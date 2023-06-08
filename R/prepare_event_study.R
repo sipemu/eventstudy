@@ -9,7 +9,7 @@ prepare_event_study <- function(task, parameter_set) {
                                     return_calculation=parameter_set$return_calculation,
                                     in_column=task$.target))
 
-  # Correctevent date
+  # Correct event date
 
   # Append estimation window
   task$firm_tbl = task$firm_tbl %>%
