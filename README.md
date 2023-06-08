@@ -1,4 +1,4 @@
-# Event Study Analysis in R {#event-study-analysis-in-r}
+# Event Study Analysis in R
 
 **Code is still experimental**
 
@@ -12,7 +12,7 @@
 
 -   Parallel execution for a large scale Event Study.
 
-## Example: Dieselgate {#example}
+## Example: Dieselgate
 
 ### Initialisation
 
@@ -95,7 +95,7 @@ est_task$firm_tbl$car_statistics[[1]] %>%
   geom_line()
 ```
 
-## Roadmap {#roadmap}
+## Roadmap
 
 -   Add documentation to methods.
 
