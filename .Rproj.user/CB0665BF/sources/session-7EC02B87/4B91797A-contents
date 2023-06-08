@@ -1,0 +1,242 @@
+ModelBase <- R6Class("ModelBase",
+                     public = list(
+                       model_name = "",
+                       initialize = function() {
+
+                       },
+                       fit = function(data_tbl) {
+
+                       },
+                       abnormal_returns = function(data_tbl) {
+
+                       }
+                     ),
+                     active = list(
+                       statistics = function(value) {
+                         if (missing(value)) {
+                           private$.statistics
+                         } else {
+                           stop("`$statistics` is read only", call. = FALSE)
+                         }
+                       },
+                       model = function(value) {
+                         if (missing(value)) {
+                           private$.fitted_model
+                         } else {
+                           stop("`$model` is read only", call. = FALSE)
+                         }
+                       },
+                       is_fitted = function(value) {
+                         if (missing(value)) {
+                           private$.is_fitted
+                         } else {
+                           stop("`$is_fitted` is read only", call. = FALSE)
+                         }
+                       }
+                     ),
+                     private = list(
+                       .is_fitted = FALSE,
+                       .fitted_model = NULL,
+                       #' Statistics object contains different model specific KPIs
+                       #' that describes the fitted model.
+                       .statistics = list(alpha=NULL,
+                                          pval_alpha=NULL,
+                                          beta=NULL,
+                                          pval_beta=NULL,
+                                          sigma=NULL,
+                                          degree_of_freedom=NULL,
+                                          r2=NULL,
+                                          f_stat=NULL,
+                                          first_order_auto_correlation=NULL),
+                       .statistics_utils = list(
+                         forecast_error_corrected_sigma=NULL,
+                         forecast_error_corrected_sigma_car=NULL
+                       ),
+                       calculate_statistics = function(data_tbl) {
+
+                       },
+                       calculate_forecast_error_correction = function(sigma,
+                                                                      estimation_window_length,
+                                                                      estimation_market_returns,
+                                                                      event_market_returns) {
+                         meanMREstW <- mean(estimation_market_returns)
+                         forecast_error_corrected_sigma <- sigma *
+                           sqrt(1 + 1 / estimation_window_length +
+                                  (event_market_returns - meanMREstW)^2 /
+                                  sum((estimation_market_returns - meanMREstW)^2))
+
+                         forecast_error_corrected_sigma_car = (event_market_returns - meanMREstW) /
+                           sqrt(sum((estimation_market_returns - meanMREstW)^2, na.rm=TRUE))
+
+                         private$.statistics_utils$forecast_error_corrected_sigma = forecast_error_corrected_sigma
+                         private$.statistics_utils$forecast_error_corrected_sigma_car = forecast_error_corrected_sigma_car
+                       },
+                       first_order_autocorrelation = function(residuals) {
+                         first_order_acf = acf(c(na.omit(residuals)), plot=F, 1, type="correlation")
+                         first_order_auto_correlation = first_order_acf[[1]][, , 1][2]
+                         private$.statistics$first_order_auto_correlation = first_order_auto_correlation
+                       },
+                       add_residuals = function(residuals) {
+                         private$.statistics_utils$residuals = residuals
+                       }
+                     )
+)
+
+
+MarketAdjustedModel <- R6Class("MarketAdjustedModel",
+                               inherit = ModelBase,
+                               public = list(
+                                 model_name = "MarketAdjustedModel",
+                                 fit = function(data_tbl) {
+                                   # do nothing
+                                   private$.is_fitted = TRUE
+                                 },
+                                 abnormal_returns = function(data_tbl) {
+                                   data_tbl %>%
+                                     mutate(abnormal_returns = firm_returns - index_returns)
+                                 }
+                               ))
+
+
+ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel",
+                                             inherit = ModelBase,
+                                             public = list(
+                                               model_name = "ComparisonPeriodMeanAdjustedModel",
+                                               fit = function(data_tbl) {
+                                                 data_tbl %>%
+                                                   filter(estimation_window == 1) %>%
+                                                   .[['index_returns']] %>%
+                                                   mean(.) -> reference_mean
+
+                                                 private$.fitted_model = reference_mean
+                                                 private$.is_fitted = TRUE
+                                               },
+                                               abnormal_returns = function(data_tbl) {
+                                                 data_tbl %>%
+                                                   mutate(abnormal_returns = firm_returns - private$.fitted_model)
+                                               }
+                                             )
+)
+
+
+MarketModel <- R6Class("MarketModel",
+                       inherit = ModelBase,
+                       public = list(
+                         model_name = "MarketModel",
+                         fit = function(data_tbl) {
+                           data_tbl %>%
+                             filter(estimation_window == 1) -> estimation_tbl
+
+                           fitted_model = lm(firm_returns ~ index_returns, data=estimation_tbl)
+                           private$.fitted_model = fitted_model
+                           private$.is_fitted = TRUE
+
+                           # Calculate statistics
+                           private$calculate_statistics(data_tbl)
+                         },
+                         abnormal_returns = function(data_tbl) {
+                           # Calculate abnormal returns
+                           alpha = private$.statistics$alpha
+                           beta = private$.statistics$beta
+                           data_tbl %>%
+                             mutate(abnormal_returns = firm_returns - (alpha + beta * index_returns))
+                         }
+                       ),
+                       private = list(
+                         calculate_statistics = function(data_tbl) {
+                           # abnormal return calculation
+                           alpha = private$.fitted_model$coefficients[1]
+                           names(alpha) <- NULL
+                           beta = private$.fitted_model$coefficients[2]
+                           names(beta) <- NULL
+
+                           # Calculate statistics
+                           modell_summary = summary(private$.fitted_model)
+                           private$.statistics$alpha = alpha
+                           private$.statistics$pval_alpha = modell_summary$coefficients[1, 4]
+                           private$.statistics$beta = beta
+                           private$.statistics$pval_beta = modell_summary$coefficients[2, 4]
+
+                           private$.statistics$sigma = modell_summary$sigma
+                           private$.statistics$r2 = modell_summary$r.squared
+                           f_stat <- modell_summary$fstatistic[1]
+                           names(f_stat) <- NULL
+                           private$.statistics$f_stat = f_stat
+                           private$.statistics$degree_of_freedom = private$.fitted_model$df.residual
+
+                           # residuals & first-order autocorrelation for
+                           # diagnostics
+                           residuals = private$.fitted_model$residuals
+                           private$add_residuals(residuals)
+                           private$first_order_autocorrelation(residuals)
+
+                           # forecast correction term
+                           estimation_tbl = data_tbl %>% filter(estimation_window == 1)
+                           event_window_tbl = data_tbl %>% filter(event_window == 1)
+                           event_market_returns = event_window_tbl$index_returns
+                           estimation_window_length = nrow(estimation_tbl)
+                           estimation_market_returns = estimation_tbl$index_returns
+
+                           private$calculate_forecast_error_correction(modell_summary$sigma,
+                                                                       estimation_window_length,
+                                                                       estimation_market_returns,
+                                                                       event_market_returns)
+                         }
+                       )
+)
+
+
+CustomModel <- R6Class("CustomModel",
+                       inherit = MarketModel,
+                       public = list(
+                         model_name = "CustomModel",
+                         public = list(
+                           abnormal_returns = function(data_tbl) {
+                             # Calculate abnormal returns
+                             mm_model = private$.fitted_model
+                             data_tbl %>%
+                               mutate(abnormal_returns = firm_returns - predict(mm_model, data_tbl),
+                                      abnormal_returns = ifelse(event_date == 1, abnormal_returns + loss_market_cap, abnormal_returns))
+                           }
+                         )
+                       )
+)
+
+
+
+.estimate_garch_model <- function(x=NULL, y, dt=NULL, garch_order=c(1, 1), varModel=F) {
+  .estimate = function(x=NULL, y, dt=NULL, garch_order=c(1, 1), varModel=F) {
+    varMod <- NULL
+    if (varModel) {
+      varMod <- list(model               = "sGARCH",
+                     garchOrder          = orGarch,
+                     submodel            = NULL,
+                     external.regressors = cbind(dt))
+    }
+
+    # model specification
+    model_specification <-
+      rugarch::ugarchspec(
+        variance.model = varMod,
+        mean.model = list(armaOrder           = c(0, 0),
+                          include.mean        = TRUE,
+                          archm               = FALSE,
+                          external.regressors = cbind(x, dt)),
+        distribution.model="norm",
+        start.pars=list())
+
+    # model fitting
+    garch_model <- rugarch::ugarchfit(spec           = modelSpec,
+                                      data           = y,
+                                      solver         = "nloptr",
+                                      solver.control = list(trace=0, solver=10))
+  }
+
+  .estimate_safely = purrr::safely(.estimate, otherwise = NULL)
+  .estimate_safely(x=NULL, y, dt=NULL, garch_order=c(1, 1), varModel=F)
+}
+
+
+.estimate_mm_model <- function(x, y) {
+
+}
