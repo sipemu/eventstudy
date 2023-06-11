@@ -1,17 +1,28 @@
+#' @title ModelBase
+#' @description Base model class for event study. Each single event study will
+#' get its own model initialization and fitting. Therefore, the input DataFrame
+#' contains the data for a single Event Study.
 ModelBase <- R6Class("ModelBase",
                      public = list(
+                       #' @field model_name Name of the model.
                        model_name = "",
-                       initialize = function() {
-
-                       },
+                       #' @description
+                       #' Fits the model with given data.
+                       #'
+                       #' @param data_tbl A data frame or tibble containing the data to fit.
                        fit = function(data_tbl) {
 
                        },
+                       #' @description
+                       #' Calculate the abnormal returns with given data and fitted model.
+                       #'
+                       #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
                        abnormal_returns = function(data_tbl) {
 
                        }
                      ),
                      active = list(
+                       #' @field statistics Read-only field to get statistics.
                        statistics = function(value) {
                          if (missing(value)) {
                            private$.statistics
@@ -19,6 +30,7 @@ ModelBase <- R6Class("ModelBase",
                            stop("`$statistics` is read only", call. = FALSE)
                          }
                        },
+                       #' @field model Read-only field to get the fitted model.
                        model = function(value) {
                          if (missing(value)) {
                            private$.fitted_model
@@ -26,6 +38,7 @@ ModelBase <- R6Class("ModelBase",
                            stop("`$model` is read only", call. = FALSE)
                          }
                        },
+                       #' @field is_fitted Read-only field to check if the model is fitted.
                        is_fitted = function(value) {
                          if (missing(value)) {
                            private$.is_fitted
@@ -54,6 +67,7 @@ ModelBase <- R6Class("ModelBase",
                          forecast_error_corrected_sigma_car=NULL
                        ),
                        calculate_statistics = function(data_tbl) {
+
 
                        },
                        calculate_forecast_error_correction = function(sigma,
@@ -84,25 +98,47 @@ ModelBase <- R6Class("ModelBase",
 )
 
 
+#' @title MarketAdjustedModel
+#' @description Market adjusted model class for event study.
+#'
+#' @export
 MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                inherit = ModelBase,
                                public = list(
+                                 #' @field model_name Name of the model.
                                  model_name = "MarketAdjustedModel",
+                                 #' @description
+                                 #' fit Fit the model with given data.
+                                 #' @param data_tbl Data frame or tibble containing the data to fit.
                                  fit = function(data_tbl) {
                                    # do nothing
                                    private$.is_fitted = TRUE
                                  },
+                                 #' @description
+                                 #' abnormal_returns Calculate the abnormal returns with given data.
+                                 #'
+                                 #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
                                  abnormal_returns = function(data_tbl) {
                                    data_tbl %>%
                                      mutate(abnormal_returns = firm_returns - index_returns)
                                  }
-                               ))
+                               )
+)
 
 
+#' @title ComparisonPeriodMeanAdjustedModel
+#' @description Comparison period mean adjusted model class for event study.
+#'
+#' @export
 ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel",
                                              inherit = ModelBase,
                                              public = list(
+                                               #' @field model_name Name of the model.
                                                model_name = "ComparisonPeriodMeanAdjustedModel",
+                                               #' @description
+                                               #' Fit the model with given data.
+                                               #'
+                                               #' @param data_tbl Data frame or tibble containing the data to fit.
                                                fit = function(data_tbl) {
                                                  data_tbl %>%
                                                    filter(estimation_window == 1) %>%
@@ -112,6 +148,10 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                  private$.fitted_model = reference_mean
                                                  private$.is_fitted = TRUE
                                                },
+                                               #' @description
+                                               #' Calculate the abnormal returns with given data.
+                                               #'
+                                               #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
                                                abnormal_returns = function(data_tbl) {
                                                  data_tbl %>%
                                                    mutate(abnormal_returns = firm_returns - private$.fitted_model)
@@ -120,10 +160,19 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
 )
 
 
+#' @title MarketModel
+#' @description Market model class for event study.
+#'
+#' @export
 MarketModel <- R6Class("MarketModel",
                        inherit = ModelBase,
                        public = list(
+                         #' @field model_name Name of the model.
                          model_name = "MarketModel",
+                         #' @description
+                         #' Fit the model with given data.
+                         #'
+                         #' @param data_tbl Data frame or tibble containing the data to fit.
                          fit = function(data_tbl) {
                            data_tbl %>%
                              filter(estimation_window == 1) -> estimation_tbl
@@ -142,6 +191,10 @@ MarketModel <- R6Class("MarketModel",
                              private$.error = res$error
                            }
                          },
+                         #' @description
+                         #' Calculate the abnormal returns with given data.
+                         #'
+                         #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
                          abnormal_returns = function(data_tbl) {
                            if (private$.is_fitted) {
                              # Calculate abnormal returns

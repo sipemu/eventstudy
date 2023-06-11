@@ -1,6 +1,6 @@
 # Event Study Analysis in R
 
-**Code is still experimental**
+**Code is still experimental - Do not use!!!**
 
 ## Status
 

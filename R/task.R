@@ -1,5 +1,3 @@
-library(R6)
-
 EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                              public = list(
                                firm_tbl = NULL,
@@ -37,7 +35,6 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                }
                              ),
                              private = list(
-
                                check_request_input = function(tbl) {
 
                                },
@@ -69,11 +66,11 @@ EventStudyRequest <- R6Class("EventStudyRequest",
                              ),
                              active = list(
                                request_tbl = function(value) {
-                                 private$request_tbl
+                                 private$.request_tbl
                                }
                              ),
                              private = list(
-                               request_tbl = NULL,
+                               .request_tbl = NULL,
                                .request_tbl_columns = c("event_id", "firm_symbol", "index_symbol", "event_date",
                                                         "group", "event_window_start", "event_window_end",
                                                         "shift_estimation_window", "estimation_window_length"),
