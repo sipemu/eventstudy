@@ -98,8 +98,16 @@ ModelBase <- R6Class("ModelBase",
 )
 
 
-#' @title MarketAdjustedModel
-#' @description Market adjusted model class for event study.
+#' Market Adjusted Model
+#'
+#' The Market Adjusted Model is another simple approach used in event studies
+#' to estimate the expected returns of a stock and calculate its abnormal
+#' returns during an event window. This model is less complex than the Market
+#' Model, as it assumes that a stock’s expected return is equal to the market
+#' return, without considering any stock-specific factors. The Market
+#' Adjusted Model is particularly useful in situations where the estimation of
+#' individual stock parameters (such as alpha and beta) is not feasible or
+#' desired, and a basic benchmark for comparison is needed.
 #'
 #' @export
 MarketAdjustedModel <- R6Class("MarketAdjustedModel",
@@ -126,8 +134,16 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
 )
 
 
-#' @title ComparisonPeriodMeanAdjustedModel
-#' @description Comparison period mean adjusted model class for event study.
+#' Comparison Period Mean Adjusted Model
+#'
+#' The Comparison Period Mean Adjusted Model is another relatively simple
+#' approach used in event studies to estimate the expected returns of a stock
+#' and calculate its abnormal returns during an event window. This model is
+#' based on the assumption that a stock’s expected return during the event
+#' window is equal to its average return during a comparison period (typically
+#' a pre-event period). This model is particularly useful when researchers want
+#' to control for a stock’s historical performance and do not wish to rely on
+#' market return data.
 #'
 #' @export
 ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel",
@@ -160,8 +176,16 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
 )
 
 
-#' @title MarketModel
-#' @description Market model class for event study.
+#' Market Model
+#'
+#' The Market Model is a widely used method in event studies to estimate the
+#' expected returns of a stock and calculate its abnormal returns during an
+#' event window. The model is based on a simple linear regression framework and
+#' captures the relationship between a stock’s return and the return of a market
+#' index, such as the S&P 500 or the Dow Jones Industrial Average. The
+#' underlying assumption of the Market Model is that a stock’s return is
+#' primarily influenced by market movements, along with a stock-specific
+#' idiosyncratic component.
 #'
 #' @export
 MarketModel <- R6Class("MarketModel",

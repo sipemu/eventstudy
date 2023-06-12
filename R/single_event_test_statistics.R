@@ -1,12 +1,36 @@
+#' Base class for Event Study test statistics
 TestStatistic <- R6Class("TestStatistic",
                          public = list(
+                           #' @field name Short code of the test statistic.
                            name = 'TestStatistics',
+                           #' @field confidence_level The chosen confidence
+                           #' level.
                            confidence_level = 0.95,
+                           #' @field confidence_type Type of the test. Defaults
+                           #' to 'two-sided'. Alternatives are 'less' or
+                           #' greater'.
                            confidence_type = 'two-sided',
+                           #' @description
+                           #' Initializes the test statistic. This includes the
+                           #' confidence level and the type of the test ('less',
+                           #' greater' or 'two-sided')
+                           #'
+                           #' @param confidence_level The confidence level for
+                           #' the confidence band. Must be anumber between 0
+                           #' and 1.
+                           #' @param confidence_type Side of the test statistic.
                            initialize = function(confidence_level=0.95, confidence_type='two-sided') {
                              self$confidence_level = confidence_level
                              self$confidence_type = confidence_type
                            },
+                           #' @description
+                           #' Computes the test test statistics for a single event.
+                           #'
+                           #' @param data_tbl The data for a single event with
+                           #' calculated abnormal returns.
+                           #' @param model The fitted model that includes the
+                           #' necessary information for calculating the test
+                           #' statistic.
                            compute = function(data_tbl, model) {
 
                            }
@@ -14,10 +38,29 @@ TestStatistic <- R6Class("TestStatistic",
 )
 
 
+#' Abnormal Return T Statistic (ART)
+#'
+#' The AR t-test is a statistical method used to determine whether the abnormal
+#' return of a security on a specific day is significantly different from zero.
+#' This test helps researchers identify whether the event of interest has a
+#' significant impact on the security’s return at a particular point in time.
+#'
+#' See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
+#'
+#' @export
 ARTTest <- R6Class("ARTTest",
                    inherit = TestStatistic,
                    public = list(
+                     #' @field name Short code of the test statistic.
                      name = 'ART',
+                     #' @description
+                     #' Computes the test AR test statistics for a single event.
+                     #'
+                     #' @param data_tbl The data for a single event with
+                     #' calculated abnormal returns.
+                     #' @param model The fitted model that includes the
+                     #' necessary information for calculating the test
+                     #' statistic.
                      compute = function(data_tbl, model) {
                        statistics = model$statistics
                        sigma = statistics$sigma
@@ -34,10 +77,31 @@ ARTTest <- R6Class("ARTTest",
 )
 
 
+#' Cumulative Abnormal Return T Statistic (CART)
+#'
+#' The CAR t-test is a statistical method used to determine whether the
+#' cumulative abnormal return of a security over an event window is
+#' significantly different from zero. This test helps researchers identify
+#' whether the event of interest has a significant impact on the security’s
+#' return over the entire event window, considering the cumulative effects of
+#' the event.
+#'
+#' See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
+#'
+#' @export
 CARTTest <- R6Class("CARTTest",
                     inherit = TestStatistic,
                     public = list(
+                      #' @field name Short code of the test statistic.
                       name = 'CART',
+                      #' @description
+                      #' Computes the test CAR test statistics for a single event.
+                      #'
+                      #' @param data_tbl The data for a single event with
+                      #' calculated abnormal returns.
+                      #' @param model The fitted model that includes the
+                      #' necessary information for calculating the test
+                      #' statistic.
                       compute = function(data_tbl, model) {
                         statistics = model$statistics
                         sigma = statistics$sigma

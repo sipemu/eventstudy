@@ -2,9 +2,21 @@
 % Please edit documentation in R/models.R
 \name{MarketAdjustedModel}
 \alias{MarketAdjustedModel}
-\title{MarketAdjustedModel}
+\title{Market Adjusted Model}
 \description{
-Market adjusted model class for event study.
+Market Adjusted Model
+
+Market Adjusted Model
+}
+\details{
+The Market Adjusted Model is another simple approach used in event studies
+to estimate the expected returns of a stock and calculate its abnormal
+returns during an event window. This model is less complex than the Market
+Model, as it assumes that a stock’s expected return is equal to the market
+return, without considering any stock-specific factors. The Market
+Adjusted Model is particularly useful in situations where the estimation of
+individual stock parameters (such as alpha and beta) is not feasible or
+desired, and a basic benchmark for comparison is needed.
 }
 \section{Super class}{
 \code{\link[EventStudy:ModelBase]{EventStudy::ModelBase}} -> \code{MarketAdjustedModel}

@@ -2,9 +2,21 @@
 % Please edit documentation in R/models.R
 \name{ComparisonPeriodMeanAdjustedModel}
 \alias{ComparisonPeriodMeanAdjustedModel}
-\title{ComparisonPeriodMeanAdjustedModel}
+\title{Comparison Period Mean Adjusted Model}
 \description{
-Comparison period mean adjusted model class for event study.
+Comparison Period Mean Adjusted Model
+
+Comparison Period Mean Adjusted Model
+}
+\details{
+The Comparison Period Mean Adjusted Model is another relatively simple
+approach used in event studies to estimate the expected returns of a stock
+and calculate its abnormal returns during an event window. This model is
+based on the assumption that a stock’s expected return during the event
+window is equal to its average return during a comparison period (typically
+a pre-event period). This model is particularly useful when researchers want
+to control for a stock’s historical performance and do not wish to rely on
+market return data.
 }
 \section{Super class}{
 \code{\link[EventStudy:ModelBase]{EventStudy::ModelBase}} -> \code{ComparisonPeriodMeanAdjustedModel}

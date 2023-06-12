@@ -11,6 +11,13 @@ R6 class for simple return calculation
 \section{Super class}{
 \code{\link[EventStudy:ReturnCalculation]{EventStudy::ReturnCalculation}} -> \code{SimpleReturn}
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{name}}{Name of the return calculation.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -22,6 +29,8 @@ R6 class for simple return calculation
 \if{html}{\out{<a id="method-SimpleReturn-calculate_return"></a>}}
 \if{latex}{\out{\hypertarget{method-SimpleReturn-calculate_return}{}}}
 \subsection{Method \code{calculate_return()}}{
+Calculates the simple return for a
+single stock.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{SimpleReturn$calculate_return(
   tbl,
@@ -30,6 +39,19 @@ R6 class for simple return calculation
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{tbl}}{The dataframe with the stock price.}
+
+\item{\code{in_column}}{The column name of the price
+infromation.}
+
+\item{\code{out_column}}{The column name were the
+return will be saved.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-SimpleReturn-clone"></a>}}

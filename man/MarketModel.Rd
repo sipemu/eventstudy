@@ -2,9 +2,21 @@
 % Please edit documentation in R/models.R
 \name{MarketModel}
 \alias{MarketModel}
-\title{MarketModel}
+\title{Market Model}
 \description{
-Market model class for event study.
+Market Model
+
+Market Model
+}
+\details{
+The Market Model is a widely used method in event studies to estimate the
+expected returns of a stock and calculate its abnormal returns during an
+event window. The model is based on a simple linear regression framework and
+captures the relationship between a stock’s return and the return of a market
+index, such as the S&P 500 or the Dow Jones Industrial Average. The
+underlying assumption of the Market Model is that a stock’s return is
+primarily influenced by market movements, along with a stock-specific
+idiosyncratic component.
 }
 \section{Super class}{
 \code{\link[EventStudy:ModelBase]{EventStudy::ModelBase}} -> \code{MarketModel}
