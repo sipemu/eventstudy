@@ -87,10 +87,10 @@ est_task = execute_single_event_statistics(est_task, param_set)
 ### Extract Results
 
 ```{r}
-est_task$firm_tbl$ar_statistics
-est_task$firm_tbl$car_statistics
+est_task$data_tbl$ar_statistics
+est_task$data_tbl$car_statistics
 
-est_task$firm_tbl$car_statistics[[1]] %>% 
+est_task$data_tbl$car_statistics[[1]] %>% 
   ggplot(aes(x=relative_index, y=car)) +
   geom_line()
 ```

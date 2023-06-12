@@ -2,10 +2,10 @@
 % Please edit documentation in R/execute.R
 \name{execute_model}
 \alias{execute_model}
-\title{Model execution}
+\title{Train the defined model on each event and calculate the abnormal return.}
 \usage{
 execute_model(task, parameter_set)
 }
 \description{
-Model execution
+Train the defined model on each event and calculate the abnormal return.
 }

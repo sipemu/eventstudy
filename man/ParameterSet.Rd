@@ -2,8 +2,13 @@
 % Please edit documentation in R/parameter_set.R
 \name{ParameterSet}
 \alias{ParameterSet}
-\title{ParameterSet}
+\title{Event Study Parameter Set}
 \description{
+Event Study Parameter Set
+
+Event Study Parameter Set
+}
+\details{
 The parameter set defines the Event Study, e.g, the return
 calculation, the event study model, the AR, CAR, AAR, and CAAR test
 statistics that should be applied.

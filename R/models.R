@@ -181,7 +181,7 @@ MarketModel <- R6Class("MarketModel",
                            safe_mm = purrr::safely(.f=.estimate_mm_model)
                            res = safe_mm(firm_returns ~ index_returns, estimation_tbl)
                            if (is.null(res$error)) {
-                             private$.fitted_model = fitted_model
+                             private$.fitted_model = res$result
                              private$.is_fitted = TRUE
 
                              # Calculate statistics

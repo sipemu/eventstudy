@@ -17,7 +17,7 @@ prepare_event_study <- function(task, parameter_set) {
   }
 
   # Calculate returns
-  task$firm_tbl = task$firm_tbl %>%
+  task$data_tbl = task$data_tbl %>%
     mutate(data = furrr::future_map(.x=data,
                                     .f=.append_returns,
                                     return_calculation=parameter_set$return_calculation,
@@ -26,7 +26,7 @@ prepare_event_study <- function(task, parameter_set) {
   # TBD: Correct event date
 
   # Append estimation window
-  task$firm_tbl = task$firm_tbl %>%
+  task$data_tbl = task$data_tbl %>%
     mutate(data = furrr::future_map2(.x=data,
                                      .y=request,
                                      .f=.append_windows))

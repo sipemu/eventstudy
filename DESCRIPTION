@@ -12,7 +12,7 @@ Maintainer: The package maintainer <yourself@somewhere.net>
 Description: Perform Event Study Analysis in R.
 URL: https://github.com/sipemu/eventstudy
 BugReports: https://github.com/sipemu/eventstudy/issues
-License: GPL
+License: AGPL
 Depends:
     R6
 Imports:

@@ -1,19 +1,41 @@
-#' Model execution
+#' Train the defined model on each event and calculate the abnormal return.
 #'
-#'
+#' @export
 execute_model = function(task, parameter_set) {
+  # TODO: Check input & check data initialization
 
-  task$firm_tbl = task$firm_tbl %>%
+  task$data_tbl = task$data_tbl %>%
     mutate(model = furrr::future_map(.x=data,
                                      .f=.initialize_and_fit_model,
                                      return_model=parameter_set$return_model))
 
-  task$firm_tbl = task$firm_tbl %>%
+  task$data_tbl = task$data_tbl %>%
     mutate(data = furrr::future_map2(.x=data,
                                      .y=model,
                                      .f=.calculate_abnormal_returns))
   task
 }
+
+
+#' Calculate single event test statistics
+#'
+#' @export
+execute_single_event_statistics = function(task, parameter_set) {
+  # TODO: Check input, check data initialization, and modell fitting
+  task$data_tbl = task$data_tbl %>%
+    dplyr::mutate(ar_statistics = furrr::future_map2(.x=data,
+                                                     .y=model,
+                                                     .f=.calculate_ar_test_statistics,
+                                                     ar_statistics=parameter_set$ar_test_statistics))
+
+  task$data_tbl = task$data_tbl %>%
+    dplyr::mutate(car_statistics = furrr::future_map2(.x=data,
+                                                      .y=model,
+                                                      .f=.calculate_car_test_statistics,
+                                                      car_statistics=parameter_set$car_test_statistics))
+  task
+}
+
 
 .initialize_and_fit_model <- function(data_tbl, return_model) {
   # Each event needs its own model
@@ -27,21 +49,6 @@ execute_model = function(task, parameter_set) {
   return_model$abnormal_returns(data_tbl)
 }
 
-
-execute_single_event_statistics = function(task, parameter_set) {
-  task$firm_tbl = task$firm_tbl %>%
-    mutate(ar_statistics = furrr::future_map2(.x=data,
-                                              .y=model,
-                                              .f=.calculate_ar_test_statistics,
-                                              ar_statistics=parameter_set$ar_test_statistics))
-
-  task$firm_tbl = task$firm_tbl %>%
-    mutate(car_statistics = furrr::future_map2(.x=data,
-                                               .y=model,
-                                               .f=.calculate_car_test_statistics,
-                                               car_statistics=parameter_set$car_test_statistics))
-  task
-}
 
 .calculate_ar_test_statistics = function(data_tbl, return_model, ar_statistics) {
   ar_statistics$compute(data_tbl, return_model)

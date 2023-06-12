@@ -1,5 +1,3 @@
-library(distributional)
-
 TestStatistic <- R6Class("TestStatistic",
                          public = list(
                            name = 'TestStatistics',

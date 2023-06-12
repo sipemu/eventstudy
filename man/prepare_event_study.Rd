@@ -6,6 +6,12 @@
 \usage{
 prepare_event_study(task, parameter_set)
 }
+\arguments{
+\item{task}{An Event Study task.}
+
+\item{parameter_set}{A parmeter set that defines the Event Study.}
+}
 \description{
-Prepare data for an Event Study
+Perform return calculation for each stock and the corresponding reference
+market defined in the task and the parameter set.
 }
