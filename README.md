@@ -1,16 +1,27 @@
 # Event Study Analysis in R
 
-**Code is still experimental - Do not use!!!**
+**Package is under active development! The API may change**
 
-## Status
+## Installation
 
--   Simple and log return calculation.
+#### CRAN
 
--   Perform single event Event Study using standard models, e.g. market model, market adjusted model, and comparison period mean adjusted model (more to come (e)garch and custom model template).
+Not deployed yet.
 
--   Calculate simple ar and car test statistics on single events.
+#### GITHUB
 
--   Parallel execution for a large scale Event Study.
+    install.packages("devtools")
+    devtools::install_github("sipemu/eventstudy")
+
+## Features
+
+- Apply common models and perform diagnostic tests on them.
+- Modular event study calculations in R:
+  - Apply your own market model (incl. external factors).
+  - Apply your own test statistics (AR, AAR, CAR, and CAAR).
+  - Extract results for further analysis as, e.g, [Cross-Sectional regression analysis](https://eventstudy.de/features/cross_sectional_regression.html)
+- Extract confidence bands on each level and for each CAR and CAAR window.
+- Parallel execution for large Event Studies.
 
 ## Example: Dieselgate
 
@@ -26,34 +37,26 @@ library(DT)
 library(EventStudy)
 
 index_symbol = c("^GDAXI")
-index_symbol = c("SPY")
 firm_symbols = c("VOW.DE", "PAH3.DE", "BMW.DE", "MBG.DE")
-firm_symbols = c("DRMA")
 
 group <- c(rep("VW Group", 2), rep("Other", 2))
 request_tbl <- cbind(c(1:4), firm_symbols, rep(index_symbol, 4), 
                      rep("18.09.2015", 4), 
-                     group, rep(-10, 4), rep(10, 4), rep(-11, 4), rep(250, 4)) |>
-  as_tibble()
-
-group <- c(rep("Other", 1))
-request_tbl <- cbind(c(1), firm_symbols, rep(index_symbol, 1), 
-                     rep("14.04.2023", 1), 
-                     group, rep(-5, 1), rep(5, 1), rep(-11, 1), rep(250, 1)) |>
+                     group, rep(-10, 4), rep(10, 4), rep(-11, 4), rep(250, 4)) %>% 
   as_tibble()
 
 names(request_tbl) <- c("event_id", "firm_symbol", "index_symbol", "event_date", 
                         "group", "event_window_start", "event_window_end", 
                         "shift_estimation_window", "estimation_window_length")
 
-firm_symbols |>
-  tidyquant::tq_get(from = "2022-01-01", to = today()) |>
-  dplyr::mutate(date = format(date, "%d.%m.%Y")) |>
+firm_symbols %>%
+  tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
+  dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
   dplyr::select(symbol, date, adjusted) -> firm_tbl
 
-index_symbol |>
-  tidyquant::tq_get(from = "2022-01-01", to = today()) |>
-  dplyr::mutate(date = format(date, "%d.%m.%Y")) |>
+index_symbol %>%
+  tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
+  dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
   dplyr::select(symbol, date, adjusted) -> index_tbl
 ```
 
@@ -63,11 +66,15 @@ index_symbol |>
 # Parametrization of the Event Study
 log_return = LogReturn$new()
 market_model = MarketModel$new()
+```
 
+```{r}
 # Define single event test statistic
 ar_test = ARTTest$new()
 car_test = CARTTest$new()
+```
 
+```{r}
 # Setup parameter set
 param_set = ParameterSet$new(return_calculation  = log_return, 
                              return_model        = market_model,
@@ -79,8 +86,17 @@ param_set = ParameterSet$new(return_calculation  = log_return,
 
 ```{r}
 est_task = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+```
+
+```{r}
 est_task = prepare_event_study(est_task, param_set)
+```
+
+```{r}
 est_task = execute_model(est_task, param_set)
+```
+
+```{r}
 est_task = execute_single_event_statistics(est_task, param_set)
 ```
 
@@ -97,16 +113,17 @@ est_task$data_tbl$car_statistics[[1]] %>%
 
 ## Roadmap
 
--   Add documentation to methods.
-
--   Diagnostics and resilient code.
-
--   Tests, tests, tests, ...
-
--   Create vignettes.
-
--   AAR and CAAR test statistics and calculations.
-
--   Volatility and volume Event Study with test statistics.
-
--   Intraday Event Study
+1. Package documentation.
+2. Add Basic AAR and CAAR test statistic.
+3. Create vignettes for 
+  - performing an Event Study with this package.
+  - add custom models 
+  - add custom test statistics
+  - extract results according to different research needs.
+4. Diagnostics and resilient code.
+5. Tests, tests, tests, ...
+6. More test statistics.
+7. CRAN readiness
+8. Long term Event Study.
+9. Volatility and volume Event Study with test statistics.
+10. Intraday Event Study
