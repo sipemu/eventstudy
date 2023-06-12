@@ -99,7 +99,7 @@ est_task$firm_tbl$car_statistics[[1]] %>%
 
 -   Add documentation to methods.
 
--   Diagnostics and recilent code.
+-   Diagnostics and resilient code.
 
 -   Tests, tests, tests, ...
 

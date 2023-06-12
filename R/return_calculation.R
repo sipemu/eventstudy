@@ -1,3 +1,4 @@
+#' R6 base class for return calculation
 ReturnCalculation <- R6Class("ReturnCalculation",
                              public = list(
                                name = "",
@@ -8,10 +9,11 @@ ReturnCalculation <- R6Class("ReturnCalculation",
 )
 
 
+#' R6 class for log return calculation
 LogReturn <- R6Class("LogReturn",
                      inherit = ReturnCalculation,
                      public = list(
-                       name = "log_return",
+                       name = "log return",
                        calculate_return = function(tbl, in_column = "adjusted", out_column="adjusted_return") {
                          tbl %>%
                            mutate(!!rlang::sym(out_column) := log(!!rlang::sym(in_column) / lag(!!rlang::sym(in_column))))
@@ -20,24 +22,14 @@ LogReturn <- R6Class("LogReturn",
 )
 
 
+#' R6 class for simple return calculation
 SimpleReturn <- R6Class("SimpleReturn",
                         inherit = ReturnCalculation,
                         public = list(
-                          name = "log_return",
+                          name = "simple return",
                           calculate_return = function(tbl, in_column = "adjusted", out_column="adjusted_return") {
                             tbl %>%
                               mutate(!!rlang::sym(out_column) := (!!rlang::sym(in_column) - lag(!!rlang::sym(in_column))) / !!rlang::sym(in_column))
                           }
                         )
 )
-
-
-calculate_log_return = function(tbl, in_column = "adjusted", out_column="adjusted_return") {
-  tbl %>%
-    mutate(!!rlang::sym(out_column) := log(!!rlang::sym(in_column) / lag(!!rlang::sym(in_column))))
-}
-
-calculate_simple_return = function(tbl, in_column = "adjusted", out_column="adjusted_return") {
-  tbl %>%
-    mutate(!!rlang::sym(out_column) := (!!rlang::sym(in_column) - lag(!!rlang::sym(in_column))) / !!rlang::sym(in_column))
-}

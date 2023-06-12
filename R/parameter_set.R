@@ -1,6 +1,6 @@
-#' @title ParameterSet
+#' Event Study Parameter Set
 #'
-#' @description The parameter set defines the Event Study, e.g, the return
+#' The parameter set defines the Event Study, e.g, the return
 #' calculation, the event study model, the AR, CAR, AAR, and CAAR test
 #' statistics that should be applied.
 #'
