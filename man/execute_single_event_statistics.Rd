@@ -2,7 +2,7 @@
 % Please edit documentation in R/execute.R
 \name{execute_single_event_statistics}
 \alias{execute_single_event_statistics}
-\title{Calculate single event test statistics}
+\title{Calculate event test statistics}
 \usage{
 execute_single_event_statistics(task, parameter_set)
 }
@@ -12,5 +12,5 @@ execute_single_event_statistics(task, parameter_set)
 \item{parameter_set}{The parameter set that defines the event study.}
 }
 \description{
-Calculate single event test statistics
+Calculate event test statistics
 }

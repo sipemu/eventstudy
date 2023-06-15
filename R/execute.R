@@ -20,7 +20,7 @@ execute_model = function(task, parameter_set) {
 }
 
 
-#' Calculate single event test statistics
+#' Calculate event test statistics
 #'
 #' @param task The event study task
 #' @param parameter_set The parameter set that defines the event study.
@@ -28,12 +28,15 @@ execute_model = function(task, parameter_set) {
 #' @export
 execute_single_event_statistics = function(task, parameter_set) {
   # TODO: Check input, check data initialization, and modell fitting
+
+  # Single event statistic calculation
   task$data_tbl = task$data_tbl %>%
     dplyr::mutate(ar_statistics = furrr::future_map2(.x=data,
                                                      .y=model,
                                                      .f=.calculate_ar_test_statistics,
                                                      ar_statistics=parameter_set$ar_test_statistics))
 
+  # Multi event test calculation
   task$data_tbl = task$data_tbl %>%
     dplyr::mutate(car_statistics = furrr::future_map2(.x=data,
                                                       .y=model,

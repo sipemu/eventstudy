@@ -20,13 +20,9 @@ statistics that should be applied.
 
 \item{\code{return_model}}{A R6 object for fitting the desired model.}
 
-\item{\code{ar_test_statistics}}{AR test statistic R6 object.}
+\item{\code{single_event_statistics}}{single event test statistic R6 object.}
 
-\item{\code{car_test_statistics}}{CAR test statistic R6 object.}
-
-\item{\code{aar_test_statistics}}{AAR test statistic R6 object.}
-
-\item{\code{caar_test_statistics}}{CAAR test statistic R6 object.}
+\item{\code{multi_event_statistics}}{multi event test statistic R6 object.}
 }
 \if{html}{\out{</div>}}
 }
@@ -46,8 +42,8 @@ Initialize the parameters that defines the Event Study that should be applied.
 \if{html}{\out{<div class="r">}}\preformatted{ParameterSet$new(
   return_calculation = SimpleReturn$new(),
   return_model = MarketModel$new(),
-  ar_test_statistics = NULL,
-  car_test_statistics = NULL
+  single_event_statistics = NULL,
+  multi_event_statistics = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -58,9 +54,9 @@ Initialize the parameters that defines the Event Study that should be applied.
 
 \item{\code{return_model}}{An initialized event study model.}
 
-\item{\code{ar_test_statistics}}{Definition of AR test statistics.}
+\item{\code{single_event_statistics}}{Definition of single event test statistics.}
 
-\item{\code{car_test_statistics}}{Definition of CAR test statistics.}
+\item{\code{multi_event_statistics}}{Definition of multiple event test statistics.}
 }
 \if{html}{\out{</div>}}
 }

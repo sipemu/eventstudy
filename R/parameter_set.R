@@ -12,25 +12,21 @@ ParameterSet = R6::R6Class(classname = "ParameterSet",
                              return_calculation = NULL,
                              #' @field return_model A R6 object for fitting the desired model.
                              return_model = NULL,
-                             #' @field ar_test_statistics AR test statistic R6 object.
-                             ar_test_statistics = NULL,
-                             #' @field car_test_statistics CAR test statistic R6 object.
-                             car_test_statistics = NULL,
-                             #' @field aar_test_statistics AAR test statistic R6 object.
-                             aar_test_statistics = NULL,
-                             #' @field caar_test_statistics CAAR test statistic R6 object.
-                             caar_test_statistics = NULL,
+                             #' @field single_event_statistics single event test statistic R6 object.
+                             single_event_statistics = NULL,
+                             #' @field multi_event_statistics multi event test statistic R6 object.
+                             multi_event_statistics = NULL,
                              #' @description
                              #' Initialize the parameters that defines the Event Study that should be applied.
                              #'
                              #' @param return_calculation An initialized return calculation class.
                              #' @param return_model An initialized event study model.
-                             #' @param ar_test_statistics Definition of AR test statistics.
-                             #' @param car_test_statistics Definition of CAR test statistics.
+                             #' @param single_event_statistics Definition of single event test statistics.
+                             #' @param multi_event_statistics Definition of multiple event test statistics.
                              initialize = function(return_calculation = SimpleReturn$new(),
                                                    return_model = MarketModel$new(),
-                                                   ar_test_statistics=NULL,
-                                                   car_test_statistics=NULL) {
+                                                   single_event_statistics=NULL,
+                                                   multi_event_statistics=NULL) {
                                # Validate return_calculation object
                                private$validate_object(return_calculation, "ReturnCalculation")
                                self$return_calculation = return_calculation
@@ -39,8 +35,11 @@ ParameterSet = R6::R6Class(classname = "ParameterSet",
                                private$validate_object(return_model, "ModelBase")
                                self$return_model = return_model
 
-                               self$ar_test_statistics = ar_test_statistics
-                               self$car_test_statistics = car_test_statistics
+                               private$validate_object(single_event_statistics, "SingleEventStatisticsSet")
+                               self$single_event_statistics = single_event_statistics
+
+                               private$validate_object(multi_event_statistics, "StatisticsSetBase")
+                               self$multi_event_statistics = multi_event_statistics
                              }
                            ),
                            private = list(
