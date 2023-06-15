@@ -1,5 +1,8 @@
 #' Train the defined model on each event and calculate the abnormal return.
 #'
+#' @param task The event study task
+#' @param parameter_set The parameter set that defines the event study.
+#'
 #' @export
 execute_model = function(task, parameter_set) {
   # TODO: Check input & check data initialization
@@ -18,6 +21,9 @@ execute_model = function(task, parameter_set) {
 
 
 #' Calculate single event test statistics
+#'
+#' @param task The event study task
+#' @param parameter_set The parameter set that defines the event study.
 #'
 #' @export
 execute_single_event_statistics = function(task, parameter_set) {

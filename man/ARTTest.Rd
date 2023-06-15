@@ -17,7 +17,7 @@ significant impact on the security’s return at a particular point in time.
 See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
 }
 \section{Super class}{
-\code{EventStudy::TestStatistic} -> \code{ARTTest}
+\code{\link[EventStudy:SingleEventTestStatistic]{EventStudy::SingleEventTestStatistic}} -> \code{ARTTest}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -36,7 +36,7 @@ See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="EventStudy" data-topic="TestStatistic" data-id="initialize"><a href='../../EventStudy/html/TestStatistic.html#method-TestStatistic-initialize'><code>EventStudy::TestStatistic$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="EventStudy" data-topic="SingleEventTestStatistic" data-id="initialize"><a href='../../EventStudy/html/SingleEventTestStatistic.html#method-SingleEventTestStatistic-initialize'><code>EventStudy::SingleEventTestStatistic$initialize()</code></a></span></li>
 </ul>
 </details>
 }}

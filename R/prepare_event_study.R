@@ -35,7 +35,6 @@ prepare_event_study <- function(task, parameter_set) {
 }
 
 
-
 #' Append returns (simple of log) to given inüput dataframe
 #'
 #' @param data_tbl A dataframe of a single stock index with reference market data.

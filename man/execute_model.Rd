@@ -6,6 +6,11 @@
 \usage{
 execute_model(task, parameter_set)
 }
+\arguments{
+\item{task}{The event study task}
+
+\item{parameter_set}{The parameter set that defines the event study.}
+}
 \description{
 Train the defined model on each event and calculate the abnormal return.
 }

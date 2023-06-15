@@ -6,6 +6,11 @@
 \usage{
 execute_single_event_statistics(task, parameter_set)
 }
+\arguments{
+\item{task}{The event study task}
+
+\item{parameter_set}{The parameter set that defines the event study.}
+}
 \description{
 Calculate single event test statistics
 }

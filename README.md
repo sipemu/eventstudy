@@ -113,7 +113,7 @@ est_task$data_tbl$car_statistics[[1]] %>%
 
 ## Roadmap
 
-1. Package documentation.
+1. Package documentation and validation.
 2. Add Basic AAR and CAAR test statistic.
 3. Create vignettes for 
   - performing an Event Study with this package.
@@ -122,8 +122,8 @@ est_task$data_tbl$car_statistics[[1]] %>%
   - extract results according to different research needs.
 4. Diagnostics and resilient code.
 5. Tests, tests, tests, ...
-6. More test statistics.
-7. CRAN readiness
+6. CRAN readiness
+7. More test statistics.
 8. Long term Event Study.
 9. Volatility and volume Event Study with test statistics.
 10. Intraday Event Study

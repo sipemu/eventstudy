@@ -1,40 +1,40 @@
 #' Base class for Event Study test statistics
-TestStatistic <- R6Class("TestStatistic",
-                         public = list(
-                           #' @field name Short code of the test statistic.
-                           name = 'TestStatistics',
-                           #' @field confidence_level The chosen confidence
-                           #' level.
-                           confidence_level = 0.95,
-                           #' @field confidence_type Type of the test. Defaults
-                           #' to 'two-sided'. Alternatives are 'less' or
-                           #' greater'.
-                           confidence_type = 'two-sided',
-                           #' @description
-                           #' Initializes the test statistic. This includes the
-                           #' confidence level and the type of the test ('less',
-                           #' greater' or 'two-sided')
-                           #'
-                           #' @param confidence_level The confidence level for
-                           #' the confidence band. Must be anumber between 0
-                           #' and 1.
-                           #' @param confidence_type Side of the test statistic.
-                           initialize = function(confidence_level=0.95, confidence_type='two-sided') {
-                             self$confidence_level = confidence_level
-                             self$confidence_type = confidence_type
-                           },
-                           #' @description
-                           #' Computes the test test statistics for a single event.
-                           #'
-                           #' @param data_tbl The data for a single event with
-                           #' calculated abnormal returns.
-                           #' @param model The fitted model that includes the
-                           #' necessary information for calculating the test
-                           #' statistic.
-                           compute = function(data_tbl, model) {
+SingleEventTestStatistic <- R6Class("SingleEventTestStatistic",
+                                    public = list(
+                                      #' @field name Short code of the test statistic.
+                                      name = 'TestStatistics',
+                                      #' @field confidence_level The chosen confidence
+                                      #' level.
+                                      confidence_level = 0.95,
+                                      #' @field confidence_type Type of the test. Defaults
+                                      #' to 'two-sided'. Alternatives are 'less' or
+                                      #' greater'.
+                                      confidence_type = 'two-sided',
+                                      #' @description
+                                      #' Initializes the test statistic. This includes the
+                                      #' confidence level and the type of the test ('less',
+                                      #' greater' or 'two-sided')
+                                      #'
+                                      #' @param confidence_level The confidence level for
+                                      #' the confidence band. Must be anumber between 0
+                                      #' and 1.
+                                      #' @param confidence_type Side of the test statistic.
+                                      initialize = function(confidence_level=0.95, confidence_type='two-sided') {
+                                        self$confidence_level = confidence_level
+                                        self$confidence_type = confidence_type
+                                      },
+                                      #' @description
+                                      #' Computes the test test statistics for a single event.
+                                      #'
+                                      #' @param data_tbl The data for a single event with
+                                      #' calculated abnormal returns.
+                                      #' @param model The fitted model that includes the
+                                      #' necessary information for calculating the test
+                                      #' statistic.
+                                      compute = function(data_tbl, model) {
 
-                           }
-                         )
+                                      }
+                                    )
 )
 
 
@@ -49,7 +49,7 @@ TestStatistic <- R6Class("TestStatistic",
 #'
 #' @export
 ARTTest <- R6Class("ARTTest",
-                   inherit = TestStatistic,
+                   inherit = SingleEventTestStatistic,
                    public = list(
                      #' @field name Short code of the test statistic.
                      name = 'ART',
@@ -90,7 +90,7 @@ ARTTest <- R6Class("ARTTest",
 #'
 #' @export
 CARTTest <- R6Class("CARTTest",
-                    inherit = TestStatistic,
+                    inherit = SingleEventTestStatistic,
                     public = list(
                       #' @field name Short code of the test statistic.
                       name = 'CART',
@@ -108,14 +108,14 @@ CARTTest <- R6Class("CARTTest",
                         degree_of_freedom = statistics$degree_of_freedom
 
                         res = data_tbl %>%
-                          filter(event_window == 1) %>%
-                          select(relative_index, abnormal_returns) %>%
-                          mutate(event_window_length = 1:n(),
-                                 car_window          = "",
-                                 car                 = cumsum(abnormal_returns),
-                                 corrected_car       = car / sigma,
-                                 car_t               = car / (sqrt(event_window_length) * sigma),
-                                 car_t_dist          = distributional::dist_student_t(degree_of_freedom))
+                          dplyr::filter(event_window == 1) %>%
+                          dplyr::select(relative_index, abnormal_returns) %>%
+                          dplyr::mutate(event_window_length = 1:n(),
+                                        car_window          = "",
+                                        car                 = cumsum(abnormal_returns),
+                                        corrected_car       = car / sigma,
+                                        car_t               = car / (sqrt(event_window_length) * sigma),
+                                        car_t_dist          = distributional::dist_student_t(degree_of_freedom))
                         res$car_window = stringr::str_c("[", res$relative_index[1], ", ", res$relative_index, "]")
                         res
                       }

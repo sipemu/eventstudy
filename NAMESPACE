@@ -3,6 +3,7 @@
 export(ARTTest)
 export(CARTTest)
 export(ComparisonPeriodMeanAdjustedModel)
+export(EventStudyTask)
 export(LogReturn)
 export(MarketAdjustedModel)
 export(MarketModel)
