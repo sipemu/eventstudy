@@ -13,6 +13,23 @@ The parameter set defines the Event Study, e.g, the return
 calculation, the event study model, the AR, CAR, AAR, and CAAR test
 statistics that should be applied.
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{return_calculation}}{A R6 object for calculating returns.}
+
+\item{\code{return_model}}{A R6 object for fitting the desired model.}
+
+\item{\code{ar_test_statistics}}{AR test statistic R6 object.}
+
+\item{\code{car_test_statistics}}{CAR test statistic R6 object.}
+
+\item{\code{aar_test_statistics}}{AAR test statistic R6 object.}
+
+\item{\code{caar_test_statistics}}{CAAR test statistic R6 object.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

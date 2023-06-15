@@ -8,11 +8,17 @@
 ParameterSet = R6::R6Class(classname = "ParameterSet",
                            lock_objects = FALSE,
                            public = list(
+                             #' @field return_calculation A R6 object for calculating returns.
                              return_calculation = NULL,
+                             #' @field return_model A R6 object for fitting the desired model.
                              return_model = NULL,
+                             #' @field ar_test_statistics AR test statistic R6 object.
                              ar_test_statistics = NULL,
+                             #' @field car_test_statistics CAR test statistic R6 object.
                              car_test_statistics = NULL,
+                             #' @field aar_test_statistics AAR test statistic R6 object.
                              aar_test_statistics = NULL,
+                             #' @field caar_test_statistics CAAR test statistic R6 object.
                              caar_test_statistics = NULL,
                              #' @description
                              #' Initialize the parameters that defines the Event Study that should be applied.
