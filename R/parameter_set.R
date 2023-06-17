@@ -35,11 +35,20 @@ ParameterSet = R6::R6Class(classname = "ParameterSet",
                                private$validate_object(return_model, "ModelBase")
                                self$return_model = return_model
 
-                               private$validate_object(single_event_statistics, "SingleEventStatisticsSet")
-                               self$single_event_statistics = single_event_statistics
+                               # Validate single event statistics; Can be null
+                               if (!is.null(single_event_statistics)) {
+                                 private$validate_object(single_event_statistics, "SingleEventStatisticsSet")
+                                 self$single_event_statistics = single_event_statistics
+                               }
 
-                               private$validate_object(multi_event_statistics, "StatisticsSetBase")
-                               self$multi_event_statistics = multi_event_statistics
+                               if (!is.null(multi_event_statistics)) {
+                                 private$validate_object(multi_event_statistics, "StatisticsSetBase")
+                                 self$multi_event_statistics = multi_event_statistics
+                               }
+
+                               if (!is.null(single_event_statistics) & !is.null(multi_event_statistics)) {
+                                 warning("No test statistic defined!")
+                               }
                              }
                            ),
                            private = list(

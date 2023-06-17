@@ -69,17 +69,18 @@ market_model = MarketModel$new()
 ```
 
 ```{r}
-# Define single event test statistic
-ar_test = ARTTest$new()
-car_test = CARTTest$new()
+# Define single event test statistics
+# Per default AR and CAR T-Tests are applied
+single_event_tests = SingleEventStatisticsSet$new()
 ```
 
 ```{r}
 # Setup parameter set
-param_set = ParameterSet$new(return_calculation  = log_return, 
-                             return_model        = market_model,
-                             ar_test_statistics  = ar_test,
-                             car_test_statistics = car_test)
+# Setup parameter set
+param_set = ParameterSet$new(return_calculation      = log_return, 
+                             return_model            = market_model,
+                             single_event_statistics = single_event_tests,
+                             multi_event_statistics  = NULL)
 ```
 
 ### Execute the Event Study
@@ -93,22 +94,27 @@ est_task = prepare_event_study(est_task, param_set)
 ```
 
 ```{r}
-est_task = execute_model(est_task, param_set)
+est_task = fit_model(est_task, param_set)
 ```
 
 ```{r}
-est_task = execute_single_event_statistics(est_task, param_set)
+est_task = calculate_statistics(est_task, param_set)
 ```
 
 ### Extract Results
 
 ```{r}
-est_task$data_tbl$ar_statistics
-est_task$data_tbl$car_statistics
+library(ggplot2)
+library(ggdist)
 
-est_task$data_tbl$car_statistics[[1]] %>% 
+# Plot CAR statistic for the first event ID
+est_task$data_tbl$CART[[1]] %>% 
   ggplot(aes(x=relative_index, y=car)) +
-  geom_line()
+  stat_lineribbon(
+    aes(ydist = car_t_dist),
+    alpha = 1/2
+  ) +
+  scale_fill_brewer(palette = "Set2")
 ```
 
 ## Roadmap
