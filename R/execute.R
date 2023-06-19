@@ -48,37 +48,41 @@ calculate_statistics = function(task, parameter_set) {
   # TODO: Check input, check data initialization, and modell fitting
 
   # Single event statistic calculation
-  task$data_tbl = task$data_tbl %>%
-    dplyr::mutate(statistics = furrr::future_map2(.x=data,
-                                                  .y=model,
-                                                  .f=.calculate_single_event_test_statistics,
-                                                  statistic_set=parameter_set$single_event_statistics))
+  if (!is.null(parameter_set$single_event_statistics)) {
+    task$data_tbl = task$data_tbl %>%
+      dplyr::mutate(statistics = furrr::future_map2(.x=data,
+                                                    .y=model,
+                                                    .f=.calculate_single_event_test_statistics,
+                                                    statistic_set=parameter_set$single_event_statistics))
 
-  # Transpose results such that each test statistic result has its own column
-  est_task$data_tbl$statistics %>%
-    purrr::transpose() %>%
-    as_tibble() -> stats_tbl
-  est_task$data_tbl = cbind(est_task$data_tbl, stats_tbl) %>%
-    dplyr::select(-statistics)
+    # Transpose results such that each test statistic result has its own column
+    est_task$data_tbl$statistics %>%
+      purrr::transpose() %>%
+      as_tibble() -> stats_tbl
+    est_task$data_tbl = cbind(est_task$data_tbl, stats_tbl) %>%
+      dplyr::select(-statistics)
+  }
 
   # Multiple events test statistic calculation
-  # The data must be reshaped for these calculations as we need to consider the
-  # grouping of the events.
-  task$aar_caar_tbl = task$data_tbl %>%
-    dplyr::select(est_task$.keys, data) %>%
-    tidyr::unnest(data) %>%
-    dplyr::group_by(group) %>%
-    tidyr::nest() %>%
-    dplyr::mutate(statistics = furrr::future_map(.x=data,
-                                                  .f = .calculate_multiple_event_test_statistics,
-                                                  statistic_set=parameter_set$multi_event_statistics))
+  if (!is.null(parameter_set$multi_event_statistics)) {
+    # The data must be reshaped for these calculations as we need to consider the
+    # grouping of the events.
+    task$aar_caar_tbl = task$data_tbl %>%
+      dplyr::select(est_task$.keys, data) %>%
+      tidyr::unnest(data) %>%
+      dplyr::group_by(group) %>%
+      tidyr::nest() %>%
+      dplyr::mutate(statistics = furrr::future_map(.x=data,
+                                                   .f = .calculate_multiple_event_test_statistics,
+                                                   statistic_set=parameter_set$multi_event_statistics))
 
-  # Transpose results such that each test statistic result has its own column
-  est_task$aar_caar_tbl$statistics %>%
-    purrr::transpose() %>%
-    as_tibble() -> stats_tbl
-  est_task$aar_caar_tbl = cbind(est_task$aar_caar_tbl, stats_tbl) %>%
-    dplyr::select(-statistics)
+    # Transpose results such that each test statistic result has its own column
+    est_task$aar_caar_tbl$statistics %>%
+      purrr::transpose() %>%
+      as_tibble() -> stats_tbl
+    est_task$aar_caar_tbl = cbind(est_task$aar_caar_tbl, stats_tbl) %>%
+      dplyr::select(-statistics)
+  }
 
   task
 }

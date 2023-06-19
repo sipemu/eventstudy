@@ -72,6 +72,7 @@ market_model = MarketModel$new()
 # Define single event test statistics
 # Per default AR and CAR T-Tests are applied
 single_event_tests = SingleEventStatisticsSet$new()
+multiple_event_tests = MultiEventStatisticsSet$new()
 ```
 
 ```{r}
@@ -80,7 +81,7 @@ single_event_tests = SingleEventStatisticsSet$new()
 param_set = ParameterSet$new(return_calculation      = log_return, 
                              return_model            = market_model,
                              single_event_statistics = single_event_tests,
-                             multi_event_statistics  = NULL)
+                             multi_event_statistics  = multiple_event_tests)
 ```
 
 ### Execute the Event Study
@@ -98,7 +99,7 @@ est_task = fit_model(est_task, param_set)
 ```
 
 ```{r}
-est_task = calculate_single_event_statistics(est_task, param_set)
+est_task = calculate_statistics(est_task, param_set)
 ```
 
 ### Extract Results
