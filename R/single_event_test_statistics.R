@@ -1,5 +1,5 @@
 #' Base class for Event Study test statistics
-SingleEventTestStatistic <- R6Class("SingleEventTestStatistic",
+TestStatisticBase <- R6Class("TestStatisticBase",
                                     public = list(
                                       #' @field name Short code of the test statistic.
                                       name = 'TestStatistics',
@@ -49,7 +49,7 @@ SingleEventTestStatistic <- R6Class("SingleEventTestStatistic",
 #'
 #' @export
 ARTTest <- R6Class("ARTTest",
-                   inherit = SingleEventTestStatistic,
+                   inherit = TestStatisticBase,
                    public = list(
                      #' @field name Short code of the test statistic.
                      name = 'ART',
@@ -90,7 +90,7 @@ ARTTest <- R6Class("ARTTest",
 #'
 #' @export
 CARTTest <- R6Class("CARTTest",
-                    inherit = SingleEventTestStatistic,
+                    inherit = TestStatisticBase,
                     public = list(
                       #' @field name Short code of the test statistic.
                       name = 'CART',
@@ -107,11 +107,10 @@ CARTTest <- R6Class("CARTTest",
                         sigma = statistics$sigma
                         degree_of_freedom = statistics$degree_of_freedom
 
-                        browser()
                         res = data_tbl %>%
                           dplyr::filter(event_window == 1) %>%
                           dplyr::select(relative_index, abnormal_returns) %>%
-                          dplyr::mutate(event_window_length = 1:n(),
+                          dplyr::mutate(event_window_length = 1:dplyr::n(),
                                         car_window          = "",
                                         car                 = cumsum(abnormal_returns),
                                         corrected_car       = car / sigma,

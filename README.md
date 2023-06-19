@@ -98,7 +98,7 @@ est_task = fit_model(est_task, param_set)
 ```
 
 ```{r}
-est_task = calculate_statistics(est_task, param_set)
+est_task = calculate_single_event_statistics(est_task, param_set)
 ```
 
 ### Extract Results

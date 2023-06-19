@@ -46,7 +46,7 @@ ParameterSet = R6::R6Class(classname = "ParameterSet",
                                  self$multi_event_statistics = multi_event_statistics
                                }
 
-                               if (!is.null(single_event_statistics) & !is.null(multi_event_statistics)) {
+                               if (is.null(single_event_statistics) & is.null(multi_event_statistics)) {
                                  warning("No test statistic defined!")
                                }
                              }

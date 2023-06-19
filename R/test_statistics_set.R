@@ -37,7 +37,7 @@ StatisticsSetBase <- R6Class("StatisticsSetBase",
                              private = list(
                                test_parent_class = "",
                                validate = function(test_obj) {
-                                 if (! inherits(test_obj, private$test_parent_class)) {
+                                 if (!inherits(test_obj, private$test_parent_class)) {
                                    stop(stringr::str_c("Test object must be of class: ", private$test_parent_class))
                                  }
                                }
@@ -66,12 +66,16 @@ SingleEventStatisticsSet <- R6Class("SingleEventStatisticsSet",
 
 #' Multi Event Statistic Set
 #'
-#' Contains a set of single event test statistics as, e.g., AR and CAR t test.
-#' These are the default test statistics.
+#' Contains a set of multi event test statistics as, e.g., AAR and CAAR
+#' cross-sectional t test. These are the default test statistics.
 #'
 #' @export
 MultiEventStatisticsSet <- R6Class("MultiEventStatisticsSet",
                                    inherit = StatisticsSetBase,
+                                   public = list(
+                                     #' @field tests Container with the statistical tests.
+                                     tests = list(CSectTTest$new())
+                                   ),
                                    private = list(
                                      test_parent_class = "MultiEventTestStatistic"
                                    )

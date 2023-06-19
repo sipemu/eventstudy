@@ -2,6 +2,7 @@
 
 export(ARTTest)
 export(CARTTest)
+export(CSectTTest)
 export(ComparisonPeriodMeanAdjustedModel)
 export(EventStudyTask)
 export(LogReturn)

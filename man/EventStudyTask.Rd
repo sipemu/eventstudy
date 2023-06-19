@@ -24,6 +24,9 @@ object with each row is one event, identified
 by the event id, the group, and the firm
 symbol.}
 
+\item{\code{aar_caar_tbl}}{Placeholder for AAR and
+CAAR test statistics.}
+
 \item{\code{.keys}}{event identifier. Do not change.}
 
 \item{\code{.index}}{The time column name}

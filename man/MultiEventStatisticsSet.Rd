@@ -4,11 +4,18 @@
 \alias{MultiEventStatisticsSet}
 \title{Multi Event Statistic Set}
 \description{
-Contains a set of single event test statistics as, e.g., AR and CAR t test.
-These are the default test statistics.
+Contains a set of multi event test statistics as, e.g., AAR and CAAR
+cross-sectional t test. These are the default test statistics.
 }
 \section{Super class}{
 \code{\link[EventStudy:StatisticsSetBase]{EventStudy::StatisticsSetBase}} -> \code{MultiEventStatisticsSet}
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{tests}}{Container with the statistical tests.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{

@@ -13,6 +13,9 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                #' by the event id, the group, and the firm
                                #' symbol.
                                data_tbl = NULL,
+                               #' @field aar_caar_tbl Placeholder for AAR and
+                               #' CAAR test statistics.
+                               aar_caar_tbl = NULL,
                                #' @field .keys event identifier. Do not change.
                                .keys = c('event_id', 'group', 'firm_symbol'),
                                #' @field .index The time column name
