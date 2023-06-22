@@ -127,7 +127,6 @@ calculate_statistics = function(task, parameter_set) {
   # Extract names
   statistic_set$tests %>%
     purrr::map(.f = function(test_statistic) {
-      print(test_statistic$name)
       test_statistic$name
     }) -> stat_names
 
