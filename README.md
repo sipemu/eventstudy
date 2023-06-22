@@ -145,16 +145,17 @@ This example demonstrates the basic usage of the `EventStudy` package. However, 
 
 ## Roadmap
 
-1. Create vignettes for 
-  - performing an Event Study with this package.
+1. Create vignettes for performing an Event Study with this package.
+2. Export results to Excel.
+3. Validation of statistics and models.
+4. CRAN readiness
+5. Diagnostics and resilient code.
+6. Tests, tests, tests, ...
+7. Create vignettes for 
   - add custom models 
   - add custom test statistics
   - extract results according to different research needs.
-2. Validation of statistics and models.
-3. Diagnostics and resilient code.
-4. Tests, tests, tests, ...
-5. CRAN readiness
-6. More test statistics.
-7. Long term Event Study.
-8. Volatility and volume Event Study with test statistics.
-9. Intraday Event Study
+8. More test statistics.
+9. Long term Event Study.
+10. Volatility and volume Event Study with test statistics.
+11. Intraday Event Study
