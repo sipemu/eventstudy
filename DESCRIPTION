@@ -17,6 +17,7 @@ Depends:
     R6
 Imports:
     distributional,
+    plotly,
     tibble,
     R6,
     ggplot2,
