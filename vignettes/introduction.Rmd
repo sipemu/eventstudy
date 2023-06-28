@@ -184,17 +184,21 @@ est_task$data_tbl$ART[[1]]
 ```
 
 ```{r}
-est_task$data_tbl$ART[[1]]
+est_task$data_tbl$CART[[1]]
 ```
 
 ```{r}
 est_task$aar_caar_tbl
 ```
 
+```{r}
+est_task$aar_caar_tbl$CSectT[[1]]
+```
+
 # Roadmap
 
-While EventStudy already offers a powerful toolset for conducting event study analysis in R, development is actively ongoing. The roadmap for future features includes adding more test statistics, supporting long-term event study, volatility and volume event study with test statistics, and intraday event study. Stay tuned for more updates!
+While EventStudy already offers a powerful tool set for conducting event study analysis in R, development is actively ongoing. The roadmap for future features includes adding more test statistics, supporting long-term event study, volatility and volume event study with test statistics, and intraday event study. Stay tuned for more updates!
 
 # Conclusion
 
-EventStudy offers a streamlined and intuitive interface for conducting event study analysis in R, making it a valuable addition to the toolkit of any researcher or analyst in finance. Whether you're assessing the impact of corporate events on stock prices or investigating the effects of macroeconomic news, EventStudy provides a flexible and efficient solution.
+Event Study offers a streamlined and intuitive interface for conducting event study analysis in R, making it a valuable addition to the toolkit of any researcher or analyst in finance. Whether you're assessing the impact of corporate events on stock prices or investigating the effects of macroeconomic news, Event Study provides a flexible and efficient solution.

@@ -38,6 +38,17 @@ column names of the request dataframe.}
 }
 \if{html}{\out{</div>}}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{symbols}}{Read-only field to get the firm symbols.}
+
+\item{\code{symbol_data}}{Read-only field to get the firm symbol data.}
+
+\item{\code{group_level_data}}{Read-only field to get the group data.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

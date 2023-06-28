@@ -85,6 +85,36 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                    dplyr::left_join(request_tbl, by=self$.keys)
                                }
                              ),
+                             active = list(
+                               #' @field symbols Read-only field to get the firm symbols.
+                               symbols = function(value) {
+                                 if (missing(value)) {
+                                   self$data_tbl$firm_symbol
+                                 } else {
+                                   stop("`$symbols` is read only", call. = FALSE)
+                                 }
+                               },
+                               #' @field symbol_data Read-only field to get the firm symbol data.
+                               symbol_data = function(value) {
+                                 if (missing(value)) {
+                                   self$data_tbl
+                                 } else {
+                                   stop("`$symbols` is read only", call. = FALSE)
+                                 }
+                               },
+                               #' @field group_level_data Read-only field to get the group data.
+                               group_level_data = function(value) {
+                                 if (missing(value)) {
+                                   self$data_tbl %>%
+                                     dplyr::select(self$.keys, data) %>%
+                                     tidyr::unnest(data) %>%
+                                     dplyr::group_by(group) %>%
+                                     tidyr::nest()
+                                 } else {
+                                   stop("`$symbols` is read only", call. = FALSE)
+                                 }
+                               }
+                             ),
                              private = list(
                                check_request_input = function(tbl) {
                                  if (any(! self$.request_file_columns %in% names(tbl))) {
