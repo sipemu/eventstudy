@@ -121,6 +121,9 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                  fit = function(data_tbl) {
                                    # do nothing
                                    private$.is_fitted = TRUE
+
+                                   # Calculate statistics
+                                   private$calculate_statistics(data_tbl)
                                  },
                                  #' @description
                                  #' abnormal_returns Calculate the abnormal returns with given data.
@@ -129,6 +132,30 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                  abnormal_returns = function(data_tbl) {
                                    data_tbl %>%
                                      mutate(abnormal_returns = firm_returns - index_returns)
+                                 }
+                               ),
+                               private = list(
+                                 calculate_statistics = function(data_tbl) {
+                                   estimation_tbl = data_tbl %>%
+                                     dplyr::filter(estimation_window == 1)
+
+                                   # residuals & first-order autocorrelation for
+                                   # diagnostics
+                                   residuals = estimation_window_tbl$firm_returns - estimation_window_tbl$index_returns
+                                   private$add_residuals(residuals)
+                                   private$first_order_autocorrelation(residuals)
+
+                                   # forecast correction term
+                                   sigma = sd(residuals)
+                                   event_window_tbl = data_tbl %>% filter(event_window == 1)
+                                   event_market_returns = event_window_tbl$index_returns
+                                   estimation_window_length = nrow(estimation_tbl)
+                                   estimation_market_returns = estimation_tbl$index_returns
+
+                                   private$calculate_forecast_error_correction(sigma,
+                                                                               estimation_window_length,
+                                                                               estimation_market_returns,
+                                                                               event_market_returns)
                                  }
                                )
 )
@@ -158,11 +185,14 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                fit = function(data_tbl) {
                                                  data_tbl %>%
                                                    filter(estimation_window == 1) %>%
-                                                   .[['index_returns']] %>%
+                                                   .[['firm_returns']] %>%
                                                    mean(.) -> reference_mean
 
                                                  private$.fitted_model = reference_mean
                                                  private$.is_fitted = TRUE
+
+                                                 # Calculate statistics
+                                                 private$calculate_statistics(data_tbl)
                                                },
                                                #' @description
                                                #' Calculate the abnormal returns with given data.
@@ -171,6 +201,30 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                abnormal_returns = function(data_tbl) {
                                                  data_tbl %>%
                                                    mutate(abnormal_returns = firm_returns - private$.fitted_model)
+                                               }
+                                             ),
+                                             private = list(
+                                               calculate_statistics = function(data_tbl) {
+                                                 estimation_tbl = data_tbl %>%
+                                                   dplyr::filter(estimation_window == 1)
+
+                                                 # residuals & first-order autocorrelation for
+                                                 # diagnostics
+                                                 residuals = estimation_window_tbl$firm_returns - mean(estimation_window_tbl$firm_returns)
+                                                 private$add_residuals(residuals)
+                                                 private$first_order_autocorrelation(residuals)
+
+                                                 # forecast correction term
+                                                 sigma = sd(residuals)
+                                                 event_window_tbl = data_tbl %>% filter(event_window == 1)
+                                                 event_market_returns = event_window_tbl$index_returns
+                                                 estimation_window_length = nrow(estimation_tbl)
+                                                 estimation_market_returns = estimation_tbl$index_returns
+
+                                                 private$calculate_forecast_error_correction(sigma,
+                                                                                             estimation_window_length,
+                                                                                             estimation_market_returns,
+                                                                                             event_market_returns)
                                                }
                                              )
 )
