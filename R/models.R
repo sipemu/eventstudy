@@ -53,19 +53,12 @@ ModelBase <- R6Class("ModelBase",
                        .error = NULL,
                        #' Statistics object contains different model specific KPIs
                        #' that describes the fitted model.
-                       .statistics = list(alpha=NULL,
-                                          pval_alpha=NULL,
-                                          beta=NULL,
-                                          pval_beta=NULL,
-                                          sigma=NULL,
+                       .statistics = list(sigma=NULL,
                                           degree_of_freedom=NULL,
-                                          r2=NULL,
-                                          f_stat=NULL,
-                                          first_order_auto_correlation=NULL),
-                       .statistics_utils = list(
-                         forecast_error_corrected_sigma=NULL,
-                         forecast_error_corrected_sigma_car=NULL
-                       ),
+                                          first_order_auto_correlation=NULL,
+                                          residuals=NULL,
+                                          forecast_error_corrected_sigma=NULL,
+                                          forecast_error_corrected_sigma_car=NULL),
                        calculate_statistics = function(data_tbl) {
 
 
@@ -83,8 +76,8 @@ ModelBase <- R6Class("ModelBase",
                          forecast_error_corrected_sigma_car = (event_market_returns - meanMREstW) /
                            sqrt(sum((estimation_market_returns - meanMREstW)^2, na.rm=TRUE))
 
-                         private$.statistics_utils$forecast_error_corrected_sigma = forecast_error_corrected_sigma
-                         private$.statistics_utils$forecast_error_corrected_sigma_car = forecast_error_corrected_sigma_car
+                         private$.statistics$forecast_error_corrected_sigma = forecast_error_corrected_sigma
+                         private$.statistics$forecast_error_corrected_sigma_car = forecast_error_corrected_sigma_car
                        },
                        first_order_autocorrelation = function(residuals) {
                          first_order_acf = acf(c(na.omit(residuals)), plot=F, 1, type="correlation")
@@ -92,7 +85,7 @@ ModelBase <- R6Class("ModelBase",
                          private$.statistics$first_order_auto_correlation = first_order_auto_correlation
                        },
                        add_residuals = function(residuals) {
-                         private$.statistics_utils$residuals = residuals
+                         private$.statistics$residuals = residuals
                        }
                      )
 )

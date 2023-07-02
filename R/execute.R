@@ -67,14 +67,22 @@ calculate_statistics = function(task, parameter_set) {
   if (!is.null(parameter_set$multi_event_statistics)) {
     # The data must be reshaped for these calculations as we need to consider the
     # grouping of the events.
+    task$data_tbl %>%
+      dplyr::select(est_task$.keys, model) %>%
+      dplyr::group_by(group) %>%
+      tidyr::nest() %>%
+      dplyr::rename(model = data) -> model_tbl
+
     task$aar_caar_tbl = task$data_tbl %>%
       dplyr::select(est_task$.keys, data) %>%
       tidyr::unnest(data) %>%
       dplyr::group_by(group) %>%
       tidyr::nest() %>%
-      dplyr::mutate(statistics = furrr::future_map(.x=data,
-                                                   .f = .calculate_multiple_event_test_statistics,
-                                                   statistic_set=parameter_set$multi_event_statistics))
+      dplyr::left_join(model_tbl, by="group") %>%
+      dplyr::mutate(statistics = furrr::future_map2(.x=data,
+                                                    .y=model,
+                                                    .f = .calculate_multiple_event_test_statistics,
+                                                    statistic_set=parameter_set$multi_event_statistics))
 
     # Transpose results such that each test statistic result has its own column
     est_task$aar_caar_tbl$statistics %>%
@@ -116,12 +124,12 @@ calculate_statistics = function(task, parameter_set) {
 #' Internal method for calculating test statistics for a multiple event
 #'
 #'
-.calculate_multiple_event_test_statistics = function(data_tbl, statistic_set) {
+.calculate_multiple_event_test_statistics = function(data_tbl, model, statistic_set) {
   # Calculate test statistics
   statistic_set$tests %>%
     purrr::map(.f = function(test_statistic, data_tbl) {
       data_tbl %>%
-        test_statistic$compute(NULL)
+        test_statistic$compute(model)
     }, data_tbl=data_tbl) -> res
 
   # Extract names

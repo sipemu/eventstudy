@@ -24,7 +24,7 @@ StatisticsSetBase <- R6Class("StatisticsSetBase",
                                  for (test in tests) {
                                    private$validate(test)
                                  }
-                                 selftests = tests
+                                 self$tests = tests
                                },
                                #' @title Adds a test statistic to this container.
                                #'
@@ -77,7 +77,7 @@ MultiEventStatisticsSet <- R6Class("MultiEventStatisticsSet",
                                      tests = list(CSectTTest$new())
                                    ),
                                    private = list(
-                                     test_parent_class = "MultiEventTestStatistic"
+                                     test_parent_class = "MultiEventStatisticsSet"
                                    )
 )
 
