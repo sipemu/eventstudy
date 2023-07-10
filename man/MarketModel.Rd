@@ -25,15 +25,35 @@ idiosyncratic component.
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{model_name}}{Name of the model.}
+
+\item{\code{formula}}{The formula applied for calculating the market model}
 }
 \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-MarketModel-set_formula}{\code{MarketModel$set_formula()}}
 \item \href{#method-MarketModel-fit}{\code{MarketModel$fit()}}
 \item \href{#method-MarketModel-abnormal_returns}{\code{MarketModel$abnormal_returns()}}
 \item \href{#method-MarketModel-clone}{\code{MarketModel$clone()}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MarketModel-set_formula"></a>}}
+\if{latex}{\out{\hypertarget{method-MarketModel-set_formula}{}}}
+\subsection{Method \code{set_formula()}}{
+Set the formula
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MarketModel$set_formula(formula)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{formula}}{A formula.}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

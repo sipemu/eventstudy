@@ -4,7 +4,7 @@
 \alias{.calculate_multiple_event_test_statistics}
 \title{Internal method for calculating test statistics for a multiple event}
 \usage{
-.calculate_multiple_event_test_statistics(data_tbl, statistic_set)
+.calculate_multiple_event_test_statistics(data_tbl, model, statistic_set)
 }
 \description{
 Internal method for calculating test statistics for a multiple event

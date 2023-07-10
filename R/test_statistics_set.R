@@ -77,7 +77,7 @@ MultiEventStatisticsSet <- R6Class("MultiEventStatisticsSet",
                                      tests = list(CSectTTest$new())
                                    ),
                                    private = list(
-                                     test_parent_class = "MultiEventStatisticsSet"
+                                     test_parent_class = "MultiEventStatistics"
                                    )
 )
 

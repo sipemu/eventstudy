@@ -121,3 +121,24 @@ CARTTest <- R6Class("CARTTest",
                       }
                     )
 )
+
+
+PermutationTest <- R6Class("PermutationTest",
+                            inherit = TestStatisticBase,
+                            public = list(
+                              #' @field name Short code of the test statistic.
+                              name = 'PermutationTest',
+                              #' @description
+                              #' Computes the test CAR test statistics for a single event.
+                              #'
+                              #' @param data_tbl The data for a single event with
+                              #' calculated abnormal returns.
+                              #' @param model The fitted model that includes the
+                              #' necessary information for calculating the test
+                              #' statistic.
+                              compute = function(data_tbl, model) {
+
+                              })
+)
+
+

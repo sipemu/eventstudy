@@ -1,7 +1,11 @@
 #' @title ModelBase
 #' @description Base model class for event study. Each single event study will
 #' get its own model initialization and fitting. Therefore, the input DataFrame
-#' contains the data for a single Event Study.
+#' contains the data for a single Event Study. For custom models, except the
+#' child modles of the market model, several statistics must be included, namely
+#' sigma, degree_of_freedom, first_order_auto_correlation, residuals,
+#' forecast_error_corrected_sigma, and forecast_error_corrected_sigma_car. Part
+#' of these statistics are necessary for calculating the Event Study statistics.
 ModelBase <- R6Class("ModelBase",
                      public = list(
                        #' @field model_name Name of the model.
@@ -89,6 +93,119 @@ ModelBase <- R6Class("ModelBase",
                        }
                      )
 )
+
+
+#' Market Model
+#'
+#' The Market Model is a widely used method in event studies to estimate the
+#' expected returns of a stock and calculate its abnormal returns during an
+#' event window. The model is based on a simple linear regression framework and
+#' captures the relationship between a stock’s return and the return of a market
+#' index, such as the S&P 500 or the Dow Jones Industrial Average. The
+#' underlying assumption of the Market Model is that a stock’s return is
+#' primarily influenced by market movements, along with a stock-specific
+#' idiosyncratic component.
+#'
+#' @export
+MarketModel <- R6Class("MarketModel",
+                       inherit = ModelBase,
+                       public = list(
+                         #' @field model_name Name of the model.
+                         model_name = "MarketModel",
+                         #' @field formula The formula applied for calculating the market model
+                         formula = as.formula("firm_returns ~ index_returns"),
+                         #' @description
+                         #' Set the formula
+                         #'
+                         #' @param formula A formula.
+                         set_formula = function(formula) {
+                           if (!inherit(formula, "formula")) {
+                             stop("Input must be a formula")
+                           }
+                           self$formula = formula
+                         },
+                         #' @description
+                         #' Fit the model with given data.
+                         #'
+                         #' @param data_tbl Data frame or tibble containing the data to fit.
+                         fit = function(data_tbl) {
+                           data_tbl %>%
+                             filter(estimation_window == 1) -> estimation_tbl
+
+                           # safe execution
+                           safe_mm = purrr::safely(.f=.estimate_mm_model)
+                           res = safe_mm(self$formula, estimation_tbl)
+                           if (is.null(res$error)) {
+                             private$.fitted_model = res$result
+                             private$.is_fitted = TRUE
+
+                             # Calculate statistics
+                             private$calculate_statistics(data_tbl)
+                           } else {
+                             private$.is_fitted = FALSE
+                             private$.error = res$error
+                           }
+                         },
+                         #' @description
+                         #' Calculate the abnormal returns with given data.
+                         #'
+                         #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
+                         abnormal_returns = function(data_tbl) {
+                           if (private$.is_fitted) {
+                             # Calculate abnormal returns
+                             alpha = private$.statistics$alpha
+                             beta = private$.statistics$beta
+                             data_tbl %>%
+                               mutate(abnormal_returns = firm_returns - (alpha + beta * index_returns))
+                           } else {
+
+                           }
+                         }
+                       ),
+                       private = list(
+                         calculate_statistics = function(data_tbl) {
+                           # abnormal return calculation
+                           alpha = private$.fitted_model$coefficients[1]
+                           names(alpha) <- NULL
+                           beta = private$.fitted_model$coefficients[2]
+                           names(beta) <- NULL
+
+                           # Calculate statistics
+                           # TBD: Make more abstract for general usage.
+                           modell_summary = summary(private$.fitted_model)
+                           private$.statistics$alpha = alpha
+                           private$.statistics$pval_alpha = modell_summary$coefficients[1, 4]
+                           private$.statistics$beta = beta
+                           private$.statistics$pval_beta = modell_summary$coefficients[2, 4]
+
+                           private$.statistics$sigma = modell_summary$sigma
+                           private$.statistics$r2 = modell_summary$r.squared
+                           f_stat <- modell_summary$fstatistic[1]
+                           names(f_stat) <- NULL
+                           private$.statistics$f_stat = f_stat
+                           private$.statistics$degree_of_freedom = private$.fitted_model$df.residual
+
+                           # residuals & first-order autocorrelation for
+                           # diagnostics
+                           residuals = private$.fitted_model$residuals
+                           private$add_residuals(residuals)
+                           private$first_order_autocorrelation(residuals)
+
+                           # forecast correction term
+                           estimation_tbl = data_tbl %>% filter(estimation_window == 1)
+                           event_window_tbl = data_tbl %>% filter(event_window == 1)
+                           event_market_returns = event_window_tbl$index_returns
+                           estimation_window_length = nrow(estimation_tbl)
+                           estimation_market_returns = estimation_tbl$index_returns
+
+                           private$calculate_forecast_error_correction(modell_summary$sigma,
+                                                                       estimation_window_length,
+                                                                       estimation_market_returns,
+                                                                       event_market_returns)
+                         }
+                       )
+)
+
 
 
 #' Market Adjusted Model
@@ -222,104 +339,6 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                              )
 )
 
-
-#' Market Model
-#'
-#' The Market Model is a widely used method in event studies to estimate the
-#' expected returns of a stock and calculate its abnormal returns during an
-#' event window. The model is based on a simple linear regression framework and
-#' captures the relationship between a stock’s return and the return of a market
-#' index, such as the S&P 500 or the Dow Jones Industrial Average. The
-#' underlying assumption of the Market Model is that a stock’s return is
-#' primarily influenced by market movements, along with a stock-specific
-#' idiosyncratic component.
-#'
-#' @export
-MarketModel <- R6Class("MarketModel",
-                       inherit = ModelBase,
-                       public = list(
-                         #' @field model_name Name of the model.
-                         model_name = "MarketModel",
-                         #' @description
-                         #' Fit the model with given data.
-                         #'
-                         #' @param data_tbl Data frame or tibble containing the data to fit.
-                         fit = function(data_tbl) {
-                           data_tbl %>%
-                             filter(estimation_window == 1) -> estimation_tbl
-
-                           # safe execution
-                           safe_mm = purrr::safely(.f=.estimate_mm_model)
-                           res = safe_mm(firm_returns ~ index_returns, estimation_tbl)
-                           if (is.null(res$error)) {
-                             private$.fitted_model = res$result
-                             private$.is_fitted = TRUE
-
-                             # Calculate statistics
-                             private$calculate_statistics(data_tbl)
-                           } else {
-                             private$.is_fitted = FALSE
-                             private$.error = res$error
-                           }
-                         },
-                         #' @description
-                         #' Calculate the abnormal returns with given data.
-                         #'
-                         #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
-                         abnormal_returns = function(data_tbl) {
-                           if (private$.is_fitted) {
-                             # Calculate abnormal returns
-                             alpha = private$.statistics$alpha
-                             beta = private$.statistics$beta
-                             data_tbl %>%
-                               mutate(abnormal_returns = firm_returns - (alpha + beta * index_returns))
-                           } else {
-
-                           }
-                         }
-                       ),
-                       private = list(
-                         calculate_statistics = function(data_tbl) {
-                           # abnormal return calculation
-                           alpha = private$.fitted_model$coefficients[1]
-                           names(alpha) <- NULL
-                           beta = private$.fitted_model$coefficients[2]
-                           names(beta) <- NULL
-
-                           # Calculate statistics
-                           modell_summary = summary(private$.fitted_model)
-                           private$.statistics$alpha = alpha
-                           private$.statistics$pval_alpha = modell_summary$coefficients[1, 4]
-                           private$.statistics$beta = beta
-                           private$.statistics$pval_beta = modell_summary$coefficients[2, 4]
-
-                           private$.statistics$sigma = modell_summary$sigma
-                           private$.statistics$r2 = modell_summary$r.squared
-                           f_stat <- modell_summary$fstatistic[1]
-                           names(f_stat) <- NULL
-                           private$.statistics$f_stat = f_stat
-                           private$.statistics$degree_of_freedom = private$.fitted_model$df.residual
-
-                           # residuals & first-order autocorrelation for
-                           # diagnostics
-                           residuals = private$.fitted_model$residuals
-                           private$add_residuals(residuals)
-                           private$first_order_autocorrelation(residuals)
-
-                           # forecast correction term
-                           estimation_tbl = data_tbl %>% filter(estimation_window == 1)
-                           event_window_tbl = data_tbl %>% filter(event_window == 1)
-                           event_market_returns = event_window_tbl$index_returns
-                           estimation_window_length = nrow(estimation_tbl)
-                           estimation_market_returns = estimation_tbl$index_returns
-
-                           private$calculate_forecast_error_correction(modell_summary$sigma,
-                                                                       estimation_window_length,
-                                                                       estimation_market_returns,
-                                                                       event_market_returns)
-                         }
-                       )
-)
 
 
 CustomModel <- R6Class("CustomModel",

@@ -9,7 +9,7 @@
 #'
 #' @export
 CSectTTest <- R6Class("CSectTTest",
-                   inherit = MultiEventStatisticsSet,
+                   inherit = TestStatisticBase,
                    public = list(
                      #' @field name Short code of the test statistic.
                      name = 'CSectT',
@@ -68,7 +68,7 @@ CSectTTest <- R6Class("CSectTTest",
 #'
 #' @export
 PatellZTest <- R6Class("PatellZTest",
-                      inherit = MultiEventStatisticsSet,
+                      inherit = TestStatisticBase,
                       public = list(
                         #' @field name Short code of the test statistic.
                         name = 'CSectT',
