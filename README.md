@@ -30,6 +30,21 @@ The `EventStudy` package includes several features that make it a versatile tool
 - **Parallel Execution**: If you are dealing with a large number of events, the package supports parallel execution. This allows you to take full advantage of your computer's processing power to speed up the calculations.
 
 
+## Implementation Status
+
+### Test Statistics
+
+Single Firm:
+
+- T test for abnormal returns: $H_0: E[AR_{i, t}] = 0$
+- T test for cumulative abnormal return: $H_0: E[CAR_{i, t}] = 0$
+
+Multiple Firms:
+
+- Cross-Sectional T Test $H_0: E[AAR_{t}] = 0$ and $H_0: E[CAAR] = 0$
+- Patell Z Test $H_0: E[AAR_{t}] = 0$ and $H_0: E[CAAR] = 0$
+
+
 ## Example: Dieselgate
 
 This example demonstrates how to use the `EventStudy` package by conducting an event study analysis on the "Dieselgate" scandal. The scandal, which erupted in 2015, involved Volkswagen's admission that it had installed software on its diesel cars to cheat on emissions tests. This significant event had substantial effects on the stock prices of Volkswagen and other automotive companies. 

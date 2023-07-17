@@ -6,7 +6,11 @@
 \description{
 Base model class for event study. Each single event study will
 get its own model initialization and fitting. Therefore, the input DataFrame
-contains the data for a single Event Study.
+contains the data for a single Event Study. For custom models, except the
+child modles of the market model, several statistics must be included, namely
+sigma, degree_of_freedom, first_order_auto_correlation, residuals,
+forecast_error_corrected_sigma, and forecast_error_corrected_sigma_car. Part
+of these statistics are necessary for calculating the Event Study statistics.
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
