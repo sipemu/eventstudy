@@ -19,15 +19,15 @@ Not deployed yet.
 ## Features
 The `EventStudy` package includes several features that make it a versatile tool for performing event study analyses:
 
-- **Flexible Models and Diagnostic Tests**: You can apply common models and perform diagnostic tests on them. The package is designed to be modular and adaptable, which means you can easily extend it with your own models and tests.
+- **Flexible Models and Diagnostic Tests**: You can apply standard models and perform diagnostic tests on them. The package is modular and adaptable, so you can easily extend it with your own models and tests.
 
-- **Custom Models**: With EventStudy, you have the ability to apply your own market model. This means you can include external factors in your model that are specific to your study or industry.
+- **Custom Models**: With EventStudy, you can apply your market model. This means you can include external factors in your model that are specific to your study or industry.
 
-- **Custom Test Statistics**: You can apply your own test statistics for abnormal returns (AR), average abnormal returns (AAR), cumulative abnormal returns (CAR), and cumulative average abnormal returns (CAAR). This gives you full control over how you want to measure the impact of the event.
+- **Custom Test Statistics**: You can apply your test statistics for abnormal returns (AR), average abnormal returns (AAR), cumulative abnormal returns (CAR), and cumulative average abnormal returns (CAAR). This gives you full control over how you want to measure the event's impact.
 
-- **Result Extraction**: You can extract the results of the event study for further analysis. For example, you might want to perform [Cross-Sectional regression analysis](https://eventstudy.de/features/cross_sectional_regression.html). The package provides convenient functions for extracting confidence bands at each level and for each CAR and CAAR window.
+- **Result Extraction**: You can extract the event study results for further analysis. For example, you might want to perform [Cross-Sectional regression analysis](https://eventstudy.de/features/cross_sectional_regression.html). The package provides convenient functions for extracting confidence bands at each level and for each CAR and CAAR window.
 
-- **Parallel Execution**: If you are dealing with a large number of events, the package supports parallel execution. This allows you to take full advantage of your computer's processing power to speed up the calculations.
+- **Parallel Execution**: If you are dealing with many events, the package supports parallel execution. This allows you to fully use your computer's processing power to speed up the calculations.
 
 
 ## Implementation Status
@@ -47,13 +47,13 @@ Multiple Firms:
 
 ## Example: Dieselgate
 
-This example demonstrates how to use the `EventStudy` package by conducting an event study analysis on the "Dieselgate" scandal. The scandal, which erupted in 2015, involved Volkswagen's admission that it had installed software on its diesel cars to cheat on emissions tests. This significant event had substantial effects on the stock prices of Volkswagen and other automotive companies. 
+This example demonstrates using the `EventStudy` package by conducting an event study analysis of the "Dieselgate" scandal. The scandal erupted in 2015 and involved Volkswagen's admission that it had installed software on its diesel cars to cheat on emissions tests. This significant event substantially affected the stock prices of Volkswagen and other automotive companies. 
 
-The following code will guide you through the steps of performing an event study analysis, from the initial setup to the extraction of results. 
+The following code will guide you through performing an event study analysis, from the initial setup to the results extraction. 
 
 ### Initialisation
 
-The first step is to load necessary packages and data. This includes market data for the companies of interest and the index during the event study period. 
+The first step is to load the necessary packages and data. This includes market data for the companies of interest and the index during the event study period. 
 
 
 ```{r}
@@ -89,10 +89,17 @@ index_symbol %>%
   dplyr::select(symbol, date, adjusted) -> index_tbl
 ```
 
+Finally, we define the data object used in the Event Study.
+
+```{r}
+est_data = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+```
+
 ### Define the Event Study
 
-Next, we define the event study. This involves specifying the return calculation method, the market model, and the test statistics to be used. In this example, we use logarithmic returns, the market model, and the default AR and CAR T-Tests.
+Next, we define the event study. This involves specifying the return calculation method, the market model, and the test statistics. We use logarithmic returns, the market model, and the default AR and CAR T-Tests in this example.
 
+#### Define Parameters: Return calculation and test statistics
 
 ```{r}
 # Parametrization of the Event Study
@@ -101,15 +108,15 @@ market_model = MarketModel$new()
 ```
 
 ```{r}
-# Define single event test statistics
-# Per default AR and CAR T-Tests are applied
+# Define single-event test statistics
+# Per default, AR and CAR T-tests are applied
 single_event_tests = SingleEventStatisticsSet$new()
 multiple_event_tests = MultiEventStatisticsSet$new()
 ```
 
 ```{r}
 # Setup parameter set
-param_set = ParameterSet$new(return_calculation      = log_return, 
+est_params = ParameterSet$new(return_calculation      = log_return, 
                              return_model            = market_model,
                              single_event_statistics = single_event_tests,
                              multi_event_statistics  = multiple_event_tests)
@@ -119,18 +126,19 @@ param_set = ParameterSet$new(return_calculation      = log_return,
 
 Now, with everything set up, we can execute the event study. This involves preparing the event study, fitting the model, and calculating the statistics. 
 
+#### Step 1: Calculate returns
 
 ```{r}
-est_task = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+est_task = prepare_event_study(est_data, est_params)
 ```
 
-```{r}
-est_task = prepare_event_study(est_task, param_set)
-```
+#### Step 2: Fit the statistical model 
 
 ```{r}
 est_task = fit_model(est_task, param_set)
 ```
+
+#### Step 3: Calculate test statistics  
 
 ```{r}
 est_task = calculate_statistics(est_task, param_set)
@@ -155,22 +163,21 @@ est_task$data_tbl$CART[[1]] %>%
   scale_fill_brewer(palette = "Set2")
 ```
 
-This example demonstrates the basic usage of the `EventStudy` package. However, the package is designed to be flexible and can be customized to suit different use cases. Refer to the package documentation for more detailed information on how to use the various features of the `EventStudy` package.
+This example demonstrates the primary usage of the `EventStudy` package. However, the package is designed to be flexible and can be customized to suit different use cases. Refer to the package documentation for more detailed information on using the various features of the `EventStudy` package.
 
 
 ## Roadmap
 
-1. Create vignettes for performing an Event Study with this package.
-2. Export results to Excel.
-3. Validation of statistics and models.
-4. CRAN readiness
-5. Diagnostics and resilient code.
-6. Tests, tests, tests, ...
-7. Create vignettes for 
+1. Export results to Excel.
+2. Validation of statistics and models.
+3. CRAN readiness
+4. Diagnostics and resilient code.
+5. Tests, tests, tests, ...
+6. Create vignettes for 
   - add custom models 
   - add custom test statistics
   - extract results according to different research needs.
-8. More test statistics.
-9. Long term Event Study.
-10. Volatility and volume Event Study with test statistics.
-11. Intraday Event Study
+7. More test statistics.
+8. Long-term Event Study.
+9. Volatility and volume Event Study with test statistics.
+10. Intraday Event Study
