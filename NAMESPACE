@@ -69,6 +69,7 @@ export(car_quantiles)
 # Intraday
 export(IntradayEventStudyTask)
 export(prepare_intraday_event_study)
+export(nonparametric_intraday_test)
 
 # Panel Event Study
 export(PanelEventStudyTask)
