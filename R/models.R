@@ -360,37 +360,588 @@ CustomModel <- R6Class("CustomModel",
 
 
 
-.estimate_garch_model <- function(x=NULL, y, dt=NULL, garch_order=c(1, 1), varModel=F) {
-  .estimate = function(x=NULL, y, dt=NULL, garch_order=c(1, 1), varModel=F) {
-    varMod <- NULL
-    if (varModel) {
-      varMod <- list(model               = "sGARCH",
-                     garchOrder          = orGarch,
-                     submodel            = NULL,
-                     external.regressors = cbind(dt))
-    }
+#' Linear Factor Model Base
+#'
+#' Base class for multi-factor OLS models used in event studies. All factor
+#' models (Market Model, Fama-French, Carhart) share the same estimation
+#' approach: OLS regression of excess returns on factor returns during the
+#' estimation window.
+#'
+#' @export
+LinearFactorModel <- R6Class("LinearFactorModel",
+                              inherit = ModelBase,
+                              public = list(
+                                #' @field model_name Name of the model.
+                                model_name = "LinearFactorModel",
+                                #' @field formula The regression formula.
+                                formula = NULL,
+                                #' @field required_columns Columns required in the data.
+                                required_columns = c("firm_returns", "index_returns"),
+                                #' @description
+                                #' Fit the linear factor model via OLS on the estimation window.
+                                #'
+                                #' @param data_tbl Data frame or tibble containing the data to fit.
+                                fit = function(data_tbl) {
+                                  # Validate required columns
+                                  missing_cols <- setdiff(self$required_columns, names(data_tbl))
+                                  if (length(missing_cols) > 0) {
+                                    stop(self$model_name, " requires columns: ",
+                                         paste(missing_cols, collapse = ", "))
+                                  }
 
-    # model specification
-    model_specification <-
-      rugarch::ugarchspec(
-        variance.model = varMod,
-        mean.model = list(armaOrder           = c(0, 0),
-                          include.mean        = TRUE,
-                          archm               = FALSE,
-                          external.regressors = cbind(x, dt)),
-        distribution.model="norm",
-        start.pars=list())
+                                  estimation_tbl <- data_tbl %>%
+                                    dplyr::filter(estimation_window == 1)
 
-    # model fitting
-    garch_model <- rugarch::ugarchfit(spec           = modelSpec,
-                                      data           = y,
-                                      solver         = "nloptr",
-                                      solver.control = list(trace=0, solver=10))
-  }
+                                  safe_lm <- purrr::safely(.f = .estimate_mm_model)
+                                  res <- safe_lm(self$formula, estimation_tbl)
 
-  .estimate_safely = purrr::safely(.estimate, otherwise = NULL)
-  .estimate_safely(x=NULL, y, dt=NULL, garch_order=c(1, 1), varModel=F)
-}
+                                  if (is.null(res$error)) {
+                                    private$.fitted_model <- res$result
+                                    private$.is_fitted <- TRUE
+                                    private$calculate_statistics(data_tbl)
+                                  } else {
+                                    private$.is_fitted <- FALSE
+                                    private$.error <- res$error
+                                    warning("Model fitting failed: ", conditionMessage(res$error))
+                                  }
+                                },
+                                #' @description
+                                #' Calculate abnormal returns as observed minus predicted.
+                                #'
+                                #' @param data_tbl Data frame or tibble.
+                                abnormal_returns = function(data_tbl) {
+                                  if (private$.is_fitted) {
+                                    predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                    data_tbl %>%
+                                      dplyr::mutate(abnormal_returns = firm_returns - predicted)
+                                  } else {
+                                    warning(self$model_name, " is not fitted. Returning NA abnormal returns.")
+                                    data_tbl %>%
+                                      dplyr::mutate(abnormal_returns = NA_real_)
+                                  }
+                                }
+                              ),
+                              private = list(
+                                calculate_statistics = function(data_tbl) {
+                                  mod <- private$.fitted_model
+                                  mod_summary <- summary(mod)
+
+                                  # Store all coefficients
+                                  coefs <- mod$coefficients
+                                  coef_names <- names(coefs)
+                                  for (i in seq_along(coefs)) {
+                                    val <- coefs[i]
+                                    names(val) <- NULL
+                                    private$.statistics[[coef_names[i]]] <- val
+                                    if (nrow(mod_summary$coefficients) >= i) {
+                                      private$.statistics[[paste0("pval_", coef_names[i])]] <-
+                                        mod_summary$coefficients[i, 4]
+                                    }
+                                  }
+
+                                  # Map intercept to alpha, first factor to beta for compatibility
+                                  private$.statistics$alpha <- coefs[1]
+                                  names(private$.statistics$alpha) <- NULL
+                                  private$.statistics$pval_alpha <- mod_summary$coefficients[1, 4]
+                                  if (length(coefs) >= 2) {
+                                    private$.statistics$beta <- coefs[2]
+                                    names(private$.statistics$beta) <- NULL
+                                    private$.statistics$pval_beta <- mod_summary$coefficients[2, 4]
+                                  }
+
+                                  private$.statistics$sigma <- mod_summary$sigma
+                                  private$.statistics$r2 <- mod_summary$r.squared
+                                  f_stat <- mod_summary$fstatistic[1]
+                                  names(f_stat) <- NULL
+                                  private$.statistics$f_stat <- f_stat
+                                  private$.statistics$degree_of_freedom <- mod$df.residual
+
+                                  residuals <- mod$residuals
+                                  private$add_residuals(residuals)
+                                  private$first_order_autocorrelation(residuals)
+
+                                  # Forecast error correction
+                                  estimation_tbl <- data_tbl %>% dplyr::filter(estimation_window == 1)
+                                  event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                                  private$calculate_forecast_error_correction(
+                                    mod_summary$sigma,
+                                    nrow(estimation_tbl),
+                                    estimation_tbl$index_returns,
+                                    event_window_tbl$index_returns
+                                  )
+                                }
+                              )
+)
+
+
+#' Fama-French Three-Factor Model
+#'
+#' Implements the Fama and French (1993) three-factor model:
+#' \deqn{R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s SMB + \beta_h HML + \epsilon}
+#'
+#' The data must contain columns: \code{excess_return} (firm return minus risk-free),
+#' \code{market_excess} (market return minus risk-free), \code{smb}, and \code{hml}.
+#' These can be joined via a factor table in \code{EventStudyTask}.
+#'
+#' @export
+FamaFrench3FactorModel <- R6Class("FamaFrench3FactorModel",
+                                   inherit = LinearFactorModel,
+                                   public = list(
+                                     #' @field model_name Name of the model.
+                                     model_name = "FamaFrench3FactorModel",
+                                     #' @field formula The three-factor regression formula.
+                                     formula = stats::as.formula(
+                                       "excess_return ~ market_excess + smb + hml"
+                                     ),
+                                     #' @field required_columns Required data columns.
+                                     required_columns = c("excess_return", "market_excess",
+                                                          "smb", "hml"),
+                                     #' @description
+                                     #' Calculate abnormal returns using the three-factor model.
+                                     #'
+                                     #' @param data_tbl Data frame or tibble.
+                                     abnormal_returns = function(data_tbl) {
+                                       if (private$.is_fitted) {
+                                         predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = excess_return - predicted)
+                                       } else {
+                                         warning(self$model_name, " is not fitted.")
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = NA_real_)
+                                       }
+                                     }
+                                   )
+)
+
+
+#' Fama-French Five-Factor Model
+#'
+#' Implements the Fama and French (2015) five-factor model:
+#' \deqn{R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s SMB + \beta_h HML + \beta_r RMW + \beta_c CMA + \epsilon}
+#'
+#' Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
+#' \code{hml}, \code{rmw}, \code{cma}.
+#'
+#' @export
+FamaFrench5FactorModel <- R6Class("FamaFrench5FactorModel",
+                                   inherit = LinearFactorModel,
+                                   public = list(
+                                     #' @field model_name Name of the model.
+                                     model_name = "FamaFrench5FactorModel",
+                                     #' @field formula The five-factor regression formula.
+                                     formula = stats::as.formula(
+                                       "excess_return ~ market_excess + smb + hml + rmw + cma"
+                                     ),
+                                     #' @field required_columns Required data columns.
+                                     required_columns = c("excess_return", "market_excess",
+                                                          "smb", "hml", "rmw", "cma"),
+                                     #' @description
+                                     #' Calculate abnormal returns using the five-factor model.
+                                     #'
+                                     #' @param data_tbl Data frame or tibble.
+                                     abnormal_returns = function(data_tbl) {
+                                       if (private$.is_fitted) {
+                                         predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = excess_return - predicted)
+                                       } else {
+                                         warning(self$model_name, " is not fitted.")
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = NA_real_)
+                                       }
+                                     }
+                                   )
+)
+
+
+#' Carhart Four-Factor Model
+#'
+#' Implements the Carhart (1997) four-factor model, which extends the
+#' Fama-French three-factor model with a momentum factor:
+#' \deqn{R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s SMB + \beta_h HML + \beta_{mom} MOM + \epsilon}
+#'
+#' Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
+#' \code{hml}, \code{mom}.
+#'
+#' @export
+Carhart4FactorModel <- R6Class("Carhart4FactorModel",
+                                inherit = LinearFactorModel,
+                                public = list(
+                                  #' @field model_name Name of the model.
+                                  model_name = "Carhart4FactorModel",
+                                  #' @field formula The four-factor regression formula.
+                                  formula = stats::as.formula(
+                                    "excess_return ~ market_excess + smb + hml + mom"
+                                  ),
+                                  #' @field required_columns Required data columns.
+                                  required_columns = c("excess_return", "market_excess",
+                                                       "smb", "hml", "mom"),
+                                  #' @description
+                                  #' Calculate abnormal returns using the four-factor model.
+                                  #'
+                                  #' @param data_tbl Data frame or tibble.
+                                  abnormal_returns = function(data_tbl) {
+                                    if (private$.is_fitted) {
+                                      predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                      data_tbl %>%
+                                        dplyr::mutate(abnormal_returns = excess_return - predicted)
+                                    } else {
+                                      warning(self$model_name, " is not fitted.")
+                                      data_tbl %>%
+                                        dplyr::mutate(abnormal_returns = NA_real_)
+                                    }
+                                  }
+                                )
+)
+
+
+#' GARCH Model
+#'
+#' Event study model using GARCH(1,1) for time-varying volatility estimation.
+#' Uses the \pkg{rugarch} package to fit a GARCH(1,1) model with a market
+#' return regressor in the mean equation during the estimation window.
+#' Abnormal returns are computed as the difference between observed returns
+#' and the GARCH conditional mean. The time-varying sigma from GARCH can
+#' be used for standardized test statistics.
+#'
+#' @export
+GARCHModel <- R6Class("GARCHModel",
+                       inherit = ModelBase,
+                       public = list(
+                         #' @field model_name Name of the model.
+                         model_name = "GARCHModel",
+                         #' @field garch_order GARCH order as c(p, q). Default c(1,1).
+                         garch_order = c(1, 1),
+                         #' @description
+                         #' Fit the GARCH model on the estimation window.
+                         #'
+                         #' @param data_tbl Data frame or tibble with firm_returns,
+                         #'   index_returns, estimation_window, event_window columns.
+                         fit = function(data_tbl) {
+                           if (!requireNamespace("rugarch", quietly = TRUE)) {
+                             stop("Package 'rugarch' is required for GARCHModel. ",
+                                  "Install it with: install.packages('rugarch')")
+                           }
+
+                           estimation_tbl <- data_tbl %>%
+                             dplyr::filter(estimation_window == 1)
+
+                           spec <- rugarch::ugarchspec(
+                             variance.model = list(
+                               model = "sGARCH",
+                               garchOrder = self$garch_order
+                             ),
+                             mean.model = list(
+                               armaOrder = c(0, 0),
+                               include.mean = TRUE,
+                               external.regressors = as.matrix(estimation_tbl$index_returns)
+                             ),
+                             distribution.model = "norm"
+                           )
+
+                           safe_fit <- purrr::safely(rugarch::ugarchfit)
+                           res <- safe_fit(
+                             spec = spec,
+                             data = estimation_tbl$firm_returns,
+                             solver = "hybrid",
+                             solver.control = list(trace = 0)
+                           )
+
+                           if (is.null(res$error)) {
+                             private$.fitted_model <- res$result
+                             private$.is_fitted <- TRUE
+                             private$calculate_statistics(data_tbl)
+                           } else {
+                             private$.is_fitted <- FALSE
+                             private$.error <- res$error
+                             warning("GARCH model fitting failed: ", conditionMessage(res$error))
+                           }
+                         },
+                         #' @description
+                         #' Calculate abnormal returns from the GARCH model.
+                         #'
+                         #' @param data_tbl Data frame or tibble.
+                         abnormal_returns = function(data_tbl) {
+                           if (!private$.is_fitted) {
+                             warning("GARCHModel is not fitted. Returning NA abnormal returns.")
+                             return(data_tbl %>% dplyr::mutate(abnormal_returns = NA_real_))
+                           }
+
+                           garch_fit <- private$.fitted_model
+                           coefs <- rugarch::coef(garch_fit)
+                           mu <- coefs["mu"]
+                           mxreg1 <- coefs["mxreg1"]
+
+                           data_tbl %>%
+                             dplyr::mutate(
+                               expected_return = mu + mxreg1 * index_returns,
+                               abnormal_returns = firm_returns - expected_return
+                             ) %>%
+                             dplyr::select(-expected_return)
+                         }
+                       ),
+                       private = list(
+                         calculate_statistics = function(data_tbl) {
+                           garch_fit <- private$.fitted_model
+
+                           # Extract conditional sigma from estimation window
+                           cond_sigma <- as.numeric(rugarch::sigma(garch_fit))
+                           avg_sigma <- mean(cond_sigma, na.rm = TRUE)
+
+                           coefs <- rugarch::coef(garch_fit)
+                           private$.statistics$alpha <- coefs["mu"]
+                           private$.statistics$beta <- coefs["mxreg1"]
+                           private$.statistics$sigma <- avg_sigma
+                           private$.statistics$garch_sigma <- cond_sigma
+                           private$.statistics$degree_of_freedom <-
+                             length(cond_sigma) - length(coefs)
+
+                           # Residuals
+                           residuals <- as.numeric(rugarch::residuals(garch_fit))
+                           private$add_residuals(residuals)
+                           private$first_order_autocorrelation(residuals)
+
+                           # Forecast error correction (using average sigma)
+                           estimation_tbl <- data_tbl %>% dplyr::filter(estimation_window == 1)
+                           event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                           private$calculate_forecast_error_correction(
+                             avg_sigma,
+                             nrow(estimation_tbl),
+                             estimation_tbl$index_returns,
+                             event_window_tbl$index_returns
+                           )
+                         }
+                       )
+)
+
+
+#' Buy-and-Hold Abnormal Returns (BHAR) Model
+#'
+#' Implements Buy-and-Hold Abnormal Returns for long-horizon event studies.
+#' BHAR compounds returns over the event window instead of summing:
+#' \deqn{BHAR_i = \prod(1 + R_{i,t}) - \prod(1 + R_{benchmark,t})}
+#'
+#' The benchmark is the market/index return by default. This model is
+#' appropriate for long-horizon studies (months/years) where compounding
+#' effects matter.
+#'
+#' @export
+BHARModel <- R6Class("BHARModel",
+                      inherit = ModelBase,
+                      public = list(
+                        #' @field model_name Name of the model.
+                        model_name = "BHARModel",
+                        #' @description
+                        #' Fit the BHAR model. Computes estimation window statistics.
+                        #'
+                        #' @param data_tbl Data frame or tibble.
+                        fit = function(data_tbl) {
+                          private$.is_fitted <- TRUE
+                          private$calculate_statistics(data_tbl)
+                        },
+                        #' @description
+                        #' Calculate abnormal returns using buy-and-hold compounding.
+                        #'
+                        #' @param data_tbl Data frame or tibble.
+                        abnormal_returns = function(data_tbl) {
+                          data_tbl %>%
+                            dplyr::mutate(
+                              # Running compounded returns
+                              cum_firm = cumprod(1 + dplyr::coalesce(firm_returns, 0)),
+                              cum_index = cumprod(1 + dplyr::coalesce(index_returns, 0)),
+                              # BHAR at each point
+                              abnormal_returns = cum_firm - cum_index
+                            ) %>%
+                            dplyr::select(-cum_firm, -cum_index)
+                        }
+                      ),
+                      private = list(
+                        calculate_statistics = function(data_tbl) {
+                          estimation_tbl <- data_tbl %>%
+                            dplyr::filter(estimation_window == 1)
+
+                          # Compute estimation-window BHAR residuals
+                          est_bhar <- cumprod(1 + estimation_tbl$firm_returns) -
+                            cumprod(1 + estimation_tbl$index_returns)
+                          # Use incremental differences as residual proxy
+                          residuals <- diff(est_bhar)
+                          private$add_residuals(residuals)
+                          if (length(residuals) >= 2) {
+                            private$first_order_autocorrelation(residuals)
+                          }
+
+                          sigma <- sd(estimation_tbl$firm_returns -
+                                        estimation_tbl$index_returns, na.rm = TRUE)
+                          private$.statistics$sigma <- sigma
+                          private$.statistics$degree_of_freedom <- length(residuals) - 1
+
+                          # Forecast error correction
+                          event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                          private$calculate_forecast_error_correction(
+                            sigma, nrow(estimation_tbl),
+                            estimation_tbl$index_returns,
+                            event_window_tbl$index_returns
+                          )
+                        }
+                      )
+)
+
+
+#' Volume Event Study Model
+#'
+#' Model for volume-based event studies. Computes abnormal volume as the
+#' difference between observed volume and expected volume from the estimation
+#' window mean. The data must contain a \code{firm_volume} column (and
+#' optionally \code{index_volume} for market-adjusted volume).
+#'
+#' The existing test statistics infrastructure works on the
+#' \code{abnormal_returns} column, so this model writes abnormal volume
+#' to that same column for compatibility.
+#'
+#' @export
+VolumeModel <- R6Class("VolumeModel",
+                        inherit = ModelBase,
+                        public = list(
+                          #' @field model_name Name of the model.
+                          model_name = "VolumeModel",
+                          #' @field log_transform Whether to log-transform volume. Default TRUE.
+                          log_transform = TRUE,
+                          #' @description
+                          #' Create a new VolumeModel.
+                          #'
+                          #' @param log_transform Whether to log-transform volume before analysis.
+                          initialize = function(log_transform = TRUE) {
+                            self$log_transform <- log_transform
+                          },
+                          #' @description
+                          #' Fit the volume model. Computes expected volume from estimation window.
+                          #'
+                          #' @param data_tbl Data frame or tibble with firm_volume column.
+                          fit = function(data_tbl) {
+                            if (!"firm_volume" %in% names(data_tbl)) {
+                              stop("VolumeModel requires a 'firm_volume' column.")
+                            }
+
+                            estimation_tbl <- data_tbl %>%
+                              dplyr::filter(estimation_window == 1)
+
+                            vol <- estimation_tbl$firm_volume
+                            if (self$log_transform) vol <- log(vol + 1)
+
+                            private$.fitted_model <- mean(vol, na.rm = TRUE)
+                            private$.is_fitted <- TRUE
+                            private$calculate_statistics(data_tbl)
+                          },
+                          #' @description
+                          #' Calculate abnormal volume.
+                          #'
+                          #' @param data_tbl Data frame or tibble.
+                          abnormal_returns = function(data_tbl) {
+                            expected <- private$.fitted_model
+                            data_tbl %>%
+                              dplyr::mutate(
+                                .vol = if (self$log_transform) log(firm_volume + 1) else firm_volume,
+                                abnormal_returns = .vol - expected
+                              ) %>%
+                              dplyr::select(-.vol)
+                          }
+                        ),
+                        private = list(
+                          calculate_statistics = function(data_tbl) {
+                            estimation_tbl <- data_tbl %>%
+                              dplyr::filter(estimation_window == 1)
+
+                            vol <- estimation_tbl$firm_volume
+                            if (self$log_transform) vol <- log(vol + 1)
+
+                            expected <- mean(vol, na.rm = TRUE)
+                            residuals <- vol - expected
+                            private$add_residuals(residuals)
+                            if (length(residuals) >= 2) {
+                              private$first_order_autocorrelation(residuals)
+                            }
+
+                            sigma <- sd(residuals, na.rm = TRUE)
+                            private$.statistics$sigma <- sigma
+                            private$.statistics$degree_of_freedom <- length(residuals) - 1
+
+                            event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                            private$calculate_forecast_error_correction(
+                              sigma, nrow(estimation_tbl),
+                              estimation_tbl$index_returns,
+                              event_window_tbl$index_returns
+                            )
+                          }
+                        )
+)
+
+
+#' Volatility Event Study Model
+#'
+#' Model for volatility-based event studies. Computes abnormal volatility
+#' as the ratio of event-window squared returns to estimation-window variance.
+#' The abnormal measure is written to the \code{abnormal_returns} column
+#' for compatibility with existing test statistics.
+#'
+#' @export
+VolatilityModel <- R6Class("VolatilityModel",
+                            inherit = ModelBase,
+                            public = list(
+                              #' @field model_name Name of the model.
+                              model_name = "VolatilityModel",
+                              #' @description
+                              #' Fit the volatility model. Estimates expected variance from
+                              #' estimation window.
+                              #'
+                              #' @param data_tbl Data frame or tibble.
+                              fit = function(data_tbl) {
+                                estimation_tbl <- data_tbl %>%
+                                  dplyr::filter(estimation_window == 1)
+
+                                est_var <- var(estimation_tbl$firm_returns, na.rm = TRUE)
+                                private$.fitted_model <- est_var
+                                private$.is_fitted <- TRUE
+                                private$calculate_statistics(data_tbl)
+                              },
+                              #' @description
+                              #' Calculate abnormal volatility (squared returns / expected variance - 1).
+                              #'
+                              #' @param data_tbl Data frame or tibble.
+                              abnormal_returns = function(data_tbl) {
+                                est_var <- private$.fitted_model
+                                data_tbl %>%
+                                  dplyr::mutate(
+                                    abnormal_returns = (firm_returns^2 / est_var) - 1
+                                  )
+                              }
+                            ),
+                            private = list(
+                              calculate_statistics = function(data_tbl) {
+                                estimation_tbl <- data_tbl %>%
+                                  dplyr::filter(estimation_window == 1)
+
+                                est_var <- var(estimation_tbl$firm_returns, na.rm = TRUE)
+                                # Residuals: squared returns minus expected variance
+                                residuals <- estimation_tbl$firm_returns^2 - est_var
+                                private$add_residuals(residuals)
+                                if (length(residuals) >= 2) {
+                                  private$first_order_autocorrelation(residuals)
+                                }
+
+                                sigma <- sd(residuals, na.rm = TRUE)
+                                private$.statistics$sigma <- sigma
+                                private$.statistics$degree_of_freedom <- length(residuals) - 1
+
+                                event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                                private$calculate_forecast_error_correction(
+                                  sigma, nrow(estimation_tbl),
+                                  estimation_tbl$index_returns,
+                                  event_window_tbl$index_returns
+                                )
+                              }
+                            )
+)
 
 
 .estimate_mm_model <- function(formula, data) {

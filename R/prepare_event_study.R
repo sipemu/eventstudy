@@ -31,6 +31,31 @@ prepare_event_study <- function(task, parameter_set) {
                               .y=request,
                               .f=.append_windows))
 
+  # Join factor data if provided (for Fama-French, Carhart models)
+  if (!is.null(task$factor_tbl)) {
+    factor_tbl = task$factor_tbl
+    task$data_tbl = task$data_tbl %>%
+      dplyr::mutate(data = purrr::map(data, function(d) {
+        d %>% dplyr::left_join(factor_tbl, by = "date")
+      }))
+
+    # Compute excess returns if risk_free_rate is available
+    has_rf = "risk_free_rate" %in% names(factor_tbl)
+    if (has_rf) {
+      task$data_tbl = task$data_tbl %>%
+        dplyr::mutate(data = purrr::map(data, function(d) {
+          if ("risk_free_rate" %in% names(d)) {
+            d %>% dplyr::mutate(
+              excess_return = firm_returns - risk_free_rate,
+              market_excess = index_returns - risk_free_rate
+            )
+          } else {
+            d
+          }
+        }))
+    }
+  }
+
   task
 }
 

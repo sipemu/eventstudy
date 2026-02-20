@@ -412,3 +412,68 @@ BMPTest <- R6Class("BMPTest",
                      }
                    )
 )
+
+
+#' Calendar-Time Portfolio Test
+#'
+#' Aggregates event-firm returns into calendar-time portfolios and tests
+#' whether the portfolio intercept (alpha) is significantly different from
+#' zero. This approach naturally handles cross-sectional dependence that
+#' arises when events cluster in calendar time.
+#'
+#' For each relative event day, the test forms an equal-weighted portfolio
+#' of all event firms' abnormal returns and computes a t-statistic of the
+#' mean portfolio return.
+#'
+#' @export
+CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
+                                      inherit = TestStatisticBase,
+                                      public = list(
+                                        #' @field name Short code of the test statistic.
+                                        name = 'CalTimeT',
+                                        #' @description
+                                        #' Computes the calendar-time portfolio test.
+                                        #'
+                                        #' @param data_tbl The data for multiple events with
+                                        #' calculated abnormal returns.
+                                        #' @param model The fitted models (unused directly).
+                                        compute = function(data_tbl, model) {
+                                          # Portfolio approach: for each relative event day,
+                                          # form equal-weighted portfolio of ARs
+                                          portfolio <- data_tbl %>%
+                                            dplyr::filter(event_window == 1) %>%
+                                            dplyr::group_by(relative_index) %>%
+                                            dplyr::summarise(
+                                              aar = mean(abnormal_returns, na.rm = TRUE),
+                                              n_events = dplyr::n(),
+                                              n_valid_events = sum(!is.na(abnormal_returns)),
+                                              n_pos = sum(abnormal_returns >= 0, na.rm = TRUE),
+                                              n_neg = sum(abnormal_returns < 0, na.rm = TRUE),
+                                              port_sd = sd(abnormal_returns, na.rm = TRUE),
+                                              .groups = "drop"
+                                            )
+
+                                          # Compute time-series t-stat of portfolio returns
+                                          # under H0: E[AAR] = 0
+                                          ts_sd <- sd(portfolio$aar, na.rm = TRUE)
+                                          n_periods <- nrow(portfolio)
+
+                                          portfolio <- portfolio %>%
+                                            dplyr::mutate(
+                                              caar = cumsum(aar),
+                                              # Time-series t-stat: AAR_t / sd(AAR) * sqrt(T)
+                                              aar_t = aar / ts_sd,
+                                              # CAAR t-stat: CAAR / (sd * sqrt(L))
+                                              caar_t = caar / (ts_sd * sqrt(seq_len(n_periods)))
+                                            )
+
+                                          portfolio$car_window <- stringr::str_c(
+                                            "[", portfolio$relative_index[1], ", ",
+                                            portfolio$relative_index, "]"
+                                          )
+
+                                          portfolio %>%
+                                            dplyr::select(-port_sd)
+                                        }
+                                      )
+)

@@ -132,3 +132,195 @@ test_that("CustomModel inherits from MarketModel", {
   expect_true(inherits(cm, "ModelBase"))
   expect_equal(cm$model_name, "CustomModel")
 })
+
+
+# --- Linear Factor Model tests ---
+
+test_that("LinearFactorModel fits and predicts", {
+  data <- create_mock_model_data()
+  lfm <- LinearFactorModel$new()
+  lfm$formula <- stats::as.formula("firm_returns ~ index_returns")
+  lfm$required_columns <- c("firm_returns", "index_returns")
+
+  lfm$fit(data)
+  expect_true(lfm$is_fitted)
+  expect_false(is.null(lfm$statistics$alpha))
+  expect_false(is.null(lfm$statistics$beta))
+  expect_false(is.null(lfm$statistics$sigma))
+
+  result <- lfm$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+})
+
+test_that("LinearFactorModel errors on missing columns", {
+  data <- create_mock_model_data()
+  lfm <- LinearFactorModel$new()
+  lfm$formula <- stats::as.formula("excess_return ~ market_excess + smb")
+  lfm$required_columns <- c("excess_return", "market_excess", "smb")
+
+  expect_error(lfm$fit(data), "requires columns")
+})
+
+
+# --- Factor Model mock data helper ---
+
+create_mock_factor_model_data <- function(n_estimation = 120, n_event = 11) {
+  set.seed(42)
+  n_total <- n_estimation + n_event
+  smb <- rnorm(n_total, mean = 0, sd = 0.005)
+  hml <- rnorm(n_total, mean = 0, sd = 0.005)
+  mom <- rnorm(n_total, mean = 0, sd = 0.005)
+  rmw <- rnorm(n_total, mean = 0, sd = 0.004)
+  cma <- rnorm(n_total, mean = 0, sd = 0.004)
+  rf <- rep(0.0001, n_total)
+  market_excess <- rnorm(n_total, mean = 0.0003, sd = 0.015)
+
+  # Firm excess return = alpha + betas * factors + noise
+  excess_return <- 0.0005 + 1.1 * market_excess + 0.5 * smb - 0.3 * hml +
+    0.2 * mom + 0.1 * rmw - 0.1 * cma + rnorm(n_total, sd = 0.008)
+
+  tibble::tibble(
+    firm_returns = excess_return + rf,
+    index_returns = market_excess + rf,
+    excess_return = excess_return,
+    market_excess = market_excess,
+    smb = smb,
+    hml = hml,
+    mom = mom,
+    rmw = rmw,
+    cma = cma,
+    risk_free_rate = rf,
+    estimation_window = c(rep(1, n_estimation), rep(0, n_event)),
+    event_window = c(rep(0, n_estimation), rep(1, n_event)),
+    relative_index = c(seq(-n_estimation, -1), seq(0, n_event - 1)),
+    event_date = c(rep(0, n_estimation), 1, rep(0, n_event - 1))
+  )
+}
+
+
+test_that("FamaFrench3FactorModel fits and calculates AR", {
+  data <- create_mock_factor_model_data()
+  ff3 <- FamaFrench3FactorModel$new()
+
+  ff3$fit(data)
+  expect_true(ff3$is_fitted)
+  expect_equal(ff3$model_name, "FamaFrench3FactorModel")
+
+  stats <- ff3$statistics
+  expect_false(is.null(stats$sigma))
+  expect_false(is.null(stats$r2))
+  expect_gt(stats$r2, 0.3)
+
+  result <- ff3$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+})
+
+test_that("FamaFrench5FactorModel fits and calculates AR", {
+  data <- create_mock_factor_model_data()
+  ff5 <- FamaFrench5FactorModel$new()
+
+  ff5$fit(data)
+  expect_true(ff5$is_fitted)
+  expect_equal(ff5$model_name, "FamaFrench5FactorModel")
+
+  result <- ff5$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+  expect_equal(nrow(result), nrow(data))
+})
+
+test_that("Carhart4FactorModel fits and calculates AR", {
+  data <- create_mock_factor_model_data()
+  c4 <- Carhart4FactorModel$new()
+
+  c4$fit(data)
+  expect_true(c4$is_fitted)
+  expect_equal(c4$model_name, "Carhart4FactorModel")
+
+  result <- c4$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+})
+
+test_that("Factor models error on missing columns", {
+  data <- create_mock_model_data()  # no factor columns
+  ff3 <- FamaFrench3FactorModel$new()
+  expect_error(ff3$fit(data), "requires columns")
+})
+
+
+# --- GARCH Model tests ---
+
+test_that("GARCHModel requires rugarch package", {
+  # This test verifies the error message when rugarch is not available
+  # In environments without rugarch, this will error with a clear message
+  data <- create_mock_model_data()
+  gm <- GARCHModel$new()
+
+  tryCatch({
+    gm$fit(data)
+    # If rugarch is available, model should fit
+    expect_true(gm$is_fitted)
+    result <- gm$abnormal_returns(data)
+    expect_true("abnormal_returns" %in% names(result))
+  }, error = function(e) {
+    expect_true(grepl("rugarch", conditionMessage(e)))
+  })
+})
+
+
+# --- BHAR Model tests ---
+
+test_that("BHARModel fits and calculates compound AR", {
+  data <- create_mock_model_data()
+  bhar <- BHARModel$new()
+
+  bhar$fit(data)
+  expect_true(bhar$is_fitted)
+  expect_equal(bhar$model_name, "BHARModel")
+
+  stats <- bhar$statistics
+  expect_false(is.null(stats$sigma))
+
+  result <- bhar$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+  # BHAR uses compounding, not simple subtraction
+  expect_equal(nrow(result), nrow(data))
+})
+
+
+# --- Volume Model tests ---
+
+test_that("VolumeModel fits and calculates abnormal volume", {
+  data <- create_mock_model_data()
+  data$firm_volume <- abs(rnorm(nrow(data), mean = 1e6, sd = 2e5))
+
+  vm <- VolumeModel$new(log_transform = TRUE)
+
+  vm$fit(data)
+  expect_true(vm$is_fitted)
+  expect_equal(vm$model_name, "VolumeModel")
+
+  result <- vm$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+})
+
+test_that("VolumeModel errors without firm_volume column", {
+  data <- create_mock_model_data()
+  vm <- VolumeModel$new()
+  expect_error(vm$fit(data), "firm_volume")
+})
+
+
+# --- Volatility Model tests ---
+
+test_that("VolatilityModel fits and calculates abnormal volatility", {
+  data <- create_mock_model_data()
+  volm <- VolatilityModel$new()
+
+  volm$fit(data)
+  expect_true(volm$is_fitted)
+  expect_equal(volm$model_name, "VolatilityModel")
+
+  result <- volm$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+  expect_equal(nrow(result), nrow(data))
+})

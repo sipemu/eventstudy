@@ -27,6 +27,9 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                .request_file_columns = c("event_id", "firm_symbol", "index_symbol", "event_date",
                                                          "group", "event_window_start", "event_window_end",
                                                          "shift_estimation_window", "estimation_window_length"),
+                               #' @field factor_tbl Optional factor data for multi-factor models
+                               #'   (Fama-French, Carhart). Must contain a \code{date} column.
+                               factor_tbl = NULL,
                                #' @title Initialization of an Event Study task.
                                #'
                                #' @description Create a new EventStudyTask from stock data, reference
@@ -40,9 +43,13 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                #'   reference data.
                                #' @param request_tbl The request dataframe for
                                #'   each event.
+                               #' @param factor_tbl Optional dataframe with factor data
+                               #'   (e.g., Fama-French factors). Must contain a \code{date}
+                               #'   column plus factor columns.
                                initialize = function(firm_stock_data_tbl,
                                                      reference_tbl,
-                                                     request_tbl) {
+                                                     request_tbl,
+                                                     factor_tbl = NULL) {
                                  # Validate input:
                                  # Check if necessary columns are in the dataframes.
                                  firm_stock_data_tbl %>% private$check_data_input("Firm table")
@@ -73,6 +80,11 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
 
                                  self$data_tbl = self$data_tbl %>%
                                    dplyr::left_join(request_tbl, by=self$.keys)
+
+                                 # Store factor table for multi-factor models
+                                 if (!is.null(factor_tbl)) {
+                                   self$factor_tbl <- factor_tbl
+                                 }
                                },
 
                                #' @description

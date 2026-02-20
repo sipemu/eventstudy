@@ -1,0 +1,146 @@
+---
+title: "Panel Event Studies (Difference-in-Differences)"
+author: "Simon Mueller"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Panel Event Studies}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+In addition to traditional financial event studies, the EventStudy package
+supports **panel event studies** (also known as DiD-style event studies).
+These are used in economics, public policy, and health research to estimate
+treatment effects when units (firms, states, individuals) receive treatment
+at potentially different times.
+
+# Setting Up a Panel Event Study
+
+Panel data should be in long format with one row per unit-period:
+
+```{r, eval=FALSE}
+library(EventStudy)
+
+# Example: policy adoption across states
+panel_data <- tibble::tibble(
+  unit_id = rep(1:50, each = 20),        # 50 states, 20 years
+  time_id = rep(2001:2020, 50),           # years
+  outcome = rnorm(1000),                   # outcome variable
+  treated = 0,                             # treatment indicator
+  treatment_time = NA_integer_             # when first treated
+)
+
+# 25 states adopt the policy at different times
+panel_data$treatment_time[panel_data$unit_id <= 10] <- 2010
+panel_data$treatment_time[panel_data$unit_id > 10 & panel_data$unit_id <= 25] <- 2015
+panel_data$treated <- ifelse(
+  !is.na(panel_data$treatment_time) &
+    panel_data$time_id >= panel_data$treatment_time, 1, 0
+)
+```
+
+# Creating the Task
+
+```{r, eval=FALSE}
+task <- PanelEventStudyTask$new(
+  panel_data,
+  unit_id = "unit_id",
+  time_id = "time_id",
+  outcome = "outcome",
+  treatment = "treated",
+  treatment_time = "treatment_time"
+)
+print(task)
+```
+
+# Estimation Methods
+
+## Static TWFE
+
+The simplest specification:
+$$Y_{it} = \alpha_i + \gamma_t + \beta D_{it} + \varepsilon_{it}$$
+
+```{r, eval=FALSE}
+task <- estimate_panel_event_study(task, method = "static_twfe")
+task$results$coefficients
+```
+
+## Dynamic TWFE
+
+Event-time indicators for pre- and post-treatment dynamics:
+
+```{r, eval=FALSE}
+task <- estimate_panel_event_study(
+  task,
+  method = "dynamic_twfe",
+  leads = 5,
+  lags = 5,
+  base_period = -1
+)
+
+# View results
+task$results$coefficients
+plot_panel_event_study(task)
+```
+
+## Sun & Abraham (2021)
+
+Interaction-weighted estimator that handles staggered treatment timing
+correctly. Recommended when treatment is staggered:
+
+```{r, eval=FALSE}
+task <- estimate_panel_event_study(
+  task,
+  method = "sun_abraham",
+  leads = 5,
+  lags = 5
+)
+plot_panel_event_study(task)
+```
+
+# Visualization
+
+All dynamic estimators produce event study plots:
+
+```{r, eval=FALSE}
+p <- plot_panel_event_study(task, confidence_level = 0.95,
+                             title = "Effect of Policy Adoption")
+p
+```
+
+# Pre-trend Testing
+
+Inspect the pre-treatment coefficients for evidence of pre-trends:
+
+```{r, eval=FALSE}
+coefs <- task$results$coefficients
+pre_treatment <- coefs %>% dplyr::filter(relative_time < 0)
+
+# Joint F-test of pre-treatment coefficients
+if (nrow(pre_treatment) > 0) {
+  f_stat <- sum(pre_treatment$estimate^2 / pre_treatment$std.error^2) /
+    nrow(pre_treatment)
+  cat("Joint pre-trend F-stat:", round(f_stat, 3), "\n")
+}
+```
+
+# Key Differences from Financial Event Studies
+
+| Feature | Financial ES | Panel ES |
+|---------|-------------|----------|
+| Units | Firms/stocks | Any (firms, states, individuals) |
+| Time | Trading days | Any (years, quarters, months) |
+| Outcome | Returns | Any continuous variable |
+| Estimation | OLS on market model | TWFE with fixed effects |
+| Cross-section | Test stats (CSect T) | DiD estimators |
+| Staggered | N/A | Sun & Abraham, CSDID |

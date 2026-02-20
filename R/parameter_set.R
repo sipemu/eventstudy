@@ -16,6 +16,9 @@ ParameterSet = R6::R6Class(classname = "ParameterSet",
                              single_event_statistics = NULL,
                              #' @field multi_event_statistics multi event test statistic R6 object.
                              multi_event_statistics = NULL,
+                             #' @field study_type Type of event study: "return" (default),
+                             #'   "volume", or "volatility". Affects axis labels in plots.
+                             study_type = "return",
                              #' @description
                              #' Initialize the parameters that defines the Event Study that should be applied.
                              #'

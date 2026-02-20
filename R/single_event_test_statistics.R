@@ -142,3 +142,52 @@ PermutationTest <- R6Class("PermutationTest",
 )
 
 
+#' Buy-and-Hold Abnormal Return T Test (BHARTTest)
+#'
+#' Tests whether the BHAR for a single event is significantly different from
+#' zero. The BHAR is the difference between compounded firm returns and
+#' compounded benchmark returns over the event window.
+#'
+#' @export
+BHARTTest <- R6Class("BHARTTest",
+                      inherit = TestStatisticBase,
+                      public = list(
+                        #' @field name Short code of the test statistic.
+                        name = 'BHART',
+                        #' @description
+                        #' Computes the BHAR t test for a single event.
+                        #'
+                        #' @param data_tbl The data for a single event with
+                        #' calculated abnormal returns.
+                        #' @param model The fitted model.
+                        compute = function(data_tbl, model) {
+                          statistics <- model$statistics
+                          sigma <- statistics$sigma
+
+                          event_data <- data_tbl %>%
+                            dplyr::filter(event_window == 1)
+
+                          # Compound returns
+                          cum_firm <- cumprod(1 + dplyr::coalesce(event_data$firm_returns, 0))
+                          cum_index <- cumprod(1 + dplyr::coalesce(event_data$index_returns, 0))
+                          bhar <- cum_firm - cum_index
+
+                          n <- seq_len(nrow(event_data))
+                          # Under simple approximation, sigma of BHAR grows with sqrt(n)
+                          bhar_se <- sigma * sqrt(n)
+
+                          res <- event_data %>%
+                            dplyr::select(relative_index) %>%
+                            dplyr::mutate(
+                              bhar = bhar,
+                              bhar_window = stringr::str_c("[", relative_index[1], ", ",
+                                                           relative_index, "]"),
+                              bhar_se = bhar_se,
+                              bhar_t = bhar / bhar_se
+                            )
+                          res
+                        }
+                      )
+)
+
+
