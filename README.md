@@ -282,6 +282,19 @@ task <- prepare_intraday_event_study(task, ParameterSet$new())
 task <- fit_model(task, ParameterSet$new())
 ```
 
+**Non-parametric significance test** (Rinaudo & Saha 2014): compares event-day CARs to the empirical distribution of estimation-day CARs to build confidence bands without distributional assumptions.
+
+```r
+results <- nonparametric_intraday_test(
+  estimation_window = est_data,   # day, time, abnormalReturn
+  event_window      = event_data, # time, abnormalReturn
+  event_times       = c("10:00", "14:30"),
+  p = 0.05
+)
+```
+
+See `vignette("intraday-event-study")` for details.
+
 ## Panel Event Studies (DiD)
 
 For difference-in-differences style analysis with staggered treatment:
