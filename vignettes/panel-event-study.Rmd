@@ -1,5 +1,5 @@
 ---
-title: "Panel Event Studies (Difference-in-Differences)"
+title: "Panel Event Studies: A Guide Following Miller (2023)"
 author: "Simon Mueller"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -18,129 +18,568 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-In addition to traditional financial event studies, the EventStudy package
-supports **panel event studies** (also known as DiD-style event studies).
-These are used in economics, public policy, and health research to estimate
-treatment effects when units (firms, states, individuals) receive treatment
-at potentially different times.
+Panel event studies---also known as difference-in-differences (DiD) event
+studies---are among the most widely used research designs in applied economics,
+public policy, and health research. When units (firms, states, individuals)
+receive a treatment at known times and are observed over multiple periods, the
+panel event study framework lets us estimate treatment effects while controlling
+for both time-invariant unit characteristics and common time shocks.
 
-# Setting Up a Panel Event Study
-
-Panel data should be in long format with one row per unit-period:
+This vignette follows the practical guide laid out in
+**Miller (2023), "An Introductory Guide to Event Study Models,"**
+*Journal of Economic Perspectives*, 37(2), 203--230.
+Miller's paper provides a unified framework covering data structure, the
+estimating equation, reference-period normalization, endpoint binning,
+heterogeneous treatment effects with staggered adoption, pre-trend testing, and
+inference. We map each concept to the EventStudy package's panel module.
 
 ```{r, eval=FALSE}
 library(EventStudy)
-
-# Example: policy adoption across states
-panel_data <- tibble::tibble(
-  unit_id = rep(1:50, each = 20),        # 50 states, 20 years
-  time_id = rep(2001:2020, 50),           # years
-  outcome = rnorm(1000),                   # outcome variable
-  treated = 0,                             # treatment indicator
-  treatment_time = NA_integer_             # when first treated
-)
-
-# 25 states adopt the policy at different times
-panel_data$treatment_time[panel_data$unit_id <= 10] <- 2010
-panel_data$treatment_time[panel_data$unit_id > 10 & panel_data$unit_id <= 25] <- 2015
-panel_data$treated <- ifelse(
-  !is.na(panel_data$treatment_time) &
-    panel_data$time_id >= panel_data$treatment_time, 1, 0
-)
+library(dplyr)
+library(ggplot2)
 ```
 
-# Creating the Task
+# Data Structure (Miller Section I)
+
+Miller classifies panel event study settings along two dimensions:
+
+1. **Single vs. staggered event dates** --- Do all treated units receive
+   treatment in the same period, or do different cohorts adopt at different
+   times?
+2. **Never-treated units present or not** --- Is there a set of units that
+   remain untreated throughout the sample?
+
+These distinctions matter because staggered adoption, combined with
+heterogeneous treatment effects, can bias conventional two-way fixed effects
+(TWFE) estimators---a point we return to in Section 8.
+
+## Dataset A: Single-Cohort Design
+
+Thirty units observed over 20 periods. Fifteen units are treated at period 10;
+fifteen are never treated.
 
 ```{r, eval=FALSE}
-task <- PanelEventStudyTask$new(
-  panel_data,
-  unit_id = "unit_id",
-  time_id = "time_id",
-  outcome = "outcome",
-  treatment = "treated",
+set.seed(42)
+n_units <- 30
+n_periods <- 20
+treat_period <- 10
+true_effect <- 2.0
+
+dataset_a <- tibble(
+  unit_id = rep(1:n_units, each = n_periods),
+  time_id = rep(1:n_periods, n_units)
+) %>%
+  mutate(
+    # First 15 units are treated at period 10
+    treatment_time = ifelse(unit_id <= 15, treat_period, NA_integer_),
+    treated = ifelse(!is.na(treatment_time) & time_id >= treatment_time, 1, 0),
+    # Unit and time fixed effects + treatment effect + noise
+    unit_fe = rep(rnorm(n_units, 0, 1), each = n_periods),
+    time_fe = rep(rnorm(n_periods, 0, 0.5), n_units),
+    outcome = unit_fe + time_fe + true_effect * treated + rnorm(n() , 0, 1)
+  )
+```
+
+## Dataset B: Staggered Multi-Cohort Design
+
+Fifty units over 20 periods. Three treatment cohorts adopt at periods 8, 12,
+and 16; a fourth group is never treated.
+
+```{r, eval=FALSE}
+set.seed(123)
+n_units_b <- 50
+n_periods_b <- 20
+
+dataset_b <- tibble(
+  unit_id = rep(1:n_units_b, each = n_periods_b),
+  time_id = rep(1:n_periods_b, n_units_b)
+) %>%
+  mutate(
+    # Assign cohorts: units 1-12 at t=8, 13-25 at t=12, 26-37 at t=16, rest never
+    treatment_time = case_when(
+      unit_id <= 12             ~ 8L,
+      unit_id > 12 & unit_id <= 25 ~ 12L,
+      unit_id > 25 & unit_id <= 37 ~ 16L,
+      TRUE                      ~ NA_integer_
+    ),
+    treated = ifelse(!is.na(treatment_time) & time_id >= treatment_time, 1, 0),
+    # Heterogeneous effects: early adopters have larger effects
+    true_te = case_when(
+      treatment_time == 8  ~ 3.0,
+      treatment_time == 12 ~ 2.0,
+      treatment_time == 16 ~ 1.0,
+      TRUE                 ~ 0
+    ),
+    unit_fe = rep(rnorm(n_units_b, 0, 1), each = n_periods_b),
+    time_fe = rep(rnorm(n_periods_b, 0, 0.5), n_units_b),
+    outcome = unit_fe + time_fe + true_te * treated + rnorm(n(), 0, 1)
+  )
+```
+
+## Creating Tasks
+
+Each dataset is wrapped in a `PanelEventStudyTask`:
+
+```{r, eval=FALSE}
+task_a <- PanelEventStudyTask$new(
+  dataset_a,
+  unit_id        = "unit_id",
+  time_id        = "time_id",
+  outcome        = "outcome",
+  treatment      = "treated",
   treatment_time = "treatment_time"
 )
-print(task)
+task_a
+#> PanelEventStudyTask
+#>   Units:    30
+#>   Periods:  20
+#>   Treated:  1 cohort(s)
+#>   Outcome:  outcome
+#>   Estimated: FALSE
+
+task_b <- PanelEventStudyTask$new(
+  dataset_b,
+  unit_id        = "unit_id",
+  time_id        = "time_id",
+  outcome        = "outcome",
+  treatment      = "treated",
+  treatment_time = "treatment_time"
+)
 ```
 
-# Estimation Methods
+# The Estimating Equation (Miller Section II)
 
-## Static TWFE
+Miller presents a general dynamic specification for panel event studies:
 
-The simplest specification:
-$$Y_{it} = \alpha_i + \gamma_t + \beta D_{it} + \varepsilon_{it}$$
+$$Y_{it} = \alpha_i + \gamma_t + \sum_{j \neq j^*} \delta_j \cdot D_{it}^j + \varepsilon_{it}$$
+
+where:
+
+- $\alpha_i$ are **unit fixed effects**, absorbing time-invariant differences
+  across units;
+- $\gamma_t$ are **time fixed effects**, absorbing common shocks that affect all
+  units in a given period;
+- $D_{it}^j$ is an **event-time indicator** equal to 1 when unit $i$ is exactly
+  $j$ periods from its treatment date at time $t$;
+- $j^*$ is the **omitted reference period** (normalized to zero); and
+- $\delta_j$ is the treatment effect at event time $j$, measured relative to
+  the reference period.
+
+The EventStudy package implements this equation in
+`estimate_panel_event_study()`. The `method` argument selects the variant, while
+`leads`, `lags`, and `base_period` control the event-time window and
+normalization.
+
+# Static TWFE: The Single-Coefficient Model (Miller Section II.A)
+
+The simplest panel event study specification restricts all post-treatment
+effects to a single coefficient $\beta$:
+
+$$Y_{it} = \alpha_i + \gamma_t + \beta \cdot D_{it} + \varepsilon_{it}$$
+
+Here $D_{it} = 1$ if unit $i$ has been treated by time $t$ (post-treatment),
+and 0 otherwise. The coefficient $\beta$ is the **average treatment effect on
+the treated (ATT)** under the assumption that the treatment effect is constant
+across all post-treatment periods and cohorts.
 
 ```{r, eval=FALSE}
-task <- estimate_panel_event_study(task, method = "static_twfe")
-task$results$coefficients
+task_a <- estimate_panel_event_study(task_a, method = "static_twfe")
+task_a$results$coefficients
+#>   term  estimate std.error statistic  p.value
+#>   ATT   2.01     0.15      13.4      <0.001
 ```
 
-## Dynamic TWFE
+The static model is a good starting point, but it assumes homogeneous
+effects. If the treatment effect varies over time (e.g., growing or fading),
+this assumption can be misleading. The dynamic specification relaxes it.
 
-Event-time indicators for pre- and post-treatment dynamics:
+# Dynamic TWFE: Event-Time Coefficients (Miller Section II.B)
+
+The dynamic specification estimates a separate coefficient $\delta_j$ for each
+event-time period, allowing us to trace out the treatment effect path:
 
 ```{r, eval=FALSE}
-task <- estimate_panel_event_study(
-  task,
-  method = "dynamic_twfe",
-  leads = 5,
-  lags = 5,
+task_a <- estimate_panel_event_study(
+  task_a,
+  method      = "dynamic_twfe",
+  leads       = 5,
+  lags        = 5,
   base_period = -1
 )
 
-# View results
-task$results$coefficients
-plot_panel_event_study(task)
+task_a$results$coefficients
+#>   relative_time estimate std.error statistic p.value
+#>              -5    0.02     0.30      0.07    0.95
+#>              -4   -0.10     0.28     -0.36    0.72
+#>              ...
+#>              -1    0.00     0.00        NA      NA
+#>               0    1.95     0.22      8.86   <0.001
+#>               1    2.03     0.23      8.83   <0.001
+#>              ...
 ```
 
-## Sun & Abraham (2021)
-
-Interaction-weighted estimator that handles staggered treatment timing
-correctly. Recommended when treatment is staggered:
+The pre-treatment coefficients ($j < 0$) should be close to zero under the
+parallel trends assumption, while the post-treatment coefficients ($j \geq 0$)
+capture the treatment effect dynamics.
 
 ```{r, eval=FALSE}
-task <- estimate_panel_event_study(
-  task,
-  method = "sun_abraham",
-  leads = 5,
-  lags = 5
+plot_panel_event_study(task_a, title = "Dynamic TWFE - Single Cohort")
+```
+
+The plot shows point estimates and confidence intervals at each event time, with
+a vertical dashed line separating the pre- and post-treatment periods.
+
+# Reference Period and Normalization (Miller Section III)
+
+One event-time indicator must be omitted to avoid perfect collinearity with the
+unit and time fixed effects. This is the **reference period** $j^*$, and all
+coefficients $\delta_j$ are interpreted relative to it.
+
+Miller emphasizes that the choice of reference period is not merely a
+mechanical necessity---it has **substantive implications**. The default
+`base_period = -1` normalizes to the period immediately before treatment, so
+that $\delta_0$ captures the immediate treatment effect. Alternative choices
+include:
+
+```{r, eval=FALSE}
+# Normalize to two periods before treatment
+task_a <- estimate_panel_event_study(
+  task_a,
+  method      = "dynamic_twfe",
+  leads       = 5,
+  lags        = 5,
+  base_period = -2
 )
-plot_panel_event_study(task)
 ```
 
-# Visualization
+With `base_period = -2`, the coefficient at $j = -1$ becomes interpretable as
+a test for anticipation effects: if units begin reacting before treatment, this
+coefficient will be non-zero.
 
-All dynamic estimators produce event study plots:
+Miller also discusses **extended reference periods** where multiple pre-treatment
+periods are pooled as the reference group. While the package normalizes a single
+period, you can approximate this by checking that all pre-treatment coefficients
+are jointly close to zero (see Section 9 on pre-trend testing).
+
+# Endpoint Binning (Miller Section IV)
+
+In practice, event time extends beyond the window we estimate. Miller discusses
+**endpoint binning**: grouping all event times below $-K$ (or above $K$) into
+a single bin. This prevents observations far from the treatment date from being
+dropped and captures the cumulative effect of treatment at long horizons.
+
+The package automatically bins at the `leads`/`lags` boundaries. The coefficient
+at relative time $-\text{leads}$ captures the average effect for all event times
+$\leq -\text{leads}$, and similarly for $+\text{lags}$.
 
 ```{r, eval=FALSE}
-p <- plot_panel_event_study(task, confidence_level = 0.95,
-                             title = "Effect of Policy Adoption")
-p
+# Narrow window: leads = 3, lags = 3
+task_a_narrow <- estimate_panel_event_study(
+  task_a,
+  method = "dynamic_twfe",
+  leads  = 3,
+  lags   = 3
+)
+task_a_narrow$results$coefficients
+
+# Wider window: leads = 8, lags = 8
+task_a_wide <- estimate_panel_event_study(
+  task_a,
+  method = "dynamic_twfe",
+  leads  = 8,
+  lags   = 8
+)
+task_a_wide$results$coefficients
 ```
 
-# Pre-trend Testing
+With the narrow window, the endpoint bins absorb more observations, and the
+binned coefficients may differ from the interior ones. With a wider window, each
+coefficient captures a more specific event time but with potentially fewer
+observations.
 
-Inspect the pre-treatment coefficients for evidence of pre-trends:
+Miller recommends reporting results for multiple window widths as a robustness
+check, and being transparent about which observations are binned at the
+endpoints.
+
+# Staggered Treatment and Heterogeneous Effects (Miller Section V)
+
+## The TWFE Problem
+
+When treatment is staggered and treatment effects are heterogeneous across
+cohorts or over time, the standard TWFE estimator can produce misleading
+results. The core issue is that TWFE uses **all** untreated and
+**already-treated** units as comparisons. When already-treated units serve as
+controls for newly-treated units---what Miller calls "forbidden comparisons"---
+the resulting weights on cohort-specific treatment effects can be **negative**.
+
+This means the TWFE estimate can be an inconsistent estimate of the ATT,
+potentially even with the wrong sign, when:
+
+1. Treatment is staggered (different cohorts adopt at different times), **and**
+2. Treatment effects are heterogeneous (differ by cohort or evolve over time).
+
+## Sun & Abraham (2021) Interaction-Weighted Estimator
+
+Sun & Abraham (2021) propose an **interaction-weighted (IW)** estimator that
+avoids forbidden comparisons. The idea is to estimate cohort-specific effects by
+interacting event-time indicators with cohort indicators, then aggregate using
+cohort-size weights.
+
+The EventStudy package implements this as `method = "sun_abraham"`:
 
 ```{r, eval=FALSE}
-coefs <- task$results$coefficients
-pre_treatment <- coefs %>% dplyr::filter(relative_time < 0)
+task_b <- estimate_panel_event_study(
+  task_b,
+  method = "sun_abraham",
+  leads  = 5,
+  lags   = 5
+)
 
-# Joint F-test of pre-treatment coefficients
+task_b$results$coefficients
+```
+
+## Comparing TWFE and Sun & Abraham
+
+To see the difference, we can estimate both on the staggered dataset and
+compare:
+
+```{r, eval=FALSE}
+# TWFE on staggered data (potentially biased)
+task_b_twfe <- PanelEventStudyTask$new(
+  dataset_b,
+  unit_id = "unit_id", time_id = "time_id",
+  outcome = "outcome", treatment = "treated",
+  treatment_time = "treatment_time"
+)
+task_b_twfe <- estimate_panel_event_study(
+  task_b_twfe,
+  method = "dynamic_twfe",
+  leads = 5, lags = 5
+)
+
+# Sun & Abraham on the same data
+task_b_sa <- PanelEventStudyTask$new(
+  dataset_b,
+  unit_id = "unit_id", time_id = "time_id",
+  outcome = "outcome", treatment = "treated",
+  treatment_time = "treatment_time"
+)
+task_b_sa <- estimate_panel_event_study(
+  task_b_sa,
+  method = "sun_abraham",
+  leads = 5, lags = 5
+)
+
+# Side-by-side comparison
+coefs_comparison <- bind_rows(
+  task_b_twfe$results$coefficients %>% mutate(method = "Dynamic TWFE"),
+  task_b_sa$results$coefficients   %>% mutate(method = "Sun & Abraham")
+)
+
+ggplot(coefs_comparison, aes(x = relative_time, y = estimate, color = method)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
+  geom_vline(xintercept = -0.5, linetype = "dotted", color = "red", alpha = 0.6) +
+  geom_point(position = position_dodge(width = 0.3), size = 2) +
+  geom_line(position = position_dodge(width = 0.3), linewidth = 0.8) +
+  labs(
+    title = "TWFE vs Sun & Abraham: Staggered Adoption",
+    x     = "Relative Time to Treatment",
+    y     = "Estimate",
+    color = "Method"
+  ) +
+  theme_minimal()
+```
+
+When treatment effects are homogeneous, the two estimators will agree. When
+effects are heterogeneous---as in Dataset B where early adopters have larger
+effects---the Sun & Abraham estimates correctly recover the cohort-weighted
+ATT, while TWFE may be attenuated or distorted.
+
+# Pre-trend Testing (Miller Section VI)
+
+The validity of the panel event study hinges on the **parallel trends
+assumption**: in the absence of treatment, treated and control units would have
+followed the same outcome trajectory. While this assumption is fundamentally
+untestable, we can look for indirect evidence.
+
+## Visual Inspection
+
+The pre-treatment coefficients $\delta_j$ for $j < 0$ should be close to zero.
+The event study plot provides a visual check---if the pre-treatment coefficients
+trend systematically away from zero, the parallel trends assumption is suspect.
+
+## Joint Test for Pre-trends
+
+A more formal approach is a joint F-test of the null hypothesis that all
+pre-treatment coefficients equal zero:
+
+```{r, eval=FALSE}
+coefs <- task_a$results$coefficients
+pre_treatment <- coefs %>%
+  filter(relative_time < 0, relative_time != -1)  # exclude base period
+
 if (nrow(pre_treatment) > 0) {
   f_stat <- sum(pre_treatment$estimate^2 / pre_treatment$std.error^2) /
     nrow(pre_treatment)
+  p_value <- pf(f_stat, df1 = nrow(pre_treatment),
+                df2 = task_a$results$model$df.residual,
+                lower.tail = FALSE)
   cat("Joint pre-trend F-stat:", round(f_stat, 3), "\n")
+  cat("p-value:               ", round(p_value, 4), "\n")
 }
 ```
 
-# Key Differences from Financial Event Studies
+## Miller's Caution
 
-| Feature | Financial ES | Panel ES |
-|---------|-------------|----------|
-| Units | Firms/stocks | Any (firms, states, individuals) |
-| Time | Trading days | Any (years, quarters, months) |
-| Outcome | Returns | Any continuous variable |
-| Estimation | OLS on market model | TWFE with fixed effects |
-| Cross-section | Test stats (CSect T) | DiD estimators |
-| Staggered | N/A | Sun & Abraham, CSDID |
+Miller warns that **absence of evidence is not evidence of absence**. A
+non-significant pre-trend test does not prove parallel trends---it may simply
+reflect low statistical power. Conversely, small but statistically significant
+pre-treatment coefficients may be substantively unimportant. Researchers should:
+
+1. Report the pre-treatment coefficients and their confidence intervals.
+2. Contextualize the magnitude of any pre-trends relative to the estimated
+   treatment effects.
+3. Consider sensitivity analyses (e.g., Rambachan & Roth, 2023) for how
+   violations of parallel trends would affect the conclusions.
+
+# Reporting and Counterfactuals (Miller Section VII)
+
+Miller recommends reporting not just the treatment effect estimates, but also
+the **counterfactual outcomes**---what the treated units' outcomes would have
+been absent treatment. This helps readers assess both the magnitude and
+plausibility of the estimates.
+
+From the dynamic model, the counterfactual for a treated unit at event time $j$
+is the observed outcome minus the estimated effect:
+
+```{r, eval=FALSE}
+# Construct counterfactual for treated units
+coef_lookup <- task_a$results$coefficients %>%
+  select(relative_time, estimate) %>%
+  deframe()
+
+counterfactual <- dataset_a %>%
+  filter(!is.na(treatment_time)) %>%
+  mutate(
+    rel_time = time_id - treatment_time,
+    delta_hat = coef_lookup[as.character(rel_time)],
+    delta_hat = ifelse(is.na(delta_hat), 0, delta_hat),
+    outcome_counterfactual = outcome - delta_hat
+  )
+
+# Plot observed vs counterfactual
+counterfactual_summary <- counterfactual %>%
+  group_by(time_id) %>%
+  summarise(
+    observed       = mean(outcome),
+    counterfactual = mean(outcome_counterfactual),
+    .groups = "drop"
+  )
+
+ggplot(counterfactual_summary, aes(x = time_id)) +
+  geom_line(aes(y = observed, color = "Observed"), linewidth = 0.8) +
+  geom_line(aes(y = counterfactual, color = "Counterfactual"),
+            linetype = "dashed", linewidth = 0.8) +
+  geom_vline(xintercept = 10, linetype = "dotted", color = "red") +
+  labs(
+    title = "Observed vs Counterfactual Outcomes (Treated Units)",
+    x     = "Time Period",
+    y     = "Mean Outcome",
+    color = NULL
+  ) +
+  theme_minimal()
+```
+
+The gap between the observed and counterfactual lines after the treatment date
+visualizes the estimated treatment effect.
+
+# Statistical Inference (Miller Section VIII)
+
+## Clustered Standard Errors
+
+Panel event studies typically require clustering standard errors at the unit
+level to account for serial correlation within units. When the `sandwich`
+package is installed, `estimate_panel_event_study()` **automatically computes
+cluster-robust standard errors** via `sandwich::vcovCL()`. The `cluster`
+parameter controls the clustering variable and defaults to the unit ID:
+
+```{r, eval=FALSE}
+# Cluster-robust SEs at the unit level (the default)
+task_a <- estimate_panel_event_study(
+  task_a,
+  method  = "dynamic_twfe",
+  leads   = 5,
+  lags    = 5,
+  cluster = "unit_id"
+)
+
+# Cluster at a different level (e.g., state)
+task_a <- estimate_panel_event_study(
+  task_a,
+  method  = "dynamic_twfe",
+  leads   = 5,
+  lags    = 5,
+  cluster = "state_id"
+)
+```
+
+If `sandwich` is not installed, the function falls back to OLS standard errors
+with an informative message. Install it with `install.packages("sandwich")`.
+
+## How Many Clusters Are Enough?
+
+Miller discusses the well-known problem that clustered standard errors are
+unreliable when the number of clusters is small. His rule of thumb, drawing on
+the simulation evidence in the literature: **you need approximately 42--50 or
+more clusters** for cluster-robust inference to be reliable.
+
+When the number of clusters is small, alternatives include:
+
+- **Wild cluster bootstrap** (Cameron, Gelbach, & Miller, 2008) --- available
+  via the `fwildclusterboot` package
+- **Randomization inference** (Fisher, 1935)
+
+# Practical Checklist
+
+Drawing on Miller (2023), here is a checklist for panel event study research:
+
+1. **Classify your setting.** Single cohort or staggered? Never-treated controls
+   available?
+2. **Start with the dynamic specification.** Plot the event-time coefficients
+   before collapsing to a static estimate.
+3. **Inspect pre-trends.** Report pre-treatment coefficients visually and with a
+   joint test.
+4. **Choose the reference period deliberately.** `base_period = -1` is standard;
+   consider whether anticipation effects warrant an earlier reference.
+5. **Report endpoint binning.** Be transparent about which event times are binned
+   and test sensitivity to different window widths.
+6. **Use appropriate estimators for staggered designs.** If treatment timing
+   varies and effects may be heterogeneous, use Sun & Abraham or similar
+   heterogeneity-robust estimators instead of TWFE.
+7. **Report counterfactual outcomes.** Show what would have happened absent
+   treatment.
+8. **Cluster standard errors appropriately.** Cluster at the unit level and
+   ensure you have enough clusters (42--50+) for reliable inference.
+9. **Test robustness.** Vary the window width, reference period, and estimator.
+   Report results for multiple specifications.
+
+# References
+
+- **Miller, D. L. (2023).** An Introductory Guide to Event Study Models.
+  *Journal of Economic Perspectives*, 37(2), 203--230.
+  [doi:10.1257/jep.37.2.203](https://doi.org/10.1257/jep.37.2.203)
+
+- **Sun, L., & Abraham, S. (2021).** Estimating Dynamic Treatment Effects in
+  Event Studies with Heterogeneous Treatment Effects.
+  *Journal of Econometrics*, 225(2), 175--199.
+  [doi:10.1016/j.jeconom.2020.09.006](https://doi.org/10.1016/j.jeconom.2020.09.006)
+
+- **MacKinlay, A. C. (1997).** Event Studies in Economics and Finance.
+  *Journal of Economic Literature*, 35(1), 13--39.
+
+- **Cameron, A. C., Gelbach, J. B., & Miller, D. L. (2008).** Bootstrap-Based
+  Improvements for Inference with Clustered Errors.
+  *Review of Economics and Statistics*, 90(3), 414--427.
+
+- **Rambachan, A., & Roth, J. (2023).** A More Credible Approach to Parallel
+  Trends. *Review of Economic Studies*, 90(5), 2555--2591.

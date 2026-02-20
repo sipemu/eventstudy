@@ -148,6 +148,20 @@ estimate_panel_event_study <- function(task,
 }
 
 
+#' Compute standard errors, using cluster-robust if sandwich is available
+#' @noRd
+.compute_se <- function(fit, panel, cluster) {
+  if (requireNamespace("sandwich", quietly = TRUE)) {
+    vcov_cl <- sandwich::vcovCL(fit, cluster = panel[[cluster]])
+    sqrt(diag(vcov_cl))
+  } else {
+    message("Install the 'sandwich' package for cluster-robust standard errors. ",
+            "Falling back to OLS standard errors.")
+    summary(fit)$coefficients[, 2]
+  }
+}
+
+
 #' Static TWFE
 #' @noRd
 .estimate_static_twfe <- function(task, panel, cluster) {
@@ -158,11 +172,11 @@ estimate_panel_event_study <- function(task,
   )
 
   fit <- stats::lm(fml, data = panel)
-  fit_summary <- summary(fit)
 
   # Extract treatment coefficient
+  all_se <- .compute_se(fit, panel, cluster)
   treat_coef <- stats::coef(fit)[task$treatment]
-  treat_se <- fit_summary$coefficients[task$treatment, 2]
+  treat_se <- all_se[task$treatment]
   treat_t <- treat_coef / treat_se
   treat_p <- 2 * stats::pt(abs(treat_t), df = fit$df.residual, lower.tail = FALSE)
 
@@ -215,15 +229,15 @@ estimate_panel_event_study <- function(task,
   fml <- stats::as.formula(paste(task$outcome, "~", rhs))
 
   fit <- stats::lm(fml, data = panel)
-  fit_summary <- summary(fit)
 
   # Extract event-time coefficients
+  all_se <- .compute_se(fit, panel, cluster)
   coef_names <- names(stats::coef(fit))
   idx <- match(dummy_names, coef_names)
   idx <- idx[!is.na(idx)]
 
   coefs <- stats::coef(fit)[idx]
-  se <- fit_summary$coefficients[idx, 2]
+  se <- all_se[idx]
 
   coef_tbl <- tibble::tibble(
     relative_time = event_times[seq_along(idx)],
@@ -303,7 +317,9 @@ estimate_panel_event_study <- function(task,
   fml <- stats::as.formula(paste(task$outcome, "~", rhs))
 
   fit <- stats::lm(fml, data = panel)
-  fit_summary <- summary(fit)
+
+  # Compute cluster-robust SEs once for all coefficients
+  all_se <- .compute_se(fit, panel, cluster)
 
   # Aggregate cohort-specific estimates to event-time estimates (IW weights)
   # Weight by cohort size
@@ -331,7 +347,7 @@ estimate_panel_event_study <- function(task,
       w <- w / sum(w)
       est <- sum(k_coefs * w)
       # Approximate SE via delta method (diagonal)
-      k_se <- fit_summary$coefficients[names(k_coefs), 2]
+      k_se <- all_se[names(k_coefs)]
       se <- sqrt(sum((w * k_se)^2))
 
       coef_tbl <- dplyr::bind_rows(coef_tbl, tibble::tibble(
