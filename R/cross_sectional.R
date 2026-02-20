@@ -135,7 +135,7 @@ print.es_cross_sectional <- function(x, ...) {
   cat("R-squared:", round(x$r_squared, 4), "\n")
   cat("Adj. R-squared:", round(x$adj_r_squared, 4), "\n\n")
   cat("Coefficients:\n")
-  print(round(x$coefficients, 6))
+  base::print.data.frame(round(x$coefficients, 6))
   invisible(x)
 }
 
