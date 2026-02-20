@@ -1,1 +1,1 @@
-testthat::context("BHAR Test Statistics")
+# BHAR test statistics - placeholder for future implementation

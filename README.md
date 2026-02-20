@@ -1,6 +1,6 @@
 # Event Study Analysis in R
 
-**Package is under active development! The API may change**
+**Package is under active development! The API may change.**
 
 ## Installation
 
@@ -8,176 +8,238 @@
 
 Not deployed yet.
 
-#### GITHUB
+#### GitHub
 
-    install.packages("devtools")
-    devtools::install_github("sipemu/eventstudy")
-
-
-
+```r
+install.packages("devtools")
+devtools::install_github("sipemu/eventstudy")
+```
 
 ## Features
-The `EventStudy` package includes several features that make it a versatile tool for performing event study analyses:
 
-- **Flexible Models and Diagnostic Tests**: You can apply standard models and perform diagnostic tests on them. The package is modular and adaptable, so you can easily extend it with your own models and tests.
+The `EventStudy` package implements the classical financial event study methodology (MacKinlay 1997) with a modular, extensible architecture built on R6 classes.
 
-- **Custom Models**: With EventStudy, you can apply your market model. This means you can include external factors in your model that are specific to your study or industry.
+- **Multiple Return Models**: Market Model, Market Adjusted Model, Comparison Period Mean Adjusted Model, and a Custom Model base class for your own specifications.
 
-- **Custom Test Statistics**: You can apply your test statistics for abnormal returns (AR), average abnormal returns (AAR), cumulative abnormal returns (CAR), and cumulative average abnormal returns (CAAR). This gives you full control over how you want to measure the event's impact.
+- **Parametric Test Statistics**: AR and CAR t-tests (single event), Cross-Sectional T test and Patell Z test (multiple events), and BMP test (Boehmer, Musumeci, Poulsen 1991) for event-induced variance robustness.
 
-- **Result Extraction**: You can extract the event study results for further analysis. For example, you might want to perform [Cross-Sectional regression analysis](https://eventstudy.de/features/cross_sectional_regression.html). The package provides convenient functions for extracting confidence bands at each level and for each CAR and CAAR window.
+- **Non-Parametric Test Statistics**: Sign Test, Generalized Sign Test (Cowan 1992), and Rank Test (Corrado 1989) — robust to non-normality of abnormal returns.
 
-- **Parallel Execution**: If you are dealing with many events, the package supports parallel execution. This allows you to fully use your computer's processing power to speed up the calculations.
+- **Diagnostics**: Model diagnostics (Shapiro-Wilk normality, Durbin-Watson, Ljung-Box autocorrelation, ACF) and pre-trend testing for pre-event abnormal return detection.
 
+- **Visualization**: Event study plots (AR, CAR, AAR, CAAR) with confidence bands, plus diagnostic plots (residuals, Q-Q, histogram, ACF).
 
-## Implementation Status
+- **Extensible Design**: Add your own models by inheriting from `ModelBase` and your own test statistics by inheriting from `TestStatisticBase`.
 
-### Test Statistics
+- **Result Extraction**: Convenient methods for extracting AR, CAR, AAR/CAAR, and model statistics from the task object.
 
-Single Firm:
+## Quick Start
 
-- T test for abnormal returns: $H_0: E[AR_{i, t}] = 0$
-- T test for cumulative abnormal return: $H_0: E[CAR_{i, t}] = 0$
+The fastest way to run an event study:
 
-Multiple Firms:
+```r
+library(EventStudy)
 
-- Cross-Sectional T Test $H_0: E[AAR_{t}] = 0$ and $H_0: E[CAAR] = 0$
-- Patell Z Test $H_0: E[AAR_{t}] = 0$ and $H_0: E[CAAR] = 0$
+# Create task from your data
+task = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
 
+# Run with default settings (Market Model, simple returns, all test statistics)
+task = run_event_study(task)
+
+# Inspect results
+print(task)
+summary(task)
+```
 
 ## Example: Dieselgate
 
-This example demonstrates using the `EventStudy` package by conducting an event study analysis of the "Dieselgate" scandal. The scandal erupted in 2015 and involved Volkswagen's admission that it had installed software on its diesel cars to cheat on emissions tests. This significant event substantially affected the stock prices of Volkswagen and other automotive companies. 
+This example demonstrates the `EventStudy` package by analyzing the "Dieselgate" scandal — Volkswagen's 2015 admission that it had installed software to cheat on diesel emissions tests. This event substantially affected stock prices across the automotive industry.
 
-The following code will guide you through performing an event study analysis, from the initial setup to the results extraction. 
+### 1. Load Data
 
-### Initialisation
-
-The first step is to load the necessary packages and data. This includes market data for the companies of interest and the index during the event study period. 
-
-
-```{r}
+```r
 library(tidyquant)
 library(dplyr)
-library(purrr)
-library(readr)
-library(DT)
-
 library(EventStudy)
 
 index_symbol = c("^GDAXI")
 firm_symbols = c("VOW.DE", "PAH3.DE", "BMW.DE", "MBG.DE")
 
 group <- c(rep("VW Group", 2), rep("Other", 2))
-request_tbl <- cbind(c(1:4), firm_symbols, rep(index_symbol, 4), 
-                     rep("18.09.2015", 4), 
-                     group, rep(-10, 4), rep(10, 4), rep(-11, 4), rep(250, 4)) %>% 
-  as_tibble()
+request_tbl <- tibble(
+  event_id = 1:4,
+  firm_symbol = firm_symbols,
+  index_symbol = rep(index_symbol, 4),
+  event_date = rep("18.09.2015", 4),
+  group = group,
+  event_window_start = rep(-10, 4),
+  event_window_end = rep(10, 4),
+  shift_estimation_window = rep(-11, 4),
+  estimation_window_length = rep(250, 4)
+)
 
-names(request_tbl) <- c("event_id", "firm_symbol", "index_symbol", "event_date", 
-                        "group", "event_window_start", "event_window_end", 
-                        "shift_estimation_window", "estimation_window_length")
-
-firm_symbols %>%
+firm_tbl <- firm_symbols %>%
   tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
   dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
-  dplyr::select(symbol, date, adjusted) -> firm_tbl
+  dplyr::select(symbol, date, adjusted)
 
-index_symbol %>%
+index_tbl <- index_symbol %>%
   tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
   dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
-  dplyr::select(symbol, date, adjusted) -> index_tbl
+  dplyr::select(symbol, date, adjusted)
 ```
 
-Finally, we define the data object used in the Event Study.
+### 2. Create Task and Run
 
-```{r}
-est_data = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+**Option A — One-liner with defaults:**
+
+```r
+task = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+task = run_event_study(task)
 ```
 
-### Define the Event Study
+**Option B — Step-by-step with custom parameters:**
 
-Next, we define the event study. This involves specifying the return calculation method, the market model, and the test statistics. We use logarithmic returns, the market model, and the default AR and CAR T-Tests in this example.
+```r
+task = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
 
-#### Define Parameters: Return calculation and test statistics
+# Configure parameters
+est_params = ParameterSet$new(
+  return_calculation = LogReturn$new(),
+  return_model = MarketModel$new(),
+  single_event_statistics = SingleEventStatisticsSet$new(),
+  multi_event_statistics = MultiEventStatisticsSet$new()
+)
 
-```{r}
-# Parametrization of the Event Study
-log_return = LogReturn$new()
-market_model = MarketModel$new()
+# Execute pipeline
+task = prepare_event_study(task, est_params)
+task = fit_model(task, est_params)
+task = calculate_statistics(task, est_params)
 ```
 
-```{r}
-# Define single-event test statistics
-# Per default, AR and CAR T-tests are applied
-single_event_tests = SingleEventStatisticsSet$new()
-multiple_event_tests = MultiEventStatisticsSet$new()
+**Option C — Pipe-friendly:**
+
+```r
+task = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+est_params = ParameterSet$new(return_calculation = LogReturn$new())
+
+task |>
+  prepare_event_study(est_params) |>
+  fit_model(est_params) |>
+  calculate_statistics(est_params)
 ```
 
-```{r}
-# Setup parameter set
-est_params = ParameterSet$new(return_calculation      = log_return, 
-                             return_model            = market_model,
-                             single_event_statistics = single_event_tests,
-                             multi_event_statistics  = multiple_event_tests)
+### 3. Inspect Results
+
+```r
+# Overview
+print(task)
+summary(task)
+
+# Extract single-event results
+task$get_ar(event_id = 1)    # Abnormal returns
+task$get_car(event_id = 1)   # Cumulative abnormal returns
+task$get_model_stats(event_id = 1)  # Model fit statistics
+
+# Extract multi-event results
+task$get_aar(stat_name = "CSectT")  # AAR/CAAR table
 ```
 
-### Execute the Event Study
+### 4. Visualize
 
-Now, with everything set up, we can execute the event study. This involves preparing the event study, fitting the model, and calculating the statistics. 
+```r
+# Event study plots with confidence bands
+plot_event_study(task, type = "car", event_id = 1)
+plot_event_study(task, type = "caar", group = "VW Group")
 
-#### Step 1: Calculate returns
+# Model diagnostic plots
+plot_diagnostics(task, event_id = 1)
 
-```{r}
-est_task = prepare_event_study(est_data, est_params)
+# Raw price plots
+plot_stocks(task, add_event_date = TRUE)
 ```
 
-#### Step 2: Fit the statistical model 
+### 5. Diagnostics and Validation
 
-```{r}
-est_task = fit_model(est_task, param_set)
+```r
+# Validate the task before running
+validate_task(task)
+
+# Model diagnostics after fitting
+model_diagnostics(task)
+
+# Pre-trend test
+pretrend_test(task)
 ```
 
-#### Step 3: Calculate test statistics  
+## Available Models
 
-```{r}
-est_task = calculate_statistics(est_task, param_set)
+| Model | Class | Description |
+|-------|-------|-------------|
+| Market Model | `MarketModel` | OLS regression: $R_i = \alpha + \beta R_m + \epsilon$ |
+| Market Adjusted | `MarketAdjustedModel` | $AR_i = R_i - R_m$ (no estimation needed) |
+| Comparison Period Mean | `ComparisonPeriodMeanAdjustedModel` | $AR_i = R_i - \bar{R}_i^{est}$ |
+| Custom Model | `CustomModel` | Extend `MarketModel` with custom AR calculation |
+
+## Available Test Statistics
+
+### Single Event (per-firm AR/CAR tests)
+
+| Test | Class | Statistic |
+|------|-------|-----------|
+| AR T-Test | `ARTTest` | $t = AR_{i,t} / \sigma_i$ |
+| CAR T-Test | `CARTTest` | $t = CAR_i / (\sqrt{L} \cdot \sigma_i)$ |
+
+### Multiple Events (cross-sectional AAR/CAAR tests)
+
+| Test | Class | Description |
+|------|-------|-------------|
+| Cross-Sectional T | `CSectTTest` | Standard cross-sectional t-test |
+| Patell Z | `PatellZTest` | Standardized residual test (Patell 1976) |
+| BMP Test | `BMPTest` | Standardized cross-sectional test (Boehmer et al. 1991) |
+| Sign Test | `SignTest` | Proportion of positive ARs vs 50% |
+| Generalized Sign Test | `GeneralizedSignTest` | Sign test adjusted for asymmetry (Cowan 1992) |
+| Rank Test | `RankTest` | Non-parametric rank test (Corrado 1989) |
+
+## Adding Custom Test Statistics
+
+```r
+# Create a custom multi-event test by inheriting from TestStatisticBase
+MyCustomTest <- R6::R6Class("MyCustomTest",
+  inherit = TestStatisticBase,
+  public = list(
+    name = "MyTest",
+    compute = function(data_tbl, model) {
+      # Your test logic here
+      # Must return a tibble with at least relative_index and your statistic
+    }
+  )
+)
+
+# Add to a statistics set
+multi_tests = MultiEventStatisticsSet$new()
+multi_tests$add_test(MyCustomTest$new())
 ```
-
-### Extract Results
-
-Finally, after the event study has been executed, we can extract and visualize the results. In this case, we plot the cumulative abnormal return (CAR) for the first event ID. The shaded area represents the confidence interval around the CAR.
-
-
-```{r}
-library(ggplot2)
-library(ggdist)
-
-# Plot CAR statistic for the first event ID
-est_task$data_tbl$CART[[1]] %>% 
-  ggplot(aes(x=relative_index, y=car)) +
-  stat_lineribbon(
-    aes(ydist = car_t_dist),
-    alpha = 1/2
-  ) +
-  scale_fill_brewer(palette = "Set2")
-```
-
-This example demonstrates the primary usage of the `EventStudy` package. However, the package is designed to be flexible and can be customized to suit different use cases. Refer to the package documentation for more detailed information on using the various features of the `EventStudy` package.
-
 
 ## Roadmap
 
-1. Export results to Excel.
-2. Validation of statistics and models.
-3. CRAN readiness
-4. Diagnostics and resilient code.
-5. Tests, tests, tests, ...
-6. Create vignettes for 
-  - add custom models 
-  - add custom test statistics
-  - extract results according to different research needs.
-7. More test statistics.
-8. Long-term Event Study.
-9. Volatility and volume Event Study with test statistics.
-10. Intraday Event Study
+### Completed
+- [x] Multiple return models (Market, Market Adjusted, Mean Adjusted)
+- [x] Parametric test statistics (AR T, CAR T, CSect T, Patell Z)
+- [x] Non-parametric test statistics (Sign, Generalized Sign, Rank, BMP)
+- [x] Model diagnostics and pre-trend testing
+- [x] Event study visualization (AR, CAR, AAR, CAAR plots)
+- [x] Validation of task data
+- [x] Comprehensive test suite
+
+### Planned
+1. Export results to Excel/LaTeX
+2. CRAN submission
+3. Vignettes for custom models, test statistics, and result extraction
+4. Fama-French factor models (3-factor, 5-factor, Carhart 4-factor)
+5. GARCH model integration
+6. Long-term event study (BHAR)
+7. Volatility and volume event study with test statistics
+8. Intraday event study
+9. Panel event study module (DiD-style, per Miller 2023)
+10. Cross-sectional regression analysis

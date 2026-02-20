@@ -119,7 +119,7 @@ MarketModel <- R6Class("MarketModel",
                          #'
                          #' @param formula A formula.
                          set_formula = function(formula) {
-                           if (!inherit(formula, "formula")) {
+                           if (!inherits(formula, "formula")) {
                              stop("Input must be a formula")
                            }
                            self$formula = formula
@@ -144,6 +144,7 @@ MarketModel <- R6Class("MarketModel",
                            } else {
                              private$.is_fitted = FALSE
                              private$.error = res$error
+                             warning("Model fitting failed: ", conditionMessage(res$error))
                            }
                          },
                          #' @description
@@ -158,7 +159,9 @@ MarketModel <- R6Class("MarketModel",
                              data_tbl %>%
                                mutate(abnormal_returns = firm_returns - (alpha + beta * index_returns))
                            } else {
-
+                             warning("MarketModel is not fitted. Returning NA abnormal returns.")
+                             data_tbl %>%
+                               mutate(abnormal_returns = NA_real_)
                            }
                          }
                        ),
@@ -251,7 +254,7 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
 
                                    # residuals & first-order autocorrelation for
                                    # diagnostics
-                                   residuals = estimation_window_tbl$firm_returns - estimation_window_tbl$index_returns
+                                   residuals = estimation_tbl$firm_returns - estimation_tbl$index_returns
                                    private$add_residuals(residuals)
                                    private$first_order_autocorrelation(residuals)
 
@@ -320,7 +323,7 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
 
                                                  # residuals & first-order autocorrelation for
                                                  # diagnostics
-                                                 residuals = estimation_window_tbl$firm_returns - mean(estimation_window_tbl$firm_returns)
+                                                 residuals = estimation_tbl$firm_returns - mean(estimation_tbl$firm_returns)
                                                  private$add_residuals(residuals)
                                                  private$first_order_autocorrelation(residuals)
 
@@ -345,15 +348,13 @@ CustomModel <- R6Class("CustomModel",
                        inherit = MarketModel,
                        public = list(
                          model_name = "CustomModel",
-                         public = list(
-                           abnormal_returns = function(data_tbl) {
-                             # Calculate abnormal returns
-                             mm_model = private$.fitted_model
-                             data_tbl %>%
-                               mutate(abnormal_returns = firm_returns - predict(mm_model, data_tbl),
-                                      abnormal_returns = ifelse(event_date == 1, abnormal_returns + loss_market_cap, abnormal_returns))
-                           }
-                         )
+                         abnormal_returns = function(data_tbl) {
+                           # Calculate abnormal returns
+                           mm_model = private$.fitted_model
+                           data_tbl %>%
+                             mutate(abnormal_returns = firm_returns - predict(mm_model, data_tbl),
+                                    abnormal_returns = ifelse(event_date == 1, abnormal_returns + loss_market_cap, abnormal_returns))
+                         }
                        )
 )
 

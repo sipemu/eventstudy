@@ -4,7 +4,9 @@
 #' market defined in the task and the parameter set.
 #'
 #' @param task An Event Study task.
-#' @param parameter_set A parmeter set that defines the Event Study.
+#' @param parameter_set A parameter set that defines the Event Study.
+#'
+#' @return The task object with returns and windows appended.
 #'
 #' @export
 prepare_event_study <- function(task, parameter_set) {
@@ -18,28 +20,28 @@ prepare_event_study <- function(task, parameter_set) {
 
   # Calculate returns
   task$data_tbl = task$data_tbl %>%
-    mutate(data = furrr::future_map(.x=data,
-                                    .f=.append_returns,
-                                    return_calculation=parameter_set$return_calculation,
-                                    in_column=task$.target))
-
-  # TBD: Correct event date
+    mutate(data = purrr::map(.x=data,
+                             .f=.append_returns,
+                             return_calculation=parameter_set$return_calculation,
+                             in_column=task$.target))
 
   # Append estimation window
   task$data_tbl = task$data_tbl %>%
-    mutate(data = furrr::future_map2(.x=data,
-                                     .y=request,
-                                     .f=.append_windows))
+    mutate(data = purrr::map2(.x=data,
+                              .y=request,
+                              .f=.append_windows))
 
   task
 }
 
 
-#' Append returns (simple of log) to given inüput dataframe
+#' Append returns (simple or log) to given input dataframe
 #'
 #' @param data_tbl A dataframe of a single stock index with reference market data.
 #' @param return_calculation An initialized ReturnCalculation class.
 #' @param in_column String identifier for the price data.
+#'
+#' @noRd
 .append_returns = function(data_tbl, return_calculation, in_column='adjusted') {
   in_cols = colnames(data_tbl)[stringr::str_detect(colnames(data_tbl), in_column)]
   out_cols = stringr::str_replace(in_cols, "adjusted", "returns")
@@ -54,14 +56,12 @@ prepare_event_study <- function(task, parameter_set) {
 #'
 #' This method adds the columns event and estimation window and the relative
 #' index to the given input data frame according to the single Event Study
-#' request definition. The relative index is according to the specified event
-#' date. The index is negative before and positive after the event date. The
-#' estimation and event index are used for training the models and perform the
-#' test statistic calculations.
+#' request definition.
 #'
 #' @param data_tbl A dataframe of a single stock index with reference market data.
-#' @param The specification of the Event Study for the given stock in the input
-#'        data.
+#' @param request The specification of the Event Study for the given stock.
+#'
+#' @noRd
 .append_windows = function(data_tbl, request) {
   # Add event date & temporary index
   data_tbl = data_tbl %>%

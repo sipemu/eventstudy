@@ -59,7 +59,7 @@ SingleEventStatisticsSet <- R6Class("SingleEventStatisticsSet",
                                       tests = list(ARTTest$new(), CARTTest$new())
                                     ),
                                     private = list(
-                                      test_parent_class = "SingleEventTestStatistic"
+                                      test_parent_class = "TestStatisticBase"
                                     )
 )
 
@@ -77,7 +77,7 @@ MultiEventStatisticsSet <- R6Class("MultiEventStatisticsSet",
                                      tests = list(CSectTTest$new())
                                    ),
                                    private = list(
-                                     test_parent_class = "MultiEventStatistics"
+                                     test_parent_class = "TestStatisticBase"
                                    )
 )
 

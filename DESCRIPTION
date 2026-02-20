@@ -1,36 +1,41 @@
 Package: EventStudy
 Type: Package
 Title: Event Study Analysis
-Version: 0.1
-Date: 2023-04-03
-Authors@R: 
+Version: 0.2.0
+Date: 2026-02-20
+Authors@R:
     c(person(given = "Simon",
            family = "Mueller",
-           role = c("cre"),
+           role = c("cre", "aut"),
            email = "sm@data-zoo.de"))
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: Perform Event Study Analysis in R.
+Maintainer: Simon Mueller <sm@data-zoo.de>
+Description: Perform financial event study analysis in R. Implements the
+    classical event study methodology (MacKinlay 1997) with multiple return
+    models (Market Model, Market Adjusted, Comparison Period Mean Adjusted),
+    parametric and non-parametric test statistics, and visualization tools.
 URL: https://github.com/sipemu/eventstudy
 BugReports: https://github.com/sipemu/eventstudy/issues
-License: AGPL
+License: AGPL-3
 Depends:
-    R6
+    R (>= 4.1.0)
 Imports:
+    R6,
     distributional,
     plotly,
     tibble,
-    R6,
     ggplot2,
     dplyr,
     purrr,
-    furrr,
     tidyr,
-    pryr
+    stringr,
+    rlang,
+    stats
 Suggests:
-    testthat,
+    testthat (>= 3.0.0),
+    gridExtra,
     knitr,
-    rmarkdown,
-    RcppArmadillo
+    rmarkdown
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
+Config/testthat/edition: 3
