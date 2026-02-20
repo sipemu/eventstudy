@@ -2,6 +2,7 @@
 
 [![CRAN status](https://www.r-pkg.org/badges/version/EventStudy)](https://CRAN.R-project.org/package=EventStudy)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/EventStudy)](https://CRAN.R-project.org/package=EventStudy)
+[![CRAN monthly downloads](https://cranlogs.r-pkg.org/badges/EventStudy)](https://CRAN.R-project.org/package=EventStudy)
 [![License: AGPL-3](https://img.shields.io/badge/License-AGPL--3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![R ≥ 4.1.0](https://img.shields.io/badge/R-%E2%89%A5%204.1.0-276DC3.svg?logo=r)](https://cran.r-project.org/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -352,6 +353,7 @@ See `vignette("custom-models")` and `vignette("custom-test-statistics")` for det
 | `custom-models` | Creating and using custom return models |
 | `custom-test-statistics` | Creating custom test statistics |
 | `result-extraction` | Extracting and exporting results |
+| `intraday-event-study` | Non-parametric intraday event studies |
 | `panel-event-study` | Panel DiD event studies |
 
 ## Roadmap
