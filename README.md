@@ -366,6 +366,7 @@ See `vignette("custom-models")` and `vignette("custom-test-statistics")` for det
 | `custom-models` | Creating and using custom return models |
 | `custom-test-statistics` | Creating custom test statistics |
 | `result-extraction` | Extracting and exporting results |
+| `volume-volatility-event-study` | Volume and volatility event studies |
 | `intraday-event-study` | Non-parametric intraday event studies |
 | `panel-event-study` | Panel DiD event studies |
 
