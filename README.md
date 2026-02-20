@@ -366,6 +366,9 @@ See `vignette("custom-models")` and `vignette("custom-test-statistics")` for det
 | `custom-models` | Creating and using custom return models |
 | `custom-test-statistics` | Creating custom test statistics |
 | `result-extraction` | Extracting and exporting results |
+| `factor-models-bhar` | Factor models (FF3, FF5, Carhart), GARCH, and BHAR |
+| `cross-sectional-analysis` | Cross-sectional regression, group comparisons, CAR quantiles |
+| `diagnostics-validation` | Data validation, model diagnostics, pre-trend testing |
 | `volume-volatility-event-study` | Volume and volatility event studies |
 | `intraday-event-study` | Non-parametric intraday event studies |
 | `panel-event-study` | Panel DiD event studies |

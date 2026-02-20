@@ -1,0 +1,411 @@
+---
+title: "Diagnostics and Validation for Event Studies"
+author: "Simon Mueller"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diagnostics and Validation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+A well-conducted event study requires more than just running the pipeline.
+You should validate the data **before** estimation and diagnose the model
+**after** fitting. The EventStudy package provides three dedicated functions
+and a diagnostic plotting tool:
+
+| Function | When to use | What it checks |
+|----------|-------------|----------------|
+| `validate_task()` | Before or after `prepare_event_study()` | Data integrity, windows, gaps |
+| `model_diagnostics()` | After `fit_model()` | Residual normality, autocorrelation, model fit |
+| `pretrend_test()` | After `fit_model()` | Pre-event abnormal returns |
+| `plot_diagnostics()` | After `fit_model()` | Visual residual analysis |
+
+```{r load-packages}
+library(EventStudy)
+library(dplyr)
+library(ggplot2)
+```
+
+# Setup: Running an Event Study
+
+```{r run-study}
+set.seed(42)
+n <- 300
+dates <- format(seq(as.Date("2014-06-01"), by = "day", length.out = n),
+                "%d.%m.%Y")
+
+firms <- c("FIRM_A", "FIRM_B", "FIRM_C", "FIRM_D")
+firm_tbl <- purrr::map_dfr(firms, function(sym) {
+  tibble(
+    symbol   = sym,
+    date     = dates,
+    adjusted = 100 * cumprod(1 + rnorm(n, 0.0003, 0.015))
+  )
+})
+
+index_tbl <- tibble(
+  symbol   = "INDEX_1",
+  date     = dates,
+  adjusted = 1000 * cumprod(1 + rnorm(n, 0.0002, 0.012))
+)
+
+request_tbl <- tibble(
+  event_id                = 1:4,
+  firm_symbol             = firms,
+  index_symbol            = rep("INDEX_1", 4),
+  event_date              = rep(dates[200], 4),
+  group                   = c("Group_A", "Group_A", "Group_B", "Group_B"),
+  event_window_start      = rep(-10L, 4),
+  event_window_end        = rep(10L, 4),
+  shift_estimation_window = rep(-11L, 4),
+  estimation_window_length = rep(150L, 4)
+)
+
+task <- EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+params <- ParameterSet$new()
+```
+
+# Step 1: Validate the Task
+
+`validate_task()` checks data integrity before estimation. Run it right after
+creating the task or after calling `prepare_event_study()`:
+
+```{r validate-basic}
+validate_task(task)
+#> Validation passed: no issues found across 4 event(s).
+```
+
+## What It Checks
+
+The function performs five checks for each event:
+
+### 1. Event Date Exists
+
+The event date from the request table must appear in the stock data. Missing
+event dates typically indicate mismatched date formats or non-trading days:
+
+```{r validate-date}
+# This would trigger a warning:
+# [Event 1 / FIRM_A] Event date '32.02.2015' not found in data.
+```
+
+### 2. Sufficient Estimation Window
+
+The estimation window must have enough observations for reliable model
+estimation. The default minimum is 30, but you can adjust it:
+
+```{r validate-min-obs}
+# Stricter requirement: at least 100 observations
+validate_task(task, min_estimation_obs = 100)
+
+# Lenient: at least 20
+validate_task(task, min_estimation_obs = 20)
+```
+
+### 3. Time Series Gaps
+
+Large gaps (> 5 calendar days) in the time series may indicate missing data,
+delistings, or trading halts:
+
+```{r validate-gaps}
+# Warnings like:
+# [Event 2 / FIRM_B] 1 gap(s) > 5 days found in time series.
+```
+
+### 4. Window Overlap
+
+Estimation and event windows must not overlap, as this would contaminate the
+benchmark model:
+
+```{r validate-overlap}
+# Warnings like:
+# [Event 3 / FIRM_C] Estimation and event windows overlap by 5 observation(s).
+```
+
+### 5. Thin Trading
+
+A high proportion of zero returns in the estimation window suggests illiquid
+securities, which violate the assumptions of most test statistics:
+
+```{r validate-thin}
+# Warnings like:
+# [Event 4 / FIRM_D] 15.3% zero returns in estimation window (possible thin trading).
+```
+
+## Using Validation Results
+
+`validate_task()` returns the task invisibly and issues `warning()` calls for
+each problem. You can capture warnings programmatically:
+
+```{r validate-capture}
+task <- prepare_event_study(task, params)
+
+warnings <- tryCatch(
+  withCallingHandlers(
+    validate_task(task),
+    warning = function(w) {
+      message("Issue: ", conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+)
+```
+
+# Step 2: Model Diagnostics
+
+After fitting models, `model_diagnostics()` runs statistical tests on the
+estimation-window residuals:
+
+```{r diagnostics-run}
+task <- fit_model(task, params)
+
+diag <- model_diagnostics(task)
+diag
+#> # A tibble: 4 x 9
+#>   event_id firm_symbol is_fitted shapiro_p dw_stat ljung_box_p  acf1  sigma    r2
+#>      <int> <chr>       <lgl>         <dbl>   <dbl>       <dbl> <dbl>  <dbl> <dbl>
+#> 1        1 FIRM_A      TRUE          0.342    2.01       0.654 0.012 0.0149 0.032
+#> 2        2 FIRM_B      TRUE          0.127    1.95       0.891 0.034 0.0162 0.028
+#> ...
+```
+
+## Diagnostic Tests Explained
+
+### Shapiro-Wilk Normality Test (`shapiro_p`)
+
+Tests whether estimation-window residuals follow a normal distribution.
+Parametric test statistics (AR T-test, CAR T-test, Patell Z) assume normally
+distributed residuals.
+
+- **p > 0.05**: No evidence against normality (good)
+- **p < 0.05**: Residuals may not be normal
+
+**What to do if normality is rejected:**
+
+- Use non-parametric test statistics (`SignTest`, `GeneralizedSignTest`,
+  `RankTest`) instead of or alongside parametric tests
+- The violation may not matter with large samples (CLT applies to
+  cross-sectional tests)
+
+### Durbin-Watson Statistic (`dw_stat`)
+
+Tests for first-order autocorrelation in residuals. Values near 2 indicate
+no autocorrelation.
+
+- **dw ≈ 2**: No autocorrelation (good)
+- **dw < 1.5**: Positive autocorrelation
+- **dw > 2.5**: Negative autocorrelation
+
+**What to do if autocorrelation is detected:**
+
+- Consider a GARCH model which can capture serial dependence in variance
+- Check for thin trading or data errors
+- Autocorrelation in residuals can inflate test statistics
+
+### Ljung-Box Test (`ljung_box_p`)
+
+A more formal test for autocorrelation at multiple lags (up to 10 or
+`floor(n/5)`, whichever is smaller).
+
+- **p > 0.05**: No significant autocorrelation (good)
+- **p < 0.05**: Residuals are autocorrelated
+
+### First-Order Autocorrelation (`acf1`)
+
+The lag-1 autocorrelation coefficient of residuals. Values close to zero
+are desirable:
+
+- **|acf1| < 0.1**: Negligible autocorrelation
+- **|acf1| > 0.2**: Substantial autocorrelation
+
+### Sigma and R-squared (`sigma`, `r2`)
+
+- **sigma**: Residual standard error from the estimation window. Used to
+  standardize abnormal returns in test statistics.
+- **r2**: Proportion of return variance explained by the model. Higher R²
+  means more precise abnormal return estimates.
+
+## Diagnostics for a Single Event
+
+```{r diagnostics-single}
+diag_event1 <- model_diagnostics(task, event_id = 1)
+diag_event1
+```
+
+## Interpreting Diagnostics as a Table
+
+A quick way to flag problematic events:
+
+```{r diagnostics-flag}
+diag <- model_diagnostics(task)
+
+# Flag events with potential issues
+diag %>%
+  mutate(
+    normality_ok     = shapiro_p > 0.05,
+    no_autocorr      = ljung_box_p > 0.05,
+    dw_ok            = dw_stat > 1.5 & dw_stat < 2.5,
+    all_ok           = normality_ok & no_autocorr & dw_ok
+  ) %>%
+  select(event_id, firm_symbol, normality_ok, no_autocorr, dw_ok, all_ok)
+```
+
+# Step 3: Visual Diagnostics
+
+`plot_diagnostics()` produces a four-panel residual analysis plot:
+
+```{r plot-diagnostics, fig.width=8, fig.height=8}
+plot_diagnostics(task, event_id = 1)
+```
+
+The four panels are:
+
+1. **Residuals vs. Observation**: Should show no pattern (random scatter around
+   zero). Trends suggest model misspecification; funneling suggests
+   heteroskedasticity.
+
+2. **Q-Q Plot**: Points should fall on the diagonal line. Deviations at the
+   tails indicate heavy-tailed or skewed residuals.
+
+3. **Residual Distribution**: Histogram of residuals. Should be roughly
+   bell-shaped and centered at zero.
+
+4. **ACF of Residuals**: Autocorrelation at each lag. Bars exceeding the blue
+   dashed lines (95% confidence bands) indicate significant autocorrelation.
+
+## Comparing Diagnostics Across Events
+
+```{r plot-diagnostics-loop, fig.width=8, fig.height=8}
+# Visual diagnostics for all events
+for (eid in task$data_tbl$event_id) {
+  plot_diagnostics(task, event_id = eid)
+}
+```
+
+# Step 4: Pre-trend Testing
+
+The pre-trend test checks whether abnormal returns are already present
+**before** the event. Significant pre-event effects may indicate:
+
+- Information leakage
+- Confounding events
+- Model misspecification
+- The event date is incorrect
+
+```{r pretrend-run}
+task <- calculate_statistics(task, params)
+
+pretrend <- pretrend_test(task)
+pretrend
+#> # A tibble: 2 x 7
+#>   group   n_pre_periods n_events mean_pre_ar sd_pre_ar t_stat p_value
+#>   <chr>           <int>    <int>       <dbl>     <dbl>  <dbl>   <dbl>
+#>   Group_A            10        2     0.00012   0.0142   0.168   0.868
+#>   Group_B            10        2    -0.00034   0.0155  -0.221   0.826
+```
+
+## Interpreting Results
+
+- **mean_pre_ar**: Average abnormal return in the pre-event window. Should be
+  close to zero.
+- **t_stat** and **p_value**: t-test of H₀: mean pre-event AR = 0.
+  - p > 0.05: No evidence of pre-event effects (good)
+  - p < 0.05: Significant pre-event effects (investigate further)
+
+## Pre-trend Test by Group
+
+```{r pretrend-group}
+pretrend_a <- pretrend_test(task, group = "Group_A")
+pretrend_b <- pretrend_test(task, group = "Group_B")
+```
+
+## What to Do When Pre-trends Are Detected
+
+1. **Check the event date.** Is it the announcement date or the effective date?
+   Information may leak before the official announcement.
+2. **Look for confounding events.** Other news may have moved the stock in the
+   pre-event window.
+3. **Extend the estimation window.** A longer estimation window can improve
+   the model fit and reduce spurious pre-event effects.
+4. **Try different models.** Factor models (FF3, FF5) may capture systematic
+   patterns that the Market Model misses.
+
+# A Complete Diagnostic Workflow
+
+Putting all four tools together in a systematic workflow:
+
+```{r full-workflow}
+# 1. Create task
+task <- EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+
+# 2. Validate data BEFORE estimation
+validate_task(task)
+
+# 3. Prepare and fit
+params <- ParameterSet$new(return_model = MarketModel$new())
+task <- prepare_event_study(task, params)
+
+# 4. Validate AFTER preparation (now windows are assigned)
+validate_task(task)
+
+# 5. Fit models
+task <- fit_model(task, params)
+
+# 6. Numerical diagnostics
+diag <- model_diagnostics(task)
+print(diag)
+
+# 7. Flag problematic events
+problems <- diag %>%
+  filter(shapiro_p < 0.05 | ljung_box_p < 0.05 | dw_stat < 1.5 | dw_stat > 2.5)
+
+if (nrow(problems) > 0) {
+  cat("Events with diagnostic issues:\n")
+  print(problems %>% select(event_id, firm_symbol, shapiro_p, ljung_box_p, dw_stat))
+} else {
+  cat("All events pass diagnostic checks.\n")
+}
+
+# 8. Visual diagnostics for flagged events (or all events)
+events_to_check <- if (nrow(problems) > 0) problems$event_id else diag$event_id[1]
+for (eid in events_to_check) {
+  plot_diagnostics(task, event_id = eid)
+}
+
+# 9. Calculate statistics and test pre-trends
+task <- calculate_statistics(task, params)
+pretrend <- pretrend_test(task)
+print(pretrend)
+```
+
+# Decision Guide
+
+| Diagnostic result | Severity | Action |
+|-------------------|----------|--------|
+| Shapiro p < 0.05 | Moderate | Add non-parametric tests (Sign, Rank) |
+| DW < 1.5 or > 2.5 | Moderate | Consider GARCH; check for thin trading |
+| Ljung-Box p < 0.05 | Moderate | Check data quality; consider GARCH |
+| |acf1| > 0.2 | Moderate | Investigate serial dependence |
+| R² very low (< 0.01) | Low | Normal for many stocks; consider factor models |
+| R² very high (> 0.8) | Low | Verify data; possible look-ahead bias |
+| Pre-trend p < 0.05 | High | Investigate leakage, confounders, wrong event date |
+| Estimation window < 30 obs | High | Extend window or drop event |
+| Window overlap | Critical | Fix request table parameters |
+| > 10% zero returns | Moderate | Possible illiquidity; consider non-parametric tests |
+
+# References
+
+- Campbell, J. Y., Lo, A. W. & MacKinlay, A. C. (1997). *The Econometrics of Financial Markets*. Princeton University Press.
+- MacKinlay, A. C. (1997). Event Studies in Economics and Finance. *Journal of Economic Literature*, 35(1), 13--39.
+- Kolari, J. W. & Pynnonen, S. (2010). Event study testing with cross-sectional correlation of abnormal returns. *Review of Financial Studies*, 23(11), 3996--4025.
