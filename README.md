@@ -400,6 +400,7 @@ See `vignette("custom-models")` and `vignette("custom-test-statistics")` for det
 - Corrado, C. J. (1989). A nonparametric test for abnormal security-price performance in event studies. *Journal of Financial Economics*, 23(2), 385-395.
 - Cowan, A. R. (1992). Nonparametric event study tests. *Review of Quantitative Finance and Accounting*, 2(4), 343-358.
 - Patell, J. M. (1976). Corporate forecasts of earnings per share and stock price behavior. *Journal of Accounting Research*, 14(2), 246-276.
+- Rinaudo, J. B. & Saha, A. (2014). Non-parametric intraday event studies.
 - Sun, L. & Abraham, S. (2021). Estimating dynamic treatment effects in event studies with heterogeneous treatment effects. *Journal of Econometrics*, 225(2), 175-199.
 
 ## License
