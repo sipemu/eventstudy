@@ -9,7 +9,10 @@ prepare_event_study(task, parameter_set)
 \arguments{
 \item{task}{An Event Study task.}
 
-\item{parameter_set}{A parmeter set that defines the Event Study.}
+\item{parameter_set}{A parameter set that defines the Event Study.}
+}
+\value{
+The task object with returns and windows appended.
 }
 \description{
 Perform return calculation for each stock and the corresponding reference

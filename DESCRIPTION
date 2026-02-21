@@ -19,7 +19,7 @@ Description: Perform financial event study analysis in R. Implements the
     Results can be exported to CSV, Excel, or LaTeX.
 URL: https://github.com/sipemu/eventstudy
 BugReports: https://github.com/sipemu/eventstudy/issues
-License: AGPL-3
+License: AGPL-3 + file LICENSE
 Depends:
     R (>= 4.1.0)
 Imports:
@@ -45,7 +45,6 @@ Suggests:
     rugarch,
     sandwich
 Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 VignetteBuilder: knitr

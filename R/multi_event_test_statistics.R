@@ -2,7 +2,7 @@
 #'
 #' The Cross-Sectional Test (CSect T) is a statistical tool employed in event
 #' studies to evaluate the null hypothesis that the average abnormal return at
-#' the event date is zero. The test statistic is distributed as t_{N-1}, where
+#' the event date is zero. The test statistic is distributed as \eqn{t_{N-1}}, where
 #' N is the number of events in that group.
 #'
 #' See also \url{https://eventstudy.de/statistics/aar_caar_statistics.html}

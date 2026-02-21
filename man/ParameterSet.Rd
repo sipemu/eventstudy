@@ -23,6 +23,9 @@ statistics that should be applied.
 \item{\code{single_event_statistics}}{single event test statistic R6 object.}
 
 \item{\code{multi_event_statistics}}{multi event test statistic R6 object.}
+
+\item{\code{study_type}}{Type of event study: "return" (default),
+"volume", or "volatility". Affects axis labels in plots.}
 }
 \if{html}{\out{</div>}}
 }
@@ -30,6 +33,7 @@ statistics that should be applied.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ParameterSet-new}{\code{ParameterSet$new()}}
+\item \href{#method-ParameterSet-print}{\code{ParameterSet$print()}}
 \item \href{#method-ParameterSet-clone}{\code{ParameterSet$clone()}}
 }
 }
@@ -42,24 +46,38 @@ Initialize the parameters that defines the Event Study that should be applied.
 \if{html}{\out{<div class="r">}}\preformatted{ParameterSet$new(
   return_calculation = SimpleReturn$new(),
   return_model = MarketModel$new(),
-  single_event_statistics = NULL,
-  multi_event_statistics = NULL
+  single_event_statistics = SingleEventStatisticsSet$new(),
+  multi_event_statistics = MultiEventStatisticsSet$new()
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{return_calculation}}{An initialized return calculation class.}
+\item{\code{return_calculation}}{An initialized return calculation class.
+Defaults to SimpleReturn.}
 
-\item{\code{return_model}}{An initialized event study model.}
+\item{\code{return_model}}{An initialized event study model.
+Defaults to MarketModel.}
 
-\item{\code{single_event_statistics}}{Definition of single event test statistics.}
+\item{\code{single_event_statistics}}{Definition of single event test statistics.
+Defaults to SingleEventStatisticsSet (AR T and CAR T tests).}
 
-\item{\code{multi_event_statistics}}{Definition of multiple event test statistics.}
+\item{\code{multi_event_statistics}}{Definition of multiple event test statistics.
+Defaults to MultiEventStatisticsSet (CSect T test).}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ParameterSet-print"></a>}}
+\if{latex}{\out{\hypertarget{method-ParameterSet-print}{}}}
+\subsection{Method \code{print()}}{
+Print a summary of the parameter set.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ParameterSet$print(...)}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ParameterSet-clone"></a>}}

@@ -11,6 +11,9 @@ calculate_statistics(task, parameter_set)
 
 \item{parameter_set}{The parameter set that defines the event study.}
 }
+\value{
+task
+}
 \description{
 Calculate test statistics
 }

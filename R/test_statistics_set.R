@@ -37,7 +37,8 @@ StatisticsSetBase <- R6Class("StatisticsSetBase",
                              private = list(
                                test_parent_class = "",
                                validate = function(test_obj) {
-                                 if (!inherits(test_obj, private$test_parent_class)) {
+                                 if (nzchar(private$test_parent_class) &&
+                                     !inherits(test_obj, private$test_parent_class)) {
                                    stop(stringr::str_c("Test object must be of class: ", private$test_parent_class))
                                  }
                                }

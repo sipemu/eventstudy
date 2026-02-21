@@ -13,26 +13,23 @@ plot_stocks(
 )
 }
 \arguments{
-\item{target_variable}{A character string specifying the target variable to plot. Default is "firm_adjusted",
-which corresponds to adjusted close prices. Alternatively, you can use "abnormal_return" to plot
-abnormal returns.}
+\item{task}{An EventStudyTask object.}
+
+\item{target_variable}{A character string specifying the target variable
+to plot. Default is "firm_adjusted".}
 
 \item{add_event_date}{Add vertical line for event date (TRUE/FALSE).}
 
-\item{max_symbols}{An integer specifying the maximum number of symbols to display. Default is 6.}
+\item{max_symbols}{An integer specifying the maximum number of symbols
+to display. Default is 6.}
 
-\item{do_sample}{A boolean specifying whether to randomly sample the symbols if the number of unique
-symbols is greater than `max_symbols`. Default is TRUE.}
-
-\item{symbols_tbl}{A data frame containing stock data with columns 'symbols', 'date', 'adjusted', and
-'abnormal_return'. The 'symbols' column should contain stock symbols, and the 'date' column should
-contain dates in the format "dd.mm.yyyy".}
+\item{do_sample}{A boolean specifying whether to randomly sample the
+symbols if the number exceeds max_symbols. Default is TRUE.}
 }
 \value{
-A plotly plot object with the specified stock events.
+A plotly plot object.
 }
 \description{
-Visualize the adjusted close prices or abnormal returns of selected stocks around a specified event date.
-Allows for customization such as setting a maximum number of symbols to display and the option to
-sample the symbols randomly.
+Visualize the adjusted close prices or abnormal returns of selected stocks
+around a specified event date.
 }

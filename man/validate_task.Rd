@@ -4,18 +4,23 @@
 \alias{validate_task}
 \title{Validate an Event Study experiment}
 \usage{
-validate_task(task, parameter_set)
+validate_task(task, parameter_set = NULL, min_estimation_obs = 30)
 }
 \arguments{
-\item{task}{The event study task}
+\item{task}{The event study task.}
 
 \item{parameter_set}{The parameter set that defines the event study.}
+
+\item{min_estimation_obs}{Minimum number of observations required in the
+estimation window. Default is 30.}
+}
+\value{
+The task object (invisibly). Warnings are issued for each problem found.
 }
 \description{
-Validation is done according to:
-}
-\details{
-1. Does the data fit to the request, e.g., is the event date in the stock data.
-2. Does the task contains all data in either the estimation and the event window.
-3. Does the reference data fits to each defined event and corresponding stock data.
+Performs validation checks on the event study task:
+1. Does the event date exist in the stock data for each event?
+2. Are there sufficient observations in the estimation window?
+3. Are there any gaps in the time series?
+4. Do estimation and event windows overlap?
 }
