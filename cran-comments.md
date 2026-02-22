@@ -4,10 +4,13 @@
 
 ## Test environments
 
-* local: Linux (Manjaro), R 4.x
-* GitHub Actions: ubuntu-latest (release), macOS-latest (release), windows-latest (release)
-* R-hub: Windows Server 2022, Ubuntu 22.04, Fedora 38
+* local: Linux (Manjaro), R 4.5.2
+* win-builder: R-devel
+* Debian: R-devel
 
 ## Notes
 
-This is the first CRAN submission of the EventStudy package.
+This is a resubmission of the EventStudy package, previously archived on
+2024-04-20. The package has been completely rewritten with all prior issues
+addressed. Version number has been incremented beyond the archived version
+(0.39.2 -> 0.40.0).

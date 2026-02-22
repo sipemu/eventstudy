@@ -4,5 +4,6 @@
 ^cran-comments\.md$
 ^README\.md$
 ^LICENSE\.md$
+^LICENSE$
 ^\.gitignore$
 ^\.claude$

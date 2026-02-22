@@ -1,4 +1,4 @@
-# EventStudy 0.3.0
+# EventStudy 0.40.0
 
 ## New Features
 

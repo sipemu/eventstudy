@@ -1,3 +1,21 @@
+# Suppress R CMD check notes for NSE column names used in dplyr/ggplot2
+utils::globalVariables(c(
+  ".", "aar", "aar_t", "abnormal_returns", "car", "caar",
+  "ci_lower", "ci_upper", "data", "estimate", "event_date",
+  "event_id", "event_window", "estimation_window",
+  "firm_price", "firm_returns", "firm_symbol",
+  "group", "index", "index_price", "index_returns",
+  "model", "relative_index", "relative_time", "request",
+  "risk_free_rate", "se", "statistic", "statistics", "std.error",
+  "t_stat", "tidy_data", "timestamp", "tmp_index", "value",
+  "sigma", "sar", "csar", "n_pos_car", "n_valid", "sd_caar",
+  "centered_rank", "mean_rank", "mean_sar", "sd_sar", "port_sd",
+  "n_pos", "n_neg", "n_valid_events", "n_events",
+  "total_obs", "ar_rank", "mean_centered_rank",
+  "standardized_abnormal_returns",
+  "car_window", "lag"
+))
+
 #' @title EventStudy: Event Study Analysis in R
 #'
 #' @description
@@ -80,21 +98,4 @@
 #' @importFrom stats sd lm na.omit shapiro.test Box.test acf qnorm pt pnorm
 #'   predict poly setNames
 #' @keywords internal
-# Suppress R CMD check notes for NSE column names used in dplyr/ggplot2
-utils::globalVariables(c(
-  ".", "aar", "aar_t", "abnormal_returns", "car", "caar",
-  "ci_lower", "ci_upper", "data", "estimate", "event_date",
-  "event_id", "event_window", "estimation_window",
-  "firm_price", "firm_returns", "firm_symbol",
-  "group", "index", "index_price", "index_returns",
-  "model", "relative_index", "relative_time", "request",
-  "risk_free_rate", "se", "statistic", "statistics", "std.error",
-  "t_stat", "tidy_data", "timestamp", "tmp_index", "value",
-  "sigma", "sar", "csar", "n_pos_car", "n_valid", "sd_caar",
-  "centered_rank", "mean_rank", "mean_sar", "sd_sar", "port_sd",
-  "n_pos", "n_neg", "n_valid_events", "n_events",
-  "total_obs", "ar_rank", "mean_centered_rank",
-  "standardized_abnormal_returns",
-  "car_window", "lag"
-))
 "_PACKAGE"

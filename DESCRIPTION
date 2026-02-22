@@ -1,8 +1,8 @@
 Package: EventStudy
 Type: Package
 Title: Event Study Analysis
-Version: 0.3.0
-Date: 2026-02-20
+Version: 0.40.0
+Date: 2026-02-22
 Authors@R:
     c(person(given = "Simon",
            family = "Mueller",
@@ -10,16 +10,16 @@ Authors@R:
            email = "sm@data-zoo.de"))
 Maintainer: Simon Mueller <sm@data-zoo.de>
 Description: Perform financial event study analysis in R. Implements the
-    classical event study methodology (MacKinlay 1997) with multiple return
+    classical event study methodology ('MacKinlay' 1997) with multiple return
     models (Market Model, Market Adjusted, Comparison Period Mean Adjusted,
-    Fama-French 3- and 5-factor, Carhart 4-factor, GARCH), parametric and
-    non-parametric test statistics, buy-and-hold abnormal returns (BHAR),
+    'Fama'-French 3- and 5-factor, 'Carhart' 4-factor, GARCH), parametric and
+    non-parametric test statistics, buy-and-hold abnormal returns ('BHAR'),
     volume and volatility event studies, cross-sectional regression,
-    intraday event studies, panel (DiD) event studies, and visualization tools.
-    Results can be exported to CSV, Excel, or LaTeX.
+    'intraday' event studies, panel ('DiD') event studies, and visualization
+    tools. Results can be exported to CSV, Excel, or 'LaTeX'.
 URL: https://github.com/sipemu/eventstudy
 BugReports: https://github.com/sipemu/eventstudy/issues
-License: AGPL-3 + file LICENSE
+License: AGPL-3
 Depends:
     R (>= 4.1.0)
 Imports:
