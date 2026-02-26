@@ -41,8 +41,8 @@ jobs:
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          args: '"--no-manual", "--as-cran", "--no-vignettes"'
-          build_args: '"--no-build-vignettes"'
+          args: 'c("--no-manual", "--as-cran", "--no-vignettes")'
+          build_args: 'c("--no-build-vignettes")'
 
   coverage:
     runs-on: ubuntu-latest
