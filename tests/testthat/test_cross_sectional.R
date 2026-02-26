@@ -112,3 +112,80 @@ test_that("print.es_cross_sectional works", {
   result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE)
   expect_output(print(result), "Cross-Sectional Regression")
 })
+
+
+# --- Cross-sectional edge cases (issue #3, gap #8) ---
+
+test_that("car_by_group with single group returns no test", {
+  task <- create_fitted_mock_task()
+  result <- car_by_group(task)
+
+  # Only one group "TestGroup", so test should be NULL
+  expect_equal(result$n_groups, 1)
+  expect_null(result$test)
+  expect_equal(result$test_name, "Only one group -- no test performed")
+})
+
+
+test_that("car_by_group ANOVA path with 3+ groups", {
+  # Create tasks with different groups and combine
+  task_a <- create_mock_task(n_firms = 2, group = "GroupA")
+  task_b <- create_mock_task(n_firms = 2, group = "GroupB")
+  task_c <- create_mock_task(n_firms = 2, group = "GroupC")
+
+  # Manually combine into one task and run pipeline
+  combined_data <- dplyr::bind_rows(
+    task_a$data_tbl %>% dplyr::mutate(event_id = event_id),
+    task_b$data_tbl %>% dplyr::mutate(event_id = event_id + 10),
+    task_c$data_tbl %>% dplyr::mutate(event_id = event_id + 20)
+  )
+
+  task_a$data_tbl <- combined_data
+  ps <- ParameterSet$new(single_event_statistics = NULL, multi_event_statistics = NULL)
+  task_a <- prepare_event_study(task_a, ps)
+  task_a <- fit_model(task_a, ps)
+
+  result <- car_by_group(task_a)
+  expect_equal(result$n_groups, 3)
+  expect_equal(result$test_name, "One-way ANOVA (Welch)")
+  expect_false(is.null(result$test))
+})
+
+
+test_that("car_by_group errors on invalid group_var", {
+  task <- create_fitted_mock_task()
+  expect_error(car_by_group(task, group_var = "nonexistent"), "not found")
+})
+
+
+test_that("cross_sectional_regression with car_window", {
+  task <- create_mock_task(n_firms = 4)
+  ps <- ParameterSet$new()
+  task <- run_event_study(task, ps)
+
+  firm_chars <- tibble::tibble(
+    event_id = 1:4,
+    x = c(1, 2, 3, 4)
+  )
+
+  result <- cross_sectional_regression(
+    task,
+    formula = ~ x,
+    data = firm_chars,
+    car_window = c(0, 2),
+    robust = FALSE
+  )
+
+  expect_s3_class(result, "es_cross_sectional")
+  expect_equal(result$n_obs, 4)
+})
+
+
+test_that("cross_sectional_regression errors on non-matching event_ids", {
+  task <- create_fitted_mock_task()
+  bad_data <- tibble::tibble(event_id = c(999, 998), x = c(1, 2))
+  expect_error(
+    cross_sectional_regression(task, ~ x, bad_data),
+    "No matching"
+  )
+})

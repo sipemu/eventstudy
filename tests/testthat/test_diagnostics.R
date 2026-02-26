@@ -55,3 +55,32 @@ test_that("pretrend_test works", {
   expect_true("p_value" %in% names(result))
   expect_true("mean_pre_ar" %in% names(result))
 })
+
+
+# --- Diagnostics edge cases (issue #3, gap #9) ---
+
+test_that("pretrend_test errors before fitting", {
+  task = create_mock_task()
+  expect_error(pretrend_test(task), "not been fitted")
+})
+
+
+test_that("pretrend_test filters by group", {
+  task = create_fitted_mock_task()
+  result = pretrend_test(task, group = "TestGroup")
+  expect_equal(nrow(result), 1)
+  expect_equal(result$group, "TestGroup")
+})
+
+
+test_that("model_diagnostics values are reasonable", {
+  task = create_fitted_mock_task()
+  diag = model_diagnostics(task)
+
+  # Shapiro-Wilk p-values are in [0, 1]
+  expect_true(all(diag$shapiro_p >= 0 & diag$shapiro_p <= 1))
+  # Durbin-Watson stat should be around 2 for uncorrelated residuals
+  expect_true(all(diag$dw_stat > 0 & diag$dw_stat < 4))
+  # sigma should be positive
+  expect_true(all(diag$sigma > 0))
+})
