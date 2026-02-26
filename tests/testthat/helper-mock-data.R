@@ -2,7 +2,6 @@
 #
 # These are automatically loaded by testthat before running tests.
 
-library(tibble)
 library(dplyr)
 
 #' Create mock stock price data for testing
@@ -22,7 +21,7 @@ create_mock_firm_data <- function(symbols = c("FIRM_A", "FIRM_B"),
     # Random walk with small drift
     returns = rnorm(n, mean = 0.0002, sd = 0.02)
     prices = 100 * cumprod(1 + returns)
-    tibble(
+    tibble::tibble(
       symbol = sym,
       date = format(dates, "%d.%m.%Y"),
       adjusted = prices
@@ -45,7 +44,7 @@ create_mock_index_data <- function(index_symbols = c("INDEX_1"),
     n = length(dates)
     returns = rnorm(n, mean = 0.0003, sd = 0.015)
     prices = 1000 * cumprod(1 + returns)
-    tibble(
+    tibble::tibble(
       symbol = sym,
       date = format(dates, "%d.%m.%Y"),
       adjusted = prices
@@ -76,7 +75,7 @@ create_mock_request <- function(firm_symbols = c("FIRM_A", "FIRM_B"),
     event_dates = rep(event_dates, length(firm_symbols))
   }
 
-  tibble(
+  tibble::tibble(
     event_id = seq_along(firm_symbols),
     firm_symbol = firm_symbols,
     index_symbol = index_symbol,
@@ -100,6 +99,41 @@ create_mock_task <- function(n_firms = 2, group = "TestGroup") {
 }
 
 
+#' Create a complete mock event study task with factor data
+create_mock_task_with_factors <- function(n_firms = 2, group = "TestGroup") {
+  symbols = paste0("FIRM_", LETTERS[1:n_firms])
+  firm_data = create_mock_firm_data(symbols = symbols)
+  index_data = create_mock_index_data()
+  request = create_mock_request(firm_symbols = symbols, group = group)
+
+  n_days = 300
+  start_date = as.Date("2020-01-01")
+  dates = seq(start_date, by = "day", length.out = n_days)
+  dates = dates[!weekdays(dates) %in% c("Saturday", "Sunday")]
+
+  set.seed(99)
+  factor_tbl = tibble::tibble(
+    date = format(dates, "%d.%m.%Y"),
+    risk_free_rate = rep(0.0001, length(dates)),
+    smb = rnorm(length(dates), 0, 0.005),
+    hml = rnorm(length(dates), 0, 0.005),
+    mom = rnorm(length(dates), 0, 0.005),
+    rmw = rnorm(length(dates), 0, 0.004),
+    cma = rnorm(length(dates), 0, 0.004)
+  )
+
+  EventStudyTask$new(firm_data, index_data, request, factor_tbl = factor_tbl)
+}
+
+
+#' Create a fitted mock task (convenience for tests that need a completed pipeline)
+create_fitted_mock_task <- function(n_firms = 2, group = "TestGroup") {
+  task = create_mock_task(n_firms = n_firms, group = group)
+  ps = ParameterSet$new()
+  run_event_study(task, ps)
+}
+
+
 #' Create estimation-window data for testing models directly
 create_mock_model_data <- function(n_estimation = 120, n_event = 11) {
   set.seed(42)
@@ -107,7 +141,7 @@ create_mock_model_data <- function(n_estimation = 120, n_event = 11) {
   index_returns = rnorm(n_total, mean = 0.0003, sd = 0.015)
   firm_returns = 0.001 + 1.2 * index_returns + rnorm(n_total, sd = 0.01)
 
-  tibble(
+  tibble::tibble(
     firm_returns = firm_returns,
     index_returns = index_returns,
     estimation_window = c(rep(1, n_estimation), rep(0, n_event)),

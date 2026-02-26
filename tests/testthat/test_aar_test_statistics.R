@@ -5,7 +5,7 @@ test_that("CSectTTest computes AAR and CAAR correctly", {
   event_window_size = 11  # -5 to +5
 
   data = do.call(rbind, lapply(1:n_events, function(i) {
-    tibble(
+    tibble::tibble(
       event_id = paste0("E", i),
       firm_symbol = paste0("F", i),
       relative_index = -5:5,
