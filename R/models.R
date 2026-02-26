@@ -258,8 +258,12 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                    private$add_residuals(residuals)
                                    private$first_order_autocorrelation(residuals)
 
-                                   # forecast correction term
+                                   # sigma and degree of freedom (needed by test statistics)
                                    sigma = sd(residuals)
+                                   private$.statistics$sigma = sigma
+                                   private$.statistics$degree_of_freedom = length(residuals) - 1
+
+                                   # forecast correction term
                                    event_window_tbl = data_tbl %>% filter(event_window == 1)
                                    event_market_returns = event_window_tbl$index_returns
                                    estimation_window_length = nrow(estimation_tbl)
@@ -327,8 +331,12 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                  private$add_residuals(residuals)
                                                  private$first_order_autocorrelation(residuals)
 
-                                                 # forecast correction term
+                                                 # sigma and degree of freedom (needed by test statistics)
                                                  sigma = sd(residuals)
+                                                 private$.statistics$sigma = sigma
+                                                 private$.statistics$degree_of_freedom = length(residuals) - 1
+
+                                                 # forecast correction term
                                                  event_window_tbl = data_tbl %>% filter(event_window == 1)
                                                  event_market_returns = event_window_tbl$index_returns
                                                  estimation_window_length = nrow(estimation_tbl)
