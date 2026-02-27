@@ -463,39 +463,55 @@ estimate_panel_event_study <- function(task,
   )
 
   # Parse results into standard format
-  # did_multiplegt returns a named vector and effects
-  n_effects <- lags + 1
-  n_placebos <- leads
+  # did_multiplegt_old returns a named numeric vector with elements:
+  #   effect, N_effect, placebo_k, N_placebo_k, dynamic_k, N_dynamic_k
+  #   SE elements (se_effect, se_placebo_k, se_dynamic_k) only when brep > 0
+  # Convert matrix/data.frame to named vector if needed
+  if (is.matrix(result) || is.data.frame(result)) {
+    res_vec <- as.numeric(result)
+    names(res_vec) <- if (!is.null(rownames(result))) {
+      rownames(result)
+    } else if (!is.null(colnames(result))) {
+      colnames(result)
+    } else {
+      NULL
+    }
+    result <- res_vec
+  }
 
   estimates <- numeric(0)
   se_vals <- numeric(0)
   rel_times <- numeric(0)
 
+  .get_val <- function(r, nm) {
+    if (nm %in% names(r)) as.numeric(r[[nm]]) else NA_real_
+  }
+
   # Placebo effects (pre-treatment)
-  for (k in seq_len(n_placebos)) {
-    est_name <- paste0("placebo_", k)
-    se_name <- paste0("se_placebo_", k)
-    if (est_name %in% names(result)) {
+  for (k in seq_len(leads)) {
+    est <- .get_val(result, paste0("placebo_", k))
+    if (!is.na(est)) {
       rel_times <- c(-k, rel_times)
-      estimates <- c(result[[est_name]], estimates)
-      se_vals <- c(result[[se_name]], se_vals)
+      estimates <- c(est, estimates)
+      se_vals <- c(.get_val(result, paste0("se_placebo_", k)), se_vals)
     }
   }
 
-  # Contemporaneous and dynamic effects
-  if ("effect" %in% names(result)) {
+  # Contemporaneous effect
+  est0 <- .get_val(result, "effect")
+  if (!is.na(est0)) {
     rel_times <- c(rel_times, 0)
-    estimates <- c(estimates, result[["effect"]])
-    se_vals <- c(se_vals, result[["se_effect"]])
+    estimates <- c(estimates, est0)
+    se_vals <- c(se_vals, .get_val(result, "se_effect"))
   }
 
+  # Dynamic effects
   for (k in seq_len(lags)) {
-    est_name <- paste0("dynamic_", k)
-    se_name <- paste0("se_dynamic_", k)
-    if (est_name %in% names(result)) {
+    est <- .get_val(result, paste0("dynamic_", k))
+    if (!is.na(est)) {
       rel_times <- c(rel_times, k)
-      estimates <- c(estimates, result[[est_name]])
-      se_vals <- c(se_vals, result[[se_name]])
+      estimates <- c(estimates, est)
+      se_vals <- c(se_vals, .get_val(result, paste0("se_dynamic_", k)))
     }
   }
 
@@ -503,8 +519,9 @@ estimate_panel_event_study <- function(task,
     relative_time = rel_times,
     estimate = estimates,
     std.error = se_vals,
-    statistic = estimates / se_vals,
-    p.value = 2 * stats::pnorm(abs(estimates / se_vals), lower.tail = FALSE)
+    statistic = ifelse(is.na(se_vals), NA_real_, estimates / se_vals),
+    p.value = ifelse(is.na(se_vals), NA_real_,
+      2 * stats::pnorm(abs(estimates / se_vals), lower.tail = FALSE))
   ) %>%
     dplyr::arrange(relative_time)
 
