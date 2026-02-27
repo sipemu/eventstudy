@@ -200,9 +200,11 @@ test_that("callaway_santanna method works", {
 
 
 test_that("dechaisemartin_dhaultfoeuille method works", {
-  skip_if_not_installed("DIDmultiplegt")
   # DIDmultiplegtDYN can segfault on macOS arm64 during dyn.load(),
-  # which kills the entire test runner. Test loading in a subprocess first.
+  # which kills the entire test runner. We must NOT call skip_if_not_installed()
+  # or requireNamespace() directly — test loading in a subprocess instead.
+  pkg_found <- nzchar(system.file(package = "DIDmultiplegt"))
+  skip_if(!pkg_found, "DIDmultiplegt is not installed")
   load_ok <- tryCatch({
     ret <- system2(
       file.path(R.home("bin"), "Rscript"),
