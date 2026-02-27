@@ -114,6 +114,21 @@ MarketModel <- R6Class("MarketModel",
                          model_name = "MarketModel",
                          #' @field formula The formula applied for calculating the market model
                          formula = as.formula("firm_returns ~ index_returns"),
+                         #' @field use_hac Logical. Use HAC (Newey-West) standard errors.
+                         use_hac = FALSE,
+                         #' @field hac_lag Integer or NULL. Lag truncation for Newey-West.
+                         #'   NULL uses the automatic bandwidth selection.
+                         hac_lag = NULL,
+                         #' @description
+                         #' Create a new MarketModel.
+                         #'
+                         #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                         #'   Requires the \pkg{sandwich} package.
+                         #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                         initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                           self$use_hac <- use_hac
+                           self$hac_lag <- hac_lag
+                         },
                          #' @description
                          #' Set the formula
                          #'
@@ -174,7 +189,6 @@ MarketModel <- R6Class("MarketModel",
                            names(beta) <- NULL
 
                            # Calculate statistics
-                           # TBD: Make more abstract for general usage.
                            modell_summary = summary(private$.fitted_model)
                            private$.statistics$alpha = alpha
                            private$.statistics$pval_alpha = modell_summary$coefficients[1, 4]
@@ -187,6 +201,29 @@ MarketModel <- R6Class("MarketModel",
                            names(f_stat) <- NULL
                            private$.statistics$f_stat = f_stat
                            private$.statistics$degree_of_freedom = private$.fitted_model$df.residual
+
+                           # HAC (Newey-West) standard errors
+                           if (self$use_hac) {
+                             if (!requireNamespace("sandwich", quietly = TRUE)) {
+                               stop("Package 'sandwich' is required for HAC standard errors. ",
+                                    "Install it with: install.packages('sandwich')")
+                             }
+                             if (is.null(self$hac_lag)) {
+                               vcov_hac <- sandwich::NeweyWest(private$.fitted_model)
+                             } else {
+                               vcov_hac <- sandwich::NeweyWest(private$.fitted_model,
+                                                                lag = self$hac_lag)
+                             }
+                             private$.statistics$vcov_hac <- vcov_hac
+                             se_hac <- sqrt(diag(vcov_hac))
+                             private$.statistics$se_hac <- se_hac
+                             # Update p-values using HAC SEs
+                             df <- private$.fitted_model$df.residual
+                             private$.statistics$pval_alpha <- 2 * stats::pt(
+                               abs(alpha / se_hac[1]), df = df, lower.tail = FALSE)
+                             private$.statistics$pval_beta <- 2 * stats::pt(
+                               abs(beta / se_hac[2]), df = df, lower.tail = FALSE)
+                           }
 
                            # residuals & first-order autocorrelation for
                            # diagnostics
@@ -385,6 +422,19 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                 formula = NULL,
                                 #' @field required_columns Columns required in the data.
                                 required_columns = c("firm_returns", "index_returns"),
+                                #' @field use_hac Logical. Use HAC (Newey-West) standard errors.
+                                use_hac = FALSE,
+                                #' @field hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                hac_lag = NULL,
+                                #' @description
+                                #' Create a new LinearFactorModel.
+                                #'
+                                #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                  self$use_hac <- use_hac
+                                  self$hac_lag <- hac_lag
+                                },
                                 #' @description
                                 #' Fit the linear factor model via OLS on the estimation window.
                                 #'
@@ -464,6 +514,35 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                   private$.statistics$f_stat <- f_stat
                                   private$.statistics$degree_of_freedom <- mod$df.residual
 
+                                  # HAC (Newey-West) standard errors
+                                  if (self$use_hac) {
+                                    if (!requireNamespace("sandwich", quietly = TRUE)) {
+                                      stop("Package 'sandwich' is required for HAC standard errors. ",
+                                           "Install it with: install.packages('sandwich')")
+                                    }
+                                    if (is.null(self$hac_lag)) {
+                                      vcov_hac <- sandwich::NeweyWest(mod)
+                                    } else {
+                                      vcov_hac <- sandwich::NeweyWest(mod, lag = self$hac_lag)
+                                    }
+                                    private$.statistics$vcov_hac <- vcov_hac
+                                    se_hac <- sqrt(diag(vcov_hac))
+                                    private$.statistics$se_hac <- se_hac
+                                    # Update p-values using HAC SEs
+                                    df <- mod$df.residual
+                                    for (i in seq_along(coefs)) {
+                                      private$.statistics[[paste0("pval_", coef_names[i])]] <-
+                                        2 * stats::pt(abs(coefs[i] / se_hac[i]),
+                                                       df = df, lower.tail = FALSE)
+                                    }
+                                    private$.statistics$pval_alpha <- 2 * stats::pt(
+                                      abs(coefs[1] / se_hac[1]), df = df, lower.tail = FALSE)
+                                    if (length(coefs) >= 2) {
+                                      private$.statistics$pval_beta <- 2 * stats::pt(
+                                        abs(coefs[2] / se_hac[2]), df = df, lower.tail = FALSE)
+                                    }
+                                  }
+
                                   residuals <- mod$residuals
                                   private$add_residuals(residuals)
                                   private$first_order_autocorrelation(residuals)
@@ -505,6 +584,14 @@ FamaFrench3FactorModel <- R6Class("FamaFrench3FactorModel",
                                      required_columns = c("excess_return", "market_excess",
                                                           "smb", "hml"),
                                      #' @description
+                                     #' Create a new FamaFrench3FactorModel.
+                                     #'
+                                     #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                     #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                     initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                       super$initialize(use_hac = use_hac, hac_lag = hac_lag)
+                                     },
+                                     #' @description
                                      #' Calculate abnormal returns using the three-factor model.
                                      #'
                                      #' @param data_tbl Data frame or tibble.
@@ -544,6 +631,14 @@ FamaFrench5FactorModel <- R6Class("FamaFrench5FactorModel",
                                      #' @field required_columns Required data columns.
                                      required_columns = c("excess_return", "market_excess",
                                                           "smb", "hml", "rmw", "cma"),
+                                     #' @description
+                                     #' Create a new FamaFrench5FactorModel.
+                                     #'
+                                     #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                     #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                     initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                       super$initialize(use_hac = use_hac, hac_lag = hac_lag)
+                                     },
                                      #' @description
                                      #' Calculate abnormal returns using the five-factor model.
                                      #'
@@ -585,6 +680,14 @@ Carhart4FactorModel <- R6Class("Carhart4FactorModel",
                                   #' @field required_columns Required data columns.
                                   required_columns = c("excess_return", "market_excess",
                                                        "smb", "hml", "mom"),
+                                  #' @description
+                                  #' Create a new Carhart4FactorModel.
+                                  #'
+                                  #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                  #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                  initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                    super$initialize(use_hac = use_hac, hac_lag = hac_lag)
+                                  },
                                   #' @description
                                   #' Calculate abnormal returns using the four-factor model.
                                   #'

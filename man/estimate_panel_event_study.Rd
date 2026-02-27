@@ -6,11 +6,13 @@
 \usage{
 estimate_panel_event_study(
   task,
-  method = c("static_twfe", "dynamic_twfe", "sun_abraham"),
+  method = c("static_twfe", "dynamic_twfe", "sun_abraham", "callaway_santanna",
+    "dechaisemartin_dhaultfoeuille", "borusyak_jaravel_spiess"),
   leads = 5,
   lags = 5,
   base_period = -1,
-  cluster = NULL
+  cluster = NULL,
+  ...
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ Default -1 (the period just before treatment).}
 
 \item{cluster}{Name of the clustering variable for standard errors.
 Defaults to the unit ID.}
+
+\item{...}{Additional arguments passed to the underlying estimator
+(used by \code{callaway_santanna}, \code{dechaisemartin_dhaultfoeuille},
+and \code{borusyak_jaravel_spiess} methods).}
 }
 \value{
 The task with \code{results} populated, containing:

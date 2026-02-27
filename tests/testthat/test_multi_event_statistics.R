@@ -176,3 +176,93 @@ test_that("CalendarTimePortfolioTest computes correctly", {
   expect_equal(nrow(result), 11)
   expect_true(all(is.finite(result$aar_t)))
 })
+
+
+test_that("KolariPynnonenTest name is correct", {
+  expect_equal(KolariPynnonenTest$new()$name, "KP")
+})
+
+
+test_that("KolariPynnonenTest computes correctly", {
+  md = create_multi_event_model_data()
+  kp = KolariPynnonenTest$new()
+  result = kp$compute(md$data, md$model)
+
+  expect_true("kp_t" %in% names(result))
+  expect_true("ckp_t" %in% names(result))
+  expect_true("aar" %in% names(result))
+  expect_true("caar" %in% names(result))
+  expect_true("car_window" %in% names(result))
+  expect_equal(nrow(result), 11)
+  expect_true(all(is.finite(result$kp_t)))
+})
+
+
+test_that("KolariPynnonenTest adjustment factor is constant across days", {
+  md = create_multi_event_model_data()
+  bmp = BMPTest$new()
+  kp = KolariPynnonenTest$new()
+
+  bmp_result = bmp$compute(md$data, md$model)
+  kp_result = kp$compute(md$data, md$model)
+
+  # KP adjusts BMP by a factor. Check that the adjustment is well-defined
+  # and that the KP statistics are finite
+  expect_true(all(is.finite(kp_result$kp_t)))
+  expect_true(all(is.finite(kp_result$ckp_t)))
+  # The ratio kp/bmp should be constant (same adjustment factor for all days)
+  ratios = kp_result$kp_t / bmp_result$bmp_t
+  ratios = ratios[is.finite(ratios)]
+  if (length(ratios) > 1) {
+    expect_equal(max(ratios) - min(ratios), 0, tolerance = 1e-10)
+  }
+})
+
+
+test_that("KolariPynnonenTest with 1 firm does not error", {
+  md = create_multi_event_model_data(n_firms = 1)
+  kp = KolariPynnonenTest$new()
+
+  # With 1 firm, BMP itself produces NaN (sd of single value),
+  # so KP will also produce NaN — the key is it doesn't error
+  expect_no_error(result <- kp$compute(md$data, md$model))
+  expect_equal(nrow(result), 11)
+  expect_true("kp_t" %in% names(result))
+  expect_true("ckp_t" %in% names(result))
+})
+
+
+test_that("KolariPynnonenTest with 2 firms gives finite results", {
+  md = create_multi_event_model_data(n_firms = 2)
+  kp = KolariPynnonenTest$new()
+  result = kp$compute(md$data, md$model)
+
+  expect_true(all(is.finite(result$kp_t)))
+  expect_equal(nrow(result), 11)
+})
+
+
+test_that("KolariPynnonenTest with many firms works", {
+  md = create_multi_event_model_data(n_firms = 10)
+  kp = KolariPynnonenTest$new()
+  result = kp$compute(md$data, md$model)
+
+  expect_true(all(is.finite(result$kp_t)))
+  expect_true(all(is.finite(result$ckp_t)))
+  expect_true("aar" %in% names(result))
+  expect_true("caar" %in% names(result))
+})
+
+
+test_that("KolariPynnonenTest works in full pipeline", {
+  task <- create_mock_task(n_firms = 5)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(KolariPynnonenTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  # The KP result should be in aar_caar_tbl
+  expect_true("KP" %in% names(task$aar_caar_tbl))
+})

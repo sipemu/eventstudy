@@ -102,6 +102,9 @@ PanelEventStudyTask <- R6::R6Class(
 #'   Default -1 (the period just before treatment).
 #' @param cluster Name of the clustering variable for standard errors.
 #'   Defaults to the unit ID.
+#' @param ... Additional arguments passed to the underlying estimator
+#'   (used by \code{callaway_santanna}, \code{dechaisemartin_dhaultfoeuille},
+#'   and \code{borusyak_jaravel_spiess} methods).
 #'
 #' @return The task with \code{results} populated, containing:
 #'   \describe{
@@ -114,11 +117,15 @@ PanelEventStudyTask <- R6::R6Class(
 estimate_panel_event_study <- function(task,
                                         method = c("static_twfe",
                                                    "dynamic_twfe",
-                                                   "sun_abraham"),
+                                                   "sun_abraham",
+                                                   "callaway_santanna",
+                                                   "dechaisemartin_dhaultfoeuille",
+                                                   "borusyak_jaravel_spiess"),
                                         leads = 5,
                                         lags = 5,
                                         base_period = -1,
-                                        cluster = NULL) {
+                                        cluster = NULL,
+                                        ...) {
   if (!inherits(task, "PanelEventStudyTask")) {
     stop("task must be a PanelEventStudyTask.")
   }
@@ -141,7 +148,13 @@ estimate_panel_event_study <- function(task,
     dynamic_twfe  = .estimate_dynamic_twfe(task, panel, leads, lags,
                                             base_period, cluster),
     sun_abraham   = .estimate_sun_abraham(task, panel, leads, lags,
-                                           base_period, cluster)
+                                           base_period, cluster),
+    callaway_santanna = .estimate_callaway_santanna(task, panel, leads, lags,
+                                                      base_period, ...),
+    dechaisemartin_dhaultfoeuille = .estimate_dechaisemartin_dhaultfoeuille(
+      task, panel, leads, lags, ...),
+    borusyak_jaravel_spiess = .estimate_borusyak_jaravel_spiess(
+      task, panel, leads, lags, base_period, ...)
   )
 
   task
@@ -377,6 +390,174 @@ estimate_panel_event_study <- function(task,
     coefficients = coef_tbl,
     model = fit,
     method = "sun_abraham"
+  )
+}
+
+
+#' Callaway & Sant'Anna (2021) Estimator
+#' @noRd
+.estimate_callaway_santanna <- function(task, panel, leads, lags,
+                                          base_period, ...) {
+  if (!requireNamespace("did", quietly = TRUE)) {
+    stop("Package 'did' is required for method='callaway_santanna'. ",
+         "Install it with: install.packages('did')")
+  }
+
+  # did::att_gt expects specific column names
+  att_gt_result <- did::att_gt(
+    yname = task$outcome,
+    tname = task$time_id,
+    idname = task$unit_id,
+    gname = task$treatment_time,
+    data = panel,
+    base_period = "universal",
+    ...
+  )
+
+  # Aggregate to dynamic event-study estimates
+  agg <- did::aggte(att_gt_result, type = "dynamic")
+
+  coef_tbl <- tibble::tibble(
+    relative_time = agg$egt,
+    estimate = agg$att.egt,
+    std.error = agg$se.egt,
+    statistic = agg$att.egt / agg$se.egt,
+    p.value = 2 * stats::pnorm(abs(agg$att.egt / agg$se.egt),
+                                 lower.tail = FALSE)
+  )
+
+  # Filter to requested range
+  coef_tbl <- coef_tbl %>%
+    dplyr::filter(relative_time >= -leads & relative_time <= lags) %>%
+    dplyr::arrange(relative_time)
+
+  task$results <- list(
+    coefficients = coef_tbl,
+    model = att_gt_result,
+    aggregation = agg,
+    method = "callaway_santanna"
+  )
+}
+
+
+#' de Chaisemartin & D'Haultfoeuille (2020) Estimator
+#' @noRd
+.estimate_dechaisemartin_dhaultfoeuille <- function(task, panel, leads, lags,
+                                                       ...) {
+  if (!requireNamespace("DIDmultiplegt", quietly = TRUE)) {
+    stop("Package 'DIDmultiplegt' is required for ",
+         "method='dechaisemartin_dhaultfoeuille'. ",
+         "Install it with: install.packages('DIDmultiplegt')")
+  }
+
+  result <- DIDmultiplegt::did_multiplegt(
+    df = as.data.frame(panel),
+    Y = task$outcome,
+    G = task$unit_id,
+    T = task$time_id,
+    D = task$treatment,
+    dynamic = lags,
+    placebo = leads,
+    ...
+  )
+
+  # Parse results into standard format
+  # did_multiplegt returns a named vector and effects
+  n_effects <- lags + 1
+  n_placebos <- leads
+
+  estimates <- numeric(0)
+  se_vals <- numeric(0)
+  rel_times <- numeric(0)
+
+  # Placebo effects (pre-treatment)
+  for (k in seq_len(n_placebos)) {
+    est_name <- paste0("placebo_", k)
+    se_name <- paste0("se_placebo_", k)
+    if (est_name %in% names(result)) {
+      rel_times <- c(-k, rel_times)
+      estimates <- c(result[[est_name]], estimates)
+      se_vals <- c(result[[se_name]], se_vals)
+    }
+  }
+
+  # Contemporaneous and dynamic effects
+  if ("effect" %in% names(result)) {
+    rel_times <- c(rel_times, 0)
+    estimates <- c(estimates, result[["effect"]])
+    se_vals <- c(se_vals, result[["se_effect"]])
+  }
+
+  for (k in seq_len(lags)) {
+    est_name <- paste0("dynamic_", k)
+    se_name <- paste0("se_dynamic_", k)
+    if (est_name %in% names(result)) {
+      rel_times <- c(rel_times, k)
+      estimates <- c(estimates, result[[est_name]])
+      se_vals <- c(se_vals, result[[se_name]])
+    }
+  }
+
+  coef_tbl <- tibble::tibble(
+    relative_time = rel_times,
+    estimate = estimates,
+    std.error = se_vals,
+    statistic = estimates / se_vals,
+    p.value = 2 * stats::pnorm(abs(estimates / se_vals), lower.tail = FALSE)
+  ) %>%
+    dplyr::arrange(relative_time)
+
+  task$results <- list(
+    coefficients = coef_tbl,
+    model = result,
+    method = "dechaisemartin_dhaultfoeuille"
+  )
+}
+
+
+#' Borusyak, Jaravel & Spiess (2024) Imputation Estimator
+#' @noRd
+.estimate_borusyak_jaravel_spiess <- function(task, panel, leads, lags,
+                                                base_period, ...) {
+  if (!requireNamespace("didimputation", quietly = TRUE)) {
+    stop("Package 'didimputation' is required for ",
+         "method='borusyak_jaravel_spiess'. ",
+         "Install it with: install.packages('didimputation')")
+  }
+
+  # didimputation expects first_stage to be specified
+  fml <- stats::as.formula(
+    paste(task$outcome, "~ 0 |", task$unit_id, "+", task$time_id)
+  )
+
+  # Create horizon variable (relative time for treated, NA for untreated)
+  panel$.horizon <- panel$.rel_time
+
+  result <- didimputation::did_imputation(
+    data = as.data.frame(panel),
+    yname = task$outcome,
+    gname = task$treatment_time,
+    tname = task$time_id,
+    idname = task$unit_id,
+    horizon = TRUE,
+    ...
+  )
+
+  coef_tbl <- tibble::tibble(
+    relative_time = as.numeric(as.character(result$term)),
+    estimate = result$estimate,
+    std.error = result$std.error,
+    statistic = result$estimate / result$std.error,
+    p.value = 2 * stats::pnorm(abs(result$estimate / result$std.error),
+                                 lower.tail = FALSE)
+  ) %>%
+    dplyr::filter(relative_time >= -leads & relative_time <= lags) %>%
+    dplyr::arrange(relative_time)
+
+  task$results <- list(
+    coefficients = coef_tbl,
+    model = result,
+    method = "borusyak_jaravel_spiess"
   )
 }
 

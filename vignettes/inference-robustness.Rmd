@@ -1,0 +1,180 @@
+---
+title: "Inference and Robustness: HAC, Bootstrap, and Multiple Testing"
+author: "Simon Mueller"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Inference and Robustness}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Classical event study inference relies on i.i.d. assumptions that are often violated in practice. The EventStudy package provides several tools to strengthen the robustness of your inference:
+
+- **HAC Standard Errors** (Newey-West) for heteroskedasticity- and autocorrelation-consistent coefficient estimation
+- **Kolari-Pynnonen Test** that adjusts the BMP test for cross-sectional correlation
+- **Wild Bootstrap** inference for AAR and CAAR test statistics
+- **Multiple Testing Corrections** (Bonferroni, BH, Holm, etc.) for controlling the family-wise error rate or false discovery rate
+
+# HAC Standard Errors
+
+When estimation-window residuals exhibit heteroskedasticity or autocorrelation, OLS standard errors are biased. The `use_hac = TRUE` option applies Newey-West HAC standard errors via the `sandwich` package.
+
+```{r hac}
+library(EventStudy)
+
+task <- EventStudyTask$new(firm_data, index_data, request)
+
+# Enable HAC SEs on the MarketModel
+ps <- ParameterSet$new(
+  return_model = MarketModel$new(use_hac = TRUE)
+)
+task <- run_event_study(task, ps)
+```
+
+You can also specify a custom lag for the Newey-West estimator:
+
+```{r hac-lag}
+ps <- ParameterSet$new(
+  return_model = MarketModel$new(use_hac = TRUE, hac_lag = 5)
+)
+```
+
+HAC standard errors are also available for factor models:
+
+```{r hac-factor}
+ps <- ParameterSet$new(
+  return_model = FamaFrench3FactorModel$new(use_hac = TRUE)
+)
+```
+
+The OLS sigma (used for abnormal return standardization in test statistics) is deliberately unchanged -- HAC only affects coefficient standard errors and p-values.
+
+# Kolari-Pynnonen Test
+
+The Boehmer, Musumeci & Poulsen (BMP) test can be oversized when event-window residuals are cross-sectionally correlated. The Kolari-Pynnonen adjustment corrects for this:
+
+$$t_{KP} = t_{BMP} \sqrt{\frac{1 - \bar{r}}{1 + (N-1)\bar{r}}}$$
+
+where $\bar{r}$ is the average pairwise correlation of standardized abnormal returns in the estimation window.
+
+```{r kp}
+ps <- ParameterSet$new(
+  multi_event_statistics = MultiEventStatisticsSet$new(
+    tests = list(
+      BMPTest$new(),
+      KolariPynnonenTest$new()
+    )
+  )
+)
+task <- run_event_study(task, ps)
+```
+
+# Wild Bootstrap Inference
+
+The wild bootstrap provides distribution-free inference by resampling with random per-firm sign flips. This preserves the cross-sectional dependence structure while testing the null hypothesis of zero abnormal returns.
+
+```{r bootstrap}
+task <- create_fitted_mock_task()
+
+# Run bootstrap with 999 replications
+boot_result <- bootstrap_test(
+  task,
+  n_boot = 999,
+  weight_type = "rademacher",
+  seed = 42
+)
+
+boot_result
+#> # A tibble: 11 x 5
+#>    relative_index observed_aar observed_caar boot_p_aar boot_p_caar
+#>             <int>        <dbl>         <dbl>      <dbl>       <dbl>
+#>  1             -5      0.00123       0.00123      0.842       0.842
+#>  ...
+```
+
+Two weight distributions are available:
+
+- `"rademacher"` (default): $w_i \in \{-1, +1\}$ with equal probability
+- `"mammen"`: Mammen two-point distribution, better for skewed data
+
+You can also bootstrap only the AAR or CAAR statistic:
+
+```{r bootstrap-stat}
+boot_aar <- bootstrap_test(task, n_boot = 499, statistic = "aar")
+boot_caar <- bootstrap_test(task, n_boot = 499, statistic = "caar")
+```
+
+# Multiple Testing Corrections
+
+When testing abnormal returns at many event-window days, the probability of a false positive increases. The `adjust_p_values()` function applies standard correction methods:
+
+```{r p-adjust}
+task <- create_fitted_mock_task()
+
+# Benjamini-Hochberg (controls FDR)
+result_bh <- adjust_p_values(task, method = "BH", stat_name = "CSectT")
+
+# Bonferroni (controls FWER)
+result_bonf <- adjust_p_values(task, method = "bonferroni", stat_name = "CSectT")
+
+# Holm (less conservative than Bonferroni)
+result_holm <- adjust_p_values(task, method = "holm", stat_name = "CSectT")
+```
+
+The result includes both raw and adjusted p-values:
+
+```{r p-adjust-result}
+result_bh
+#> # A tibble: 11 x 8+
+#>    relative_index   aar  caar p_raw_aar p_adj_aar p_raw_caar p_adj_caar ...
+```
+
+The function automatically detects the test statistic type (t, z, BMP, etc.) and computes p-values from the appropriate distribution.
+
+You can filter by group:
+
+```{r p-adjust-group}
+result <- adjust_p_values(task, method = "BH", stat_name = "CSectT",
+                           group = "MyGroup")
+```
+
+# Combining Approaches
+
+For maximum robustness, combine multiple approaches:
+
+```{r combined}
+# 1. Use HAC SEs in the model
+ps <- ParameterSet$new(
+  return_model = MarketModel$new(use_hac = TRUE),
+  multi_event_statistics = MultiEventStatisticsSet$new(
+    tests = list(
+      CSectTTest$new(),
+      KolariPynnonenTest$new()
+    )
+  )
+)
+task <- run_event_study(task, ps)
+
+# 2. Apply multiple testing correction
+adjusted <- adjust_p_values(task, method = "BH", stat_name = "CSectT")
+
+# 3. Validate with bootstrap
+boot <- bootstrap_test(task, n_boot = 999, seed = 42)
+```
+
+# References
+
+- Kolari, J. W. and Pynnonen, S. (2010). Event study testing with cross-sectional correlation of abnormal returns. *Review of Financial Studies*, 23(11), 3996-4025.
+- Newey, W. K. and West, K. D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. *Econometrica*, 55(3), 703-708.
+- Benjamini, Y. and Hochberg, Y. (1995). Controlling the false discovery rate: A practical and powerful approach to multiple testing. *Journal of the Royal Statistical Society*, 57(1), 289-300.

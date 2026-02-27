@@ -477,3 +477,128 @@ CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
                                         }
                                       )
 )
+
+
+#' Kolari-Pynnönen Adjusted BMP Test
+#'
+#' Adjusts the BMP (Boehmer, Musumeci, Poulsen 1991) test for cross-sectional
+#' correlation of abnormal returns using the Kolari and Pynnönen (2010)
+#' correction. The adjustment scales the BMP statistic by a factor that
+#' accounts for the average pairwise correlation of standardized abnormal
+#' residuals in the estimation window.
+#'
+#' @references
+#' Kolari, J. W. and Pynnönen, S. (2010). Event Study Testing with
+#' Cross-sectional Correlation of Abnormal Returns.
+#' \emph{The Review of Financial Studies}, 23(11), 3996--4025.
+#'
+#' @export
+KolariPynnonenTest <- R6Class("KolariPynnonenTest",
+                               inherit = TestStatisticBase,
+                               public = list(
+                                 #' @field name Short code of the test statistic.
+                                 name = 'KP',
+                                 #' @description
+                                 #' Computes the Kolari-Pynnönen adjusted BMP test.
+                                 #'
+                                 #' @param data_tbl The data for a multiple event with
+                                 #' calculated abnormal returns.
+                                 #' @param model The fitted model containing sigma estimates.
+                                 compute = function(data_tbl, model) {
+                                   # Extract sigma from each model
+                                   model <- model %>%
+                                     dplyr::mutate(sigma = purrr::map_dbl(model, .f = function(x) {
+                                       x$statistics$sigma
+                                     }))
+
+                                   # Standardize abnormal returns by model sigma
+                                   sar_data <- data_tbl %>%
+                                     dplyr::filter(event_window == 1) %>%
+                                     dplyr::left_join(model %>% dplyr::select(firm_symbol, sigma),
+                                                      by = "firm_symbol") %>%
+                                     dplyr::mutate(sar = abnormal_returns / sigma)
+
+                                   # --- BMP statistics (replicated from BMPTest) ---
+                                   aar_stats <- sar_data %>%
+                                     dplyr::group_by(relative_index) %>%
+                                     dplyr::summarise(
+                                       aar            = mean(abnormal_returns, na.rm = TRUE),
+                                       n_events       = dplyr::n(),
+                                       n_valid_events = sum(!is.na(abnormal_returns)),
+                                       n_pos          = sum(abnormal_returns > 0, na.rm = TRUE),
+                                       n_neg          = sum(abnormal_returns <= 0, na.rm = TRUE),
+                                       mean_sar       = mean(sar, na.rm = TRUE),
+                                       sd_sar         = sd(sar, na.rm = TRUE),
+                                       bmp_t          = sqrt(n_valid_events) * mean_sar / sd_sar,
+                                       .groups = "drop"
+                                     ) %>%
+                                     dplyr::mutate(caar = cumsum(aar))
+
+                                   # Cumulative BMP
+                                   cum_sar <- sar_data %>%
+                                     dplyr::select(event_id, relative_index, sar) %>%
+                                     dplyr::group_by(event_id) %>%
+                                     dplyr::mutate(csar = cumsum(sar)) %>%
+                                     dplyr::group_by(relative_index) %>%
+                                     dplyr::summarise(
+                                       mean_csar = mean(csar, na.rm = TRUE),
+                                       sd_csar   = sd(csar, na.rm = TRUE),
+                                       n_valid   = sum(!is.na(csar)),
+                                       cbmp_t    = sqrt(n_valid) * mean_csar / sd_csar,
+                                       .groups = "drop"
+                                     )
+
+                                   # --- Kolari-Pynnönen correction ---
+                                   # Compute average pairwise correlation of SARs from estimation window
+                                   est_sar_data <- data_tbl %>%
+                                     dplyr::filter(estimation_window == 1) %>%
+                                     dplyr::left_join(model %>% dplyr::select(firm_symbol, sigma),
+                                                      by = "firm_symbol") %>%
+                                     dplyr::mutate(sar = abnormal_returns / sigma)
+
+                                   # Pivot to wide: one column per firm
+                                   est_sar_wide <- est_sar_data %>%
+                                     dplyr::select(relative_index, firm_symbol, sar) %>%
+                                     tidyr::pivot_wider(names_from = firm_symbol,
+                                                        values_from = sar)
+
+                                   # Compute correlation matrix of estimation-window SARs
+                                   sar_matrix <- as.matrix(est_sar_wide[, -1])
+                                   n_firms <- ncol(sar_matrix)
+
+                                   if (n_firms >= 2) {
+                                     cor_matrix <- stats::cor(sar_matrix, use = "pairwise.complete.obs")
+                                     # Average off-diagonal correlation
+                                     r_bar <- (sum(cor_matrix) - n_firms) / (n_firms * (n_firms - 1))
+                                   } else {
+                                     r_bar <- 0
+                                   }
+
+                                   # KP adjustment factor: sqrt((1 - r_bar) / (1 + (n-1)*r_bar))
+                                   n <- aar_stats$n_valid_events[1]
+                                   denom <- 1 + (n - 1) * r_bar
+                                   if (denom > 0) {
+                                     kp_adj <- sqrt((1 - r_bar) / denom)
+                                   } else {
+                                     kp_adj <- 1
+                                   }
+
+                                   aar_stats <- aar_stats %>%
+                                     dplyr::mutate(kp_t = bmp_t * kp_adj)
+
+                                   aar_stats <- aar_stats %>%
+                                     dplyr::left_join(
+                                       cum_sar %>% dplyr::select(relative_index, cbmp_t),
+                                       by = "relative_index"
+                                     ) %>%
+                                     dplyr::mutate(ckp_t = cbmp_t * kp_adj) %>%
+                                     dplyr::select(-mean_sar, -sd_sar, -bmp_t, -cbmp_t)
+
+                                   aar_stats$car_window <- stringr::str_c(
+                                     "[", aar_stats$relative_index[1], ", ",
+                                     aar_stats$relative_index, "]"
+                                   )
+                                   aar_stats
+                                 }
+                               )
+)

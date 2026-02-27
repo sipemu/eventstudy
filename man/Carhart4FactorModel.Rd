@@ -33,6 +33,7 @@ Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-Carhart4FactorModel-new}{\code{Carhart4FactorModel$new()}}
 \item \href{#method-Carhart4FactorModel-abnormal_returns}{\code{Carhart4FactorModel$abnormal_returns()}}
 \item \href{#method-Carhart4FactorModel-clone}{\code{Carhart4FactorModel$clone()}}
 }
@@ -44,6 +45,25 @@ Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Carhart4FactorModel-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Carhart4FactorModel-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new Carhart4FactorModel.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Carhart4FactorModel$new(use_hac = FALSE, hac_lag = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_hac}}{Logical. Use HAC (Newey-West) standard errors.}
+
+\item{\code{hac_lag}}{Integer or NULL. Lag truncation for Newey-West.}
+}
+\if{html}{\out{</div>}}
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Carhart4FactorModel-abnormal_returns"></a>}}
 \if{latex}{\out{\hypertarget{method-Carhart4FactorModel-abnormal_returns}{}}}

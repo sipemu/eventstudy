@@ -173,3 +173,63 @@ test_that("plot_panel_event_study errors without results", {
 
   expect_error(plot_panel_event_study(task), "No results")
 })
+
+
+# --- Modern DiD Estimator tests ---
+
+test_that("callaway_santanna method works", {
+  skip_if_not_installed("did")
+  panel <- create_mock_staggered_panel()
+  task <- PanelEventStudyTask$new(panel)
+
+  task <- estimate_panel_event_study(task, method = "callaway_santanna",
+                                      leads = 3, lags = 3)
+
+  expect_false(is.null(task$results))
+  expect_equal(task$results$method, "callaway_santanna")
+  coefs <- task$results$coefficients
+  expect_true("relative_time" %in% names(coefs))
+  expect_true("estimate" %in% names(coefs))
+  expect_true("std.error" %in% names(coefs))
+  expect_true(nrow(coefs) > 0)
+
+  # Plot should still work
+  p <- plot_panel_event_study(task)
+  expect_s3_class(p, "gg")
+})
+
+
+test_that("dechaisemartin_dhaultfoeuille method works", {
+  skip_if_not_installed("DIDmultiplegt")
+  panel <- create_mock_staggered_panel()
+  task <- PanelEventStudyTask$new(panel)
+
+  task <- estimate_panel_event_study(
+    task, method = "dechaisemartin_dhaultfoeuille",
+    leads = 2, lags = 2
+  )
+
+  expect_false(is.null(task$results))
+  expect_equal(task$results$method, "dechaisemartin_dhaultfoeuille")
+  coefs <- task$results$coefficients
+  expect_true("relative_time" %in% names(coefs))
+  expect_true(nrow(coefs) > 0)
+})
+
+
+test_that("borusyak_jaravel_spiess method works", {
+  skip_if_not_installed("didimputation")
+  panel <- create_mock_staggered_panel()
+  task <- PanelEventStudyTask$new(panel)
+
+  task <- estimate_panel_event_study(
+    task, method = "borusyak_jaravel_spiess",
+    leads = 3, lags = 3
+  )
+
+  expect_false(is.null(task$results))
+  expect_equal(task$results$method, "borusyak_jaravel_spiess")
+  coefs <- task$results$coefficients
+  expect_true("relative_time" %in% names(coefs))
+  expect_true(nrow(coefs) > 0)
+})

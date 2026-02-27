@@ -13,7 +13,20 @@ utils::globalVariables(c(
   "n_pos", "n_neg", "n_valid_events", "n_events",
   "total_obs", "ar_rank", "mean_centered_rank",
   "standardized_abnormal_returns",
-  "car_window", "lag"
+  "car_window", "lag",
+  # Phase 1: KP test, bootstrap
+  "bmp_t", "cbmp_t", "mean_csar", "sd_csar",
+  "boot_ar", "boot_car",
+  # Phase 3: time-varying models
+  "firm_volume",
+  # Phase 1d: bootstrap
+  "sd_aar", "boot_aar", "sd_boot", "boot_caar", "sd_boot_caar",
+  # Phase 4: synthetic control
+  "gap", "series", "unit", "time",
+  # Phase 6: data download
+  "adjusted", "date",
+  # Phase 7: reports
+  "autocorr", "dof", "r2"
 ))
 
 #' @title EventStudy: Event Study Analysis in R
@@ -25,13 +38,15 @@ utils::globalVariables(c(
 #'
 #' @section Return Models:
 #' \itemize{
-#'   \item \code{\link{MarketModel}} -- OLS market model (single factor)
+#'   \item \code{\link{MarketModel}} -- OLS market model (single factor, optional HAC SEs)
 #'   \item \code{\link{MarketAdjustedModel}} -- Market-adjusted returns
 #'   \item \code{\link{ComparisonPeriodMeanAdjustedModel}} -- Mean-adjusted returns
 #'   \item \code{\link{FamaFrench3FactorModel}} -- Fama-French 3-factor model
 #'   \item \code{\link{FamaFrench5FactorModel}} -- Fama-French 5-factor model
 #'   \item \code{\link{Carhart4FactorModel}} -- Carhart 4-factor model
 #'   \item \code{\link{GARCHModel}} -- GARCH(1,1) model
+#'   \item \code{\link{RollingWindowModel}} -- Rolling-window OLS (time-varying beta)
+#'   \item \code{\link{DCCGARCHModel}} -- DCC-GARCH (time-varying beta)
 #'   \item \code{\link{BHARModel}} -- Buy-and-hold abnormal returns
 #'   \item \code{\link{VolumeModel}} -- Volume event study model
 #'   \item \code{\link{VolatilityModel}} -- Volatility event study model
@@ -52,7 +67,20 @@ utils::globalVariables(c(
 #'   \item \code{\link{GeneralizedSignTest}} -- Generalized sign test (Cowan 1992)
 #'   \item \code{\link{RankTest}} -- Rank test (Corrado 1989)
 #'   \item \code{\link{BMPTest}} -- Boehmer, Musumeci & Poulsen (1991) test
+#'   \item \code{\link{KolariPynnonenTest}} -- Kolari-Pynnönen adjusted BMP test
 #'   \item \code{\link{CalendarTimePortfolioTest}} -- Calendar-time portfolio test
+#' }
+#'
+#' @section Inference & Robustness:
+#' \itemize{
+#'   \item \code{\link{adjust_p_values}} -- Multiple testing corrections (BH, Bonferroni, etc.)
+#'   \item \code{\link{bootstrap_test}} -- Wild bootstrap inference
+#'   \item HAC standard errors via \code{use_hac = TRUE} in model constructors
+#' }
+#'
+#' @section Simulation:
+#' \itemize{
+#'   \item \code{\link{simulate_event_study}} -- Monte Carlo power analysis
 #' }
 #'
 #' @section Pipeline:
@@ -67,13 +95,18 @@ utils::globalVariables(c(
 #'     \code{get_aar()}, or \code{\link{tidy.EventStudyTask}}
 #'   \item Export with \code{\link{export_results}}
 #'   \item Visualize with \code{\link{plot_event_study}}
+#'   \item Generate reports with \code{\link{generate_report}}
 #' }
 #'
 #' @section Extensions:
 #' \itemize{
 #'   \item \code{\link{cross_sectional_regression}} -- Explain CARs with firm characteristics
 #'   \item \code{\link{IntradayEventStudyTask}} -- Intraday event studies
-#'   \item \code{\link{PanelEventStudyTask}} -- Panel DiD event studies
+#'   \item \code{\link{PanelEventStudyTask}} -- Panel DiD event studies (TWFE,
+#'     Sun-Abraham, Callaway-Sant'Anna, de Chaisemartin-D'Haultfoeuille,
+#'     Borusyak-Jaravel-Spiess)
+#'   \item \code{\link{SyntheticControlTask}} -- Synthetic control methods
+#'   \item \code{\link{download_stock_data}}, \code{\link{download_factor_data}} -- Data helpers
 #' }
 #'
 #' @references
@@ -96,6 +129,6 @@ utils::globalVariables(c(
 #' @importFrom distributional dist_student_t
 #' @importFrom plotly plot_ly add_trace layout subplot
 #' @importFrom stats sd lm na.omit shapiro.test Box.test acf qnorm pt pnorm
-#'   predict poly setNames
+#'   predict poly setNames var cor runif as.formula p.adjust
 #' @keywords internal
 "_PACKAGE"

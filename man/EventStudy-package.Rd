@@ -13,13 +13,15 @@ parametric and non-parametric test statistics, and visualization tools.
 \section{Return Models}{
 
 \itemize{
-  \item \code{\link{MarketModel}} -- OLS market model (single factor)
+  \item \code{\link{MarketModel}} -- OLS market model (single factor, optional HAC SEs)
   \item \code{\link{MarketAdjustedModel}} -- Market-adjusted returns
   \item \code{\link{ComparisonPeriodMeanAdjustedModel}} -- Mean-adjusted returns
   \item \code{\link{FamaFrench3FactorModel}} -- Fama-French 3-factor model
   \item \code{\link{FamaFrench5FactorModel}} -- Fama-French 5-factor model
   \item \code{\link{Carhart4FactorModel}} -- Carhart 4-factor model
   \item \code{\link{GARCHModel}} -- GARCH(1,1) model
+  \item \code{\link{RollingWindowModel}} -- Rolling-window OLS (time-varying beta)
+  \item \code{\link{DCCGARCHModel}} -- DCC-GARCH (time-varying beta)
   \item \code{\link{BHARModel}} -- Buy-and-hold abnormal returns
   \item \code{\link{VolumeModel}} -- Volume event study model
   \item \code{\link{VolatilityModel}} -- Volatility event study model
@@ -42,7 +44,24 @@ parametric and non-parametric test statistics, and visualization tools.
   \item \code{\link{GeneralizedSignTest}} -- Generalized sign test (Cowan 1992)
   \item \code{\link{RankTest}} -- Rank test (Corrado 1989)
   \item \code{\link{BMPTest}} -- Boehmer, Musumeci & Poulsen (1991) test
+  \item \code{\link{KolariPynnonenTest}} -- Kolari-Pynnönen adjusted BMP test
   \item \code{\link{CalendarTimePortfolioTest}} -- Calendar-time portfolio test
+}
+}
+
+\section{Inference & Robustness}{
+
+\itemize{
+  \item \code{\link{adjust_p_values}} -- Multiple testing corrections (BH, Bonferroni, etc.)
+  \item \code{\link{bootstrap_test}} -- Wild bootstrap inference
+  \item HAC standard errors via \code{use_hac = TRUE} in model constructors
+}
+}
+
+\section{Simulation}{
+
+\itemize{
+  \item \code{\link{simulate_event_study}} -- Monte Carlo power analysis
 }
 }
 
@@ -59,6 +78,7 @@ The standard workflow is:
     \code{get_aar()}, or \code{\link{tidy.EventStudyTask}}
   \item Export with \code{\link{export_results}}
   \item Visualize with \code{\link{plot_event_study}}
+  \item Generate reports with \code{\link{generate_report}}
 }
 }
 
@@ -67,7 +87,11 @@ The standard workflow is:
 \itemize{
   \item \code{\link{cross_sectional_regression}} -- Explain CARs with firm characteristics
   \item \code{\link{IntradayEventStudyTask}} -- Intraday event studies
-  \item \code{\link{PanelEventStudyTask}} -- Panel DiD event studies
+  \item \code{\link{PanelEventStudyTask}} -- Panel DiD event studies (TWFE,
+    Sun-Abraham, Callaway-Sant'Anna, de Chaisemartin-D'Haultfoeuille,
+    Borusyak-Jaravel-Spiess)
+  \item \code{\link{SyntheticControlTask}} -- Synthetic control methods
+  \item \code{\link{download_stock_data}}, \code{\link{download_factor_data}} -- Data helpers
 }
 }
 

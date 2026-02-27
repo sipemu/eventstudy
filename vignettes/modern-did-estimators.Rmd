@@ -1,0 +1,159 @@
+---
+title: "Modern Difference-in-Differences Estimators"
+author: "Simon Mueller"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Modern DiD Estimators}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Traditional two-way fixed effects (TWFE) estimation of event studies can produce biased estimates when treatment effects are heterogeneous across cohorts and time. The EventStudy package supports five panel event study estimators:
+
+| Method | Package | Key Property |
+|--------|---------|-------------|
+| TWFE | Base R | Standard two-way fixed effects |
+| Sun-Abraham | `fixest` | Interaction-weighted estimator |
+| Callaway-Sant'Anna | `did` | Group-time ATTs with doubly-robust estimation |
+| de Chaisemartin-D'Haultfoeuille | `DIDmultiplegt` | Fuzzy DiD, robust to heterogeneous effects |
+| Borusyak-Jaravel-Spiess | `didimputation` | Imputation-based estimator |
+
+# Data Setup
+
+All estimators use the `PanelEventStudyTask`:
+
+```{r data}
+library(EventStudy)
+library(tibble)
+
+# Create panel data
+panel_data <- tibble(
+  unit_id = rep(1:100, each = 20),
+  time_id = rep(1:20, times = 100),
+  treatment = ifelse(unit_id <= 50 & time_id >= 11, 1, 0),
+  outcome = rnorm(2000) + 2 * treatment  # true effect = 2
+)
+
+task <- PanelEventStudyTask$new(
+  data = panel_data,
+  unit_col = "unit_id",
+  time_col = "time_id",
+  treatment_col = "treatment",
+  outcome_col = "outcome"
+)
+```
+
+# TWFE (Default)
+
+```{r twfe}
+result <- estimate_panel_event_study(task, method = "twfe", leads = 5, lags = 5)
+plot_panel_event_study(result)
+```
+
+# Sun-Abraham
+
+The interaction-weighted estimator of Sun and Abraham (2021) avoids negative weighting problems in TWFE by computing cohort-specific estimates. Requires `fixest`.
+
+```{r sun-abraham}
+result <- estimate_panel_event_study(
+  task,
+  method = "sun_abraham",
+  leads = 5,
+  lags = 5
+)
+plot_panel_event_study(result)
+```
+
+# Callaway-Sant'Anna
+
+The doubly-robust estimator of Callaway and Sant'Anna (2021) estimates group-time average treatment effects and aggregates them into dynamic effects. Requires `did`.
+
+```{r callaway}
+result <- estimate_panel_event_study(
+  task,
+  method = "callaway_santanna",
+  leads = 5,
+  lags = 5
+)
+plot_panel_event_study(result)
+```
+
+Key features:
+- Doubly-robust (consistent if either outcome or propensity score model is correct)
+- Handles staggered treatment adoption
+- Provides group-time specific estimates
+
+# de Chaisemartin-D'Haultfoeuille
+
+The estimator of de Chaisemartin and D'Haultfoeuille (2020) is robust to heterogeneous treatment effects and can handle fuzzy designs. Requires `DIDmultiplegt`.
+
+```{r dechaisemartin}
+result <- estimate_panel_event_study(
+  task,
+  method = "dechaisemartin_dhaultfoeuille",
+  leads = 5,
+  lags = 5
+)
+plot_panel_event_study(result)
+```
+
+# Borusyak-Jaravel-Spiess
+
+The imputation estimator of Borusyak, Jaravel, and Spiess (2024) imputes untreated potential outcomes and computes treatment effects as the difference. Requires `didimputation`.
+
+```{r borusyak}
+result <- estimate_panel_event_study(
+  task,
+  method = "borusyak_jaravel_spiess",
+  leads = 5,
+  lags = 5
+)
+plot_panel_event_study(result)
+```
+
+Key features:
+- Efficient imputation-based approach
+- Handles staggered treatment timing
+- Provides horizon-specific estimates
+
+# Comparing Estimators
+
+All estimators produce the same output format (`relative_time, estimate, std.error, statistic, p.value`), making it easy to compare:
+
+```{r compare}
+methods <- c("twfe", "sun_abraham", "callaway_santanna")
+
+results <- lapply(methods, function(m) {
+  tryCatch(
+    estimate_panel_event_study(task, method = m, leads = 5, lags = 5),
+    error = function(e) NULL
+  )
+})
+names(results) <- methods
+```
+
+# When to Use Which?
+
+- **TWFE**: When treatment is not staggered and effects are homogeneous
+- **Sun-Abraham**: Good default for staggered adoption; requires `fixest` (fast)
+- **Callaway-Sant'Anna**: When you want doubly-robust estimation; slower but more robust
+- **de Chaisemartin-D'Haultfoeuille**: Fuzzy designs or when treatment can switch on and off
+- **Borusyak-Jaravel-Spiess**: Efficient imputation approach for staggered designs
+
+# References
+
+- Sun, L. and Abraham, S. (2021). Estimating dynamic treatment effects in event studies with heterogeneous treatment effects. *Journal of Econometrics*, 225(2), 175-199.
+- Callaway, B. and Sant'Anna, P. H. C. (2021). Difference-in-differences with multiple time periods. *Journal of Econometrics*, 225(2), 200-230.
+- de Chaisemartin, C. and D'Haultfoeuille, X. (2020). Two-Way Fixed Effects Estimators with Heterogeneous Treatment Effects. *American Economic Review*, 110(9), 2964-2996.
+- Borusyak, K., Jaravel, X., and Spiess, J. (2024). Revisiting Event Study Designs: Robust and Efficient Estimation. *Review of Economic Studies*, 91(6), 3253-3285.

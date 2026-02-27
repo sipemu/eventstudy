@@ -1,0 +1,171 @@
+---
+title: "Automated Event Study Reports"
+author: "Simon Mueller"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Automated Reports}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+The EventStudy package can generate comprehensive HTML reports from a completed event study with a single function call. Reports include summary tables, diagnostic plots, test statistics, and optional cross-sectional regression results.
+
+# Requirements
+
+Report generation requires the `rmarkdown` and `knitr` packages:
+
+```{r install}
+install.packages(c("rmarkdown", "knitr"))
+```
+
+# Basic Usage
+
+```{r basic}
+library(EventStudy)
+
+# Run a complete event study
+task <- EventStudyTask$new(firm_data, index_data, request)
+ps <- ParameterSet$new()
+task <- run_event_study(task, ps)
+
+# Generate report
+generate_report(task, output_file = "my_report.html")
+```
+
+# Customizing the Report
+
+## Title and Author
+
+```{r title}
+generate_report(
+  task,
+  output_file = "report.html",
+  title = "Earnings Announcement Event Study",
+  author = "John Doe"
+)
+```
+
+## Selecting Sections
+
+Choose which sections to include:
+
+```{r sections}
+generate_report(
+  task,
+  output_file = "report.html",
+  sections = c("summary", "data", "diagnostics",
+               "single_event", "multi_event", "appendix")
+)
+```
+
+Available sections:
+
+| Section | Description |
+|---------|-------------|
+| `summary` | Study overview: model, event window, number of events |
+| `data` | Data summary and event timeline |
+| `diagnostics` | Model fit diagnostics (residual plots, normality tests) |
+| `single_event` | Individual event AR and CAR results |
+| `multi_event` | AAR and CAAR test statistics |
+| `cross_sectional` | Cross-sectional regression results |
+| `panel` | Panel event study results (for PanelEventStudyTask) |
+| `appendix` | Technical details and methodology |
+
+## Summary Only
+
+For a quick overview:
+
+```{r summary-only}
+generate_report(
+  task,
+  output_file = "summary.html",
+  sections = c("summary", "multi_event")
+)
+```
+
+## Including Cross-Sectional Analysis
+
+If you have firm characteristics, include the cross-sectional regression:
+
+```{r cross-sectional}
+# Run cross-sectional regression first
+cs_result <- cross_sectional_regression(
+  task,
+  formula = car ~ size + leverage,
+  characteristics = firm_chars
+)
+
+generate_report(
+  task,
+  output_file = "report.html",
+  sections = c("summary", "multi_event", "cross_sectional"),
+  cross_sectional = cs_result
+)
+```
+
+# Output Formats
+
+Currently HTML is the primary format. PDF output requires a LaTeX installation:
+
+```{r pdf}
+generate_report(
+  task,
+  output_file = "report.pdf",
+  format = "pdf"
+)
+```
+
+# Panel Event Study Reports
+
+The report function automatically detects `PanelEventStudyTask` and renders panel-specific sections:
+
+```{r panel}
+panel_task <- PanelEventStudyTask$new(
+  data = panel_data,
+  unit_col = "unit_id",
+  time_col = "time_id",
+  treatment_col = "treatment",
+  outcome_col = "outcome"
+)
+result <- estimate_panel_event_study(panel_task)
+
+generate_report(
+  panel_task,
+  output_file = "panel_report.html",
+  sections = c("summary", "panel")
+)
+```
+
+# Programmatic Report Generation
+
+Generate reports in a loop for multiple configurations:
+
+```{r batch}
+models <- list(
+  MarketModel$new(),
+  MarketAdjustedModel$new(),
+  FamaFrench3FactorModel$new()
+)
+
+for (i in seq_along(models)) {
+  ps <- ParameterSet$new(return_model = models[[i]])
+  task <- run_event_study(EventStudyTask$new(firm_data, index_data, request), ps)
+
+  generate_report(
+    task,
+    output_file = sprintf("report_%s.html", class(models[[i]])[1]),
+    title = paste("Event Study:", class(models[[i]])[1])
+  )
+}
+```

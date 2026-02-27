@@ -33,6 +33,7 @@ These can be joined via a factor table in \code{EventStudyTask}.
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-FamaFrench3FactorModel-new}{\code{FamaFrench3FactorModel$new()}}
 \item \href{#method-FamaFrench3FactorModel-abnormal_returns}{\code{FamaFrench3FactorModel$abnormal_returns()}}
 \item \href{#method-FamaFrench3FactorModel-clone}{\code{FamaFrench3FactorModel$clone()}}
 }
@@ -44,6 +45,25 @@ These can be joined via a factor table in \code{EventStudyTask}.
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-FamaFrench3FactorModel-new"></a>}}
+\if{latex}{\out{\hypertarget{method-FamaFrench3FactorModel-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new FamaFrench3FactorModel.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{FamaFrench3FactorModel$new(use_hac = FALSE, hac_lag = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_hac}}{Logical. Use HAC (Newey-West) standard errors.}
+
+\item{\code{hac_lag}}{Integer or NULL. Lag truncation for Newey-West.}
+}
+\if{html}{\out{</div>}}
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-FamaFrench3FactorModel-abnormal_returns"></a>}}
 \if{latex}{\out{\hypertarget{method-FamaFrench3FactorModel-abnormal_returns}{}}}

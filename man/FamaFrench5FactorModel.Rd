@@ -32,6 +32,7 @@ Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-FamaFrench5FactorModel-new}{\code{FamaFrench5FactorModel$new()}}
 \item \href{#method-FamaFrench5FactorModel-abnormal_returns}{\code{FamaFrench5FactorModel$abnormal_returns()}}
 \item \href{#method-FamaFrench5FactorModel-clone}{\code{FamaFrench5FactorModel$clone()}}
 }
@@ -43,6 +44,25 @@ Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
 </ul>
 </details>
 }}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-FamaFrench5FactorModel-new"></a>}}
+\if{latex}{\out{\hypertarget{method-FamaFrench5FactorModel-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new FamaFrench5FactorModel.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{FamaFrench5FactorModel$new(use_hac = FALSE, hac_lag = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_hac}}{Logical. Use HAC (Newey-West) standard errors.}
+
+\item{\code{hac_lag}}{Integer or NULL. Lag truncation for Newey-West.}
+}
+\if{html}{\out{</div>}}
+}
+}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-FamaFrench5FactorModel-abnormal_returns"></a>}}
 \if{latex}{\out{\hypertarget{method-FamaFrench5FactorModel-abnormal_returns}{}}}

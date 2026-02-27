@@ -324,3 +324,117 @@ test_that("VolatilityModel fits and calculates abnormal volatility", {
   expect_true("abnormal_returns" %in% names(result))
   expect_equal(nrow(result), nrow(data))
 })
+
+
+# --- HAC Standard Errors tests ---
+
+test_that("MarketModel with HAC stores vcov_hac and se_hac", {
+  skip_if_not_installed("sandwich")
+  data <- create_mock_model_data()
+  mm <- MarketModel$new(use_hac = TRUE)
+
+  mm$fit(data)
+  expect_true(mm$is_fitted)
+
+  stats <- mm$statistics
+  expect_false(is.null(stats$vcov_hac))
+  expect_false(is.null(stats$se_hac))
+  expect_equal(length(stats$se_hac), 2)  # intercept + slope
+  # sigma should be unchanged (OLS sigma, not HAC)
+  expect_false(is.null(stats$sigma))
+})
+
+
+test_that("MarketModel HAC sigma unchanged from OLS", {
+  skip_if_not_installed("sandwich")
+  data <- create_mock_model_data()
+  mm_ols <- MarketModel$new(use_hac = FALSE)
+  mm_hac <- MarketModel$new(use_hac = TRUE)
+
+  mm_ols$fit(data)
+  mm_hac$fit(data)
+
+  expect_equal(mm_hac$statistics$sigma, mm_ols$statistics$sigma)
+})
+
+
+test_that("MarketModel HAC works in full pipeline", {
+  skip_if_not_installed("sandwich")
+  task <- create_mock_task()
+  ps <- ParameterSet$new(return_model = MarketModel$new(use_hac = TRUE))
+  result <- run_event_study(task, ps)
+  expect_false(is.null(result$data_tbl))
+})
+
+
+test_that("LinearFactorModel with HAC stores vcov_hac", {
+  skip_if_not_installed("sandwich")
+  data <- create_mock_factor_model_data()
+  ff3 <- FamaFrench3FactorModel$new(use_hac = TRUE)
+
+  ff3$fit(data)
+  expect_true(ff3$is_fitted)
+  expect_false(is.null(ff3$statistics$vcov_hac))
+  expect_false(is.null(ff3$statistics$se_hac))
+})
+
+
+test_that("MarketModel with custom hac_lag", {
+  skip_if_not_installed("sandwich")
+  data <- create_mock_model_data()
+  mm <- MarketModel$new(use_hac = TRUE, hac_lag = 5)
+
+  mm$fit(data)
+  expect_true(mm$is_fitted)
+  expect_false(is.null(mm$statistics$vcov_hac))
+  expect_false(is.null(mm$statistics$se_hac))
+})
+
+
+test_that("FamaFrench5FactorModel with HAC works", {
+  skip_if_not_installed("sandwich")
+  data <- create_mock_factor_model_data()
+  ff5 <- FamaFrench5FactorModel$new(use_hac = TRUE)
+
+  ff5$fit(data)
+  expect_true(ff5$is_fitted)
+  expect_false(is.null(ff5$statistics$vcov_hac))
+})
+
+
+test_that("Carhart4FactorModel with HAC works", {
+  skip_if_not_installed("sandwich")
+  data <- create_mock_factor_model_data()
+  c4 <- Carhart4FactorModel$new(use_hac = TRUE)
+
+  c4$fit(data)
+  expect_true(c4$is_fitted)
+  expect_false(is.null(c4$statistics$vcov_hac))
+})
+
+
+test_that("HAC SEs differ from OLS SEs", {
+  skip_if_not_installed("sandwich")
+  data <- create_mock_model_data()
+  mm_ols <- MarketModel$new(use_hac = FALSE)
+  mm_hac <- MarketModel$new(use_hac = TRUE)
+
+  mm_ols$fit(data)
+  mm_hac$fit(data)
+
+  # HAC SEs should differ from OLS SEs
+  ols_se <- sqrt(diag(vcov(mm_ols$model)))
+  hac_se <- mm_hac$statistics$se_hac
+  # They should be different (not guaranteed to be larger/smaller)
+  expect_false(identical(ols_se, hac_se))
+})
+
+
+test_that("MarketModel without HAC has no vcov_hac", {
+  data <- create_mock_model_data()
+  mm <- MarketModel$new(use_hac = FALSE)
+  mm$fit(data)
+
+  expect_true(is.null(mm$statistics$vcov_hac))
+  expect_true(is.null(mm$statistics$se_hac))
+})

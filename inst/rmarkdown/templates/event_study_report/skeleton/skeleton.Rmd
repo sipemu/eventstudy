@@ -1,0 +1,187 @@
+---
+title: "`r params$title`"
+author: "`r params$author`"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: hide
+params:
+  task: NULL
+  title: "Event Study Report"
+  author: ""
+  sections: !r c("summary", "data", "diagnostics", "single_event", "multi_event", "cross_sectional", "appendix")
+  cross_sectional: NULL
+  confidence_level: 0.95
+  interactive: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 10,
+  fig.height = 6
+)
+library(EventStudy)
+library(dplyr)
+library(ggplot2)
+
+task <- params$task
+is_panel <- inherits(task, "PanelEventStudyTask")
+sections <- params$sections
+```
+
+```{r check-task, results='asis'}
+if (is.null(task)) {
+  cat("**Error:** No task object provided.\n")
+  knitr::knit_exit()
+}
+```
+
+```{r summary, results='asis', eval="summary" %in% sections}
+cat("## Summary\n\n")
+
+if (is_panel) {
+  cat("**Study Type:** Panel Event Study (DiD)\n\n")
+  n_units <- length(unique(task$panel_data[[task$unit_id]]))
+  n_periods <- length(unique(task$panel_data[[task$time_id]]))
+  cat(sprintf("- **Units:** %d\n", n_units))
+  cat(sprintf("- **Periods:** %d\n", n_periods))
+  if (!is.null(task$results)) {
+    cat(sprintf("- **Method:** %s\n", task$results$method))
+  }
+} else {
+  cat("**Study Type:** Classical Event Study\n\n")
+  n_events <- nrow(task$data_tbl)
+  groups <- unique(task$data_tbl$group)
+  cat(sprintf("- **Number of Events:** %d\n", n_events))
+  cat(sprintf("- **Groups:** %s\n", paste(groups, collapse = ", ")))
+  cat(sprintf("- **Confidence Level:** %.0f%%\n",
+              params$confidence_level * 100))
+}
+```
+
+```{r data-section, results='asis', eval="data" %in% sections && !is_panel}
+cat("\n## Data Overview\n\n")
+
+if (!is.null(task$data_tbl)) {
+  cat(sprintf("- **Total observations:** %d\n",
+              sum(sapply(task$data_tbl$data, nrow))))
+  cat(sprintf("- **Events:** %d\n", nrow(task$data_tbl)))
+
+  # Show first few events
+  event_summary <- task$data_tbl %>%
+    select(event_id, group, firm_symbol)
+  knitr::kable(head(event_summary, 10),
+               caption = "Events (first 10)")
+}
+```
+
+```{r diagnostics-section, results='asis', eval="diagnostics" %in% sections && !is_panel}
+cat("\n## Model Diagnostics\n\n")
+
+if ("model" %in% names(task$data_tbl)) {
+  diag_data <- task$data_tbl %>%
+    mutate(
+      sigma = purrr::map_dbl(model, ~.x$statistics$sigma),
+      r2 = purrr::map_dbl(model, ~{
+        r2_val <- .x$statistics$r2
+        if (is.null(r2_val)) NA_real_ else r2_val
+      }),
+      dof = purrr::map_dbl(model, ~.x$statistics$degree_of_freedom),
+      autocorr = purrr::map_dbl(model, ~{
+        ac <- .x$statistics$first_order_auto_correlation
+        if (is.null(ac)) NA_real_ else ac
+      })
+    ) %>%
+    select(event_id, firm_symbol, sigma, r2, dof, autocorr)
+
+  knitr::kable(diag_data, digits = 4,
+               caption = "Model Diagnostics by Event")
+
+  cat("\n### Residual Sigma Distribution\n\n")
+  p <- ggplot(diag_data, aes(x = sigma)) +
+    geom_histogram(bins = 15, fill = "steelblue", alpha = 0.7) +
+    labs(x = "Residual Sigma", y = "Count") +
+    theme_minimal()
+  print(p)
+}
+```
+
+```{r single-event-section, results='asis', eval="single_event" %in% sections && !is_panel}
+cat("\n## Single Event Results\n\n")
+
+if (!is.null(task$data_tbl)) {
+  # AR plot
+  cat("### Abnormal Returns\n\n")
+  tryCatch({
+    p <- EventStudy::plot_event_study(task)
+    print(p)
+  }, error = function(e) {
+    cat("*Could not generate AR plot.*\n\n")
+  })
+}
+```
+
+```{r multi-event-section, results='asis', eval="multi_event" %in% sections && !is_panel}
+cat("\n## Multi-Event Test Statistics\n\n")
+
+if (!is.null(task$aar_caar_tbl)) {
+  stat_names <- setdiff(names(task$aar_caar_tbl),
+                         c("group", "data", "model"))
+
+  for (sn in stat_names) {
+    cat(sprintf("\n### %s\n\n", sn))
+    for (i in seq_len(nrow(task$aar_caar_tbl))) {
+      grp <- task$aar_caar_tbl$group[i]
+      stat_tbl <- task$aar_caar_tbl[[sn]][[i]]
+      cat(sprintf("**Group: %s**\n\n", grp))
+      print(knitr::kable(stat_tbl, digits = 4))
+      cat("\n")
+    }
+  }
+}
+```
+
+```{r cross-sectional-section, results='asis', eval="cross_sectional" %in% sections && !is.null(params$cross_sectional)}
+cat("\n## Cross-Sectional Analysis\n\n")
+
+cs_result <- params$cross_sectional
+if (!is.null(cs_result)) {
+  cat("### Regression Results\n\n")
+  if (inherits(cs_result, "data.frame")) {
+    knitr::kable(cs_result, digits = 4)
+  } else {
+    print(summary(cs_result))
+  }
+}
+```
+
+```{r panel-section, results='asis', eval=is_panel && !is.null(task$results)}
+cat("\n## Panel Event Study Results\n\n")
+cat(sprintf("**Method:** %s\n\n", task$results$method))
+
+cat("### Coefficient Estimates\n\n")
+knitr::kable(task$results$coefficients, digits = 4,
+             caption = "Event-Time Coefficients")
+
+cat("\n### Event Study Plot\n\n")
+tryCatch({
+  p <- plot_panel_event_study(task, confidence_level = params$confidence_level)
+  print(p)
+}, error = function(e) {
+  cat("*Could not generate panel event study plot.*\n\n")
+})
+```
+
+```{r appendix-section, results='asis', eval="appendix" %in% sections}
+cat("\n## Appendix\n\n")
+cat(sprintf("- **Report generated:** %s\n", Sys.time()))
+cat(sprintf("- **R version:** %s\n", R.version.string))
+cat(sprintf("- **EventStudy version:** %s\n",
+            as.character(utils::packageVersion("EventStudy"))))
+```

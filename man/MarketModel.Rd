@@ -27,16 +27,42 @@ idiosyncratic component.
 \item{\code{model_name}}{Name of the model.}
 
 \item{\code{formula}}{The formula applied for calculating the market model}
+
+\item{\code{use_hac}}{Logical. Use HAC (Newey-West) standard errors.}
+
+\item{\code{hac_lag}}{Integer or NULL. Lag truncation for Newey-West.
+NULL uses the automatic bandwidth selection.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-MarketModel-new}{\code{MarketModel$new()}}
 \item \href{#method-MarketModel-set_formula}{\code{MarketModel$set_formula()}}
 \item \href{#method-MarketModel-fit}{\code{MarketModel$fit()}}
 \item \href{#method-MarketModel-abnormal_returns}{\code{MarketModel$abnormal_returns()}}
 \item \href{#method-MarketModel-clone}{\code{MarketModel$clone()}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MarketModel-new"></a>}}
+\if{latex}{\out{\hypertarget{method-MarketModel-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new MarketModel.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MarketModel$new(use_hac = FALSE, hac_lag = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_hac}}{Logical. Use HAC (Newey-West) standard errors.
+Requires the \pkg{sandwich} package.}
+
+\item{\code{hac_lag}}{Integer or NULL. Lag truncation for Newey-West.}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

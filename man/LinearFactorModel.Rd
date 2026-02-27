@@ -25,15 +25,39 @@ estimation window.
 \item{\code{formula}}{The regression formula.}
 
 \item{\code{required_columns}}{Columns required in the data.}
+
+\item{\code{use_hac}}{Logical. Use HAC (Newey-West) standard errors.}
+
+\item{\code{hac_lag}}{Integer or NULL. Lag truncation for Newey-West.}
 }
 \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-LinearFactorModel-new}{\code{LinearFactorModel$new()}}
 \item \href{#method-LinearFactorModel-fit}{\code{LinearFactorModel$fit()}}
 \item \href{#method-LinearFactorModel-abnormal_returns}{\code{LinearFactorModel$abnormal_returns()}}
 \item \href{#method-LinearFactorModel-clone}{\code{LinearFactorModel$clone()}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-LinearFactorModel-new"></a>}}
+\if{latex}{\out{\hypertarget{method-LinearFactorModel-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new LinearFactorModel.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{LinearFactorModel$new(use_hac = FALSE, hac_lag = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_hac}}{Logical. Use HAC (Newey-West) standard errors.}
+
+\item{\code{hac_lag}}{Integer or NULL. Lag truncation for Newey-West.}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
