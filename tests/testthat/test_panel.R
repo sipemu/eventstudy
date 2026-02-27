@@ -201,6 +201,18 @@ test_that("callaway_santanna method works", {
 
 test_that("dechaisemartin_dhaultfoeuille method works", {
   skip_if_not_installed("DIDmultiplegt")
+  # DIDmultiplegtDYN can segfault on macOS arm64 during dyn.load(),
+  # which kills the entire test runner. Test loading in a subprocess first.
+  load_ok <- tryCatch({
+    ret <- system2(
+      file.path(R.home("bin"), "Rscript"),
+      args = c("-e", shQuote("library(DIDmultiplegt)")),
+      stdout = FALSE, stderr = FALSE, timeout = 30
+    )
+    ret == 0
+  }, error = function(e) FALSE)
+  skip_if(!load_ok, "DIDmultiplegt crashes on load (segfault)")
+
   panel <- create_mock_staggered_panel()
   task <- PanelEventStudyTask$new(panel)
 
