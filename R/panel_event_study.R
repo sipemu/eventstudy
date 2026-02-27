@@ -458,6 +458,7 @@ estimate_panel_event_study <- function(task,
     D = task$treatment,
     dynamic = lags,
     placebo = leads,
+    mode = "old",
     ...
   )
 
