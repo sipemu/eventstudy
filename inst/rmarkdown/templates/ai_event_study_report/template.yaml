@@ -1,0 +1,6 @@
+name: AI-Powered Event Study Report
+description: >
+  An event study report enhanced with AI-generated interpretation,
+  test statistic guidance, and model validation commentary.
+  Requires the ellmer package for AI text generation.
+create_dir: false

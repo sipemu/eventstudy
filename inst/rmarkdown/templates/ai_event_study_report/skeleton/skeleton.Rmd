@@ -1,0 +1,209 @@
+---
+title: "`r params$title`"
+author: "`r params$author`"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: hide
+params:
+  task: NULL
+  ai_sections: NULL
+  cross_sectional: NULL
+  title: "AI-Powered Event Study Report"
+  author: ""
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 10,
+  fig.height = 6
+)
+library(EventStudy)
+library(dplyr)
+library(ggplot2)
+
+task <- params$task
+ai <- params$ai_sections
+is_panel <- inherits(task, "PanelEventStudyTask")
+```
+
+```{r check-task, results='asis'}
+if (is.null(task)) {
+  cat("**Error:** No task object provided.\n")
+  knitr::knit_exit()
+}
+if (is.null(ai)) {
+  cat("**Error:** No AI sections provided.\n")
+  knitr::knit_exit()
+}
+```
+
+## Executive Summary {.ai-section}
+
+```{r executive-summary, results='asis'}
+if (!is.null(ai$executive_summary)) {
+  cat(ai$executive_summary)
+} else {
+  cat("*Executive summary not generated.*")
+}
+```
+
+## Study Overview
+
+```{r study-overview, results='asis'}
+if (!is_panel) {
+  n_events <- nrow(task$data_tbl)
+  groups <- unique(task$data_tbl$group)
+  cat(sprintf("- **Study Type:** Classical Event Study\n"))
+  cat(sprintf("- **Number of Events:** %d\n", n_events))
+  cat(sprintf("- **Groups:** %s\n", paste(groups, collapse = ", ")))
+  cat(sprintf("- **Firms:** %d\n", length(unique(task$data_tbl$firm_symbol))))
+} else {
+  cat("- **Study Type:** Panel Event Study (DiD)\n")
+}
+```
+
+```{r event-table}
+if (!is_panel && !is.null(task$data_tbl)) {
+  event_summary <- task$data_tbl %>%
+    select(event_id, group, firm_symbol)
+  knitr::kable(head(event_summary, 15),
+               caption = "Events (first 15)")
+}
+```
+
+## Event Study Results
+
+### Abnormal Returns
+
+```{r ar-plot, fig.cap="Cumulative Abnormal Returns"}
+tryCatch({
+  p <- EventStudy::plot_event_study(task)
+  print(p)
+}, error = function(e) {
+  cat("*Could not generate event study plot.*\n\n")
+})
+```
+
+### AAR/CAAR Tables
+
+```{r aar-caar-tables, results='asis'}
+if (!is.null(task$aar_caar_tbl)) {
+  stat_names <- setdiff(names(task$aar_caar_tbl),
+                         c("group", "data", "model"))
+
+  for (sn in stat_names) {
+    cat(sprintf("\n#### %s\n\n", sn))
+    for (i in seq_len(nrow(task$aar_caar_tbl))) {
+      grp <- task$aar_caar_tbl$group[i]
+      stat_tbl <- task$aar_caar_tbl[[sn]][[i]]
+      cat(sprintf("**Group: %s**\n\n", grp))
+      print(knitr::kable(stat_tbl, digits = 4))
+      cat("\n")
+    }
+  }
+}
+```
+
+## AI Result Interpretation {.ai-section}
+
+```{r result-interpretation, results='asis'}
+if (!is.null(ai$result_interpretation)) {
+  cat(ai$result_interpretation)
+} else {
+  cat("*Result interpretation not generated.*")
+}
+```
+
+## Model Diagnostics
+
+```{r diagnostics-table, results='asis'}
+if ("model" %in% names(task$data_tbl) && !is_panel) {
+  diag_data <- task$data_tbl %>%
+    mutate(
+      sigma = purrr::map_dbl(model, ~.x$statistics$sigma),
+      r2 = purrr::map_dbl(model, ~{
+        r2_val <- .x$statistics$r2
+        if (is.null(r2_val)) NA_real_ else r2_val
+      }),
+      dof = purrr::map_dbl(model, ~.x$statistics$degree_of_freedom),
+      autocorr = purrr::map_dbl(model, ~{
+        ac <- .x$statistics$first_order_auto_correlation
+        if (is.null(ac)) NA_real_ else ac
+      })
+    ) %>%
+    select(event_id, firm_symbol, sigma, r2, dof, autocorr)
+
+  knitr::kable(diag_data, digits = 4,
+               caption = "Model Fit Statistics by Event")
+}
+```
+
+```{r diagnostics-tests, results='asis'}
+if ("model" %in% names(task$data_tbl) && !is_panel) {
+  diag <- tryCatch(EventStudy::model_diagnostics(task), error = function(e) NULL)
+  if (!is.null(diag)) {
+    diag_display <- diag %>%
+      filter(is_fitted == TRUE) %>%
+      select(event_id, firm_symbol, shapiro_p, dw_stat, ljung_box_p)
+    knitr::kable(diag_display, digits = 4,
+                 caption = "Diagnostic Tests (Shapiro-Wilk, Durbin-Watson, Ljung-Box)")
+  }
+}
+```
+
+## AI Test Statistic Guidance {.ai-section}
+
+```{r test-guidance, results='asis'}
+if (!is.null(ai$test_guidance)) {
+  cat(ai$test_guidance)
+} else {
+  cat("*Test statistic guidance not generated.*")
+}
+```
+
+## AI Model Validation {.ai-section}
+
+```{r model-validation, results='asis'}
+if (!is.null(ai$model_validation)) {
+  cat(ai$model_validation)
+} else {
+  cat("*Model validation not generated.*")
+}
+```
+
+```{r cross-sectional-section, results='asis', eval=!is.null(params$cross_sectional)}
+cat("\n## Cross-Sectional Analysis\n\n")
+
+cs_result <- params$cross_sectional
+if (inherits(cs_result, "es_cross_sectional")) {
+  cat(sprintf("- **N:** %d\n", cs_result$n_obs))
+  cat(sprintf("- **R-squared:** %.4f\n", cs_result$r_squared))
+  cat(sprintf("- **Adj. R-squared:** %.4f\n\n", cs_result$adj_r_squared))
+  knitr::kable(cs_result$coefficients, digits = 4,
+               caption = "Cross-Sectional Regression Coefficients")
+}
+```
+
+```{r cross-sectional-ai, results='asis', eval=!is.null(ai$cross_sectional)}
+cat("\n### AI Cross-Sectional Interpretation {.ai-section}\n\n")
+cat(ai$cross_sectional)
+```
+
+## Appendix
+
+```{r appendix, results='asis'}
+cat(sprintf("- **Report generated:** %s\n", Sys.time()))
+cat(sprintf("- **R version:** %s\n", R.version.string))
+cat(sprintf("- **EventStudy version:** %s\n",
+            as.character(utils::packageVersion("EventStudy"))))
+cat("- **AI sections:** ", paste(names(ai), collapse = ", "), "\n")
+cat("\n*AI-generated sections are marked with a blue sidebar. ",
+    "AI interpretations should be reviewed by a domain expert.*\n")
+```

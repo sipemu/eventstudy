@@ -59,7 +59,10 @@ Suggests:
     tidyquant,
     quantmod,
     DT,
-    zoo
+    zoo,
+    ellmer (>= 0.4.0),
+    jsonlite,
+    digest
 Encoding: UTF-8
 RoxygenNote: 7.3.3
 Config/testthat/edition: 3
