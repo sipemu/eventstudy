@@ -790,3 +790,74 @@ test_that("cross_sectional .extract_cars returns NA for all-NA abnormal returns"
   # Second event should have a non-NA CAR
   expect_false(is.na(car_data$car[car_data$event_id == 2]))
 })
+
+
+# --- Regression: MarketAdjustedModel handles NA residuals in sd() ---
+
+test_that("MarketAdjustedModel sd(residuals) uses na.rm=TRUE", {
+
+  # Bug: MarketAdjustedModel used sd(residuals) without na.rm=TRUE,
+  # returning NA sigma when residuals contain NAs.
+  task <- create_mock_task()
+  ps <- ParameterSet$new(return_model = MarketAdjustedModel$new())
+  task <- run_event_study(task, ps)
+
+  # Verify sigma is finite (not NA)
+  model_tbl <- task$data_tbl$model
+  sigmas <- purrr::map_dbl(model_tbl, ~ .x$statistics$sigma)
+  expect_true(all(is.finite(sigmas)))
+})
+
+
+# --- Regression: FEC handles constant market returns without division by zero ---
+
+test_that("forecast_error_correction handles constant market returns", {
+  # Bug: When all estimation-window market returns were constant,
+  # sum((x - mean(x))^2) = 0 caused division by zero -> NaN in FEC sigma.
+  # Test the base class method directly since MarketModel's lm() drops
+  # the collinear predictor before reaching FEC.
+  model <- ModelBase$new()
+
+  n_est <- 120
+  n_event <- 5
+  sigma <- 0.02
+
+  # Constant market returns -> ss_market = 0
+  est_market <- rep(0.001, n_est)
+  event_market <- rnorm(n_event, mean = 0.001, sd = 0.01)
+
+  # Call FEC directly (private method accessed via environment)
+  env <- model$.__enclos_env__$private
+  env$calculate_forecast_error_correction(sigma, n_est, est_market, event_market)
+
+  fec <- model$statistics$forecast_error_corrected_sigma
+  fec_car <- model$statistics$forecast_error_corrected_sigma_car
+
+  # Should fall back to constant-mean correction, not NaN
+  expect_true(all(is.finite(fec)))
+  expect_true(all(is.finite(fec_car)))
+  expected <- sigma * sqrt(1 + 1 / n_est)
+  expect_equal(fec, rep(expected, n_event), tolerance = 1e-10)
+  expect_equal(fec_car, rep(0, n_event))
+})
+
+
+# --- Regression: BHARModel degree_of_freedom uses estimation window length ---
+
+test_that("BHARModel degree_of_freedom equals nrow(estimation_tbl) - 1", {
+  # Bug: BHARModel computed df from length(diff(est_bhar)) - 1 = n_est - 2,
+
+  # but sigma was computed from n_est observations, so df should be n_est - 1.
+  task <- create_mock_task()
+  ps <- ParameterSet$new(return_model = BHARModel$new())
+  task <- run_event_study(task, ps)
+
+  model_tbl <- task$data_tbl$model
+  for (m in model_tbl) {
+    df <- m$statistics$degree_of_freedom
+    n_resid <- length(m$statistics$residuals)
+    # df should be nrow(estimation_tbl) - 1, which is n_resid (diff reduces by 1)
+    # So df = (n_resid + 1) - 1 = n_resid
+    expect_equal(df, n_resid)
+  }
+})

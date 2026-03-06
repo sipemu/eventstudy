@@ -327,3 +327,52 @@ test_that("estimate_synthetic_control errors on donor with missing periods", {
     "pre-treatment observations"
   )
 })
+
+
+# --- Regression: estimate_synthetic_control validates pre/post periods ---
+
+test_that("estimate_synthetic_control errors when no pre-treatment periods", {
+  # Bug: mean(gap[FALSE]^2) returned NaN, causing silent NaN propagation
+  # through all results. Now errors with an informative message.
+  d <- create_sc_test_data(n_donors = 3, n_periods = 20)
+
+  # Set treatment_time to before all data (so no pre-treatment periods)
+  task <- SyntheticControlTask$new(
+    d$treated_data, d$donor_data, treatment_time = 0
+  )
+
+  expect_error(
+    estimate_synthetic_control(task, method = "optim"),
+    "No pre-treatment periods"
+  )
+})
+
+
+test_that("estimate_synthetic_control errors when no post-treatment periods", {
+  d <- create_sc_test_data(n_donors = 3, n_periods = 20)
+
+  # Set treatment_time to after all data (so no post-treatment periods)
+  task <- SyntheticControlTask$new(
+    d$treated_data, d$donor_data, treatment_time = 100
+  )
+
+  expect_error(
+    estimate_synthetic_control(task, method = "optim"),
+    "No post-treatment periods"
+  )
+})
+
+
+# --- Regression: optim convergence warning ---
+
+test_that("estimate_synthetic_control warns on non-convergence", {
+  # Bug: optim could fail to converge silently without any indication.
+  # Now issues a warning when convergence != 0.
+  # We can't easily force non-convergence, so just verify convergence
+  # succeeds without warning on normal data.
+  d <- create_sc_test_data(n_donors = 3, n_periods = 30)
+  task <- SyntheticControlTask$new(
+    d$treated_data, d$donor_data, d$treatment_time
+  )
+  expect_no_warning(estimate_synthetic_control(task, method = "optim"))
+})

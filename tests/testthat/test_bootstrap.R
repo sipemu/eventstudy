@@ -165,3 +165,18 @@ test_that("bootstrap works with non-sequential event IDs via group filter", {
   expect_true(all(result$boot_p_aar >= 0 & result$boot_p_aar <= 1))
   expect_equal(nrow(result), 11)
 })
+
+
+# --- Regression: boot_p_caar is NA when statistic="aar" ---
+
+test_that("bootstrap_test returns NA boot_p_caar when statistic='aar'", {
+  # Bug: When statistic="aar", boot_caar_exceed was never updated (stayed 0),
+
+  # so boot_p_caar = 1/(n_boot+1) -- the minimum possible p-value regardless
+  # of the actual data. Now correctly returns NA.
+  task <- create_fitted_mock_task()
+  result <- bootstrap_test(task, n_boot = 19, seed = 42, statistic = "aar")
+
+  expect_true(all(is.na(result$boot_p_caar)))
+  expect_true(all(!is.na(result$boot_p_aar)))
+})

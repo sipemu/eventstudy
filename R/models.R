@@ -71,14 +71,23 @@ ModelBase <- R6Class("ModelBase",
                                                                       estimation_window_length,
                                                                       estimation_market_returns,
                                                                       event_market_returns) {
-                         meanMREstW <- mean(estimation_market_returns)
-                         forecast_error_corrected_sigma <- sigma *
-                           sqrt(1 + 1 / estimation_window_length +
-                                  (event_market_returns - meanMREstW)^2 /
-                                  sum((estimation_market_returns - meanMREstW)^2))
-
-                         forecast_error_corrected_sigma_car = (event_market_returns - meanMREstW) /
-                           sqrt(sum((estimation_market_returns - meanMREstW)^2, na.rm=TRUE))
+                         meanMREstW <- mean(estimation_market_returns, na.rm = TRUE)
+                         ss_market <- sum((estimation_market_returns - meanMREstW)^2, na.rm = TRUE)
+                         if (ss_market < .Machine$double.eps) {
+                           # Constant market returns: no OLS correction possible,
+                           # fall back to constant-mean FEC
+                           forecast_error_corrected_sigma <- rep(
+                             sigma * sqrt(1 + 1 / estimation_window_length),
+                             length(event_market_returns)
+                           )
+                           forecast_error_corrected_sigma_car <- rep(0, length(event_market_returns))
+                         } else {
+                           forecast_error_corrected_sigma <- sigma *
+                             sqrt(1 + 1 / estimation_window_length +
+                                    (event_market_returns - meanMREstW)^2 / ss_market)
+                           forecast_error_corrected_sigma_car <- (event_market_returns - meanMREstW) /
+                             sqrt(ss_market)
+                         }
 
                          private$.statistics$forecast_error_corrected_sigma = forecast_error_corrected_sigma
                          private$.statistics$forecast_error_corrected_sigma_car = forecast_error_corrected_sigma_car
@@ -296,9 +305,9 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                    private$first_order_autocorrelation(residuals)
 
                                    # sigma and degree of freedom (needed by test statistics)
-                                   sigma = sd(residuals)
+                                   sigma = sd(residuals, na.rm = TRUE)
                                    private$.statistics$sigma = sigma
-                                   private$.statistics$degree_of_freedom = length(residuals) - 1
+                                   private$.statistics$degree_of_freedom = sum(!is.na(residuals)) - 1
 
                                    # Constant-mean forecast error correction (no regression parameters estimated)
                                    event_window_tbl = data_tbl %>% filter(event_window == 1)
@@ -896,7 +905,7 @@ BHARModel <- R6Class("BHARModel",
                           sigma <- sd(estimation_tbl$firm_returns -
                                         estimation_tbl$index_returns, na.rm = TRUE)
                           private$.statistics$sigma <- sigma
-                          private$.statistics$degree_of_freedom <- length(residuals) - 1
+                          private$.statistics$degree_of_freedom <- nrow(estimation_tbl) - 1
 
                           # Constant-mean forecast error correction (no regression)
                           event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)

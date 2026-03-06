@@ -121,7 +121,11 @@ download_factor_data <- function(model = c("ff3", "ff5", "mom"),
   tryCatch({
     utils::download.file(url, tmp_zip, mode = "wb", quiet = TRUE)
     csv_files <- utils::unzip(tmp_zip, exdir = tmp_dir)
-    csv_file <- csv_files[grepl("\\.CSV$|\\.csv$", csv_files)][1]
+    csv_match <- csv_files[grepl("\\.CSV$|\\.csv$", csv_files)]
+    if (length(csv_match) == 0) {
+      stop("No CSV file found in downloaded archive from ", url)
+    }
+    csv_file <- csv_match[1]
 
     # Read CSV, skipping header lines
     lines <- readLines(csv_file, warn = FALSE)

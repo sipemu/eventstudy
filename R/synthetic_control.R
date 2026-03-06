@@ -143,6 +143,15 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
   pre_idx <- all_times < t0
   post_idx <- all_times >= t0
 
+  if (!any(pre_idx)) {
+    stop("No pre-treatment periods found. Check that treatment_time is ",
+         "after the first time period in the data.")
+  }
+  if (!any(post_idx)) {
+    stop("No post-treatment periods found. Check that treatment_time is ",
+         "before or at the last time period in the data.")
+  }
+
   pre_mspe <- mean(gap[pre_idx]^2)
   post_mspe <- mean(gap[post_idx]^2)
   att <- mean(gap[post_idx])
@@ -199,6 +208,11 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
 
   init <- rep(0, n)
   res <- stats::optim(init, obj_fn, method = "L-BFGS-B")
+
+  if (res$convergence != 0) {
+    warning("Synthetic control optimization did not converge (code ",
+            res$convergence, "). Weights may be suboptimal.")
+  }
 
   w <- exp(res$par) / sum(exp(res$par))
   as.numeric(w)

@@ -140,7 +140,11 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
     observed_aar = observed$aar,
     observed_caar = observed$caar,
     boot_p_aar = (boot_aar_exceed + 1) / (n_boot + 1),
-    boot_p_caar = (boot_caar_exceed + 1) / (n_boot + 1)
+    boot_p_caar = if (statistic %in% c("caar", "both")) {
+      (boot_caar_exceed + 1) / (n_boot + 1)
+    } else {
+      NA_real_
+    }
   )
 
   result
