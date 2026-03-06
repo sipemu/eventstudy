@@ -42,6 +42,12 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                    }
 
                                    ws <- min(self$window_size, n_est)
+                                   if (ws < 3) {
+                                     private$.is_fitted <- FALSE
+                                     warning("RollingWindowModel: effective window size (",
+                                             ws, ") must be >= 3 for OLS with 2 parameters.")
+                                     return(invisible(self))
+                                   }
                                    firm_ret <- estimation_tbl$firm_returns
                                    idx_ret <- estimation_tbl$index_returns
 

@@ -47,7 +47,7 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
     ar_data <- ar_data %>% dplyr::filter(event_id %in% group_events)
   }
 
-  firm_ids <- unique(ar_data$event_id)
+  firm_ids <- unique(ar_data$firm_symbol)
   n_firms <- length(firm_ids)
 
   # Observed AAR and t-statistics
@@ -101,7 +101,7 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
 
     # Weighted abnormal returns
     boot_ar <- ar_data %>%
-      dplyr::mutate(boot_ar = abnormal_returns * w[as.character(event_id)])
+      dplyr::mutate(boot_ar = abnormal_returns * w[as.character(firm_symbol)])
 
     boot_stats <- boot_ar %>%
       dplyr::group_by(relative_index) %>%

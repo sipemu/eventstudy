@@ -1052,6 +1052,12 @@ VolatilityModel <- R6Class("VolatilityModel",
                                   dplyr::filter(estimation_window == 1)
 
                                 est_var <- var(estimation_tbl$firm_returns, na.rm = TRUE)
+                                if (is.na(est_var) || est_var < .Machine$double.eps) {
+                                  private$.is_fitted <- FALSE
+                                  warning("VolatilityModel: zero or NA variance in estimation window. ",
+                                          "Cannot compute abnormal volatility.")
+                                  return(invisible(NULL))
+                                }
                                 # Residuals in ratio form to match abnormal_returns = r^2/V - 1
                                 residuals <- estimation_tbl$firm_returns^2 / est_var - 1
                                 private$add_residuals(residuals)

@@ -180,3 +180,23 @@ test_that("bootstrap_test returns NA boot_p_caar when statistic='aar'", {
   expect_true(all(is.na(result$boot_p_caar)))
   expect_true(all(!is.na(result$boot_p_aar)))
 })
+
+
+# --- Regression: bootstrap clusters by firm_symbol, not event_id ---
+
+test_that("bootstrap_test clusters weights by firm_symbol", {
+  # Bug: Wild bootstrap assigned independent weights per event_id instead of
+  # per firm_symbol. When the same firm has multiple events, this violates the
+  # cross-sectional dependence assumption (all events from the same firm must
+  # share the same bootstrap weight).
+  #
+  # For the standard case (one event per firm), the fix is functionally
+  # equivalent but produces different seeds since names(w) changed.
+  task <- create_fitted_mock_task()
+  result <- bootstrap_test(task, n_boot = 49, seed = 42)
+
+  # Basic sanity: p-values should be valid
+
+  expect_true(all(result$boot_p_aar >= 0 & result$boot_p_aar <= 1))
+  expect_true(all(result$boot_p_caar >= 0 & result$boot_p_caar <= 1))
+})

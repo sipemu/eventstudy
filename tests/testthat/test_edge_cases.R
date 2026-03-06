@@ -861,3 +861,48 @@ test_that("BHARModel degree_of_freedom equals nrow(estimation_tbl) - 1", {
     expect_equal(df, n_resid)
   }
 })
+
+
+# --- Regression: VolatilityModel handles zero-variance estimation window ---
+
+test_that("VolatilityModel warns and skips fitting when estimation returns are constant", {
+  # Bug: When var(estimation_tbl$firm_returns) == 0 (constant returns),
+  # division by zero in r^2/var produced Inf/NaN residuals.
+  model <- VolatilityModel$new()
+
+  n <- 120
+  event_n <- 11
+  data_tbl <- tibble::tibble(
+    firm_returns = c(rep(0.001, n), rnorm(event_n, sd = 0.01)),  # constant estimation
+    index_returns = rnorm(n + event_n, sd = 0.01),
+    estimation_window = c(rep(1, n), rep(0, event_n)),
+    event_window = c(rep(0, n), rep(1, event_n)),
+    relative_index = c(seq(-n, -1), seq(0, event_n - 1))
+  )
+
+  expect_warning(model$fit(data_tbl), "zero or NA variance")
+  expect_false(model$is_fitted)
+})
+
+
+# --- Regression: RollingWindowModel rejects effective window size < 3 ---
+
+test_that("RollingWindowModel warns when effective window size < 3", {
+  # Bug: When ws < 3, sigma = sqrt(sum(resid^2) / (ws-2)) caused division
+  # by zero (ws=2 -> denominator=0).
+  skip_if_not_installed("sandwich")
+  model <- RollingWindowModel$new(window_size = 2, min_obs = 2)
+
+  n <- 5  # very small estimation window -> ws = min(2, 5) = 2
+  event_n <- 3
+  data_tbl <- tibble::tibble(
+    firm_returns = rnorm(n + event_n, sd = 0.01),
+    index_returns = rnorm(n + event_n, sd = 0.01),
+    estimation_window = c(rep(1, n), rep(0, event_n)),
+    event_window = c(rep(0, n), rep(1, event_n)),
+    relative_index = c(seq(-n, -1), seq(0, event_n - 1))
+  )
+
+  expect_warning(model$fit(data_tbl), "window size.*must be >= 3")
+  expect_false(model$is_fitted)
+})
