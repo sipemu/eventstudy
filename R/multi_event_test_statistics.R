@@ -99,7 +99,13 @@ PatellZTest <- R6Class("PatellZTest",
                             dplyr::filter(estimation_window == 1) %>%
                             dplyr::group_by(firm_symbol) %>%
                             dplyr::summarise(m = dplyr::n(), .groups = "drop") %>%
-                            dplyr::mutate(Q_i = (m - k_param) / (m - k_param - 2))
+                            dplyr::mutate(
+                              Q_i = ifelse(
+                                m > k_param + 2,
+                                (m - k_param) / (m - k_param - 2),
+                                1  # fallback: insufficient obs for Q_i adjustment
+                              )
+                            )
 
                           # Extract forecast error corrected sigma (vector per firm)
                           fec_sigma = model %>%

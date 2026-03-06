@@ -337,7 +337,8 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
 
       .compute_pval <- function(stat_vals, col_name, n_valid) {
         if (col_name %in% t_dist_cols) {
-          2 * stats::pt(abs(stat_vals), df = n_valid - 1, lower.tail = FALSE)
+          df <- pmax(n_valid - 1, 1)  # guard: df must be >= 1 for pt()
+          2 * stats::pt(abs(stat_vals), df = df, lower.tail = FALSE)
         } else {
           2 * stats::pnorm(abs(stat_vals), lower.tail = FALSE)
         }

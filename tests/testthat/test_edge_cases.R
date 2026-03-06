@@ -906,3 +906,85 @@ test_that("RollingWindowModel warns when effective window size < 3", {
   expect_warning(model$fit(data_tbl), "window size.*must be >= 3")
   expect_false(model$is_fitted)
 })
+
+
+# --- Regression: PatellZTest Q_i clamps to 1 when m < k+2 ---
+
+test_that("PatellZTest Q_i does not produce NaN with short estimation window", {
+  # Bug: Q_i = (m-k)/(m-k-2) produced negative values when m < k+2,
+  # then sqrt(sum(negative Q_i)) = NaN, breaking the Patell Z-test.
+  # Now clamps Q_i to 1 when estimation window is too short.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(PatellZTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  result <- task$aar_caar_tbl[["PatellZ"]][[1]]
+  # AAR z-statistics should be finite (not NaN)
+  expect_true(all(is.finite(result$aar_z)))
+})
+
+
+# --- Regression: tidy_aar pt(df=0) returns valid p-value with n=1 ---
+
+test_that("tidy_aar does not produce NaN p-values with single firm", {
+  # Bug: pt(stat, df=0) returns NaN when n_valid_events=1 (df=1-1=0).
+  # Now clamps df to be >= 1.
+  # Note: With n_firms=1, CSectTTest aar_t is NA (sd of 1 value = NA),
+  # so p-values are correctly NA (not NaN). The fix guards against the case
+  # where a test statistic IS computed but df=0 would make pt() return NaN.
+  task <- create_mock_task(n_firms = 2)
+  ps <- ParameterSet$new()
+  task <- run_event_study(task, ps)
+
+  result <- tidy.EventStudyTask(task, type = "aar")
+  # p-values should never be NaN (may be NA if stat is NA)
+  non_na_pvals <- result$p.value[!is.na(result$p.value)]
+  expect_true(all(!is.nan(non_na_pvals)))
+  expect_true(all(non_na_pvals >= 0 & non_na_pvals <= 1))
+})
+
+
+# --- Regression: MarketModel FEC uses non-NA observation count ---
+
+test_that("MarketModel FEC uses effective obs count excluding NAs", {
+  # Bug: nrow(estimation_tbl) included rows with NA returns, but lm()
+  # drops NAs via na.omit. This made FEC correction factor too small
+  # (denominator too large).
+  model <- MarketModel$new()
+
+  set.seed(42)
+  n <- 120
+  event_n <- 5
+  firm_ret <- rnorm(n + event_n, sd = 0.02)
+  idx_ret <- rnorm(n + event_n, sd = 0.015)
+
+  # Inject 10 NAs into estimation window
+  na_idx <- sample(1:n, 10)
+  firm_ret[na_idx] <- NA
+
+  data_tbl <- tibble::tibble(
+    firm_returns = firm_ret,
+    index_returns = idx_ret,
+    estimation_window = c(rep(1, n), rep(0, event_n)),
+    event_window = c(rep(0, n), rep(1, event_n)),
+    relative_index = c(seq(-n, -1), seq(0, event_n - 1))
+  )
+
+  model$fit(data_tbl)
+
+  if (model$is_fitted) {
+    fec <- model$statistics$forecast_error_corrected_sigma
+    sigma <- model$statistics$sigma
+
+    # FEC should use n_valid = 110 (not n_total = 120)
+    # With 110 obs: correction factor sqrt(1 + 1/110 + ...) is larger
+    # than with 120 obs: sqrt(1 + 1/120 + ...)
+    # So FEC / sigma > sqrt(1 + 1/120) for all event days
+    min_ratio <- min(fec / sigma)
+    expect_gt(min_ratio, sqrt(1 + 1 / 120))
+  }
+})

@@ -244,8 +244,12 @@ MarketModel <- R6Class("MarketModel",
                            estimation_tbl = data_tbl %>% filter(estimation_window == 1)
                            event_window_tbl = data_tbl %>% filter(event_window == 1)
                            event_market_returns = event_window_tbl$index_returns
-                           estimation_window_length = nrow(estimation_tbl)
                            estimation_market_returns = estimation_tbl$index_returns
+                           # Use actual non-NA obs count (lm drops NAs via na.omit)
+                           estimation_window_length = sum(
+                             !is.na(estimation_tbl$firm_returns) &
+                               !is.na(estimation_tbl$index_returns)
+                           )
 
                            private$calculate_forecast_error_correction(modell_summary$sigma,
                                                                        estimation_window_length,
