@@ -104,8 +104,9 @@ simulate_event_study <- function(n_events = 20,
         event_day_stats[sim] <- t_vals[event_day_idx]
       }
     }, error = function(e) {
-      # Failed simulations contribute NA
+      # Failed simulations contribute NA, not zeros
       event_day_stats[sim] <<- NA_real_
+      rejection_matrix[sim, ] <<- NA_integer_
     })
   }
 
@@ -205,7 +206,11 @@ print.es_simulation <- function(x, ...) {
           prev_price <- firm_data$adjusted[idx - 1]
           # Adjust price to inject additional return
           new_price <- prev_price * (1 + (old_price / prev_price - 1) + abnormal_return)
-          firm_data$adjusted[idx] <- new_price
+          scale_factor <- new_price / old_price
+          # Propagate price level shift to all subsequent days for this firm
+          firm_rows <- which(firm_data$symbol == sym)
+          post_event <- firm_rows[firm_rows >= idx]
+          firm_data$adjusted[post_event] <- firm_data$adjusted[post_event] * scale_factor
         }
       }
     }

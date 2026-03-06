@@ -97,11 +97,11 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
                    -(sqrt(5) - 1) / 2,
                    (sqrt(5) + 1) / 2)
     }
-    names(w) <- firm_ids
+    names(w) <- as.character(firm_ids)
 
     # Weighted abnormal returns
     boot_ar <- ar_data %>%
-      dplyr::mutate(boot_ar = abnormal_returns * w[event_id])
+      dplyr::mutate(boot_ar = abnormal_returns * w[as.character(event_id)])
 
     boot_stats <- boot_ar %>%
       dplyr::group_by(relative_index) %>%

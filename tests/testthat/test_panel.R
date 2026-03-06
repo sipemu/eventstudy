@@ -255,3 +255,27 @@ test_that("borusyak_jaravel_spiess method works", {
   expect_true("relative_time" %in% names(coefs))
   expect_true(nrow(coefs) > 0)
 })
+
+
+test_that("dynamic_twfe coefficient relative_time labels are correct even if dummies dropped", {
+  # Create panel where some event-time dummies will be collinear
+  panel <- create_mock_panel_data(n_units = 20, n_periods = 10,
+                                   n_treated = 10, treatment_period = 6)
+  task <- PanelEventStudyTask$new(panel)
+
+  task <- estimate_panel_event_study(task, method = "dynamic_twfe",
+                                      leads = 4, lags = 4)
+
+  coefs <- task$results$coefficients
+  # Check that relative_time values are correct and include base period
+  expect_true(-1 %in% coefs$relative_time)
+  base <- coefs %>% dplyr::filter(relative_time == -1)
+  expect_equal(base$estimate, 0)
+
+  # Post-treatment coefficients should correspond to actual post-treatment periods
+  post <- coefs %>% dplyr::filter(relative_time > 0)
+  if (nrow(post) > 0) {
+    # Estimate should be positive (true effect is 2.0)
+    expect_true(all(post$estimate > 0))
+  }
+})

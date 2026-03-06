@@ -130,3 +130,38 @@ test_that("bootstrap errors on unprepared task", {
   # Task without running the pipeline — nested data lacks event_window column
   expect_error(bootstrap_test(task, n_boot = 5, seed = 42))
 })
+
+
+test_that("bootstrap works with non-sequential event IDs via group filter", {
+  # Create a task with 5 firms across 2 groups
+  symbols = paste0("FIRM_", LETTERS[1:5])
+  firm_data = create_mock_firm_data(symbols = symbols)
+  index_data = create_mock_index_data()
+
+  n_days = 300
+  start_date = as.Date("2020-01-01")
+  dates = seq(start_date, by = "day", length.out = n_days)
+  dates = dates[!weekdays(dates) %in% c("Saturday", "Sunday")]
+  event_date = format(dates[180], "%d.%m.%Y")
+
+  request = tibble::tibble(
+    event_id = 1:5,
+    firm_symbol = symbols,
+    index_symbol = "INDEX_1",
+    event_date = event_date,
+    group = c("A", "B", "A", "B", "A"),
+    event_window_start = -5,
+    event_window_end = 5,
+    shift_estimation_window = -6,
+    estimation_window_length = 120
+  )
+
+  task = EventStudyTask$new(firm_data, index_data, request)
+  ps = ParameterSet$new()
+  task = run_event_study(task, ps)
+
+  # Filtering group "B" gives event_ids 2 and 4 (non-sequential)
+  result = bootstrap_test(task, n_boot = 19, group = "B", seed = 42)
+  expect_true(all(result$boot_p_aar >= 0 & result$boot_p_aar <= 1))
+  expect_equal(nrow(result), 11)
+})

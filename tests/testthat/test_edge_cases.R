@@ -616,3 +616,49 @@ test_that("get_aar with invalid stat_name errors", {
   task = create_fitted_mock_task()
   expect_error(task$get_aar(stat_name = "Nonexistent"), "not found")
 })
+
+
+# ============================================================================
+# Estimation window length is exact (off-by-one regression test)
+# ============================================================================
+
+test_that("Estimation window has exactly estimation_window_length observations", {
+  task = create_mock_task()
+  ps = ParameterSet$new()
+  task = prepare_event_study(task, ps)
+
+  # Check each event's estimation window
+  for (i in seq_len(nrow(task$data_tbl))) {
+    d = task$data_tbl$data[[i]]
+    est_len = task$data_tbl$request[[i]]$estimation_window_length
+    n_est = sum(d$estimation_window == 1)
+    expect_equal(n_est, est_len,
+                 info = paste("Event", i, ": estimation window should have exactly",
+                              est_len, "observations, got", n_est))
+  }
+})
+
+
+# ============================================================================
+# .append_returns uses in_column parameter, not hardcoded "adjusted"
+# ============================================================================
+
+test_that(".append_returns works with non-default target column", {
+  # Create data with 'close' columns instead of 'adjusted'
+  set.seed(42)
+  n = 50
+  tbl = tibble::tibble(
+    firm_close = 100 * cumprod(1 + rnorm(n, 0, 0.02)),
+    index_close = 100 * cumprod(1 + rnorm(n, 0, 0.015))
+  )
+
+  lr = LogReturn$new()
+  result = EventStudy:::.append_returns(tbl, lr, in_column = "close")
+
+  # Should produce firm_returns and index_returns columns
+
+  expect_true("firm_returns" %in% names(result))
+  expect_true("index_returns" %in% names(result))
+  # Should NOT still have only the original columns (no overwrite)
+  expect_false(identical(result$firm_close, result$firm_returns))
+})

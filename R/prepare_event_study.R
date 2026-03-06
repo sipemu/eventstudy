@@ -69,7 +69,7 @@ prepare_event_study <- function(task, parameter_set) {
 #' @noRd
 .append_returns = function(data_tbl, return_calculation, in_column='adjusted') {
   in_cols = colnames(data_tbl)[stringr::str_detect(colnames(data_tbl), in_column)]
-  out_cols = stringr::str_replace(in_cols, "adjusted", "returns")
+  out_cols = stringr::str_replace(in_cols, in_column, "returns")
 
   data_tbl %>%
     return_calculation$calculate_return(in_column=in_cols[1], out_column=out_cols[1]) %>%
@@ -96,7 +96,7 @@ prepare_event_study <- function(task, parameter_set) {
   # Create columns event_window and estimation_window
   event_window_start = as.integer(request$event_window_start)
   event_window_end = as.integer(request$event_window_end)
-  estimation_window_start = as.integer(request$shift_estimation_window) - as.integer(request$estimation_window_length)
+  estimation_window_start = as.integer(request$shift_estimation_window) - as.integer(request$estimation_window_length) + 1L
   estimation_window_end = as.integer(request$shift_estimation_window)
 
   # Extract index of event

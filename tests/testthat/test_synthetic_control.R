@@ -261,3 +261,27 @@ test_that("synthetic control with no treatment effect has ATT near zero", {
   # ATT should be close to 0 (may not be exactly 0 due to finite sample)
   expect_lt(abs(task$results$att), 3)  # generous tolerance
 })
+
+
+test_that("synthetic control handles unsorted treated_data correctly", {
+  d <- create_sc_test_data(n_donors = 3, n_periods = 30, treatment_time = 16)
+
+  # Shuffle the treated data rows (unsorted by time)
+  shuffled_treated <- d$treated_data[sample(nrow(d$treated_data)), ]
+
+  task_sorted <- SyntheticControlTask$new(
+    d$treated_data, d$donor_data, d$treatment_time
+  )
+  task_shuffled <- SyntheticControlTask$new(
+    shuffled_treated, d$donor_data, d$treatment_time
+  )
+
+  task_sorted <- estimate_synthetic_control(task_sorted, method = "optim")
+  task_shuffled <- estimate_synthetic_control(task_shuffled, method = "optim")
+
+  # Results should be identical regardless of input row order
+  expect_equal(task_sorted$results$weights, task_shuffled$results$weights,
+               tolerance = 1e-6)
+  expect_equal(task_sorted$results$att, task_shuffled$results$att,
+               tolerance = 1e-6)
+})

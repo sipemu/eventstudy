@@ -83,54 +83,55 @@ PatellZTest <- R6Class("PatellZTest",
                             dplyr::filter(estimation_window == 1) %>%
                             dplyr::group_by(firm_symbol) %>%
                             dplyr::summarise(m = dplyr::n(), .groups = "drop") %>%
-                            dplyr::mutate(Q = (m - 2) / (m - 4))
+                            dplyr::mutate(Q_i = (m - 2) / (m - 4))
 
-                          # Extract sigma from the model object
-                          model = model %>%
-                            dplyr::mutate(sigma = purrr::map(model, .f=function(x) {
-                              x$statistics$sigma
-                            }) %>% purrr::reduce(c))
-
-                          # Extract forecast error corrected sigma from the model object
-                          model = model %>%
-                            dplyr::mutate(forecast_error_corrected_sigma = purrr::map(model, .f=function(x) {
+                          # Extract forecast error corrected sigma (vector per firm)
+                          fec_sigma = model %>%
+                            dplyr::mutate(fec_sigma = purrr::map(model, .f=function(x) {
                               x$statistics$forecast_error_corrected_sigma
-                            }))
+                            })) %>%
+                            dplyr::select(firm_symbol, fec_sigma) %>%
+                            tidyr::unnest(fec_sigma) %>%
+                            dplyr::group_by(firm_symbol) %>%
+                            dplyr::mutate(day_index = dplyr::row_number()) %>%
+                            dplyr::ungroup()
 
-                          # Standardize abnormal returns by forecast corrected sigma
+                          # Standardize abnormal returns by forecast-error-corrected sigma
                           aar_caar_stats_tmp = data_tbl %>%
                             dplyr::filter(event_window == 1) %>%
-                            dplyr::left_join(model %>% dplyr::select(firm_symbol, sigma), by="firm_symbol") %>%
-                            dplyr::mutate(standardized_abnormal_returns = abnormal_returns / sigma)
+                            dplyr::group_by(firm_symbol) %>%
+                            dplyr::mutate(day_index = dplyr::row_number()) %>%
+                            dplyr::ungroup() %>%
+                            dplyr::left_join(fec_sigma, by = c("firm_symbol", "day_index")) %>%
+                            dplyr::mutate(standardized_abnormal_returns = abnormal_returns / fec_sigma)
 
                           # AAR & AAR Z Test
-                          Q = sd_asar %>%
-                            .[["Q"]] %>%
-                            sum() %>%
-                            sqrt()
+                          Q_total = sqrt(sum(sd_asar$Q_i))
 
                           aar_caar_stats = aar_caar_stats_tmp %>%
                             dplyr::group_by(relative_index) %>%
-                            dplyr::summarise(aar            = sum(standardized_abnormal_returns, na.rm = TRUE),
+                            dplyr::summarise(aar            = mean(abnormal_returns, na.rm = TRUE),
+                                             sum_sar        = sum(standardized_abnormal_returns, na.rm = TRUE),
                                              n_events       = dplyr::n(),
                                              n_valid_events = sum(!is.na(abnormal_returns)),
                                              n_pos          = sum(abnormal_returns >= 0, na.rm = TRUE),
                                              n_neg          = sum(abnormal_returns < 0, na.rm = TRUE),
-                                             aar_z          = aar / Q,
-                                             .groups = "drop")
+                                             aar_z          = sum_sar / Q_total,
+                                             .groups = "drop") %>%
+                            dplyr::select(-sum_sar)
 
                           sd_caar = aar_caar_stats_tmp %>%
-                            dplyr::left_join(sd_asar, by="firm_symbol") %>%
+                            dplyr::left_join(sd_asar, by = "firm_symbol") %>%
                             dplyr::group_by(firm_symbol) %>%
-                            dplyr::mutate(csar = cumsum(standardized_abnormal_returns)) %>%
-                            dplyr::mutate(n      = 1:dplyr::n(),
-                                          csar   = csar / (sqrt(n * Q))) %>%
+                            dplyr::mutate(csar = cumsum(standardized_abnormal_returns),
+                                          n    = dplyr::row_number(),
+                                          csar = csar / sqrt(n * .data$Q_i)) %>%
                             dplyr::group_by(relative_index) %>%
                             dplyr::summarise(caar_z = 1 / sqrt(dplyr::n()) * sum(csar))
 
                           aar_caar_stats = aar_caar_stats %>%
                             dplyr::mutate(caar = cumsum(aar)) %>%
-                            dplyr::left_join(sd_caar, by="relative_index")
+                            dplyr::left_join(sd_caar, by = "relative_index")
 
                           aar_caar_stats$car_window = stringr::str_c("[", aar_caar_stats$relative_index[1], ", ", aar_caar_stats$relative_index, "]")
                           aar_caar_stats

@@ -89,14 +89,16 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
   donors <- task$donor_data
   t0 <- task$treatment_time
 
-  # Pre-treatment data
-  y_pre <- treated$outcome[treated$time < t0]
+  # Pre-treatment data (sorted by time for consistent alignment)
+  pre_treated <- treated[treated$time < t0, ]
+  pre_treated <- pre_treated[order(pre_treated$time), ]
+  y_pre <- pre_treated$outcome
+  pre_times <- pre_treated$time
   donor_units <- sort(unique(donors$unit))
   n_donors <- length(donor_units)
 
   # Build donor matrix: rows = pre-treatment periods, cols = donors
   X_pre <- matrix(NA_real_, nrow = length(y_pre), ncol = n_donors)
-  pre_times <- treated$time[treated$time < t0]
 
   for (j in seq_along(donor_units)) {
     d <- donors[donors$unit == donor_units[j], ]

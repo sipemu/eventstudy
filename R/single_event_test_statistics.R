@@ -115,7 +115,7 @@ CARTTest <- R6Class("CARTTest",
                                         car                 = cumsum(abnormal_returns),
                                         corrected_car       = car / sigma,
                                         car_t               = car / (sqrt(event_window_length) * sigma),
-                                        car_t_dist          = distributional::dist_student_t(df=degree_of_freedom, mu=car, sigma=sigma))
+                                        car_t_dist          = distributional::dist_student_t(df=degree_of_freedom, mu=car, sigma=sqrt(event_window_length) * sigma))
                         res$car_window = stringr::str_c("[", res$relative_index[1], ", ", res$relative_index, "]")
                         res
                       }

@@ -152,8 +152,8 @@ test_that("PatellZTest computes correctly", {
 })
 
 
-test_that("PatellZTest standardizes by sigma, not sqrt(sigma) (GH #6)", {
-  # Construct minimal 2-firm data with known ARs and sigmas
+test_that("PatellZTest uses forecast-error-corrected sigma for standardization (GH #6)", {
+  # Construct minimal 2-firm data with known ARs and per-day FEC sigmas
   n_est = 20
   n_ev = 3
   data = do.call(rbind, lapply(1:2, function(i) {
@@ -167,30 +167,38 @@ test_that("PatellZTest standardizes by sigma, not sqrt(sigma) (GH #6)", {
     )
   }))
 
-  # Build model with known sigma values
-  sigma_vals = c(0.04, 0.08)
+  # Build model with known FEC sigma vectors (one per event-window day)
+  fec_sigma_f1 = c(0.044, 0.040, 0.042)  # varies by day
+  fec_sigma_f2 = c(0.088, 0.080, 0.084)
   model_tbl = tibble::tibble(
     firm_symbol = c("F1", "F2"),
-    model = lapply(sigma_vals, function(s) {
-      list(statistics = list(sigma = s, forecast_error_corrected_sigma = s * 1.1))
-    })
+    model = list(
+      list(statistics = list(sigma = 0.04, forecast_error_corrected_sigma = fec_sigma_f1)),
+      list(statistics = list(sigma = 0.08, forecast_error_corrected_sigma = fec_sigma_f2))
+    )
   )
 
   patell = PatellZTest$new()
   result = patell$compute(data, model_tbl)
 
-  # Manually compute expected SAR for event window day 0
-  # SAR = AR / sigma (NOT AR / sqrt(sigma))
-  sar_f1 = 0.02 / sigma_vals[1]  # 0.5
-  sar_f2 = 0.02 / sigma_vals[2]  # 0.25
-  expected_aar_day0 = sar_f1 + sar_f2  # sum of SARs
+  # Manually compute expected SAR at day 0 using FEC sigma
+  # SAR = AR / fec_sigma (NOT AR / sigma or AR / sqrt(sigma))
+  sar_f1_d0 = 0.02 / fec_sigma_f1[1]
+  sar_f2_d0 = 0.02 / fec_sigma_f2[1]
+  expected_sum_sar_d0 = sar_f1_d0 + sar_f2_d0
 
+  # aar should be mean of raw ARs (not sum of SARs)
   day0 = result[result$relative_index == 0, ]
-  expect_equal(day0$aar, expected_aar_day0, tolerance = 1e-10)
+  expect_equal(day0$aar, 0.02, tolerance = 1e-10)
+
+  # aar_z = sum(SAR) / sqrt(sum(Q_i))
+  Q_i = (n_est - 2) / (n_est - 4)
+  Q_total = sqrt(2 * Q_i)
+  expect_equal(day0$aar_z, expected_sum_sar_d0 / Q_total, tolerance = 1e-10)
 })
 
 
-test_that("PatellZTest CSAR cumsum is per-firm, not across firms (GH #6)", {
+test_that("PatellZTest CSAR cumsum is per-firm with per-firm Q_i (GH #6)", {
   # With 2 firms and 3 event days, cumsum must reset per firm
   n_est = 20
   n_ev = 3
@@ -206,33 +214,32 @@ test_that("PatellZTest CSAR cumsum is per-firm, not across firms (GH #6)", {
     )
   }))
 
-  sigma_val = 0.05
+  fec_sigma_val = 0.05
   model_tbl = tibble::tibble(
     firm_symbol = c("F1", "F2"),
     model = lapply(1:2, function(i) {
-      list(statistics = list(sigma = sigma_val, forecast_error_corrected_sigma = sigma_val))
+      list(statistics = list(
+        sigma = fec_sigma_val,
+        forecast_error_corrected_sigma = rep(fec_sigma_val, n_ev)
+      ))
     })
   )
 
   patell = PatellZTest$new()
   result = patell$compute(data, model_tbl)
 
-  # The CSAR for firm 2 at day 0 should be its own SAR, not accumulated from firm 1
-  # If cumsum ran across firms, firm 2's CSAR at day 0 would include firm 1's cumsum
-  # Verify caar_z is finite and has the expected number of rows
   expect_equal(nrow(result), n_ev)
   expect_true(all(is.finite(result$caar_z)))
 
-  # More specific: manually compute what caar_z at day 0 should be
+  # Manually compute caar_z at day 0
   # SAR_F1_day0 = 0.01 / 0.05 = 0.2, SAR_F2_day0 = 0.02 / 0.05 = 0.4
-  # CSAR at day 0 = just the first SAR (cumsum of length 1)
-  # Q_F1 = (20-2)/(20-4) = 18/16 = 1.125, same for F2
-  Q_per_firm = (n_est - 2) / (n_est - 4)
-  sar_f1_d0 = 0.01 / sigma_val
-  sar_f2_d0 = 0.02 / sigma_val
-  # At day 0, n=1, csar = cumsum[1] / sqrt(1 * Q) = sar / sqrt(Q)
-  csar_f1_d0 = sar_f1_d0 / sqrt(1 * Q_per_firm)
-  csar_f2_d0 = sar_f2_d0 / sqrt(1 * Q_per_firm)
+  # Q_i = (20-2)/(20-4) = 1.125
+  Q_i = (n_est - 2) / (n_est - 4)
+  sar_f1_d0 = 0.01 / fec_sigma_val
+  sar_f2_d0 = 0.02 / fec_sigma_val
+  # At day 0, n=1, csar = cumsum[1] / sqrt(1 * Q_i) = sar / sqrt(Q_i)
+  csar_f1_d0 = sar_f1_d0 / sqrt(1 * Q_i)
+  csar_f2_d0 = sar_f2_d0 / sqrt(1 * Q_i)
   expected_caar_z_d0 = (1 / sqrt(2)) * (csar_f1_d0 + csar_f2_d0)
 
   day0 = result[result$relative_index == 0, ]

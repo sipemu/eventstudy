@@ -246,14 +246,15 @@ estimate_panel_event_study <- function(task,
   # Extract event-time coefficients
   all_se <- .compute_se(fit, panel, cluster)
   coef_names <- names(stats::coef(fit))
-  idx <- match(dummy_names, coef_names)
-  idx <- idx[!is.na(idx)]
+  matched <- match(dummy_names, coef_names)
+  found <- !is.na(matched)
+  idx <- matched[found]
 
   coefs <- stats::coef(fit)[idx]
   se <- all_se[idx]
 
   coef_tbl <- tibble::tibble(
-    relative_time = event_times[seq_along(idx)],
+    relative_time = event_times[found],
     estimate = as.numeric(coefs),
     std.error = as.numeric(se),
     statistic = as.numeric(coefs) / as.numeric(se),

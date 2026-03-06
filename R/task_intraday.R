@@ -173,7 +173,7 @@ prepare_intraday_event_study <- function(task, parameter_set) {
           event_window = ifelse(relative_index >= event_window_start &
                                   relative_index <= event_window_end, 1, 0),
           estimation_window = ifelse(
-            relative_index >= (est_shift - est_length) &
+            relative_index >= (est_shift - est_length + 1) &
               relative_index <= est_shift, 1, 0
           )
         ) %>%

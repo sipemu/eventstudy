@@ -69,3 +69,24 @@ test_that("CARTTest name is correct", {
   cart = CARTTest$new()
   expect_equal(cart$name, "CART")
 })
+
+
+test_that("CARTTest car_t_dist scale grows with sqrt(event_window_length)", {
+  data = create_mock_model_data()
+  mm = MarketModel$new()
+  mm$fit(data)
+  data = mm$abnormal_returns(data)
+
+  cart = CARTTest$new()
+  result = cart$compute(data, mm)
+
+  sigma = mm$statistics$sigma
+  # The distribution's scale should be sqrt(L) * sigma at each row
+  for (i in seq_len(nrow(result))) {
+    L = result$event_window_length[i]
+    dist_params = distributional::parameters(result$car_t_dist[i])
+    expected_scale = sqrt(L) * sigma
+    expect_equal(dist_params$sigma, expected_scale, tolerance = 1e-10,
+                 info = paste("Day", i, ": dist scale should be sqrt(L)*sigma"))
+  }
+})

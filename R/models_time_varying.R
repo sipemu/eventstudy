@@ -115,13 +115,12 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                    private$.statistics$alpha <- alpha_last
                                    private$.statistics$beta <- beta_last
                                    private$.statistics$sigma <- sigma_last
-                                   private$.statistics$degree_of_freedom <- self$window_size - 2
-
                                    # Residuals from last window
                                    estimation_tbl <- data_tbl %>%
                                      dplyr::filter(estimation_window == 1)
                                    n_est <- nrow(estimation_tbl)
                                    ws <- min(self$window_size, n_est)
+                                   private$.statistics$degree_of_freedom <- ws - 2
                                    last_window <- utils::tail(estimation_tbl, ws)
                                    residuals <- last_window$firm_returns -
                                      (alpha_last + beta_last * last_window$index_returns)
