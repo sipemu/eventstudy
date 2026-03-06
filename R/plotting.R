@@ -82,7 +82,7 @@ plot_stocks <- function(task,
   }
 
   # Combine individual plots into a single plot
-  subplot(plots_list, nrows = max(1, length(plots_list) / 2), margin = 0.05)
+  subplot(plots_list, nrows = max(1L, ceiling(length(plots_list) / 2)), margin = 0.05)
 }
 
 
@@ -144,6 +144,7 @@ plot_event_study <- function(task,
 
   model = row$model[[1]]
   sigma = model$statistics$sigma
+  if (is.null(sigma)) sigma <- NA_real_
 
   z_val = stats::qnorm(1 - (1 - confidence_level) / 2)
 
@@ -207,14 +208,17 @@ plot_event_study <- function(task,
   z_val = stats::qnorm(1 - (1 - confidence_level) / 2)
 
   if (type == "aar") {
-    if (!"aar" %in% names(stats_data) || !"aar_t" %in% names(stats_data)) {
-      stop("AAR or AAR t-stat not found in results.")
+    t_candidates <- c("aar_t", "aar_z", "bmp_t", "kp_t",
+                       "sign_z", "gsign_z", "rank_z", "caltime_t")
+    t_col <- intersect(t_candidates, names(stats_data))
+    if (!"aar" %in% names(stats_data) || length(t_col) == 0) {
+      stop("AAR or test statistic column not found in results.")
     }
     # Compute CI from the implicit standard error
     stats_data = stats_data %>%
       dplyr::mutate(
         value = aar,
-        se = ifelse(aar_t != 0, abs(aar / aar_t), NA_real_),
+        se = ifelse(.data[[t_col[1]]] != 0, abs(aar / .data[[t_col[1]]]), NA_real_),
         ci_lower = aar - z_val * se,
         ci_upper = aar + z_val * se
       )

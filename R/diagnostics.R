@@ -55,7 +55,9 @@ model_diagnostics = function(task, event_id = NULL) {
       # Durbin-Watson statistic (approximate)
       dw_stat = tryCatch({
         resid = na.omit(residuals)
-        sum(diff(resid)^2) / sum(resid^2)
+        denom = sum(resid^2)
+        if (denom < .Machine$double.eps) NA_real_
+        else sum(diff(resid)^2) / denom
       }, error = function(e) NA_real_)
 
       # Ljung-Box test for autocorrelation

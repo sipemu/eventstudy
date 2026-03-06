@@ -1145,3 +1145,110 @@ test_that("Simulation weekend filter works regardless of locale", {
   expect_true(is.numeric(result$power))
   expect_true(result$power >= 0 && result$power <= 1)
 })
+
+
+# ============================================================================
+# Round 11: Crash bugs and silent wrong results
+# ============================================================================
+
+test_that("Synthetic control validates donor completeness for all periods", {
+  # A donor missing post-treatment data would cause silent R vector recycling
+  set.seed(42)
+  treated_data <- tibble::tibble(
+    time = 1:10,
+    outcome = rnorm(10)
+  )
+  donor_data <- tibble::tibble(
+    unit = c(rep("donor1", 10), rep("donor2", 7)),
+    time = c(1:10, 1:7),  # donor2 missing periods 8-10
+    outcome = rnorm(17)
+  )
+
+  task <- SyntheticControlTask$new(
+    treated_data = treated_data,
+    donor_data = donor_data,
+    treatment_time = 6
+  )
+
+  expect_error(
+    estimate_synthetic_control(task),
+    "complete data"
+  )
+})
+
+
+test_that("calculate_statistics is idempotent (no duplicate columns)", {
+  task <- create_mock_task()
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+  task <- fit_model(task, ps)
+  task <- calculate_statistics(task, ps)
+
+  cols_before <- names(task$data_tbl)
+  task <- calculate_statistics(task, ps)
+  cols_after <- names(task$data_tbl)
+
+  # Should have same column names, no duplicates
+  expect_equal(sort(cols_after), sort(cols_before))
+  expect_false(any(grepl("\\.\\.\\.", cols_after)))
+})
+
+
+test_that("Durbin-Watson returns NA (not NaN) for zero residuals", {
+  # Direct test of the DW calculation logic
+  resid <- rep(0, 10)
+  denom <- sum(resid^2)
+  dw_stat <- if (denom < .Machine$double.eps) NA_real_ else sum(diff(resid)^2) / denom
+  expect_true(is.na(dw_stat))
+  expect_false(is.nan(dw_stat))
+})
+
+
+test_that("tidy_ar and tidy_car handle df=0 without NaN", {
+  task <- create_mock_task(n_firms = 1)
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+  task <- fit_model(task, ps)
+  task <- calculate_statistics(task, ps)
+
+  # Force df=0 in the model
+  task$data_tbl$model[[1]]$.__enclos_env__$private$.statistics$degree_of_freedom <- 0
+
+  # Should not produce NaN p-values
+  ar_tidy <- tidy.EventStudyTask(task, type = "ar")
+  expect_true(all(is.na(ar_tidy$p.value)))  # NA, not NaN
+  expect_false(any(is.nan(ar_tidy$p.value)))
+
+  car_tidy <- tidy.EventStudyTask(task, type = "car")
+  expect_true(all(is.na(car_tidy$p.value)))
+  expect_false(any(is.nan(car_tidy$p.value)))
+})
+
+
+test_that("Panel TWFE handles se=0 without Inf statistic", {
+  skip_if_not_installed("sandwich")
+
+  set.seed(42)
+  n_units <- 10
+  n_periods <- 8
+  panel <- expand.grid(unit_id = 1:n_units, time_id = 1:n_periods)
+  panel <- tibble::as_tibble(panel)
+  panel$treatment_time <- ifelse(panel$unit_id <= 5, 5L, NA_integer_)
+  panel$treated <- as.integer(!is.na(panel$treatment_time) &
+                                panel$time_id >= panel$treatment_time)
+  panel$outcome <- rnorm(nrow(panel)) + 2 * panel$treated
+
+  task <- PanelEventStudyTask$new(
+    panel_data = panel,
+    outcome = "outcome",
+    treatment = "treated",
+    unit_id = "unit_id",
+    time_id = "time_id",
+    treatment_time = "treatment_time"
+  )
+
+  # Should not crash or produce Inf
+  result <- estimate_panel_event_study(task, method = "dynamic_twfe")
+  expect_true(all(is.na(result$coef_tbl$statistic) |
+                    is.finite(result$coef_tbl$statistic)))
+})

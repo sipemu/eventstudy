@@ -269,7 +269,7 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
           estimate  = abnormal_returns,
           std.error = if (!is.null(sigma)) sigma else NA_real_,
           statistic = if (!is.null(sigma)) abnormal_returns / sigma else NA_real_,
-          p.value   = if (!is.null(df) && !is.null(sigma)) {
+          p.value   = if (!is.null(df) && !is.null(sigma) && df > 0) {
             2 * stats::pt(abs(abnormal_returns / sigma), df = df, lower.tail = FALSE)
           } else NA_real_
         )
@@ -298,7 +298,7 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
           n         = seq_len(dplyr::n()),
           std.error = if (!is.null(sigma)) sqrt(n) * sigma else NA_real_,
           statistic = if (!is.null(sigma)) estimate / (sqrt(n) * sigma) else NA_real_,
-          p.value   = if (!is.null(df) && !is.null(sigma)) {
+          p.value   = if (!is.null(df) && !is.null(sigma) && df > 0) {
             2 * stats::pt(abs(statistic), df = df, lower.tail = FALSE)
           } else NA_real_
         ) %>%

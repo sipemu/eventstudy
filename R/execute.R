@@ -78,6 +78,14 @@ calculate_statistics = function(task, parameter_set) {
     task$data_tbl$statistics %>%
       purrr::transpose() %>%
       as_tibble() -> stats_tbl
+
+    # Remove existing statistic columns to allow idempotent re-runs
+    existing_stat_cols <- intersect(names(stats_tbl), names(task$data_tbl))
+    if (length(existing_stat_cols) > 0) {
+      task$data_tbl <- task$data_tbl[, !names(task$data_tbl) %in% existing_stat_cols,
+                                      drop = FALSE]
+    }
+
     task$data_tbl = cbind(task$data_tbl, stats_tbl) %>%
       dplyr::select(-statistics)
   }

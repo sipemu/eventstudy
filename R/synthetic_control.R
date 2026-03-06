@@ -133,6 +133,11 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
     d <- donors[donors$unit == donor_units[j], ]
     d <- d[d$time %in% all_times, ]
     d <- d[order(d$time), ]
+    if (nrow(d) != length(all_times)) {
+      stop("Donor unit '", donor_units[j], "' has ", nrow(d),
+           " observations but treated unit has ", length(all_times),
+           " time periods. All donors must have complete data.")
+    }
     X_all[, j] <- d$outcome
   }
 

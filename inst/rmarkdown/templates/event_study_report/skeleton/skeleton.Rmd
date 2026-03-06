@@ -87,12 +87,18 @@ cat("\n## Model Diagnostics\n\n")
 if ("model" %in% names(task$data_tbl)) {
   diag_data <- task$data_tbl %>%
     mutate(
-      sigma = purrr::map_dbl(model, ~.x$statistics$sigma),
+      sigma = purrr::map_dbl(model, ~{
+        s <- .x$statistics$sigma
+        if (is.null(s)) NA_real_ else s
+      }),
       r2 = purrr::map_dbl(model, ~{
         r2_val <- .x$statistics$r2
         if (is.null(r2_val)) NA_real_ else r2_val
       }),
-      dof = purrr::map_dbl(model, ~.x$statistics$degree_of_freedom),
+      dof = purrr::map_dbl(model, ~{
+        d <- .x$statistics$degree_of_freedom
+        if (is.null(d)) NA_real_ else d
+      }),
       autocorr = purrr::map_dbl(model, ~{
         ac <- .x$statistics$first_order_auto_correlation
         if (is.null(ac)) NA_real_ else ac

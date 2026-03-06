@@ -190,8 +190,9 @@ estimate_panel_event_study <- function(task,
   all_se <- .compute_se(fit, panel, cluster)
   treat_coef <- stats::coef(fit)[task$treatment]
   treat_se <- all_se[task$treatment]
-  treat_t <- treat_coef / treat_se
-  treat_p <- 2 * stats::pt(abs(treat_t), df = fit$df.residual, lower.tail = FALSE)
+  treat_t <- if (is.finite(treat_se) && treat_se > 0) treat_coef / treat_se else NA_real_
+  treat_p <- if (is.na(treat_t)) NA_real_ else
+    2 * stats::pt(abs(treat_t), df = max(fit$df.residual, 1), lower.tail = FALSE)
 
   coef_tbl <- tibble::tibble(
     term = "ATT",
@@ -257,9 +258,11 @@ estimate_panel_event_study <- function(task,
     relative_time = event_times[found],
     estimate = as.numeric(coefs),
     std.error = as.numeric(se),
-    statistic = as.numeric(coefs) / as.numeric(se),
-    p.value = 2 * stats::pt(abs(as.numeric(coefs) / as.numeric(se)),
-                              df = fit$df.residual, lower.tail = FALSE)
+    statistic = ifelse(as.numeric(se) > 0,
+                        as.numeric(coefs) / as.numeric(se), NA_real_),
+    p.value = ifelse(is.na(statistic), NA_real_,
+      2 * stats::pt(abs(statistic),
+                      df = max(fit$df.residual, 1), lower.tail = FALSE))
   )
 
   # Add the base period as zero
@@ -375,8 +378,9 @@ estimate_panel_event_study <- function(task,
 
   coef_tbl <- coef_tbl %>%
     dplyr::mutate(
-      statistic = estimate / std.error,
-      p.value = 2 * stats::pnorm(abs(statistic), lower.tail = FALSE)
+      statistic = ifelse(std.error > 0, estimate / std.error, NA_real_),
+      p.value = ifelse(is.na(statistic), NA_real_,
+        2 * stats::pnorm(abs(statistic), lower.tail = FALSE))
     )
 
   # Add base period
