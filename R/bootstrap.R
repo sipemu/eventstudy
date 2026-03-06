@@ -60,14 +60,15 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
       .groups = "drop"
     ) %>%
     dplyr::mutate(
-      aar_t = sqrt(n) * aar / sd_aar,
-      caar = cumsum(aar)
+      aar_t = ifelse(is.finite(sd_aar) & sd_aar > 0,
+                      sqrt(n) * aar / sd_aar, NA_real_),
+      caar = cumsum(dplyr::coalesce(aar, 0))
     )
 
   # CAAR t-stat: cumulative SD via CAR per firm
   car_data <- ar_data %>%
     dplyr::group_by(event_id) %>%
-    dplyr::mutate(car = cumsum(abnormal_returns)) %>%
+    dplyr::mutate(car = cumsum(dplyr::coalesce(abnormal_returns, 0))) %>%
     dplyr::group_by(relative_index) %>%
     dplyr::summarise(
       sd_caar = stats::sd(car, na.rm = TRUE),
@@ -77,7 +78,8 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
 
   observed <- observed %>%
     dplyr::left_join(car_data, by = "relative_index", suffix = c("", "_car")) %>%
-    dplyr::mutate(caar_t = sqrt(n_car) * caar / sd_caar)
+    dplyr::mutate(caar_t = ifelse(is.finite(sd_caar) & sd_caar > 0,
+                                    sqrt(n_car) * caar / sd_caar, NA_real_))
 
   obs_aar_t <- observed$aar_t
   obs_caar_t <- observed$caar_t
@@ -111,16 +113,18 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
         n = sum(!is.na(boot_ar)),
         .groups = "drop"
       ) %>%
-      dplyr::mutate(boot_aar_t = sqrt(n) * boot_aar / sd_boot)
+      dplyr::mutate(boot_aar_t = ifelse(is.finite(sd_boot) & sd_boot > 0,
+                                         sqrt(n) * boot_aar / sd_boot, NA_real_))
 
     comparison_aar <- abs(boot_stats$boot_aar_t) >= abs(obs_aar_t)
+    # Only count when BOTH observed and bootstrap stats are available
     comparison_aar[is.na(comparison_aar)] <- FALSE
     boot_aar_exceed <- boot_aar_exceed + as.integer(comparison_aar)
 
     if (statistic %in% c("caar", "both")) {
       boot_car <- boot_ar %>%
         dplyr::group_by(event_id) %>%
-        dplyr::mutate(boot_car = cumsum(boot_ar)) %>%
+        dplyr::mutate(boot_car = cumsum(dplyr::coalesce(boot_ar, 0))) %>%
         dplyr::group_by(relative_index) %>%
         dplyr::summarise(
           boot_caar = mean(boot_car, na.rm = TRUE),
@@ -128,7 +132,9 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
           n = sum(!is.na(boot_car)),
           .groups = "drop"
         ) %>%
-        dplyr::mutate(boot_caar_t = sqrt(n) * boot_caar / sd_boot_caar)
+        dplyr::mutate(boot_caar_t = ifelse(is.finite(sd_boot_caar) & sd_boot_caar > 0,
+                                             sqrt(n) * boot_caar / sd_boot_caar,
+                                             NA_real_))
 
       comparison_caar <- abs(boot_car$boot_caar_t) >= abs(obs_caar_t)
       comparison_caar[is.na(comparison_caar)] <- FALSE
@@ -136,17 +142,24 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
     }
   }
 
-  # Bootstrap p-values
+  # Bootstrap p-values; NA where observed stat is NA (degenerate, e.g. single firm)
+  boot_p_aar_raw <- (boot_aar_exceed + 1) / (n_boot + 1)
+  boot_p_aar_raw[is.na(obs_aar_t)] <- NA_real_
+
+  boot_p_caar_raw <- if (statistic %in% c("caar", "both")) {
+    p <- (boot_caar_exceed + 1) / (n_boot + 1)
+    p[is.na(obs_caar_t)] <- NA_real_
+    p
+  } else {
+    NA_real_
+  }
+
   result <- tibble::tibble(
     relative_index = observed$relative_index,
     observed_aar = observed$aar,
     observed_caar = observed$caar,
-    boot_p_aar = (boot_aar_exceed + 1) / (n_boot + 1),
-    boot_p_caar = if (statistic %in% c("caar", "both")) {
-      (boot_caar_exceed + 1) / (n_boot + 1)
-    } else {
-      NA_real_
-    }
+    boot_p_aar = boot_p_aar_raw,
+    boot_p_caar = boot_p_caar_raw
   )
 
   result

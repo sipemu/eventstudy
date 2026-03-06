@@ -297,6 +297,9 @@ plot_diagnostics <- function(task, event_id = NULL) {
   }
 
   residuals = model$statistics$residuals
+  if (is.null(residuals) || length(na.omit(residuals)) < 2) {
+    stop("Insufficient residuals for diagnostics (model may not produce residuals).")
+  }
   resid_df = tibble::tibble(
     index = seq_along(residuals),
     residuals = residuals
@@ -323,12 +326,14 @@ plot_diagnostics <- function(task, event_id = NULL) {
     ggplot2::theme_minimal()
 
   # ACF plot (manual since ggplot2 doesn't have native ACF)
-  acf_vals = acf(na.omit(residuals), plot = FALSE, lag.max = 20)
+  clean_resid <- na.omit(residuals)
+  max_lag <- min(20, max(length(clean_resid) - 1, 1))
+  acf_vals = acf(clean_resid, plot = FALSE, lag.max = max_lag)
   acf_df = tibble::tibble(
     lag = acf_vals$lag[-1, , 1],
     acf = acf_vals$acf[-1, , 1]
   )
-  ci = stats::qnorm(0.975) / sqrt(length(na.omit(residuals)))
+  ci = stats::qnorm(0.975) / sqrt(length(clean_resid))
 
   p4 = ggplot2::ggplot(acf_df, ggplot2::aes(x = lag, y = acf)) +
     ggplot2::geom_hline(yintercept = 0, color = "grey40") +

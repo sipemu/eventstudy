@@ -115,7 +115,8 @@ PatellZTest <- R6Class("PatellZTest",
                           # Extract forecast error corrected sigma (vector per firm)
                           fec_sigma = model %>%
                             dplyr::mutate(fec_sigma = purrr::map(model, .f=function(x) {
-                              x$statistics$forecast_error_corrected_sigma
+                              fec <- x$statistics$forecast_error_corrected_sigma
+                              if (is.null(fec)) NA_real_ else fec
                             })) %>%
                             dplyr::select(firm_symbol, fec_sigma) %>%
                             tidyr::unnest(fec_sigma) %>%
@@ -402,7 +403,7 @@ BMPTest <- R6Class("BMPTest",
                        # Extract sigma from each model
                        model = model %>%
                          dplyr::mutate(sigma = purrr::map_dbl(model, .f=function(x) {
-                           x$statistics$sigma
+                           x$statistics$sigma %||% NA_real_
                          }))
 
                        # Standardize abnormal returns by model sigma
@@ -554,7 +555,7 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                    # Extract sigma from each model
                                    model <- model %>%
                                      dplyr::mutate(sigma = purrr::map_dbl(model, .f = function(x) {
-                                       x$statistics$sigma
+                                       x$statistics$sigma %||% NA_real_
                                      }))
 
                                    # Standardize abnormal returns by model sigma

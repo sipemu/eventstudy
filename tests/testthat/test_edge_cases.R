@@ -1449,3 +1449,120 @@ test_that("LinearFactorModel maps p-values by name not position", {
   expect_false(is.null(model$statistics$alpha))
   expect_false(is.null(model$statistics$pval_alpha))
 })
+
+
+# ============================================================================
+# Round 13: NULL sigma from unfitted models → test stat crashes
+# ============================================================================
+
+test_that("ARTTest handles NULL sigma from unfitted model gracefully", {
+  data <- create_mock_model_data(n_estimation = 50, n_event = 5)
+  # Add abnormal_returns column (normally added by fit_model pipeline)
+  data$abnormal_returns <- rnorm(nrow(data), 0, 0.01)
+  unfitted <- MarketModel$new()
+  art <- ARTTest$new()
+  # Compute should not crash; should produce NA ar_t values (sigma is NULL)
+  expect_no_error(result <- art$compute(data, unfitted))
+  expect_true(all(is.na(result$ar_t)))
+})
+
+test_that("CARTTest handles NULL sigma from unfitted model gracefully", {
+  data <- create_mock_model_data(n_estimation = 50, n_event = 5)
+  data$abnormal_returns <- rnorm(nrow(data), 0, 0.01)
+  unfitted <- MarketModel$new()
+  cart <- CARTTest$new()
+  expect_no_error(result <- cart$compute(data, unfitted))
+  expect_true(all(is.na(result$car_t)))
+})
+
+test_that("BMPTest handles NULL sigma from unfitted model via map_dbl", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  # Replace one model with unfitted
+  task$data_tbl$model[[1]] <- MarketModel$new()
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(tests = list(BMPTest$new()))
+  # Should not crash from map_dbl returning NULL → numeric(0)
+  expect_no_error(task <- calculate_statistics(task, ps))
+})
+
+
+# ============================================================================
+# Round 13: Bootstrap single-firm sd=NA → artificially significant p-value
+# ============================================================================
+
+test_that("bootstrap_test returns NA p-values for single-firm groups", {
+  task <- create_fitted_mock_task(n_firms = 1)
+  # Single firm: sd of 1 observation = NA → p-values should be NA, not 1/1001
+  result <- bootstrap_test(task, n_boot = 10, seed = 42)
+  # With 1 firm, aar_t should be NA (sd undefined) → p-values should be NA
+  expect_true(all(is.na(result$boot_p_aar)))
+})
+
+
+# ============================================================================
+# Round 13: Bootstrap cumsum NA propagation
+# ============================================================================
+
+test_that("bootstrap_test handles NA abnormal returns without cumsum propagation", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  # Inject NA
+  task$data_tbl$data[[1]]$abnormal_returns[
+    task$data_tbl$data[[1]]$event_window == 1
+  ][3] <- NA_real_
+  result <- bootstrap_test(task, n_boot = 10, seed = 42, statistic = "both")
+  # CAAR should not be all NA after the injection point
+  expect_true(sum(!is.na(result$observed_caar)) > 1)
+})
+
+
+# ============================================================================
+# Round 13: model_diagnostics NULL acf1/sigma/r2
+# ============================================================================
+
+test_that("model_diagnostics handles NULL statistics fields gracefully", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  # Replace one model with unfitted model (NULL sigma, acf1, r2)
+  task$data_tbl$model[[1]] <- MarketModel$new()
+  expect_no_error(diag <- model_diagnostics(task))
+  expect_equal(nrow(diag), 2)
+  # Unfitted model should have is_fitted = FALSE row
+  expect_true(any(!diag$is_fitted))
+})
+
+
+# ============================================================================
+# Round 13: plot_diagnostics NULL residuals guard
+# ============================================================================
+
+test_that("plot_diagnostics gives informative error for models without residuals", {
+  task <- create_fitted_mock_task(n_firms = 1)
+  # Replace model with unfitted model
+  task$data_tbl$model[[1]] <- MarketModel$new()
+  expect_error(
+    plot_diagnostics(task, event_id = task$data_tbl$event_id[1]),
+    "not fitted"
+  )
+})
+
+
+# ============================================================================
+# Round 13: LaTeX special character escaping
+# ============================================================================
+
+test_that("export_results escapes LaTeX special characters", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  ps <- ParameterSet$new()
+  task <- calculate_statistics(task, ps)
+
+  # Rename firm_symbol to contain underscore
+  task$data_tbl$firm_symbol <- c("AAPL_US", "MSFT_US")
+
+  tmp <- tempfile(fileext = ".tex")
+  on.exit(unlink(tmp))
+  export_results(task, tmp, which = "model")
+  content <- readLines(tmp)
+  # Underscores should be escaped by knitr::kable (escape=TRUE default)
+  # In the .tex file: AAPL\_US — in R string: "AAPL\\_US"
+  expect_true(any(grepl("AAPL\\_US", content, fixed = TRUE)))
+})

@@ -78,9 +78,9 @@ model_diagnostics = function(task, event_id = NULL) {
         shapiro_p   = shapiro_p,
         dw_stat     = dw_stat,
         ljung_box_p = ljung_box_p,
-        acf1        = stats$first_order_auto_correlation,
-        sigma       = stats$sigma,
-        r2          = stats$r2
+        acf1        = stats$first_order_auto_correlation %||% NA_real_,
+        sigma       = stats$sigma %||% NA_real_,
+        r2          = stats$r2 %||% NA_real_
       )
     }
   )

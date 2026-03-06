@@ -93,7 +93,9 @@ adjust_p_values <- function(task, method = "BH", stat_name = "CSectT",
       p_raw_aar <- 2 * stats::pnorm(abs(stat_col), lower.tail = FALSE)
       p_raw_caar <- rep(NA_real_, length(stat_col))
     } else if ("caltime_t" %in% names(stat_tbl)) {
-      df <- pmax(stat_tbl$n_valid_events - 1, 1)
+      # CalTimeT uses time-series df (n_periods - 1), not cross-sectional df
+      n_periods <- nrow(stat_tbl)
+      df <- pmax(n_periods - 1, 1)
       stat_col <- stat_tbl$caltime_t
       p_raw_aar <- 2 * stats::pt(abs(stat_col), df = df, lower.tail = FALSE)
       caar_col <- stat_tbl$ccaltime_t

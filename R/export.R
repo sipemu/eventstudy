@@ -137,14 +137,19 @@ export_results <- function(task,
 .export_csv <- function(tables, file, ...) {
   if (length(tables) == 1) {
     utils::write.csv(tables[[1]], file = file, row.names = FALSE, ...)
+    invisible(file)
   } else {
     # Multiple tables: write each with a suffix
     base <- tools::file_path_sans_ext(file)
     ext <- tools::file_ext(file)
-    for (name in names(tables)) {
+    paths <- character(length(tables))
+    for (i in seq_along(tables)) {
+      name <- names(tables)[i]
       out_file <- paste0(base, "_", name, ".", ext)
       utils::write.csv(tables[[name]], file = out_file, row.names = FALSE, ...)
+      paths[i] <- out_file
     }
+    invisible(paths)
   }
 }
 
@@ -204,6 +209,7 @@ export_results <- function(task,
     num_cols <- vapply(tbl, is.numeric, logical(1))
     tbl[num_cols] <- lapply(tbl[num_cols], round, digits = 6)
 
+    # knitr::kable with escape=TRUE (default) handles LaTeX special characters
     latex_tbl <- knitr::kable(tbl, format = "latex",
                                caption = caption,
                                booktabs = TRUE, ...)

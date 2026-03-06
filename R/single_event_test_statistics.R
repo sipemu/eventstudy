@@ -63,8 +63,8 @@ ARTTest <- R6Class("ARTTest",
                      #' statistic.
                      compute = function(data_tbl, model) {
                        statistics = model$statistics
-                       sigma = statistics$sigma
-                       degree_of_freedom = max(statistics$degree_of_freedom, 1)
+                       sigma = statistics$sigma %||% NA_real_
+                       degree_of_freedom = max(statistics$degree_of_freedom %||% 1, 1)
 
                        res = data_tbl %>%
                          dplyr::filter(event_window == 1) %>%
@@ -104,8 +104,8 @@ CARTTest <- R6Class("CARTTest",
                       #' statistic.
                       compute = function(data_tbl, model) {
                         statistics = model$statistics
-                        sigma = statistics$sigma
-                        degree_of_freedom = max(statistics$degree_of_freedom, 1)
+                        sigma = statistics$sigma %||% NA_real_
+                        degree_of_freedom = max(statistics$degree_of_freedom %||% 1, 1)
 
                         res = data_tbl %>%
                           dplyr::filter(event_window == 1) %>%
@@ -166,7 +166,7 @@ BHARTTest <- R6Class("BHARTTest",
                         #' @param model The fitted model.
                         compute = function(data_tbl, model) {
                           statistics <- model$statistics
-                          sigma <- statistics$sigma
+                          sigma <- statistics$sigma %||% NA_real_
 
                           event_data <- data_tbl %>%
                             dplyr::filter(event_window == 1)
