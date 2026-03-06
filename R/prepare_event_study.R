@@ -45,10 +45,12 @@ prepare_event_study <- function(task, parameter_set) {
       task$data_tbl = task$data_tbl %>%
         dplyr::mutate(data = purrr::map(data, function(d) {
           if ("risk_free_rate" %in% names(d)) {
-            d %>% dplyr::mutate(
-              excess_return = firm_returns - risk_free_rate,
-              market_excess = index_returns - risk_free_rate
-            )
+            d <- d %>% dplyr::mutate(excess_return = firm_returns - risk_free_rate)
+            # Only compute market_excess if not already provided by factor data (e.g., FF Mkt-RF)
+            if (!"market_excess" %in% names(d)) {
+              d <- d %>% dplyr::mutate(market_excess = index_returns - risk_free_rate)
+            }
+            d
           } else {
             d
           }

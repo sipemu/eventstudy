@@ -300,16 +300,12 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                    private$.statistics$sigma = sigma
                                    private$.statistics$degree_of_freedom = length(residuals) - 1
 
-                                   # forecast correction term
+                                   # Constant-mean forecast error correction (no regression parameters estimated)
                                    event_window_tbl = data_tbl %>% filter(event_window == 1)
-                                   event_market_returns = event_window_tbl$index_returns
-                                   estimation_window_length = nrow(estimation_tbl)
-                                   estimation_market_returns = estimation_tbl$index_returns
-
-                                   private$calculate_forecast_error_correction(sigma,
-                                                                               estimation_window_length,
-                                                                               estimation_market_returns,
-                                                                               event_market_returns)
+                                   n_event = nrow(event_window_tbl)
+                                   correction = sigma * sqrt(1 + 1 / nrow(estimation_tbl))
+                                   private$.statistics$forecast_error_corrected_sigma = rep(correction, n_event)
+                                   private$.statistics$forecast_error_corrected_sigma_car = rep(0, n_event)
                                  }
                                )
 )
@@ -373,16 +369,12 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                  private$.statistics$sigma = sigma
                                                  private$.statistics$degree_of_freedom = length(residuals) - 1
 
-                                                 # forecast correction term
+                                                 # Constant-mean forecast error correction (no regression)
                                                  event_window_tbl = data_tbl %>% filter(event_window == 1)
-                                                 event_market_returns = event_window_tbl$index_returns
-                                                 estimation_window_length = nrow(estimation_tbl)
-                                                 estimation_market_returns = estimation_tbl$index_returns
-
-                                                 private$calculate_forecast_error_correction(sigma,
-                                                                                             estimation_window_length,
-                                                                                             estimation_market_returns,
-                                                                                             event_market_returns)
+                                                 n_event = nrow(event_window_tbl)
+                                                 correction = sigma * sqrt(1 + 1 / nrow(estimation_tbl))
+                                                 private$.statistics$forecast_error_corrected_sigma = rep(correction, n_event)
+                                                 private$.statistics$forecast_error_corrected_sigma_car = rep(0, n_event)
                                                }
                                              )
 )
@@ -547,15 +539,33 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                   private$add_residuals(residuals)
                                   private$first_order_autocorrelation(residuals)
 
-                                  # Forecast error correction
-                                  estimation_tbl <- data_tbl %>% dplyr::filter(estimation_window == 1)
+                                  # Multi-factor forecast error correction using full (X'X)^{-1}
                                   event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
-                                  private$calculate_forecast_error_correction(
-                                    mod_summary$sigma,
-                                    nrow(estimation_tbl),
-                                    estimation_tbl$index_returns,
-                                    event_window_tbl$index_returns
+                                  sigma <- mod_summary$sigma
+                                  X_est <- stats::model.matrix(mod)
+                                  XtX_inv <- tryCatch(
+                                    solve(crossprod(X_est)),
+                                    error = function(e) NULL
                                   )
+                                  if (!is.null(XtX_inv) && nrow(event_window_tbl) > 0) {
+                                    X_evt <- tryCatch(
+                                      stats::model.matrix(self$formula, data = event_window_tbl),
+                                      error = function(e) NULL
+                                    )
+                                    if (!is.null(X_evt)) {
+                                      # hat values: h_t = x_t' (X'X)^{-1} x_t
+                                      hat_vals <- rowSums((X_evt %*% XtX_inv) * X_evt)
+                                      fec <- sigma * sqrt(1 + hat_vals)
+                                      private$.statistics$forecast_error_corrected_sigma <- fec
+                                      fec_car <- (X_evt %*% XtX_inv)[, -1, drop = FALSE]
+                                      private$.statistics$forecast_error_corrected_sigma_car <- fec_car
+                                    } else {
+                                      n_event <- nrow(event_window_tbl)
+                                      correction <- sigma * sqrt(1 + 1 / nrow(X_est))
+                                      private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                                      private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
+                                    }
+                                  }
                                 }
                               )
 )
@@ -857,13 +867,14 @@ BHARModel <- R6Class("BHARModel",
                         #' @param data_tbl Data frame or tibble.
                         abnormal_returns = function(data_tbl) {
                           data_tbl %>%
+                            dplyr::group_by(event_window) %>%
                             dplyr::mutate(
-                              # Running compounded returns
+                              # Compound returns within each window separately
                               cum_firm = cumprod(1 + dplyr::coalesce(firm_returns, 0)),
                               cum_index = cumprod(1 + dplyr::coalesce(index_returns, 0)),
-                              # BHAR at each point
                               abnormal_returns = cum_firm - cum_index
                             ) %>%
+                            dplyr::ungroup() %>%
                             dplyr::select(-cum_firm, -cum_index)
                         }
                       ),
@@ -887,13 +898,12 @@ BHARModel <- R6Class("BHARModel",
                           private$.statistics$sigma <- sigma
                           private$.statistics$degree_of_freedom <- length(residuals) - 1
 
-                          # Forecast error correction
+                          # Constant-mean forecast error correction (no regression)
                           event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
-                          private$calculate_forecast_error_correction(
-                            sigma, nrow(estimation_tbl),
-                            estimation_tbl$index_returns,
-                            event_window_tbl$index_returns
-                          )
+                          n_event <- nrow(event_window_tbl)
+                          correction <- sigma * sqrt(1 + 1 / nrow(estimation_tbl))
+                          private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                          private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
                         }
                       )
 )
@@ -977,12 +987,12 @@ VolumeModel <- R6Class("VolumeModel",
                             private$.statistics$sigma <- sigma
                             private$.statistics$degree_of_freedom <- length(residuals) - 1
 
+                            # Constant-mean forecast error correction (no regression)
                             event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
-                            private$calculate_forecast_error_correction(
-                              sigma, nrow(estimation_tbl),
-                              estimation_tbl$index_returns,
-                              event_window_tbl$index_returns
-                            )
+                            n_event <- nrow(event_window_tbl)
+                            correction <- sigma * sqrt(1 + 1 / nrow(estimation_tbl))
+                            private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                            private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
                           }
                         )
 )
@@ -1033,8 +1043,8 @@ VolatilityModel <- R6Class("VolatilityModel",
                                   dplyr::filter(estimation_window == 1)
 
                                 est_var <- var(estimation_tbl$firm_returns, na.rm = TRUE)
-                                # Residuals: squared returns minus expected variance
-                                residuals <- estimation_tbl$firm_returns^2 - est_var
+                                # Residuals in ratio form to match abnormal_returns = r^2/V - 1
+                                residuals <- estimation_tbl$firm_returns^2 / est_var - 1
                                 private$add_residuals(residuals)
                                 if (length(residuals) >= 2) {
                                   private$first_order_autocorrelation(residuals)
@@ -1044,12 +1054,12 @@ VolatilityModel <- R6Class("VolatilityModel",
                                 private$.statistics$sigma <- sigma
                                 private$.statistics$degree_of_freedom <- length(residuals) - 1
 
+                                # Constant-mean forecast error correction (no regression)
                                 event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
-                                private$calculate_forecast_error_correction(
-                                  sigma, nrow(estimation_tbl),
-                                  estimation_tbl$index_returns,
-                                  event_window_tbl$index_returns
-                                )
+                                n_event <- nrow(event_window_tbl)
+                                correction <- sigma * sqrt(1 + 1 / nrow(estimation_tbl))
+                                private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                                private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
                               }
                             )
 )

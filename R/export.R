@@ -323,9 +323,24 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
     task$aar_caar_tbl$group,
     task$aar_caar_tbl[[stat_name]],
     function(grp, tbl) {
-      # Detect which t/z column is available
-      t_col <- intersect(c("aar_t", "aar_z"), names(tbl))
-      ct_col <- intersect(c("caar_t", "caar_z"), names(tbl))
+      # Detect which t/z column is available (all supported test statistics)
+      t_candidates <- c("aar_t", "aar_z", "bmp_t", "kp_t",
+                         "sign_z", "gsign_z", "rank_z", "caltime_t")
+      ct_candidates <- c("caar_t", "caar_z", "cbmp_t", "ckp_t",
+                          "csign_z", "cgsign_z", "ccaltime_t")
+      t_col <- intersect(t_candidates, names(tbl))
+      ct_col <- intersect(ct_candidates, names(tbl))
+
+      # t-distributed columns use pt; z-distributed columns use pnorm
+      t_dist_cols <- c("aar_t", "bmp_t", "caltime_t")
+
+      .compute_pval <- function(stat_vals, col_name, n_valid) {
+        if (col_name %in% t_dist_cols) {
+          2 * stats::pt(abs(stat_vals), df = n_valid - 1, lower.tail = FALSE)
+        } else {
+          2 * stats::pnorm(abs(stat_vals), lower.tail = FALSE)
+        }
+      }
 
       tbl %>%
         dplyr::transmute(
@@ -337,12 +352,12 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
           } else NA_real_,
           statistic = if (length(t_col) > 0) .data[[t_col[1]]] else NA_real_,
           p.value   = if (length(t_col) > 0) {
-            2 * stats::pnorm(abs(.data[[t_col[1]]]), lower.tail = FALSE)
+            .compute_pval(.data[[t_col[1]]], t_col[1], n_valid_events)
           } else NA_real_,
           caar      = caar,
           caar_statistic = if (length(ct_col) > 0) .data[[ct_col[1]]] else NA_real_,
           caar_p.value   = if (length(ct_col) > 0) {
-            2 * stats::pnorm(abs(.data[[ct_col[1]]]), lower.tail = FALSE)
+            .compute_pval(.data[[ct_col[1]]], ct_col[1], n_valid_events)
           } else NA_real_
         )
     }

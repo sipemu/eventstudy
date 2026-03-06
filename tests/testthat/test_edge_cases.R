@@ -224,20 +224,25 @@ test_that("MarketAdjustedModel with constant estimation residuals", {
 # Forecast error correction with zero-variance market returns
 # ============================================================================
 
-test_that("Forecast error correction with constant market returns in MarketAdjustedModel", {
+test_that("Forecast error correction in MarketAdjustedModel uses constant-mean formula", {
   data = create_mock_model_data()
-  # Constant index returns → sum((x - mean)^2) = 0 → division by zero
+  # Constant index returns — should not affect forecast error correction
   data$index_returns = 0.001
 
-  # Use MarketAdjustedModel which doesn't do lm() regression
   mam = MarketAdjustedModel$new()
   mam$fit(data)
 
   expect_true(mam$is_fitted)
-  # Forecast error sigma will be Inf due to zero-variance market returns
+  # Constant-mean correction: sigma * sqrt(1 + 1/T) — always finite
   fec = mam$statistics$forecast_error_corrected_sigma
   expect_true(!is.null(fec))
-  expect_true(all(is.infinite(fec) | is.nan(fec)))
+  expect_true(all(is.finite(fec)))
+  # All values should be equal (constant correction, no regression term)
+  expect_equal(length(unique(fec)), 1)
+  # Should equal sigma * sqrt(1 + 1/T)
+  T_est = sum(data$estimation_window == 1)
+  expected = mam$statistics$sigma * sqrt(1 + 1 / T_est)
+  expect_equal(fec[1], expected, tolerance = 1e-10)
 })
 
 
@@ -661,4 +666,49 @@ test_that(".append_returns works with non-default target column", {
   expect_true("index_returns" %in% names(result))
   # Should NOT still have only the original columns (no overwrite)
   expect_false(identical(result$firm_close, result$firm_returns))
+})
+
+
+# --- Regression: prepare_event_study preserves factor-provided market_excess ---
+
+test_that("prepare_event_study does not overwrite market_excess from factor data", {
+  # Bug: When factor_tbl provided a market_excess column (e.g., FF Mkt-RF),
+  # prepare_event_study unconditionally computed market_excess = index_returns - rf,
+  # overwriting the factor-provided value.
+  # Fix: Only compute market_excess if not already present in the data.
+  symbols <- c("FIRM_A")
+  firm_data <- create_mock_firm_data(symbols = symbols)
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = symbols)
+
+  n_days <- 300
+  start_date <- as.Date("2020-01-01")
+  dates <- seq(start_date, by = "day", length.out = n_days)
+  dates <- dates[!weekdays(dates) %in% c("Saturday", "Sunday")]
+
+  set.seed(99)
+  # Factor table WITH market_excess (as FF Mkt-RF would provide)
+  factor_tbl <- tibble::tibble(
+    date = format(dates, "%d.%m.%Y"),
+    risk_free_rate = rep(0.0001, length(dates)),
+    market_excess = rnorm(length(dates), 0.0003, 0.015),
+    smb = rnorm(length(dates), 0, 0.005),
+    hml = rnorm(length(dates), 0, 0.005)
+  )
+
+  task <- EventStudyTask$new(firm_data, index_data, request, factor_tbl = factor_tbl)
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+
+  # Check that the market_excess in the nested data matches the factor_tbl values,
+  # NOT index_returns - risk_free_rate
+  nested_data <- task$data_tbl$data[[1]]
+  expect_true("market_excess" %in% names(nested_data))
+
+  # The factor-provided market_excess should be preserved
+  # (Join produces the factor_tbl value; if overwritten, it would be index_returns - rf)
+  joined_mkt <- nested_data %>%
+    dplyr::inner_join(factor_tbl %>% dplyr::select(date, mkt_factor = market_excess),
+                      by = "date")
+  expect_equal(joined_mkt$market_excess, joined_mkt$mkt_factor, tolerance = 1e-12)
 })

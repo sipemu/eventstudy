@@ -438,3 +438,158 @@ test_that("MarketModel without HAC has no vcov_hac", {
   expect_true(is.null(mm$statistics$vcov_hac))
   expect_true(is.null(mm$statistics$se_hac))
 })
+
+
+# --- Regression: BHARModel event-window-only compounding ---
+
+test_that("BHARModel compounds returns within event window only, not across windows", {
+
+  # Bug: cumprod ran over entire data frame, so event window compounding
+
+  # was contaminated by estimation window values.
+  # Fix: group_by(event_window) before cumprod so each window compounds independently.
+  data <- tibble::tibble(
+    firm_returns = c(rep(0.01, 5), rep(0.02, 5)),
+    index_returns = c(rep(0.005, 5), rep(0.01, 5)),
+    estimation_window = c(rep(1, 5), rep(0, 5)),
+    event_window = c(rep(0, 5), rep(1, 5)),
+    relative_index = c(-5:-1, 0:4),
+    event_date = c(rep(0, 5), 1, rep(0, 4))
+  )
+
+  bhar <- BHARModel$new()
+  bhar$fit(data)
+  result <- bhar$abnormal_returns(data)
+
+  event_rows <- result %>% dplyr::filter(event_window == 1)
+  # First event window day should be: (1+0.02) - (1+0.01) = 0.01
+  # If compounding leaked from estimation window, this value would be much larger
+  expect_equal(event_rows$abnormal_returns[1], 0.02 - 0.01, tolerance = 1e-10)
+
+  # After 5 days of compounding in the event window:
+  # cum_firm = cumprod(1.02, 1.02, 1.02, 1.02, 1.02) = 1.02^5
+  # cum_index = cumprod(1.01, 1.01, 1.01, 1.01, 1.01) = 1.01^5
+  expected_last <- 1.02^5 - 1.01^5
+  expect_equal(event_rows$abnormal_returns[5], expected_last, tolerance = 1e-10)
+})
+
+
+# --- Regression: Constant-mean FEC for non-regression models ---
+
+test_that("MarketAdjustedModel uses constant-mean FEC (sigma * sqrt(1 + 1/T))", {
+  # Bug: MarketAdjustedModel used OLS-style FEC formula despite having no regression.
+  # Fix: Use sigma * sqrt(1 + 1/T) for constant-mean models.
+  data <- create_mock_model_data(n_estimation = 100, n_event = 5)
+  ma <- MarketAdjustedModel$new()
+  ma$fit(data)
+
+  stats <- ma$statistics
+  sigma <- stats$sigma
+  T_est <- 100
+  expected_fec <- sigma * sqrt(1 + 1 / T_est)
+
+  # FEC should be a vector of length n_event, all equal to the constant-mean correction
+  expect_length(stats$forecast_error_corrected_sigma, 5)
+  expect_equal(stats$forecast_error_corrected_sigma, rep(expected_fec, 5), tolerance = 1e-12)
+})
+
+
+test_that("ComparisonPeriodMeanAdjustedModel uses constant-mean FEC", {
+  # Same bug as MarketAdjustedModel
+  data <- create_mock_model_data(n_estimation = 80, n_event = 7)
+  cpm <- ComparisonPeriodMeanAdjustedModel$new()
+  cpm$fit(data)
+
+  stats <- cpm$statistics
+  sigma <- stats$sigma
+  T_est <- 80
+  expected_fec <- sigma * sqrt(1 + 1 / T_est)
+
+  expect_length(stats$forecast_error_corrected_sigma, 7)
+  expect_equal(stats$forecast_error_corrected_sigma, rep(expected_fec, 7), tolerance = 1e-12)
+})
+
+
+test_that("VolumeModel uses constant-mean FEC", {
+  data <- create_mock_model_data(n_estimation = 60, n_event = 5)
+  data$firm_volume <- abs(rnorm(nrow(data), mean = 1e6, sd = 2e5))
+  vm <- VolumeModel$new(log_transform = FALSE)
+  vm$fit(data)
+
+  stats <- vm$statistics
+  sigma <- stats$sigma
+  T_est <- 60
+  expected_fec <- sigma * sqrt(1 + 1 / T_est)
+
+  expect_length(stats$forecast_error_corrected_sigma, 5)
+  expect_equal(stats$forecast_error_corrected_sigma, rep(expected_fec, 5), tolerance = 1e-12)
+})
+
+
+test_that("BHARModel uses constant-mean FEC", {
+  data <- create_mock_model_data(n_estimation = 100, n_event = 5)
+  bhar <- BHARModel$new()
+  bhar$fit(data)
+
+  stats <- bhar$statistics
+  sigma <- stats$sigma
+  T_est <- 100
+  expected_fec <- sigma * sqrt(1 + 1 / T_est)
+
+  expect_length(stats$forecast_error_corrected_sigma, 5)
+  expect_equal(stats$forecast_error_corrected_sigma, rep(expected_fec, 5), tolerance = 1e-12)
+})
+
+
+# --- Regression: VolatilityModel ratio-form residuals ---
+
+test_that("VolatilityModel residuals match abnormal_returns formula (r^2/V - 1)", {
+  # Bug: residuals were computed as r^2 - V (additive) but abnormal_returns was
+  # r^2/V - 1 (ratio). FEC sigma was inconsistent with actual AR.
+  # Fix: residuals now use r^2/V - 1, same form as abnormal_returns.
+  set.seed(42)
+  data <- create_mock_model_data(n_estimation = 100, n_event = 5)
+  volm <- VolatilityModel$new()
+  volm$fit(data)
+
+  stats <- volm$statistics
+
+  # Manually compute what the residuals should be
+  est_data <- data %>% dplyr::filter(estimation_window == 1)
+  est_var <- var(est_data$firm_returns, na.rm = TRUE)
+  expected_residuals <- est_data$firm_returns^2 / est_var - 1
+
+  expect_equal(stats$residuals, expected_residuals, tolerance = 1e-10)
+
+  # And verify FEC is constant-mean form
+  sigma <- sd(expected_residuals, na.rm = TRUE)
+  expected_fec <- sigma * sqrt(1 + 1 / 100)
+  expect_equal(stats$forecast_error_corrected_sigma, rep(expected_fec, 5), tolerance = 1e-12)
+})
+
+
+# --- Regression: LinearFactorModel multi-factor FEC ---
+
+test_that("LinearFactorModel FEC uses hat matrix (X'X)^{-1} for correction", {
+  # Bug: LinearFactorModel used 1/T scalar correction instead of leveraging the
+  # full hat matrix from the regression, which captures how far each event-window
+  # day's factor values are from the estimation-window mean.
+  # Fix: FEC = sigma * sqrt(1 + h_t) where h_t = x_t'(X'X)^{-1}x_t
+  data <- create_mock_factor_model_data(n_estimation = 120, n_event = 11)
+  ff3 <- FamaFrench3FactorModel$new()
+  ff3$fit(data)
+
+  stats <- ff3$statistics
+  fec <- stats$forecast_error_corrected_sigma
+
+  # FEC should be a vector (one per event-window day), NOT a scalar replicated
+  expect_length(fec, 11)
+  # Each day's FEC depends on its own factor values, so they should NOT all be identical
+  # (unless by extreme coincidence)
+  expect_false(all(fec == fec[1]))
+
+  # Verify the formula: FEC = sigma * sqrt(1 + h_t)
+  sigma <- stats$sigma
+  # All FEC values should be >= sigma (since h_t >= 0)
+  expect_true(all(fec >= sigma * 0.999))  # small tolerance for floating point
+})

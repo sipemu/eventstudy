@@ -216,3 +216,68 @@ test_that("tidy AAR errors on missing stat_name", {
     "not found"
   )
 })
+
+
+# --- Regression: tidy_aar detects all test statistic columns ---
+
+test_that("tidy_aar detects BMP test statistic columns", {
+  # Bug: tidy_aar only checked for aar_t and aar_z columns, missing bmp_t, kp_t,
+  # sign_z, gsign_z, rank_z, caltime_t and their CAAR counterparts.
+  # Fix: Extended candidate lists to cover all test statistics.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(tests = list(BMPTest$new()))
+  )
+  task <- run_event_study(task, ps)
+
+  result <- tidy.EventStudyTask(task, type = "aar", stat_name = "BMP")
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(c("estimate", "statistic", "p.value") %in% names(result)))
+  # BMP is t-distributed, so p-values should use pt (not pnorm)
+  expect_true(all(!is.na(result$statistic)))
+  expect_true(all(!is.na(result$p.value)))
+  expect_true(all(result$p.value >= 0 & result$p.value <= 1))
+})
+
+
+test_that("tidy_aar uses pnorm for z-distributed statistics", {
+  # Verify that z-distributed test stats (PatellZ, Sign, etc.) use pnorm,
+  # not pt for p-values.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(tests = list(PatellZTest$new()))
+  )
+  task <- run_event_study(task, ps)
+
+  result <- tidy.EventStudyTask(task, type = "aar", stat_name = "PatellZ")
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(!is.na(result$statistic)))
+  expect_true(all(!is.na(result$p.value)))
+
+  # Manually verify p-value computation with pnorm (z-distributed)
+  stat_val <- result$statistic[1]
+  expected_pval <- 2 * stats::pnorm(abs(stat_val), lower.tail = FALSE)
+  expect_equal(result$p.value[1], expected_pval, tolerance = 1e-10)
+})
+
+
+test_that("tidy_aar uses pt for t-distributed statistics (CSectT)", {
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(tests = list(CSectTTest$new()))
+  )
+  task <- run_event_study(task, ps)
+
+  result <- tidy.EventStudyTask(task, type = "aar", stat_name = "CSectT")
+  expect_s3_class(result, "tbl_df")
+
+  # CSectT is t-distributed, so p-value should differ from pnorm-based computation
+  stat_val <- result$statistic[1]
+  n_valid <- 3  # n_firms
+  pval_pt <- 2 * stats::pt(abs(stat_val), df = n_valid - 1, lower.tail = FALSE)
+  pval_pnorm <- 2 * stats::pnorm(abs(stat_val), lower.tail = FALSE)
+
+  expect_equal(result$p.value[1], pval_pt, tolerance = 1e-10)
+  # With small n, pt and pnorm should give different values
+  expect_false(isTRUE(all.equal(pval_pt, pval_pnorm, tolerance = 1e-6)))
+})
