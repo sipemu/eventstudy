@@ -92,6 +92,12 @@ adjust_p_values <- function(task, method = "BH", stat_name = "CSectT",
       stat_col <- stat_tbl$rank_z
       p_raw_aar <- 2 * stats::pnorm(abs(stat_col), lower.tail = FALSE)
       p_raw_caar <- rep(NA_real_, length(stat_col))
+    } else if ("caltime_t" %in% names(stat_tbl)) {
+      df <- stat_tbl$n_valid_events - 1
+      stat_col <- stat_tbl$caltime_t
+      p_raw_aar <- 2 * stats::pt(abs(stat_col), df = df, lower.tail = FALSE)
+      caar_col <- stat_tbl$ccaltime_t
+      p_raw_caar <- 2 * stats::pt(abs(caar_col), df = df, lower.tail = FALSE)
     } else {
       stop("Cannot detect test statistic type in '", stat_name, "'.")
     }
@@ -104,11 +110,7 @@ adjust_p_values <- function(task, method = "BH", stat_name = "CSectT",
     stat_tbl$p_raw_caar <- p_raw_caar
     stat_tbl$p_adj_caar <- p_adj_caar
 
-    if (!is.null(group)) {
-      stat_tbl$group <- aar_caar$group[i]
-    } else {
-      stat_tbl$group <- aar_caar$group[i]
-    }
+    stat_tbl$group <- aar_caar$group[i]
 
     stat_tbl
   })

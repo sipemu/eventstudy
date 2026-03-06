@@ -281,3 +281,48 @@ test_that("tidy_aar uses pt for t-distributed statistics (CSectT)", {
   # With small n, pt and pnorm should give different values
   expect_false(isTRUE(all.equal(pval_pt, pval_pnorm, tolerance = 1e-6)))
 })
+
+
+# --- Regression: CAAR p-values use pt for t-distributed stats ---
+
+test_that("tidy_aar CAAR p-values use pt (not pnorm) for t-distributed stats", {
+  # Bug: t_dist_cols didn't include cumulative counterparts (caar_t, cbmp_t, etc.)
+  # so CAAR p-values were computed with pnorm instead of pt.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(tests = list(CSectTTest$new()))
+  )
+  task <- run_event_study(task, ps)
+
+  result <- tidy.EventStudyTask(task, type = "aar", stat_name = "CSectT")
+
+  # CAAR statistic is caar_t (t-distributed with N-1 df)
+  caar_stat <- result$caar_statistic[1]
+  n_valid <- 3
+  expected_pval <- 2 * stats::pt(abs(caar_stat), df = n_valid - 1, lower.tail = FALSE)
+  wrong_pval <- 2 * stats::pnorm(abs(caar_stat), lower.tail = FALSE)
+
+  expect_equal(result$caar_p.value[1], expected_pval, tolerance = 1e-10)
+  # These should differ with small N
+  expect_false(isTRUE(all.equal(expected_pval, wrong_pval, tolerance = 1e-6)))
+})
+
+
+test_that("tidy_aar KP test uses pt (not pnorm)", {
+  # Bug: kp_t was not in t_dist_cols, so KP p-values used pnorm.
+  task <- create_mock_task(n_firms = 5)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(tests = list(KolariPynnonenTest$new()))
+  )
+  task <- run_event_study(task, ps)
+
+  result <- tidy.EventStudyTask(task, type = "aar", stat_name = "KP")
+  expect_true(all(!is.na(result$statistic)))
+  expect_true(all(!is.na(result$p.value)))
+
+  # KP is t-distributed: verify first row
+  stat_val <- result$statistic[1]
+  n_valid <- 5
+  expected_pval <- 2 * stats::pt(abs(stat_val), df = n_valid - 1, lower.tail = FALSE)
+  expect_equal(result$p.value[1], expected_pval, tolerance = 1e-10)
+})

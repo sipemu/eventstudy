@@ -378,7 +378,7 @@ test_that("validate_task warns when event date missing from data", {
 # extract_cars with all-NA abnormal returns
 # ============================================================================
 
-test_that("cross_sectional_regression with all-NA abnormal returns gives CAR=0", {
+test_that("cross_sectional_regression with all-NA abnormal returns gives NA CARs", {
   task = create_fitted_mock_task(n_firms = 3)
 
   # Replace all abnormal returns with NA
@@ -391,10 +391,12 @@ test_that("cross_sectional_regression with all-NA abnormal returns gives CAR=0",
     x = c(1.0, 2.0)
   )
 
-  # sum(NA, na.rm=TRUE) = 0, so CARs will be 0 (not NA)
-  # This documents the current behavior
-  result = cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE)
-  expect_true(all(result$car_data$car == 0))
+  # All-NA ARs should produce NA CARs (not 0)
+  # The regression will fail due to no non-NA cases
+  expect_error(
+    cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE),
+    "0 \\(non-NA\\) cases|missing"
+  )
 })
 
 
@@ -419,8 +421,8 @@ test_that("CalendarTimePortfolioTest with constant AARs across time", {
   result = ct$compute(data, NULL)
 
   expect_equal(nrow(result), 11)
-  # ts_sd = sd(constant) = 0 → aar_t = value/0 = Inf
-  expect_true(all(is.infinite(result$aar_t) | is.nan(result$aar_t)))
+  # ts_sd = sd(constant) = 0 → caltime_t = value/0 = Inf
+  expect_true(all(is.infinite(result$caltime_t) | is.nan(result$caltime_t)))
 })
 
 
@@ -711,4 +713,80 @@ test_that("prepare_event_study does not overwrite market_excess from factor data
     dplyr::inner_join(factor_tbl %>% dplyr::select(date, mkt_factor = market_excess),
                       by = "date")
   expect_equal(joined_mkt$market_excess, joined_mkt$mkt_factor, tolerance = 1e-12)
+})
+
+
+# --- Regression: ComparisonPeriodMeanAdjustedModel handles NA returns ---
+
+test_that("ComparisonPeriodMeanAdjustedModel handles NA in estimation returns", {
+  # Bug: mean() without na.rm=TRUE caused NA to propagate when returns have NAs
+  # (e.g., the leading NA from return calculation).
+  data <- create_mock_model_data()
+  # Introduce NA at the beginning (simulating return calculation lag)
+  data$firm_returns[1] <- NA_real_
+
+  cpm <- ComparisonPeriodMeanAdjustedModel$new()
+  cpm$fit(data)
+
+  expect_true(cpm$is_fitted)
+  # Sigma should be finite (not NA)
+  expect_true(is.finite(cpm$statistics$sigma))
+
+  result <- cpm$abnormal_returns(data)
+  # Non-NA rows should have finite abnormal returns
+  non_na_rows <- !is.na(data$firm_returns)
+  expect_true(all(is.finite(result$abnormal_returns[non_na_rows])))
+})
+
+
+# --- Regression: Event date validation ---
+
+test_that(".append_windows errors when event date not found in data", {
+  # Bug: When the event date didn't match any date in the data,
+  # event_index was empty and relative_index became wrong silently.
+  # Fix: Now throws an informative error.
+  data <- tibble::tibble(
+    date = c("01.01.2020", "02.01.2020", "03.01.2020"),
+    firm_returns = c(0.01, 0.02, -0.01),
+    index_returns = c(0.005, 0.01, -0.005)
+  )
+
+  request <- list(
+    event_date = "15.06.2020",  # doesn't exist in data
+    event_window_start = -1,
+    event_window_end = 1,
+    shift_estimation_window = -2,
+    estimation_window_length = 1
+  )
+
+  expect_error(
+    EventStudy:::.append_windows(data, request),
+    "not found"
+  )
+})
+
+
+# --- Regression: cross_sectional all-NA ARs produce NA CARs ---
+
+test_that("cross_sectional .extract_cars returns NA for all-NA abnormal returns", {
+  # Bug: sum(NA, na.rm=TRUE) returned 0, so events with entirely missing
+  # ARs were treated as having zero CAR.
+  # Fix: Now returns NA_real_ when all ARs are NA.
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Replace only the first firm's ARs with NA (leave second firm intact)
+  task$data_tbl$data[[1]]$abnormal_returns <- NA_real_
+
+  firm_chars <- tibble::tibble(
+    event_id = 1:2,
+    x = c(1.0, 2.0)
+  )
+
+  # Should not error but the first firm should have NA CAR
+  result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE)
+  car_data <- result$car_data
+  # First event (all NA) should have NA CAR
+  expect_true(is.na(car_data$car[car_data$event_id == 1]))
+  # Second event should have a non-NA CAR
+  expect_false(is.na(car_data$car[car_data$event_id == 2]))
 })

@@ -104,6 +104,11 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
     d <- donors[donors$unit == donor_units[j], ]
     d <- d[d$time %in% pre_times, ]
     d <- d[order(d$time), ]
+    if (nrow(d) != length(y_pre)) {
+      stop("Donor unit '", donor_units[j], "' has ", nrow(d),
+           " pre-treatment observations but treated unit has ", length(y_pre),
+           ". All donors must have complete pre-treatment data.")
+    }
     X_pre[, j] <- d$outcome
   }
 
@@ -230,15 +235,13 @@ sc_placebo_test <- function(task, n_placebo = NULL) {
     donor_units <- sample(donor_units, n_placebo)
   }
 
-  # Treated unit RMSPE ratio
+  # Treated unit MSPE ratio (Abadie et al. 2010, 2015)
   traj <- task$results$trajectory
-  pre_rmspe_treated <- sqrt(task$results$pre_mspe)
-  post_rmspe_treated <- sqrt(task$results$post_mspe)
-  ratio_treated <- post_rmspe_treated / max(pre_rmspe_treated, 1e-10)
+  ratio_treated <- task$results$post_mspe / max(task$results$pre_mspe, 1e-10)
 
   all_times <- sort(unique(treated$time))
   placebo_gaps <- list()
-  rmspe_ratios <- numeric(length(donor_units))
+  mspe_ratios <- numeric(length(donor_units))
 
   for (i in seq_along(donor_units)) {
     du <- donor_units[i]
@@ -268,21 +271,20 @@ sc_placebo_test <- function(task, n_placebo = NULL) {
       pseudo_task <- estimate_synthetic_control(pseudo_task, method = "optim")
 
       placebo_gaps[[du]] <- pseudo_task$results$trajectory$gap
-      pre_rmspe <- sqrt(pseudo_task$results$pre_mspe)
-      post_rmspe <- sqrt(pseudo_task$results$post_mspe)
-      rmspe_ratios[i] <- post_rmspe / max(pre_rmspe, 1e-10)
+      mspe_ratios[i] <- pseudo_task$results$post_mspe /
+        max(pseudo_task$results$pre_mspe, 1e-10)
     }, error = function(e) {
-      rmspe_ratios[i] <<- NA_real_
+      mspe_ratios[i] <<- NA_real_
     })
   }
 
   # P-value: proportion of donor ratios >= treated ratio
-  valid_ratios <- rmspe_ratios[!is.na(rmspe_ratios)]
+  valid_ratios <- mspe_ratios[!is.na(mspe_ratios)]
   p_value <- (sum(valid_ratios >= ratio_treated) + 1) /
     (length(valid_ratios) + 1)
 
   task$results$placebo <- list(
-    rmspe_ratios = stats::setNames(rmspe_ratios, donor_units),
+    mspe_ratios = stats::setNames(mspe_ratios, donor_units),
     treated_ratio = ratio_treated,
     p_value = p_value,
     placebo_gaps = placebo_gaps

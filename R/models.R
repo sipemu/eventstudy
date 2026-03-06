@@ -336,7 +336,7 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                  data_tbl %>%
                                                    filter(estimation_window == 1) %>%
                                                    .[['firm_returns']] %>%
-                                                   mean(.) -> reference_mean
+                                                   mean(., na.rm = TRUE) -> reference_mean
 
                                                  private$.fitted_model = reference_mean
                                                  private$.is_fitted = TRUE
@@ -360,12 +360,12 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
 
                                                  # residuals & first-order autocorrelation for
                                                  # diagnostics
-                                                 residuals = estimation_tbl$firm_returns - mean(estimation_tbl$firm_returns)
+                                                 residuals = estimation_tbl$firm_returns - mean(estimation_tbl$firm_returns, na.rm = TRUE)
                                                  private$add_residuals(residuals)
                                                  private$first_order_autocorrelation(residuals)
 
                                                  # sigma and degree of freedom (needed by test statistics)
-                                                 sigma = sd(residuals)
+                                                 sigma = sd(residuals, na.rm = TRUE)
                                                  private$.statistics$sigma = sigma
                                                  private$.statistics$degree_of_freedom = length(residuals) - 1
 

@@ -205,8 +205,8 @@ test_that("sc_placebo_test produces valid results", {
   expect_true(task$results$placebo$p_value >= 0 &&
                 task$results$placebo$p_value <= 1)
 
-  # rmspe_ratios should be named
-  ratios <- task$results$placebo$rmspe_ratios
+  # mspe_ratios should be named (MSPE ratio per Abadie et al.)
+  ratios <- task$results$placebo$mspe_ratios
   expect_equal(length(ratios), 3)
   expect_false(is.null(names(ratios)))
 })
@@ -284,4 +284,46 @@ test_that("synthetic control handles unsorted treated_data correctly", {
                tolerance = 1e-6)
   expect_equal(task_sorted$results$att, task_shuffled$results$att,
                tolerance = 1e-6)
+})
+
+
+# --- Regression: Placebo test uses MSPE ratio (not RMSPE) ---
+
+test_that("sc_placebo_test uses MSPE ratio per Abadie et al.", {
+  # Bug: Used sqrt(post_mspe)/sqrt(pre_mspe) (RMSPE ratio) instead of
+  # post_mspe/pre_mspe (MSPE ratio), reducing statistical power.
+  d <- create_sc_test_data()
+  task <- SyntheticControlTask$new(d$treated_data, d$donor_data, d$treatment_time)
+  task <- estimate_synthetic_control(task, method = "optim")
+  task <- sc_placebo_test(task, n_placebo = 3)
+
+  # The treated_ratio should be MSPE ratio (post/pre), not RMSPE
+  expected_ratio <- task$results$post_mspe / max(task$results$pre_mspe, 1e-10)
+  expect_equal(task$results$placebo$treated_ratio, expected_ratio, tolerance = 1e-10)
+
+  # Field should be mspe_ratios (not rmspe_ratios)
+  expect_true("mspe_ratios" %in% names(task$results$placebo))
+  expect_false("rmspe_ratios" %in% names(task$results$placebo))
+})
+
+
+# --- Regression: Donor matrix validation for missing periods ---
+
+test_that("estimate_synthetic_control errors on donor with missing periods", {
+  # Bug: If a donor was missing pre-treatment periods, R would silently
+  # recycle values in the donor matrix.
+  d <- create_sc_test_data()
+
+  # Remove some pre-treatment periods from donor D2
+  incomplete_donors <- d$donor_data[!(d$donor_data$unit == "D2" &
+                                        d$donor_data$time <= 3), ]
+
+  task <- SyntheticControlTask$new(
+    d$treated_data, incomplete_donors, d$treatment_time
+  )
+
+  expect_error(
+    estimate_synthetic_control(task, method = "optim"),
+    "pre-treatment observations"
+  )
 })

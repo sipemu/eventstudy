@@ -332,7 +332,8 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
       ct_col <- intersect(ct_candidates, names(tbl))
 
       # t-distributed columns use pt; z-distributed columns use pnorm
-      t_dist_cols <- c("aar_t", "bmp_t", "caltime_t")
+      t_dist_cols <- c("aar_t", "bmp_t", "kp_t", "caltime_t",
+                        "caar_t", "cbmp_t", "ckp_t", "ccaltime_t")
 
       .compute_pval <- function(stat_vals, col_name, n_valid) {
         if (col_name %in% t_dist_cols) {

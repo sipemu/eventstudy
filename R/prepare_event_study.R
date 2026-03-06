@@ -106,6 +106,12 @@ prepare_event_study <- function(task, parameter_set) {
     filter(event_date == 1) %>%
     .[['tmp_index']]
 
+  if (length(event_index) != 1) {
+    stop("Event date '", request$event_date,
+         "' not found in data (or found multiple times). ",
+         "Check that the event date exists in the firm's trading data.")
+  }
+
   data_tbl = data_tbl %>%
     mutate(relative_index    = tmp_index - event_index,
            event_window      = ifelse((relative_index >= event_window_start) & (relative_index <= event_window_end), 1, 0),

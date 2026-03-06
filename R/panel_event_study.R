@@ -337,7 +337,10 @@ estimate_panel_event_study <- function(task,
 
   # Aggregate cohort-specific estimates to event-time estimates (IW weights)
   # Weight by cohort size
-  cohort_sizes <- table(panel[[task$treatment_time]][!is.na(panel[[task$treatment_time]])])
+  # Count unique units per cohort (not observations) for correct IW weighting
+  cohort_unit_df <- unique(panel[!is.na(panel[[task$treatment_time]]),
+                                  c(task$unit_id, task$treatment_time)])
+  cohort_sizes <- table(cohort_unit_df[[task$treatment_time]])
   cohort_weights <- as.numeric(cohort_sizes) / sum(cohort_sizes)
   names(cohort_weights) <- names(cohort_sizes)
 

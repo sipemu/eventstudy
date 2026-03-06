@@ -26,7 +26,12 @@ utils::globalVariables(c(
   # Phase 6: data download
   "adjusted", "date",
   # Phase 7: reports
-  "autocorr", "dof", "r2"
+  "autocorr", "dof", "r2",
+  # Phase 8: additional NSE variables
+  "excess_return", "market_excess", "fec_sigma", "day_index",
+  "sum_sar", "expected_return", "kp_t", "ckp_t",
+  "loss_market_cap", "caltime_t", "ccaltime_t",
+  "k", "model_k"
 ))
 
 #' @title EventStudy: Event Study Analysis in R

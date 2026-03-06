@@ -255,7 +255,7 @@ print.es_simulation <- function(x, ...) {
 #' @noRd
 .detect_stat_column <- function(tbl) {
   candidates <- c("aar_t", "aar_z", "bmp_t", "kp_t", "sign_z",
-                   "gsign_z", "rank_z")
+                   "gsign_z", "rank_z", "caltime_t")
   hit <- intersect(candidates, names(tbl))
   if (length(hit) == 0) stop("Cannot detect test statistic column.")
   hit[1]

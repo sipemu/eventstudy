@@ -67,8 +67,8 @@ test_that("CalendarTimePortfolioTest computes portfolio test", {
 
   expect_true("aar" %in% names(result))
   expect_true("caar" %in% names(result))
-  expect_true("aar_t" %in% names(result))
-  expect_true("caar_t" %in% names(result))
+  expect_true("caltime_t" %in% names(result))
+  expect_true("ccaltime_t" %in% names(result))
   expect_true("car_window" %in% names(result))
 
   expect_true(all(is.finite(result$aar)))

@@ -79,11 +79,26 @@ PatellZTest <- R6Class("PatellZTest",
                         #' calculated abnormal returns.
                         #' @param model The fitted model.
                         compute = function(data_tbl, model) {
+                          # Extract number of estimated parameters (k) from model df
+                          # df = m - k, so k = m - df. Default k=2 for MarketModel.
+                          model_k = model %>%
+                            dplyr::mutate(k = purrr::map_dbl(model, function(x) {
+                              df <- x$statistics$degree_of_freedom
+                              m_est <- sum(x$statistics$residuals != 0 | TRUE)
+                              if (!is.null(df) && length(df) == 1 && is.finite(df)) {
+                                length(x$statistics$residuals) - df
+                              } else {
+                                2L  # default: intercept + slope (MarketModel)
+                              }
+                            }))
+                          # Use median k across firms (should be same for all)
+                          k_param <- stats::median(model_k$k)
+
                           sd_asar = data_tbl %>%
                             dplyr::filter(estimation_window == 1) %>%
                             dplyr::group_by(firm_symbol) %>%
                             dplyr::summarise(m = dplyr::n(), .groups = "drop") %>%
-                            dplyr::mutate(Q_i = (m - 2) / (m - 4))
+                            dplyr::mutate(Q_i = (m - k_param) / (m - k_param - 2))
 
                           # Extract forecast error corrected sigma (vector per firm)
                           fec_sigma = model %>%
@@ -462,10 +477,10 @@ CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
                                           portfolio <- portfolio %>%
                                             dplyr::mutate(
                                               caar = cumsum(aar),
-                                              # Time-series t-stat: AAR_t / sd(AAR) * sqrt(T)
-                                              aar_t = aar / ts_sd,
+                                              # Time-series t-stat: AAR_t / sd(AAR)
+                                              caltime_t = aar / ts_sd,
                                               # CAAR t-stat: CAAR / (sd * sqrt(L))
-                                              caar_t = caar / (ts_sd * sqrt(seq_len(n_periods)))
+                                              ccaltime_t = caar / (ts_sd * sqrt(seq_len(n_periods)))
                                             )
 
                                           portfolio$car_window <- stringr::str_c(

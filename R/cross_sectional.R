@@ -111,11 +111,13 @@ cross_sectional_regression <- function(task, formula, data,
                         relative_index <= car_window[2])
       }
 
+      ar_vals <- event_data$abnormal_returns
+      car_val <- if (all(is.na(ar_vals))) NA_real_ else sum(ar_vals, na.rm = TRUE)
       tibble::tibble(
         event_id = eid,
         firm_symbol = sym,
         group = grp,
-        car = sum(event_data$abnormal_returns, na.rm = TRUE)
+        car = car_val
       )
     }
   )

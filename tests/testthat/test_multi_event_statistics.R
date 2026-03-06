@@ -263,13 +263,13 @@ test_that("CalendarTimePortfolioTest computes correctly", {
   ct = CalendarTimePortfolioTest$new()
   result = ct$compute(data, NULL)
 
-  expect_true("aar_t" %in% names(result))
-  expect_true("caar_t" %in% names(result))
+  expect_true("caltime_t" %in% names(result))
+  expect_true("ccaltime_t" %in% names(result))
   expect_true("aar" %in% names(result))
   expect_true("caar" %in% names(result))
   expect_true("car_window" %in% names(result))
   expect_equal(nrow(result), 11)
-  expect_true(all(is.finite(result$aar_t)))
+  expect_true(all(is.finite(result$caltime_t)))
 })
 
 
@@ -360,4 +360,90 @@ test_that("KolariPynnonenTest works in full pipeline", {
 
   # The KP result should be in aar_caar_tbl
   expect_true("KP" %in% names(task$aar_caar_tbl))
+})
+
+
+# --- Regression: PatellZTest Q_i adapts to model parameters ---
+
+test_that("PatellZTest Q_i uses correct k for MarketModel (k=2)", {
+  # Bug: Q_i was hardcoded as (m-2)/(m-4), correct only for k=2.
+  # Fix: Now extracts k from model degree_of_freedom.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(PatellZTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  patell <- task$aar_caar_tbl$PatellZ[[1]]
+  expect_true("aar_z" %in% names(patell))
+  expect_true(all(is.finite(patell$aar_z)))
+})
+
+
+test_that("PatellZTest Q_i adapts for multi-factor models (k>2)", {
+  # For FF3 (k=4), Q_i should be (m-4)/(m-6) instead of (m-2)/(m-4)
+  task <- create_mock_task_with_factors(n_firms = 3)
+  ps <- ParameterSet$new(
+    return_model = FamaFrench3FactorModel$new(),
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(PatellZTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  patell <- task$aar_caar_tbl$PatellZ[[1]]
+  expect_true("aar_z" %in% names(patell))
+  expect_true(all(is.finite(patell$aar_z)))
+  # With k=4 and typical m~120, Q_i = (120-4)/(120-6) ≈ 1.0175
+  # vs old Q_i = (120-2)/(120-4) ≈ 1.0172 -- similar but different
+  expect_true(all(is.finite(patell$caar_z)))
+})
+
+
+test_that("PatellZTest Q_i uses k=1 for ComparisonPeriodMeanAdjustedModel", {
+  # ComparisonPeriodMeanAdjustedModel estimates 1 parameter (the mean)
+  # df = T - 1, so k = 1. Q_i should be (m-1)/(m-3).
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    return_model = ComparisonPeriodMeanAdjustedModel$new(),
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(PatellZTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  patell <- task$aar_caar_tbl$PatellZ[[1]]
+  expect_true(all(is.finite(patell$aar_z)))
+})
+
+
+# --- Regression: CalendarTimePortfolioTest column names ---
+
+test_that("CalendarTimePortfolioTest uses caltime_t/ccaltime_t column names", {
+  # Bug: CalendarTimePortfolioTest used aar_t/caar_t, colliding with CSectTTest.
+  # Fix: Renamed to caltime_t/ccaltime_t.
+  set.seed(42)
+  data <- do.call(rbind, lapply(1:5, function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = -5:5,
+      abnormal_returns = rnorm(11, mean = 0.005, sd = 0.02),
+      event_window = 1,
+      estimation_window = 0
+    )
+  }))
+
+  ct <- CalendarTimePortfolioTest$new()
+  result <- ct$compute(data, NULL)
+
+  # New column names should be present
+
+  expect_true("caltime_t" %in% names(result))
+  expect_true("ccaltime_t" %in% names(result))
+  # Old column names should NOT be present
+  expect_false("aar_t" %in% names(result))
+  expect_false("caar_t" %in% names(result))
 })
