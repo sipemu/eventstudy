@@ -152,6 +152,94 @@ test_that("PatellZTest computes correctly", {
 })
 
 
+test_that("PatellZTest standardizes by sigma, not sqrt(sigma) (GH #6)", {
+  # Construct minimal 2-firm data with known ARs and sigmas
+  n_est = 20
+  n_ev = 3
+  data = do.call(rbind, lapply(1:2, function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = c(seq(-n_est, -1), 0:(n_ev - 1)),
+      abnormal_returns = c(rnorm(n_est, sd = 0.01), rep(0.02, n_ev)),
+      event_window = c(rep(0, n_est), rep(1, n_ev)),
+      estimation_window = c(rep(1, n_est), rep(0, n_ev))
+    )
+  }))
+
+  # Build model with known sigma values
+  sigma_vals = c(0.04, 0.08)
+  model_tbl = tibble::tibble(
+    firm_symbol = c("F1", "F2"),
+    model = lapply(sigma_vals, function(s) {
+      list(statistics = list(sigma = s, forecast_error_corrected_sigma = s * 1.1))
+    })
+  )
+
+  patell = PatellZTest$new()
+  result = patell$compute(data, model_tbl)
+
+  # Manually compute expected SAR for event window day 0
+  # SAR = AR / sigma (NOT AR / sqrt(sigma))
+  sar_f1 = 0.02 / sigma_vals[1]  # 0.5
+  sar_f2 = 0.02 / sigma_vals[2]  # 0.25
+  expected_aar_day0 = sar_f1 + sar_f2  # sum of SARs
+
+  day0 = result[result$relative_index == 0, ]
+  expect_equal(day0$aar, expected_aar_day0, tolerance = 1e-10)
+})
+
+
+test_that("PatellZTest CSAR cumsum is per-firm, not across firms (GH #6)", {
+  # With 2 firms and 3 event days, cumsum must reset per firm
+  n_est = 20
+  n_ev = 3
+  set.seed(99)
+  data = do.call(rbind, lapply(1:2, function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = c(seq(-n_est, -1), 0:(n_ev - 1)),
+      abnormal_returns = c(rnorm(n_est, sd = 0.01), c(0.01, 0.02, 0.03) * i),
+      event_window = c(rep(0, n_est), rep(1, n_ev)),
+      estimation_window = c(rep(1, n_est), rep(0, n_ev))
+    )
+  }))
+
+  sigma_val = 0.05
+  model_tbl = tibble::tibble(
+    firm_symbol = c("F1", "F2"),
+    model = lapply(1:2, function(i) {
+      list(statistics = list(sigma = sigma_val, forecast_error_corrected_sigma = sigma_val))
+    })
+  )
+
+  patell = PatellZTest$new()
+  result = patell$compute(data, model_tbl)
+
+  # The CSAR for firm 2 at day 0 should be its own SAR, not accumulated from firm 1
+  # If cumsum ran across firms, firm 2's CSAR at day 0 would include firm 1's cumsum
+  # Verify caar_z is finite and has the expected number of rows
+  expect_equal(nrow(result), n_ev)
+  expect_true(all(is.finite(result$caar_z)))
+
+  # More specific: manually compute what caar_z at day 0 should be
+  # SAR_F1_day0 = 0.01 / 0.05 = 0.2, SAR_F2_day0 = 0.02 / 0.05 = 0.4
+  # CSAR at day 0 = just the first SAR (cumsum of length 1)
+  # Q_F1 = (20-2)/(20-4) = 18/16 = 1.125, same for F2
+  Q_per_firm = (n_est - 2) / (n_est - 4)
+  sar_f1_d0 = 0.01 / sigma_val
+  sar_f2_d0 = 0.02 / sigma_val
+  # At day 0, n=1, csar = cumsum[1] / sqrt(1 * Q) = sar / sqrt(Q)
+  csar_f1_d0 = sar_f1_d0 / sqrt(1 * Q_per_firm)
+  csar_f2_d0 = sar_f2_d0 / sqrt(1 * Q_per_firm)
+  expected_caar_z_d0 = (1 / sqrt(2)) * (csar_f1_d0 + csar_f2_d0)
+
+  day0 = result[result$relative_index == 0, ]
+  expect_equal(day0$caar_z, expected_caar_z_d0, tolerance = 1e-10)
+})
+
+
 test_that("CalendarTimePortfolioTest computes correctly", {
   set.seed(42)
   data = do.call(rbind, lapply(1:5, function(i) {
