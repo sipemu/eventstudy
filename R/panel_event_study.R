@@ -67,9 +67,9 @@ PanelEventStudyTask <- R6::R6Class(
       cat("PanelEventStudyTask\n")
       n_units <- length(unique(self$panel_data[[self$unit_id]]))
       n_periods <- length(unique(self$panel_data[[self$time_id]]))
-      n_treated <- sum(!is.na(unique(
-        self$panel_data[[self$treatment_time]][self$panel_data[[self$treatment]] == 1]
-      )))
+      n_treated <- length(unique(
+        self$panel_data[[self$unit_id]][!is.na(self$panel_data[[self$treatment_time]])]
+      ))
 
       cat("  Units:   ", n_units, "\n")
       cat("  Periods: ", n_periods, "\n")
@@ -546,14 +546,6 @@ estimate_panel_event_study <- function(task,
          "method='borusyak_jaravel_spiess'. ",
          "Install it with: install.packages('didimputation')")
   }
-
-  # didimputation expects first_stage to be specified
-  fml <- stats::as.formula(
-    paste(task$outcome, "~ 0 |", task$unit_id, "+", task$time_id)
-  )
-
-  # Create horizon variable (relative time for treated, NA for untreated)
-  panel$.horizon <- panel$.rel_time
 
   result <- didimputation::did_imputation(
     data = as.data.frame(panel),

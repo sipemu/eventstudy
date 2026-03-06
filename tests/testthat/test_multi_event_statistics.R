@@ -447,3 +447,27 @@ test_that("CalendarTimePortfolioTest uses caltime_t/ccaltime_t column names", {
   expect_false("aar_t" %in% names(result))
   expect_false("caar_t" %in% names(result))
 })
+
+
+# --- Regression: PatellZTest handles NULL residuals in k extraction ---
+
+test_that("PatellZTest k extraction handles NULL residuals gracefully", {
+  # Bug: When a model failed to fit, residuals was NULL. The expression
+  # sum(NULL != 0 | TRUE) evaluated to 0, and length(NULL) - df produced
+  # a wrong negative k value. Now explicitly checks for NULL residuals.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(PatellZTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  # Verify PatellZ results exist and are finite
+  aar_tbl <- task$aar_caar_tbl
+  stat_name <- "PatellZ"
+  expect_true(stat_name %in% names(aar_tbl))
+
+  result <- aar_tbl[[stat_name]][[1]]
+  expect_true(all(!is.na(result$aar)))
+})

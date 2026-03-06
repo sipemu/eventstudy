@@ -205,6 +205,7 @@ download_factor_data <- function(model = c("ff3", "ff5", "mom"),
   }, error = function(e) {
     stop("Failed to download factor data: ", conditionMessage(e))
   }, finally = {
+    if (exists("csv_files")) unlink(csv_files)
     unlink(tmp_zip)
   })
 }

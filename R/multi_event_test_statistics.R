@@ -84,9 +84,10 @@ PatellZTest <- R6Class("PatellZTest",
                           model_k = model %>%
                             dplyr::mutate(k = purrr::map_dbl(model, function(x) {
                               df <- x$statistics$degree_of_freedom
-                              m_est <- sum(x$statistics$residuals != 0 | TRUE)
-                              if (!is.null(df) && length(df) == 1 && is.finite(df)) {
-                                length(x$statistics$residuals) - df
+                              resid <- x$statistics$residuals
+                              if (!is.null(df) && !is.null(resid) &&
+                                  length(df) == 1 && is.finite(df)) {
+                                length(resid) - df
                               } else {
                                 2L  # default: intercept + slope (MarketModel)
                               }

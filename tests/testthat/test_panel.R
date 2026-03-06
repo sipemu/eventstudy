@@ -92,6 +92,20 @@ test_that("PanelEventStudyTask print works", {
   expect_output(print(task), "Periods:")
 })
 
+
+# --- Regression: print counts treated units, not cohorts ---
+
+test_that("PanelEventStudyTask print reports correct treated unit count", {
+  # Bug: print counted unique treatment_time values (cohorts), not unique
+  # unit_ids with non-NA treatment_time (treated units).
+  panel <- create_mock_panel_data(n_units = 20, n_treated = 10)
+  task <- PanelEventStudyTask$new(panel)
+
+  # All 10 treated units share the same treatment period, so there's 1 cohort
+  # but 10 treated units. The print should report "10 unit(s)", not "1 unit(s)".
+  expect_output(print(task), "10 unit\\(s\\)")
+})
+
 test_that("static_twfe estimates treatment effect", {
   panel <- create_mock_panel_data()
   task <- PanelEventStudyTask$new(panel)
