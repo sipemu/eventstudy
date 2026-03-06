@@ -60,7 +60,7 @@ SimpleReturn <- R6Class("SimpleReturn",
                           #' return will be saved.
                           calculate_return = function(tbl, in_column = "adjusted", out_column="adjusted_return") {
                             tbl %>%
-                              mutate(!!rlang::sym(out_column) := (!!rlang::sym(in_column) - lag(!!rlang::sym(in_column))) / !!rlang::sym(in_column))
+                              mutate(!!rlang::sym(out_column) := (!!rlang::sym(in_column) - lag(!!rlang::sym(in_column))) / lag(!!rlang::sym(in_column)))
                           }
                         )
 )

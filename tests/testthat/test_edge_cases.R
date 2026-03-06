@@ -285,12 +285,14 @@ test_that("PatellZTest with very short estimation window (m <= 4)", {
 # Return calculation edge cases
 # ============================================================================
 
-test_that("SimpleReturn with zero price produces Inf", {
+test_that("SimpleReturn with zero price produces correct result or Inf", {
   sr = SimpleReturn$new()
   tbl = tibble::tibble(p = c(100, 0, 50))
   result = sr$calculate_return(tbl, "p", "r")
-  # (0 - 100) / 0 is -Inf or NaN
-  expect_true(is.infinite(result$r[2]) || is.nan(result$r[2]))
+  # (0 - 100) / lag(100) = -1 (divides by lagged price)
+  expect_equal(result$r[2], -1)
+  # (50 - 0) / lag(0) = Inf (divides by lagged zero)
+  expect_true(is.infinite(result$r[3]))
 })
 
 

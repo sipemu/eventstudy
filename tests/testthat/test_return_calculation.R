@@ -6,9 +6,9 @@ test_that("SimpleReturn calculates correctly", {
   expect_true("pct" %in% names(tbl))
   expect_true(is.na(tbl$pct[1]))
   expect_equal(length(tbl$pct), 5)
-  # Check approximate values
-  mean_diff = mean(tbl$pct - c(NA, 0.0196, 0.0192, -0.0196, -0.00990), na.rm = TRUE)
-  expect_lt(abs(mean_diff), 1e-3)
+  # Standard simple return: (P[t] - P[t-1]) / P[t-1]
+  expected = c(NA, 0.002/0.1, 0.002/0.102, -0.002/0.104, -0.001/0.102)
+  expect_equal(tbl$pct, expected, tolerance = 1e-10)
 })
 
 
@@ -60,6 +60,15 @@ test_that("SimpleReturn name is correct", {
 
 test_that("LogReturn name is correct", {
   expect_equal(LogReturn$new()$name, "log return")
+})
+
+
+test_that("SimpleReturn divides by lagged price, not current price (GH #5)", {
+  sr = SimpleReturn$new()
+  tbl = tibble::tibble(adj = c(100, 110, 105))
+  result = sr$calculate_return(tbl, in_column = "adj", out_column = "ret")
+  expect_equal(result$ret[2], 10/100, tolerance = 1e-10)   # 0.1, not 10/110
+  expect_equal(result$ret[3], -5/110, tolerance = 1e-10)   # -0.04545..., not -5/105
 })
 
 

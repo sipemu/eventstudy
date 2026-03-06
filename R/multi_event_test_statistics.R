@@ -101,7 +101,7 @@ PatellZTest <- R6Class("PatellZTest",
                           aar_caar_stats_tmp = data_tbl %>%
                             dplyr::filter(event_window == 1) %>%
                             dplyr::left_join(model %>% dplyr::select(firm_symbol, sigma), by="firm_symbol") %>%
-                            dplyr::mutate(standardized_abnormal_returns = abnormal_returns / sqrt(sigma))
+                            dplyr::mutate(standardized_abnormal_returns = abnormal_returns / sigma)
 
                           # AAR & AAR Z Test
                           Q = sd_asar %>%
@@ -120,9 +120,9 @@ PatellZTest <- R6Class("PatellZTest",
                                              .groups = "drop")
 
                           sd_caar = aar_caar_stats_tmp %>%
-                            dplyr::mutate(csar = cumsum(standardized_abnormal_returns)) %>%
                             dplyr::left_join(sd_asar, by="firm_symbol") %>%
                             dplyr::group_by(firm_symbol) %>%
+                            dplyr::mutate(csar = cumsum(standardized_abnormal_returns)) %>%
                             dplyr::mutate(n      = 1:dplyr::n(),
                                           csar   = csar / (sqrt(n * Q))) %>%
                             dplyr::group_by(relative_index) %>%
