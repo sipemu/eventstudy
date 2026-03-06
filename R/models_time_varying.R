@@ -235,9 +235,21 @@ DCCGARCHModel <- R6Class("DCCGARCHModel",
                                res <- safe_fit(dcc_spec, data = returns_mat)
 
                                if (is.null(res$error)) {
-                                 private$.fitted_model <- res$result
-                                 private$.is_fitted <- TRUE
-                                 private$calculate_statistics(data_tbl)
+                                 # Check convergence of underlying GARCH fits
+                                 converged <- tryCatch({
+                                   # rmgarch does not expose a single convergence flag;
+                                   # check that covariance matrices are finite
+                                   H_check <- rmgarch::rcov(res$result)
+                                   all(is.finite(H_check))
+                                 }, error = function(e) FALSE)
+                                 if (converged) {
+                                   private$.fitted_model <- res$result
+                                   private$.is_fitted <- TRUE
+                                   private$calculate_statistics(data_tbl)
+                                 } else {
+                                   private$.is_fitted <- FALSE
+                                   warning("DCC-GARCH model produced non-finite covariance. Returning NA.")
+                                 }
                                } else {
                                  private$.is_fitted <- FALSE
                                  private$.error <- res$error
@@ -278,11 +290,20 @@ DCCGARCHModel <- R6Class("DCCGARCHModel",
                                # Time-varying beta: Cov(firm, market) / Var(market)
                                beta_t <- numeric(n_t)
                                for (t in seq_len(n_t)) {
-                                 beta_t[t] <- H[1, 2, t] / H[2, 2, t]
+                                 mkt_var <- H[2, 2, t]
+                                 if (is.finite(mkt_var) && mkt_var > .Machine$double.eps) {
+                                   beta_t[t] <- H[1, 2, t] / mkt_var
+                                 } else {
+                                   beta_t[t] <- NA_real_
+                                 }
                                }
 
-                               # Use last beta for prediction
+                               # Use last non-NA beta for prediction
                                beta_last <- beta_t[n_t]
+                               if (is.na(beta_last)) {
+                                 non_na <- which(!is.na(beta_t))
+                                 beta_last <- if (length(non_na) > 0) beta_t[non_na[length(non_na)]] else 0
+                               }
 
                                # Extract conditional sigma for firm
                                sigma_t <- sqrt(H[1, 1, ])
@@ -298,7 +319,7 @@ DCCGARCHModel <- R6Class("DCCGARCHModel",
                                private$.statistics$alpha <- alpha_last
                                private$.statistics$beta <- beta_last
                                private$.statistics$sigma <- mean(sigma_t, na.rm = TRUE)
-                               private$.statistics$degree_of_freedom <- n_t - 4
+                               private$.statistics$degree_of_freedom <- max(n_t - 4, 1)
                                private$.statistics$beta_t <- beta_t
                                private$.statistics$sigma_t <- sigma_t
 

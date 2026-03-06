@@ -30,7 +30,10 @@ CSectTTest <- R6Class("CSectTTest",
                                           n_valid_events = sum(!is.na(abnormal_returns)),
                                           n_pos          = sum(abnormal_returns >= 0, na.rm = TRUE),
                                           n_neg          = sum(abnormal_returns < 0, na.rm = TRUE),
-                                          aar_t          = sqrt(n_valid_events) * aar / sd(abnormal_returns, na.rm=TRUE),
+                                          aar_t          = {
+                                            sd_ar <- sd(abnormal_returns, na.rm = TRUE)
+                                            if (is.finite(sd_ar) && sd_ar > 0) sqrt(n_valid_events) * aar / sd_ar else NA_real_
+                                          },
                                           .groups = "drop")
 
                        # Calculate SD_CAAR for each window
@@ -38,15 +41,17 @@ CSectTTest <- R6Class("CSectTTest",
                          dplyr::filter(event_window == 1) %>%
                          dplyr::select(event_id, relative_index, abnormal_returns) %>%
                          dplyr::group_by(event_id) %>%
-                         dplyr::mutate(car = cumsum(abnormal_returns)) %>%
+                         dplyr::mutate(car = cumsum(dplyr::coalesce(abnormal_returns, 0))) %>%
                          dplyr::group_by(relative_index) %>%
                          dplyr::summarise(sd_caar = sd(car, na.rm=TRUE))
 
                        # Finally, the t statistic for CAAR and each window is calculated
                        aar_caar_stats = aar_caar_stats %>%
-                         dplyr::mutate(caar = cumsum(aar)) %>%
+                         dplyr::mutate(caar = cumsum(dplyr::coalesce(aar, 0))) %>%
                          dplyr::left_join(sd_caar, by="relative_index") %>%
-                         dplyr::mutate(caar_t = sqrt(n_valid_events) * caar / sd_caar) %>%
+                         dplyr::mutate(caar_t = ifelse(is.finite(sd_caar) & sd_caar > 0,
+                                                        sqrt(n_valid_events) * caar / sd_caar,
+                                                        NA_real_)) %>%
                          dplyr::select(-sd_caar)
 
                        aar_caar_stats$car_window = stringr::str_c("[", aar_caar_stats$relative_index[1], ", ", aar_caar_stats$relative_index, "]")
@@ -145,14 +150,14 @@ PatellZTest <- R6Class("PatellZTest",
                           sd_caar = aar_caar_stats_tmp %>%
                             dplyr::left_join(sd_asar, by = "firm_symbol") %>%
                             dplyr::group_by(firm_symbol) %>%
-                            dplyr::mutate(csar = cumsum(standardized_abnormal_returns),
+                            dplyr::mutate(csar = cumsum(dplyr::coalesce(standardized_abnormal_returns, 0)),
                                           n    = dplyr::row_number(),
                                           csar = csar / sqrt(n * .data$Q_i)) %>%
                             dplyr::group_by(relative_index) %>%
-                            dplyr::summarise(caar_z = 1 / sqrt(dplyr::n()) * sum(csar))
+                            dplyr::summarise(caar_z = 1 / sqrt(dplyr::n()) * sum(csar, na.rm = TRUE))
 
                           aar_caar_stats = aar_caar_stats %>%
-                            dplyr::mutate(caar = cumsum(aar)) %>%
+                            dplyr::mutate(caar = cumsum(dplyr::coalesce(aar, 0))) %>%
                             dplyr::left_join(sd_caar, by = "relative_index")
 
                           aar_caar_stats$car_window = stringr::str_c("[", aar_caar_stats$relative_index[1], ", ", aar_caar_stats$relative_index, "]")
@@ -194,8 +199,10 @@ SignTest <- R6Class("SignTest",
                           ) %>%
                           dplyr::mutate(
                             # Sign test: (n_pos - 0.5*N) / (0.5*sqrt(N))
-                            sign_z = (n_pos - 0.5 * n_valid_events) / (0.5 * sqrt(n_valid_events)),
-                            caar   = cumsum(aar)
+                            sign_z = ifelse(n_valid_events > 0,
+                                            (n_pos - 0.5 * n_valid_events) / (0.5 * sqrt(n_valid_events)),
+                                            NA_real_),
+                            caar   = cumsum(dplyr::coalesce(aar, 0))
                           )
 
                         # Cumulative sign test
@@ -203,7 +210,7 @@ SignTest <- R6Class("SignTest",
                           dplyr::filter(event_window == 1) %>%
                           dplyr::select(event_id, relative_index, abnormal_returns) %>%
                           dplyr::group_by(event_id) %>%
-                          dplyr::mutate(car = cumsum(abnormal_returns)) %>%
+                          dplyr::mutate(car = cumsum(dplyr::coalesce(abnormal_returns, 0))) %>%
                           dplyr::group_by(relative_index) %>%
                           dplyr::summarise(
                             n_pos_car = sum(car > 0, na.rm = TRUE),
@@ -266,9 +273,13 @@ GeneralizedSignTest <- R6Class("GeneralizedSignTest",
                                        .groups = "drop"
                                      ) %>%
                                      dplyr::mutate(
-                                       gsign_z = (n_pos - n_valid_events * p_hat) /
-                                         sqrt(n_valid_events * p_hat * (1 - p_hat)),
-                                       caar = cumsum(aar)
+                                       gsign_z = {
+                                         denom <- sqrt(n_valid_events * p_hat * (1 - p_hat))
+                                         ifelse(is.finite(denom) & denom > 0,
+                                                (n_pos - n_valid_events * p_hat) / denom,
+                                                NA_real_)
+                                       },
+                                       caar = cumsum(dplyr::coalesce(aar, 0))
                                      )
 
                                    # Cumulative generalized sign test
@@ -276,13 +287,17 @@ GeneralizedSignTest <- R6Class("GeneralizedSignTest",
                                      dplyr::filter(event_window == 1) %>%
                                      dplyr::select(event_id, relative_index, abnormal_returns) %>%
                                      dplyr::group_by(event_id) %>%
-                                     dplyr::mutate(car = cumsum(abnormal_returns)) %>%
+                                     dplyr::mutate(car = cumsum(dplyr::coalesce(abnormal_returns, 0))) %>%
                                      dplyr::group_by(relative_index) %>%
                                      dplyr::summarise(
                                        n_pos_car = sum(car > 0, na.rm = TRUE),
                                        n_valid   = sum(!is.na(car)),
-                                       cgsign_z  = (n_pos_car - n_valid * p_hat) /
-                                         sqrt(n_valid * p_hat * (1 - p_hat)),
+                                       cgsign_z  = {
+                                         denom <- sqrt(n_valid * p_hat * (1 - p_hat))
+                                         ifelse(is.finite(denom) & denom > 0,
+                                                (n_pos_car - n_valid * p_hat) / denom,
+                                                NA_real_)
+                                       },
                                        .groups = "drop"
                                      )
 
@@ -352,8 +367,9 @@ RankTest <- R6Class("RankTest",
                             .groups = "drop"
                           ) %>%
                           dplyr::mutate(
-                            rank_z = mean_rank / S_rank,
-                            caar   = cumsum(aar)
+                            rank_z = ifelse(is.finite(S_rank) & S_rank > 0,
+                                            mean_rank / S_rank, NA_real_),
+                            caar   = cumsum(dplyr::coalesce(aar, 0))
                           )
 
                         aar_stats$car_window = stringr::str_c("[", aar_stats$relative_index[1], ", ", aar_stats$relative_index, "]")
@@ -407,22 +423,26 @@ BMPTest <- R6Class("BMPTest",
                            n_neg          = sum(abnormal_returns <= 0, na.rm = TRUE),
                            mean_sar       = mean(sar, na.rm = TRUE),
                            sd_sar         = sd(sar, na.rm = TRUE),
-                           bmp_t          = sqrt(n_valid_events) * mean_sar / sd_sar,
+                           bmp_t          = ifelse(is.finite(sd_sar) & sd_sar > 0,
+                                                    sqrt(n_valid_events) * mean_sar / sd_sar,
+                                                    NA_real_),
                            .groups = "drop"
                          ) %>%
-                         dplyr::mutate(caar = cumsum(aar))
+                         dplyr::mutate(caar = cumsum(dplyr::coalesce(aar, 0)))
 
                        # Cumulative BMP
                        cum_sar = sar_data %>%
                          dplyr::select(event_id, relative_index, sar) %>%
                          dplyr::group_by(event_id) %>%
-                         dplyr::mutate(csar = cumsum(sar)) %>%
+                         dplyr::mutate(csar = cumsum(dplyr::coalesce(sar, 0))) %>%
                          dplyr::group_by(relative_index) %>%
                          dplyr::summarise(
                            mean_csar = mean(csar, na.rm = TRUE),
                            sd_csar   = sd(csar, na.rm = TRUE),
                            n_valid   = sum(!is.na(csar)),
-                           cbmp_t    = sqrt(n_valid) * mean_csar / sd_csar,
+                           cbmp_t    = ifelse(is.finite(sd_csar) & sd_csar > 0,
+                                              sqrt(n_valid) * mean_csar / sd_csar,
+                                              NA_real_),
                            .groups = "drop"
                          )
 
@@ -483,11 +503,14 @@ CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
 
                                           portfolio <- portfolio %>%
                                             dplyr::mutate(
-                                              caar = cumsum(aar),
+                                              caar = cumsum(dplyr::coalesce(aar, 0)),
                                               # Time-series t-stat: AAR_t / sd(AAR)
-                                              caltime_t = aar / ts_sd,
+                                              caltime_t = ifelse(is.finite(ts_sd) & ts_sd > 0,
+                                                                  aar / ts_sd, NA_real_),
                                               # CAAR t-stat: CAAR / (sd * sqrt(L))
-                                              ccaltime_t = caar / (ts_sd * sqrt(seq_len(n_periods)))
+                                              ccaltime_t = ifelse(is.finite(ts_sd) & ts_sd > 0,
+                                                                   caar / (ts_sd * sqrt(seq_len(n_periods))),
+                                                                   NA_real_)
                                             )
 
                                           portfolio$car_window <- stringr::str_c(
@@ -552,22 +575,26 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                        n_neg          = sum(abnormal_returns <= 0, na.rm = TRUE),
                                        mean_sar       = mean(sar, na.rm = TRUE),
                                        sd_sar         = sd(sar, na.rm = TRUE),
-                                       bmp_t          = sqrt(n_valid_events) * mean_sar / sd_sar,
+                                       bmp_t          = ifelse(is.finite(sd_sar) & sd_sar > 0,
+                                                                sqrt(n_valid_events) * mean_sar / sd_sar,
+                                                                NA_real_),
                                        .groups = "drop"
                                      ) %>%
-                                     dplyr::mutate(caar = cumsum(aar))
+                                     dplyr::mutate(caar = cumsum(dplyr::coalesce(aar, 0)))
 
                                    # Cumulative BMP
                                    cum_sar <- sar_data %>%
                                      dplyr::select(event_id, relative_index, sar) %>%
                                      dplyr::group_by(event_id) %>%
-                                     dplyr::mutate(csar = cumsum(sar)) %>%
+                                     dplyr::mutate(csar = cumsum(dplyr::coalesce(sar, 0))) %>%
                                      dplyr::group_by(relative_index) %>%
                                      dplyr::summarise(
                                        mean_csar = mean(csar, na.rm = TRUE),
                                        sd_csar   = sd(csar, na.rm = TRUE),
                                        n_valid   = sum(!is.na(csar)),
-                                       cbmp_t    = sqrt(n_valid) * mean_csar / sd_csar,
+                                       cbmp_t    = ifelse(is.finite(sd_csar) & sd_csar > 0,
+                                                           sqrt(n_valid) * mean_csar / sd_csar,
+                                                           NA_real_),
                                        .groups = "drop"
                                      )
 
@@ -600,8 +627,10 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                    # KP adjustment factor: sqrt((1 - r_bar) / (1 + (n-1)*r_bar))
                                    n <- aar_stats$n_valid_events[1]
                                    denom <- 1 + (n - 1) * r_bar
-                                   if (is.finite(denom) && denom > 0) {
-                                     kp_adj <- sqrt((1 - r_bar) / denom)
+                                   numer <- 1 - r_bar
+                                   if (is.finite(denom) && denom > 0 &&
+                                       is.finite(numer) && numer >= 0) {
+                                     kp_adj <- sqrt(numer / denom)
                                    } else {
                                      kp_adj <- 1
                                    }

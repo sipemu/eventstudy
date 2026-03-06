@@ -322,10 +322,10 @@ print.EventStudySummary = function(x, ...) {
     for (sym in names(x$model_stats)) {
       s = x$model_stats[[sym]]
       if (isTRUE(s$is_fitted)) {
-        cat("  ", sym, ": alpha=", round(s$alpha, 6),
-            " beta=", round(s$beta, 4),
-            " sigma=", round(s$sigma, 6),
-            " R2=", round(s$r2, 4), "\n")
+        cat("  ", sym, ": alpha=", round(s$alpha %||% NA_real_, 6),
+            " beta=", round(s$beta %||% NA_real_, 4),
+            " sigma=", round(s$sigma %||% NA_real_, 6),
+            " R2=", round(s$r2 %||% NA_real_, 4), "\n")
       } else {
         cat("  ", sym, ": NOT FITTED\n")
       }

@@ -36,7 +36,13 @@ LogReturn <- R6Class("LogReturn",
                        #' return will be saved.
                        calculate_return = function(tbl, in_column = "adjusted", out_column="adjusted_return") {
                          tbl %>%
-                           mutate(!!rlang::sym(out_column) := log(!!rlang::sym(in_column) / lag(!!rlang::sym(in_column))))
+                           mutate(!!rlang::sym(out_column) := {
+                             price <- !!rlang::sym(in_column)
+                             lagged <- lag(price)
+                             ratio <- price / lagged
+                             # Guard: log(0) = -Inf, log(negative) = NaN
+                             ifelse(is.finite(ratio) & ratio > 0, log(ratio), NA_real_)
+                           })
                        }
                      )
 )
@@ -60,7 +66,13 @@ SimpleReturn <- R6Class("SimpleReturn",
                           #' return will be saved.
                           calculate_return = function(tbl, in_column = "adjusted", out_column="adjusted_return") {
                             tbl %>%
-                              mutate(!!rlang::sym(out_column) := (!!rlang::sym(in_column) - lag(!!rlang::sym(in_column))) / lag(!!rlang::sym(in_column)))
+                              mutate(!!rlang::sym(out_column) := {
+                                price <- !!rlang::sym(in_column)
+                                lagged <- lag(price)
+                                ifelse(is.finite(lagged) & lagged != 0,
+                                       (price - lagged) / lagged,
+                                       NA_real_)
+                              })
                           }
                         )
 )

@@ -93,7 +93,12 @@ ModelBase <- R6Class("ModelBase",
                          private$.statistics$forecast_error_corrected_sigma_car = forecast_error_corrected_sigma_car
                        },
                        first_order_autocorrelation = function(residuals) {
-                         first_order_acf = acf(c(na.omit(residuals)), plot=F, 1, type="correlation")
+                         clean_resid <- c(na.omit(residuals))
+                         if (length(clean_resid) < 2) {
+                           private$.statistics$first_order_auto_correlation <- NA_real_
+                           return(invisible(NULL))
+                         }
+                         first_order_acf = acf(clean_resid, plot=F, 1, type="correlation")
                          first_order_auto_correlation = first_order_acf[[1]][, , 1][2]
                          private$.statistics$first_order_auto_correlation = first_order_auto_correlation
                        },
@@ -492,24 +497,30 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                   # Store all coefficients
                                   coefs <- mod$coefficients
                                   coef_names <- names(coefs)
+                                  summary_coef_names <- rownames(mod_summary$coefficients)
                                   for (i in seq_along(coefs)) {
                                     val <- coefs[i]
                                     names(val) <- NULL
                                     private$.statistics[[coef_names[i]]] <- val
-                                    if (nrow(mod_summary$coefficients) >= i) {
+                                    # Match by name, not position (lm drops collinear terms)
+                                    if (coef_names[i] %in% summary_coef_names) {
                                       private$.statistics[[paste0("pval_", coef_names[i])]] <-
-                                        mod_summary$coefficients[i, 4]
+                                        mod_summary$coefficients[coef_names[i], 4]
                                     }
                                   }
 
                                   # Map intercept to alpha, first factor to beta for compatibility
                                   private$.statistics$alpha <- coefs[1]
                                   names(private$.statistics$alpha) <- NULL
-                                  private$.statistics$pval_alpha <- mod_summary$coefficients[1, 4]
+                                  if (coef_names[1] %in% summary_coef_names) {
+                                    private$.statistics$pval_alpha <- mod_summary$coefficients[coef_names[1], 4]
+                                  }
                                   if (length(coefs) >= 2) {
                                     private$.statistics$beta <- coefs[2]
                                     names(private$.statistics$beta) <- NULL
-                                    private$.statistics$pval_beta <- mod_summary$coefficients[2, 4]
+                                    if (coef_names[2] %in% summary_coef_names) {
+                                      private$.statistics$pval_beta <- mod_summary$coefficients[coef_names[2], 4]
+                                    }
                                   }
 
                                   private$.statistics$sigma <- mod_summary$sigma
@@ -578,6 +589,13 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                       private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
                                       private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
                                     }
+                                  } else if (nrow(event_window_tbl) > 0) {
+                                    # Fallback when X'X is singular: use constant-mean FEC
+                                    n_est <- sum(!is.na(mod$residuals))
+                                    n_event <- nrow(event_window_tbl)
+                                    correction <- sigma * sqrt(1 + 1 / max(n_est, 1))
+                                    private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                                    private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
                                   }
                                 }
                               )
@@ -783,9 +801,19 @@ GARCHModel <- R6Class("GARCHModel",
                            )
 
                            if (is.null(res$error)) {
-                             private$.fitted_model <- res$result
-                             private$.is_fitted <- TRUE
-                             private$calculate_statistics(data_tbl)
+                             # Check convergence: solver status 0 = converged
+                             converged <- tryCatch({
+                               conv <- rugarch::convergence(res$result)
+                               is.numeric(conv) && conv == 0
+                             }, error = function(e) TRUE)  # if no convergence method, assume OK
+                             if (converged) {
+                               private$.fitted_model <- res$result
+                               private$.is_fitted <- TRUE
+                               private$calculate_statistics(data_tbl)
+                             } else {
+                               private$.is_fitted <- FALSE
+                               warning("GARCH model did not converge. Returning NA abnormal returns.")
+                             }
                            } else {
                              private$.is_fitted <- FALSE
                              private$.error <- res$error
@@ -822,6 +850,10 @@ GARCHModel <- R6Class("GARCHModel",
                            # Extract conditional sigma from estimation window
                            cond_sigma <- as.numeric(rugarch::sigma(garch_fit))
                            avg_sigma <- mean(cond_sigma, na.rm = TRUE)
+                           if (!is.finite(avg_sigma) || avg_sigma <= 0) {
+                             avg_sigma <- sd(as.numeric(rugarch::residuals(garch_fit)), na.rm = TRUE)
+                             if (!is.finite(avg_sigma) || avg_sigma <= 0) avg_sigma <- NA_real_
+                           }
 
                            coefs <- rugarch::coef(garch_fit)
                            private$.statistics$alpha <- coefs["mu"]
@@ -829,7 +861,7 @@ GARCHModel <- R6Class("GARCHModel",
                            private$.statistics$sigma <- avg_sigma
                            private$.statistics$garch_sigma <- cond_sigma
                            private$.statistics$degree_of_freedom <-
-                             length(cond_sigma) - length(coefs)
+                             max(length(cond_sigma) - length(coefs), 1)
 
                            # Residuals
                            residuals <- as.numeric(rugarch::residuals(garch_fit))

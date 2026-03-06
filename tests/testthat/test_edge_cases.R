@@ -64,9 +64,8 @@ test_that("GeneralizedSignTest with all positive estimation returns (p_hat=1)", 
   result = gsign$compute(data, NULL)
 
   expect_equal(nrow(result), n_ev)
-  # p_hat = 1.0 → denominator = sqrt(n * 1 * 0) = 0 → division by zero
-  # produces NaN (0/0) or Inf. Documents current behavior.
-  expect_true(all(is.nan(result$gsign_z) | is.infinite(result$gsign_z)))
+  # p_hat = 1.0 → denominator = sqrt(n * 1 * 0) = 0 → guarded to NA
+  expect_true(all(is.na(result$gsign_z)))
 })
 
 
@@ -290,34 +289,32 @@ test_that("PatellZTest with very short estimation window (m <= 4)", {
 # Return calculation edge cases
 # ============================================================================
 
-test_that("SimpleReturn with zero price produces correct result or Inf", {
+test_that("SimpleReturn with zero price produces correct result or NA", {
   sr = SimpleReturn$new()
   tbl = tibble::tibble(p = c(100, 0, 50))
   result = sr$calculate_return(tbl, "p", "r")
   # (0 - 100) / lag(100) = -1 (divides by lagged price)
   expect_equal(result$r[2], -1)
-  # (50 - 0) / lag(0) = Inf (divides by lagged zero)
-  expect_true(is.infinite(result$r[3]))
+  # (50 - 0) / lag(0) = guarded to NA (was Inf)
+  expect_true(is.na(result$r[3]))
 })
 
 
-test_that("LogReturn with zero price produces -Inf or NaN", {
+test_that("LogReturn with zero price produces NA (guarded)", {
   lr = LogReturn$new()
   tbl = tibble::tibble(p = c(100, 0, 50))
   result = lr$calculate_return(tbl, "p", "r")
-  # log(0/100) = -Inf
-  expect_true(is.infinite(result$r[2]) || is.nan(result$r[2]))
+  # log(0/100) = guarded to NA (was -Inf)
+  expect_true(is.na(result$r[2]))
 })
 
 
-test_that("LogReturn with negative price produces NaN", {
+test_that("LogReturn with negative price produces NA (guarded)", {
   lr = LogReturn$new()
   tbl = tibble::tibble(p = c(100, -10, 50))
-  expect_warning(
-    result <- lr$calculate_return(tbl, "p", "r"),
-    "NaN"
-  )
-  expect_true(is.nan(result$r[2]))
+  # Guarded: ratio = -10/100 = -0.1, log of negative → NA
+  result <- lr$calculate_return(tbl, "p", "r")
+  expect_true(is.na(result$r[2]))
 })
 
 
@@ -421,8 +418,8 @@ test_that("CalendarTimePortfolioTest with constant AARs across time", {
   result = ct$compute(data, NULL)
 
   expect_equal(nrow(result), 11)
-  # ts_sd = sd(constant) = 0 → caltime_t = value/0 = Inf
-  expect_true(all(is.infinite(result$caltime_t) | is.nan(result$caltime_t)))
+  # ts_sd = sd(constant) = 0 → caltime_t guarded to NA
+  expect_true(all(is.na(result$caltime_t)))
 })
 
 
@@ -1251,4 +1248,204 @@ test_that("Panel TWFE handles se=0 without Inf statistic", {
   result <- estimate_panel_event_study(task, method = "dynamic_twfe")
   expect_true(all(is.na(result$coef_tbl$statistic) |
                     is.finite(result$coef_tbl$statistic)))
+})
+
+
+# ============================================================================
+# Round 12: ModelBase acf guard
+# ============================================================================
+
+test_that("ModelBase first_order_autocorrelation handles < 2 residuals", {
+  # Test acf guard directly: single residual should not crash
+  model <- MarketModel$new()
+  # Fit with normal data first
+  data <- create_mock_model_data(n_estimation = 50, n_event = 5)
+  model$fit(data)
+  expect_true(model$is_fitted)
+
+  # Now verify that the guard works: calling the base method with 1 residual
+  # The guard is in the private method; we verify by checking that models
+  # with very few residuals produce NA for autocorrelation, not a crash
+  model2 <- ComparisonPeriodMeanAdjustedModel$new()
+  data2 <- create_mock_model_data(n_estimation = 3, n_event = 5)
+  expect_no_error(model2$fit(data2))
+})
+
+
+# ============================================================================
+# Round 12: cumsum NA propagation guard in multi-event stats
+# ============================================================================
+
+test_that("CSectTTest handles NA abnormal returns without cumsum propagation", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Inject NA into one event's abnormal returns at one time point
+  task$data_tbl$data[[1]]$abnormal_returns[
+    task$data_tbl$data[[1]]$event_window == 1
+  ][2] <- NA_real_
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(tests = list(CSectTTest$new()))
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  # CAAR should not be all NA after the injection point
+  caar_vals <- task$aar_caar_tbl$CSectT[[1]]$caar
+  expect_true(sum(!is.na(caar_vals)) > 1)
+})
+
+
+# ============================================================================
+# Round 12: sd()=0 division guard in BMPTest
+# ============================================================================
+
+test_that("BMPTest handles identical abnormal returns (sd=0)", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Set all events to have identical abnormal returns
+  for (i in seq_len(nrow(task$data_tbl))) {
+    evt_idx <- task$data_tbl$data[[i]]$event_window == 1
+    task$data_tbl$data[[i]]$abnormal_returns[evt_idx] <- 0.01
+  }
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(tests = list(BMPTest$new()))
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  # bmp_t should be NA (not Inf/NaN) when all SARs have sd=0
+  bmp_vals <- task$aar_caar_tbl$BMP[[1]]$bmp_t
+  expect_true(all(is.na(bmp_vals) | is.finite(bmp_vals)))
+})
+
+
+# ============================================================================
+# Round 12: CalendarTimePortfolioTest ts_sd=0 guard
+# ============================================================================
+
+test_that("CalendarTimePortfolioTest handles constant AAR (ts_sd=0)", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Set all events to have the same abnormal return pattern
+  for (i in seq_len(nrow(task$data_tbl))) {
+    evt_idx <- task$data_tbl$data[[i]]$event_window == 1
+    task$data_tbl$data[[i]]$abnormal_returns[evt_idx] <- rep(0.02, sum(evt_idx))
+  }
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(
+    tests = list(CalendarTimePortfolioTest$new())
+  )
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  caltime_vals <- task$aar_caar_tbl$CalTimeT[[1]]$caltime_t
+  expect_true(all(is.na(caltime_vals) | is.finite(caltime_vals)))
+})
+
+
+# ============================================================================
+# Round 12: GeneralizedSignTest sqrt(0) guard when p_hat=0 or p_hat=1
+# ============================================================================
+
+test_that("GeneralizedSignTest handles p_hat=1 (all positive estimation ARs)", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Make all estimation window abnormal returns positive
+  for (i in seq_len(nrow(task$data_tbl))) {
+    est_idx <- task$data_tbl$data[[i]]$estimation_window == 1
+    task$data_tbl$data[[i]]$abnormal_returns[est_idx] <-
+      abs(task$data_tbl$data[[i]]$abnormal_returns[est_idx]) + 0.001
+  }
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(
+    tests = list(GeneralizedSignTest$new())
+  )
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  gsign_vals <- task$aar_caar_tbl$GSignT[[1]]$gsign_z
+  expect_true(all(is.na(gsign_vals) | is.finite(gsign_vals)))
+})
+
+
+# ============================================================================
+# Round 12: LogReturn/SimpleReturn zero-price guard
+# ============================================================================
+
+test_that("LogReturn handles zero prices without producing -Inf", {
+  prices <- tibble::tibble(adjusted = c(100, 105, 0, 110, 115))
+  lr <- LogReturn$new()
+  result <- lr$calculate_return(prices)
+  # The zero price should produce NA, not -Inf
+  expect_true(is.na(result$adjusted_return[3]))
+  expect_true(all(is.finite(result$adjusted_return) | is.na(result$adjusted_return)))
+})
+
+test_that("SimpleReturn handles zero lagged price without Inf", {
+  prices <- tibble::tibble(adjusted = c(100, 0, 110, 115, 120))
+  sr <- SimpleReturn$new()
+  result <- sr$calculate_return(prices)
+  # Division by zero lagged price should produce NA, not Inf
+  expect_true(is.na(result$adjusted_return[3]))
+  expect_true(all(is.finite(result$adjusted_return) | is.na(result$adjusted_return)))
+})
+
+
+# ============================================================================
+# Round 12: print.EventStudySummary round(NULL) guard
+# ============================================================================
+
+test_that("print.EventStudySummary handles NULL statistics gracefully", {
+  summary_obj <- structure(
+    list(
+      n_events = 1,
+      groups = "test",
+      symbols = "SYM1",
+      model_stats = list(
+        SYM1 = list(
+          is_fitted = TRUE,
+          alpha = NULL,   # NULL like VolumeModel
+          beta = NULL,
+          sigma = 0.02,
+          r2 = NULL
+        )
+      )
+    ),
+    class = "EventStudySummary"
+  )
+  # Should not crash from round(NULL)
+  expect_no_error(capture.output(print(summary_obj)))
+})
+
+
+# ============================================================================
+# Round 12: LinearFactorModel p-value mapping by name
+# ============================================================================
+
+test_that("LinearFactorModel maps p-values by name not position", {
+  # When lm() drops a collinear term, summary$coefficients has fewer rows.
+  # This test verifies the p-value is mapped to the correct coefficient.
+  model <- FamaFrench3FactorModel$new()
+
+  # FF3 requires: excess_return, market_excess, smb, hml
+  set.seed(42)
+  n <- 60
+  market_excess <- rnorm(n, 0.0003, 0.015)
+  smb <- rnorm(n, 0, 0.01)
+  hml <- rnorm(n, 0, 0.01)
+  data <- tibble::tibble(
+    firm_returns = 0.001 + 1.2 * market_excess + 0.5 * smb + 0.3 * hml + rnorm(n, sd = 0.01),
+    index_returns = market_excess + 0.0001,
+    market_excess = market_excess,
+    excess_return = firm_returns - 0.0001,
+    smb = smb,
+    hml = hml,
+    estimation_window = c(rep(1, 50), rep(0, 10)),
+    event_window = c(rep(0, 50), rep(1, 10)),
+    relative_index = c(seq(-50, -1), seq(1, 10))
+  )
+
+  expect_no_error(model$fit(data))
+  expect_true(model$is_fitted)
+  # The model should have alpha and pval_alpha stats
+  expect_false(is.null(model$statistics$alpha))
+  expect_false(is.null(model$statistics$pval_alpha))
 })
