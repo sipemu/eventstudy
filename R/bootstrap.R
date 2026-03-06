@@ -77,7 +77,7 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
 
   observed <- observed %>%
     dplyr::left_join(car_data, by = "relative_index", suffix = c("", "_car")) %>%
-    dplyr::mutate(caar_t = sqrt(n) * caar / sd_caar)
+    dplyr::mutate(caar_t = sqrt(n_car) * caar / sd_caar)
 
   obs_aar_t <- observed$aar_t
   obs_caar_t <- observed$caar_t
@@ -113,8 +113,9 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
       ) %>%
       dplyr::mutate(boot_aar_t = sqrt(n) * boot_aar / sd_boot)
 
-    boot_aar_exceed <- boot_aar_exceed +
-      as.integer(abs(boot_stats$boot_aar_t) >= abs(obs_aar_t))
+    comparison_aar <- abs(boot_stats$boot_aar_t) >= abs(obs_aar_t)
+    comparison_aar[is.na(comparison_aar)] <- FALSE
+    boot_aar_exceed <- boot_aar_exceed + as.integer(comparison_aar)
 
     if (statistic %in% c("caar", "both")) {
       boot_car <- boot_ar %>%
@@ -129,8 +130,9 @@ bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
         ) %>%
         dplyr::mutate(boot_caar_t = sqrt(n) * boot_caar / sd_boot_caar)
 
-      boot_caar_exceed <- boot_caar_exceed +
-        as.integer(abs(boot_car$boot_caar_t) >= abs(obs_caar_t))
+      comparison_caar <- abs(boot_car$boot_caar_t) >= abs(obs_caar_t)
+      comparison_caar[is.na(comparison_caar)] <- FALSE
+      boot_caar_exceed <- boot_caar_exceed + as.integer(comparison_caar)
     }
   }
 

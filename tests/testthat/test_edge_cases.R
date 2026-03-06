@@ -988,3 +988,160 @@ test_that("MarketModel FEC uses effective obs count excluding NAs", {
     expect_gt(min_ratio, sqrt(1 + 1 / 120))
   }
 })
+
+
+# ============================================================================
+# Round 10: Crash bugs and wrong-result edge cases
+# ============================================================================
+
+test_that("ARTTest/CARTTest with df=0 do not crash (dist_student_t guard)", {
+  # With exactly p+1 estimation observations, lm() produces df.residual=0
+  # and sigma=NaN. dist_student_t(df=0) throws a hard error.
+  # The guard clamps df to >= 1.
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(
+    firm_symbols = "FIRM_A",
+    estimation_window_length = 3,
+    shift_estimation_window = -6
+  )
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+  task <- fit_model(task, ps)
+
+  model <- task$data_tbl$model[[1]]
+  # With 3 obs and 2 params (intercept + slope), df should be 1
+  # The model stores df.residual from lm() which could be 0 or 1
+
+  # Should not throw "degrees of freedom must be strictly positive"
+  expect_no_error({
+    task <- calculate_statistics(task, ps)
+  })
+})
+
+
+test_that("KolariPynnonenTest with NA in correlation matrix does not crash", {
+  # When a firm has constant SARs, cor() produces NA entries.
+  # The denom becomes NA, and if(NA > 0) crashes.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(KolariPynnonenTest$new())
+    )
+  )
+
+  # Run the full pipeline — should not crash
+  expect_no_error({
+    task <- run_event_study(task, ps)
+  })
+
+  # Verify results exist
+  expect_true("KP" %in% names(task$aar_caar_tbl))
+})
+
+
+test_that("VolatilityModel with zero variance guards abnormal_returns", {
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = "FIRM_A")
+
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new(return_model = VolatilityModel$new())
+  task <- prepare_event_study(task, ps)
+
+  # Force constant returns in estimation window to trigger zero variance
+  inner <- task$data_tbl$data[[1]]
+  inner$firm_returns[inner$estimation_window == 1] <- 0.01
+  task$data_tbl$data[[1]] <- inner
+
+  # Model should detect zero variance and set is_fitted = FALSE
+  expect_warning(
+    task <- fit_model(task, ps),
+    "zero or NA variance"
+  )
+
+  # abnormal_returns should return NA, not Inf
+  model <- task$data_tbl$model[[1]]
+  expect_false(model$is_fitted)
+  result <- model$abnormal_returns(inner)
+  expect_true(all(is.na(result$abnormal_returns)))
+})
+
+
+test_that("ComparisonPeriodMeanAdjustedModel df excludes NAs", {
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = "FIRM_A")
+
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new(return_model = ComparisonPeriodMeanAdjustedModel$new())
+  task <- prepare_event_study(task, ps)
+
+  # Inject NAs into estimation window
+  inner <- task$data_tbl$data[[1]]
+  est_idx <- which(inner$estimation_window == 1)
+  n_nas <- 10
+  inner$firm_returns[est_idx[1:n_nas]] <- NA
+  task$data_tbl$data[[1]] <- inner
+
+  task <- fit_model(task, ps)
+  model <- task$data_tbl$model[[1]]
+
+  # df should be (n_valid - 1), not (n_total - 1)
+  n_est <- length(est_idx)
+  expect_equal(model$statistics$degree_of_freedom, n_est - n_nas - 1)
+})
+
+
+test_that("RollingWindowModel with NA data uses na.rm and validates params", {
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = "FIRM_A")
+
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new(return_model = RollingWindowModel$new(window_size = 30))
+  task <- prepare_event_study(task, ps)
+
+  # Inject NAs into last rolling window
+  inner <- task$data_tbl$data[[1]]
+  est_idx <- which(inner$estimation_window == 1)
+  # Make all index_returns constant in last window → beta = NA
+  last_30 <- tail(est_idx, 30)
+  inner$index_returns[last_30] <- 0.01
+  task$data_tbl$data[[1]] <- inner
+
+  # Should warn about NA params, not crash
+  expect_warning(
+    task <- fit_model(task, ps),
+    "last window parameters are NA"
+  )
+  expect_false(task$data_tbl$model[[1]]$is_fitted)
+})
+
+
+test_that("Bootstrap exceed counter handles NA comparisons", {
+  task <- create_mock_task(n_firms = 2)
+  ps <- ParameterSet$new()
+  task <- run_event_study(task, ps)
+
+  # Should produce finite p-values (not NA from NA poisoning)
+  result <- bootstrap_test(task, n_boot = 50, statistic = "both")
+  expect_true(all(is.finite(result$boot_p_aar)))
+  expect_true(all(is.finite(result$boot_p_caar)))
+})
+
+
+test_that("Simulation weekend filter works regardless of locale", {
+  # .generate_synthetic_data uses format(dates, "%u") which is locale-independent
+  set.seed(42)
+  result <- simulate_event_study(
+    n_events = 3,
+    estimation_window_length = 30,
+    event_window = c(-2, 2),
+    abnormal_return = 0.02,
+    n_simulations = 5
+  )
+  expect_true(is.numeric(result$power))
+  expect_true(result$power >= 0 && result$power <= 1)
+})

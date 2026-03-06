@@ -63,10 +63,10 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                      y <- firm_ret[start:end]
                                      x <- idx_ret[start:end]
 
-                                     x_bar <- mean(x)
-                                     y_bar <- mean(y)
-                                     ss_xx <- sum((x - x_bar)^2)
-                                     ss_xy <- sum((x - x_bar) * (y - y_bar))
+                                     x_bar <- mean(x, na.rm = TRUE)
+                                     y_bar <- mean(y, na.rm = TRUE)
+                                     ss_xx <- sum((x - x_bar)^2, na.rm = TRUE)
+                                     ss_xy <- sum((x - x_bar) * (y - y_bar), na.rm = TRUE)
 
                                      if (ss_xx > 0) {
                                        betas[i] <- ss_xy / ss_xx
@@ -76,13 +76,23 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                      } else {
                                        betas[i] <- NA_real_
                                        alphas[i] <- y_bar
-                                       sigmas[i] <- stats::sd(y)
+                                       sigmas[i] <- stats::sd(y, na.rm = TRUE)
                                      }
                                    }
 
                                    private$.rolling_params <- list(
                                      alphas = alphas, betas = betas, sigmas = sigmas
                                    )
+
+                                   alpha_last <- utils::tail(alphas, 1)
+                                   beta_last <- utils::tail(betas, 1)
+                                   if (is.na(alpha_last) || is.na(beta_last)) {
+                                     private$.is_fitted <- FALSE
+                                     warning("RollingWindowModel: last window parameters are NA. ",
+                                             "Model cannot produce valid predictions.")
+                                     return(invisible(self))
+                                   }
+
                                    private$.is_fitted <- TRUE
                                    private$calculate_statistics(data_tbl)
                                  },
@@ -131,7 +141,9 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                    residuals <- last_window$firm_returns -
                                      (alpha_last + beta_last * last_window$index_returns)
                                    private$add_residuals(residuals)
-                                   private$first_order_autocorrelation(residuals)
+                                   if (length(stats::na.omit(residuals)) >= 2) {
+                                     private$first_order_autocorrelation(residuals)
+                                   }
 
                                    # Forecast error correction
                                    event_window_tbl <- data_tbl %>%

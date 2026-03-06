@@ -64,7 +64,7 @@ ARTTest <- R6Class("ARTTest",
                      compute = function(data_tbl, model) {
                        statistics = model$statistics
                        sigma = statistics$sigma
-                       degree_of_freedom = statistics$degree_of_freedom
+                       degree_of_freedom = max(statistics$degree_of_freedom, 1)
 
                        res = data_tbl %>%
                          dplyr::filter(event_window == 1) %>%
@@ -105,7 +105,7 @@ CARTTest <- R6Class("CARTTest",
                       compute = function(data_tbl, model) {
                         statistics = model$statistics
                         sigma = statistics$sigma
-                        degree_of_freedom = statistics$degree_of_freedom
+                        degree_of_freedom = max(statistics$degree_of_freedom, 1)
 
                         res = data_tbl %>%
                           dplyr::filter(event_window == 1) %>%
@@ -115,7 +115,11 @@ CARTTest <- R6Class("CARTTest",
                                         car                 = cumsum(abnormal_returns),
                                         corrected_car       = car / sigma,
                                         car_t               = car / (sqrt(event_window_length) * sigma),
-                                        car_t_dist          = distributional::dist_student_t(df=degree_of_freedom, mu=car, sigma=sqrt(event_window_length) * sigma))
+                                        car_t_dist          = distributional::dist_student_t(
+                                          df    = degree_of_freedom,
+                                          mu    = car,
+                                          sigma = pmax(sqrt(event_window_length) * sigma, .Machine$double.eps)
+                                        ))
                         res$car_window = stringr::str_c("[", res$relative_index[1], ", ", res$relative_index, "]")
                         res
                       }

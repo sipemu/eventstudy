@@ -600,7 +600,7 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                    # KP adjustment factor: sqrt((1 - r_bar) / (1 + (n-1)*r_bar))
                                    n <- aar_stats$n_valid_events[1]
                                    denom <- 1 + (n - 1) * r_bar
-                                   if (denom > 0) {
+                                   if (is.finite(denom) && denom > 0) {
                                      kp_adj <- sqrt((1 - r_bar) / denom)
                                    } else {
                                      kp_adj <- 1

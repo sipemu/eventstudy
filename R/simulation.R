@@ -165,7 +165,7 @@ print.es_simulation <- function(x, ...) {
   symbols <- paste0("SIM_", seq_len(n_events))
   start_date <- as.Date("2020-01-01")
   dates <- seq(start_date, by = "day", length.out = n_days_total * 1.5)
-  dates <- dates[!weekdays(dates) %in% c("Saturday", "Sunday")]
+  dates <- dates[!format(dates, "%u") %in% c("6", "7")]
   dates <- dates[seq_len(n_days_total)]
 
   # Market returns

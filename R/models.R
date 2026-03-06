@@ -380,7 +380,7 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                  # sigma and degree of freedom (needed by test statistics)
                                                  sigma = sd(residuals, na.rm = TRUE)
                                                  private$.statistics$sigma = sigma
-                                                 private$.statistics$degree_of_freedom = length(residuals) - 1
+                                                 private$.statistics$degree_of_freedom = sum(!is.na(residuals)) - 1
 
                                                  # Constant-mean forecast error correction (no regression)
                                                  event_window_tbl = data_tbl %>% filter(event_window == 1)
@@ -897,8 +897,8 @@ BHARModel <- R6Class("BHARModel",
                             dplyr::filter(estimation_window == 1)
 
                           # Compute estimation-window BHAR residuals
-                          est_bhar <- cumprod(1 + estimation_tbl$firm_returns) -
-                            cumprod(1 + estimation_tbl$index_returns)
+                          est_bhar <- cumprod(1 + dplyr::coalesce(estimation_tbl$firm_returns, 0)) -
+                            cumprod(1 + dplyr::coalesce(estimation_tbl$index_returns, 0))
                           # Use incremental differences as residual proxy
                           residuals <- diff(est_bhar)
                           private$add_residuals(residuals)
@@ -1043,6 +1043,11 @@ VolatilityModel <- R6Class("VolatilityModel",
                               #'
                               #' @param data_tbl Data frame or tibble.
                               abnormal_returns = function(data_tbl) {
+                                if (!private$.is_fitted) {
+                                  warning("VolatilityModel is not fitted. Returning NA.")
+                                  return(data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = NA_real_))
+                                }
                                 est_var <- private$.fitted_model
                                 data_tbl %>%
                                   dplyr::mutate(
