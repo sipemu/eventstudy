@@ -206,8 +206,15 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
 
   # Objective: ||y - X %*% w||^2 where w is simplex-constrained
   # Use log-ratio transform: w = softmax(theta)
+  # Numerically stable softmax: subtract max(theta) to prevent overflow
+  .stable_softmax <- function(theta) {
+    theta_shift <- theta - max(theta)
+    e <- exp(theta_shift)
+    e / sum(e)
+  }
+
   obj_fn <- function(theta) {
-    w <- exp(theta) / sum(exp(theta))
+    w <- .stable_softmax(theta)
     sum((y - X %*% w)^2)
   }
 
@@ -219,7 +226,7 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
             res$convergence, "). Weights may be suboptimal.")
   }
 
-  w <- exp(res$par) / sum(exp(res$par))
+  w <- .stable_softmax(res$par)
   as.numeric(w)
 }
 

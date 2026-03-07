@@ -268,14 +268,16 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
     dplyr::mutate(tidy_data = purrr::map2(data, model, function(d, m) {
       sigma <- m$statistics$sigma
       df <- m$statistics$degree_of_freedom
+      has_sigma <- !is.null(sigma) && !is.na(sigma) && is.finite(sigma)
+      has_df <- !is.null(df) && !is.na(df) && df > 0
       d %>%
         dplyr::filter(event_window == 1) %>%
         dplyr::transmute(
           term      = as.character(relative_index),
           estimate  = abnormal_returns,
-          std.error = if (!is.null(sigma)) sigma else NA_real_,
-          statistic = if (!is.null(sigma)) abnormal_returns / sigma else NA_real_,
-          p.value   = if (!is.null(df) && !is.null(sigma) && df > 0) {
+          std.error = if (has_sigma) sigma else NA_real_,
+          statistic = if (has_sigma) abnormal_returns / sigma else NA_real_,
+          p.value   = if (has_df && has_sigma) {
             2 * stats::pt(abs(abnormal_returns / sigma), df = df, lower.tail = FALSE)
           } else NA_real_
         )
@@ -296,15 +298,17 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
     dplyr::mutate(tidy_data = purrr::map2(data, model, function(d, m) {
       sigma <- m$statistics$sigma
       df <- m$statistics$degree_of_freedom
+      has_sigma <- !is.null(sigma) && !is.na(sigma) && is.finite(sigma)
+      has_df <- !is.null(df) && !is.na(df) && df > 0
       d %>%
         dplyr::filter(event_window == 1) %>%
         dplyr::transmute(
           term      = paste0("[", relative_index[1], ",", relative_index, "]"),
-          estimate  = cumsum(abnormal_returns),
+          estimate  = cumsum(dplyr::coalesce(abnormal_returns, 0)),
           n         = seq_len(dplyr::n()),
-          std.error = if (!is.null(sigma)) sqrt(n) * sigma else NA_real_,
-          statistic = if (!is.null(sigma)) estimate / (sqrt(n) * sigma) else NA_real_,
-          p.value   = if (!is.null(df) && !is.null(sigma) && df > 0) {
+          std.error = if (has_sigma) sqrt(n) * sigma else NA_real_,
+          statistic = if (has_sigma) estimate / (sqrt(n) * sigma) else NA_real_,
+          p.value   = if (has_df && has_sigma) {
             2 * stats::pt(abs(statistic), df = df, lower.tail = FALSE)
           } else NA_real_
         ) %>%

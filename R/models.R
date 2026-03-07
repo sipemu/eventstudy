@@ -287,7 +287,16 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                  #' fit Fit the model with given data.
                                  #' @param data_tbl Data frame or tibble containing the data to fit.
                                  fit = function(data_tbl) {
-                                   # do nothing
+                                   estimation_tbl <- data_tbl %>%
+                                     dplyr::filter(estimation_window == 1)
+                                   n_valid <- sum(!is.na(estimation_tbl$firm_returns) &
+                                                    !is.na(estimation_tbl$index_returns))
+                                   if (n_valid < 2) {
+                                     warning("MarketAdjustedModel: insufficient estimation data (",
+                                             n_valid, " valid obs). Model not fitted.")
+                                     private$.is_fitted <- FALSE
+                                     return(invisible(NULL))
+                                   }
                                    private$.is_fitted = TRUE
 
                                    # Calculate statistics
@@ -351,10 +360,17 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                #'
                                                #' @param data_tbl Data frame or tibble containing the data to fit.
                                                fit = function(data_tbl) {
-                                                 data_tbl %>%
+                                                 est_returns <- data_tbl %>%
                                                    filter(estimation_window == 1) %>%
-                                                   .[['firm_returns']] %>%
-                                                   mean(., na.rm = TRUE) -> reference_mean
+                                                   .[['firm_returns']]
+                                                 n_valid <- sum(!is.na(est_returns))
+                                                 if (n_valid < 2) {
+                                                   warning("ComparisonPeriodMeanAdjustedModel: insufficient estimation data (",
+                                                           n_valid, " valid obs). Model not fitted.")
+                                                   private$.is_fitted <- FALSE
+                                                   return(invisible(NULL))
+                                                 }
+                                                 reference_mean <- mean(est_returns, na.rm = TRUE)
 
                                                  private$.fitted_model = reference_mean
                                                  private$.is_fitted = TRUE
@@ -903,6 +919,16 @@ BHARModel <- R6Class("BHARModel",
                         #'
                         #' @param data_tbl Data frame or tibble.
                         fit = function(data_tbl) {
+                          estimation_tbl <- data_tbl %>%
+                            dplyr::filter(estimation_window == 1)
+                          n_valid <- sum(!is.na(estimation_tbl$firm_returns) &
+                                          !is.na(estimation_tbl$index_returns))
+                          if (n_valid < 2) {
+                            warning("BHARModel: insufficient estimation data (",
+                                    n_valid, " valid obs). Model not fitted.")
+                            private$.is_fitted <- FALSE
+                            return(invisible(NULL))
+                          }
                           private$.is_fitted <- TRUE
                           private$calculate_statistics(data_tbl)
                         },
@@ -994,6 +1020,13 @@ VolumeModel <- R6Class("VolumeModel",
 
                             vol <- estimation_tbl$firm_volume
                             if (self$log_transform) vol <- log(vol + 1)
+                            n_valid <- sum(is.finite(vol))
+                            if (n_valid < 2) {
+                              warning("VolumeModel: insufficient estimation data (",
+                                      n_valid, " valid obs). Model not fitted.")
+                              private$.is_fitted <- FALSE
+                              return(invisible(NULL))
+                            }
 
                             private$.fitted_model <- mean(vol, na.rm = TRUE)
                             private$.is_fitted <- TRUE
@@ -1030,12 +1063,13 @@ VolumeModel <- R6Class("VolumeModel",
 
                             sigma <- sd(residuals, na.rm = TRUE)
                             private$.statistics$sigma <- sigma
-                            private$.statistics$degree_of_freedom <- length(residuals) - 1
+                            private$.statistics$degree_of_freedom <- sum(is.finite(residuals)) - 1
 
                             # Constant-mean forecast error correction (no regression)
                             event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
                             n_event <- nrow(event_window_tbl)
-                            correction <- sigma * sqrt(1 + 1 / nrow(estimation_tbl))
+                            n_est <- max(sum(is.finite(residuals)), 1)
+                            correction <- sigma * sqrt(1 + 1 / n_est)
                             private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
                             private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
                           }
@@ -1108,12 +1142,13 @@ VolatilityModel <- R6Class("VolatilityModel",
 
                                 sigma <- sd(residuals, na.rm = TRUE)
                                 private$.statistics$sigma <- sigma
-                                private$.statistics$degree_of_freedom <- length(residuals) - 1
+                                private$.statistics$degree_of_freedom <- sum(is.finite(residuals)) - 1
 
                                 # Constant-mean forecast error correction (no regression)
                                 event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
                                 n_event <- nrow(event_window_tbl)
-                                correction <- sigma * sqrt(1 + 1 / nrow(estimation_tbl))
+                                n_est <- max(sum(is.finite(residuals)), 1)
+                                correction <- sigma * sqrt(1 + 1 / n_est)
                                 private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
                                 private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
                               }

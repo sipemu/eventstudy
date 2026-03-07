@@ -131,11 +131,20 @@ pretrend_test = function(task, group = NULL) {
       mean_pre_ar    = mean(abnormal_returns, na.rm = TRUE),
       sd_pre_ar      = sd(abnormal_returns, na.rm = TRUE),
       # Joint test: H0: all pre-event AARs = 0
-      # Using F = (mean(AR)^2 / var(AR)) * N approximation
-      t_stat         = sqrt(sum(!is.na(abnormal_returns))) *
-                         mean(abnormal_returns, na.rm = TRUE) /
-                         sd(abnormal_returns, na.rm = TRUE),
-      p_value        = 2 * (1 - stats::pt(abs(t_stat), df = sum(!is.na(abnormal_returns)) - 1)),
+      # Using t = sqrt(N) * mean(AR) / sd(AR) approximation
+      t_stat         = {
+        n_obs <- sum(!is.na(abnormal_returns))
+        sd_ar <- sd(abnormal_returns, na.rm = TRUE)
+        if (n_obs < 2 || is.na(sd_ar) || sd_ar < .Machine$double.eps) {
+          NA_real_
+        } else {
+          sqrt(n_obs) * mean(abnormal_returns, na.rm = TRUE) / sd_ar
+        }
+      },
+      p_value        = if (is.na(t_stat)) NA_real_ else {
+        df_val <- sum(!is.na(abnormal_returns)) - 1
+        if (df_val < 1) NA_real_ else 2 * (1 - stats::pt(abs(t_stat), df = df_val))
+      },
       .groups = "drop"
     )
 

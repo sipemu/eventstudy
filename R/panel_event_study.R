@@ -429,9 +429,10 @@ estimate_panel_event_study <- function(task,
     relative_time = agg$egt,
     estimate = agg$att.egt,
     std.error = agg$se.egt,
-    statistic = agg$att.egt / agg$se.egt,
-    p.value = 2 * stats::pnorm(abs(agg$att.egt / agg$se.egt),
-                                 lower.tail = FALSE)
+    statistic = ifelse(is.na(agg$se.egt) | agg$se.egt <= 0, NA_real_,
+                        agg$att.egt / agg$se.egt),
+    p.value = ifelse(is.na(agg$se.egt) | agg$se.egt <= 0, NA_real_,
+      2 * stats::pnorm(abs(agg$att.egt / agg$se.egt), lower.tail = FALSE))
   )
 
   # Filter to requested range
@@ -527,8 +528,8 @@ estimate_panel_event_study <- function(task,
     relative_time = rel_times,
     estimate = estimates,
     std.error = se_vals,
-    statistic = ifelse(is.na(se_vals), NA_real_, estimates / se_vals),
-    p.value = ifelse(is.na(se_vals), NA_real_,
+    statistic = ifelse(is.na(se_vals) | se_vals <= 0, NA_real_, estimates / se_vals),
+    p.value = ifelse(is.na(se_vals) | se_vals <= 0, NA_real_,
       2 * stats::pnorm(abs(estimates / se_vals), lower.tail = FALSE))
   ) %>%
     dplyr::arrange(relative_time)
@@ -565,9 +566,10 @@ estimate_panel_event_study <- function(task,
     relative_time = as.numeric(as.character(result$term)),
     estimate = result$estimate,
     std.error = result$std.error,
-    statistic = result$estimate / result$std.error,
-    p.value = 2 * stats::pnorm(abs(result$estimate / result$std.error),
-                                 lower.tail = FALSE)
+    statistic = ifelse(is.na(result$std.error) | result$std.error <= 0, NA_real_,
+                        result$estimate / result$std.error),
+    p.value = ifelse(is.na(result$std.error) | result$std.error <= 0, NA_real_,
+      2 * stats::pnorm(abs(result$estimate / result$std.error), lower.tail = FALSE))
   ) %>%
     dplyr::filter(relative_time >= -leads & relative_time <= lags) %>%
     dplyr::arrange(relative_time)

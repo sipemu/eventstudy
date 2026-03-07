@@ -72,7 +72,9 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                        betas[i] <- ss_xy / ss_xx
                                        alphas[i] <- y_bar - betas[i] * x_bar
                                        resid <- y - (alphas[i] + betas[i] * x)
-                                       sigmas[i] <- sqrt(sum(resid^2) / (ws - 2))
+                                       n_valid_resid <- sum(!is.na(resid))
+                                       denom <- max(n_valid_resid - 2, 1)
+                                       sigmas[i] <- sqrt(sum(resid^2, na.rm = TRUE) / denom)
                                      } else {
                                        betas[i] <- NA_real_
                                        alphas[i] <- y_bar

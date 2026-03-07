@@ -1566,3 +1566,113 @@ test_that("export_results escapes LaTeX special characters", {
   # In the .tex file: AAPL\_US — in R string: "AAPL\\_US"
   expect_true(any(grepl("AAPL\\_US", content, fixed = TRUE)))
 })
+
+
+# ============================================================================
+# Round 14: Simple model insufficient estimation data guards
+# ============================================================================
+
+test_that("MarketAdjustedModel warns and does not fit with < 2 estimation obs", {
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  model <- MarketAdjustedModel$new()
+  expect_warning(model$fit(data), "insufficient estimation data")
+  expect_false(model$is_fitted)
+})
+
+test_that("ComparisonPeriodMeanAdjustedModel warns with < 2 estimation obs", {
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  model <- ComparisonPeriodMeanAdjustedModel$new()
+  expect_warning(model$fit(data), "insufficient estimation data")
+  expect_false(model$is_fitted)
+})
+
+test_that("BHARModel warns with < 2 estimation obs", {
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  model <- BHARModel$new()
+  expect_warning(model$fit(data), "insufficient estimation data")
+  expect_false(model$is_fitted)
+})
+
+test_that("VolumeModel warns with < 2 estimation obs", {
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  data$firm_volume <- abs(rnorm(nrow(data), 1000, 100))
+  model <- VolumeModel$new()
+  expect_warning(model$fit(data), "insufficient estimation data")
+  expect_false(model$is_fitted)
+})
+
+
+# ============================================================================
+# Round 14: .tidy_ar/.tidy_car NA df/sigma guard
+# ============================================================================
+
+test_that(".tidy_ar handles NA sigma and df without crashing", {
+  task <- create_fitted_mock_task(n_firms = 1)
+
+  # Create a mock model with NA sigma/df using a list that mimics model structure
+  mock_model <- list(
+    is_fitted = TRUE,
+    statistics = list(sigma = NA_real_, degree_of_freedom = NA_real_)
+  )
+  task$data_tbl$model[[1]] <- mock_model
+
+  result <- tidy.EventStudyTask(task, type = "ar")
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(is.na(result$statistic)))
+  expect_true(all(is.na(result$p.value)))
+})
+
+test_that(".tidy_car handles NA sigma and df without crashing", {
+  task <- create_fitted_mock_task(n_firms = 1)
+
+  mock_model <- list(
+    is_fitted = TRUE,
+    statistics = list(sigma = NA_real_, degree_of_freedom = NA_real_)
+  )
+  task$data_tbl$model[[1]] <- mock_model
+
+  result <- tidy.EventStudyTask(task, type = "car")
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(is.na(result$statistic)))
+  expect_true(all(is.na(result$p.value)))
+})
+
+
+# ============================================================================
+# Round 14: pretrend_test sd=0 guard
+# ============================================================================
+
+test_that("pretrend_test handles zero-variance pre-event AR", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Set all pre-event abnormal returns to exactly zero
+  for (i in seq_len(nrow(task$data_tbl))) {
+    d <- task$data_tbl$data[[i]]
+    pre_idx <- d$event_window == 1 & d$relative_index < 0
+    d$abnormal_returns[pre_idx] <- 0
+    task$data_tbl$data[[i]] <- d
+  }
+
+  result <- pretrend_test(task)
+  expect_s3_class(result, "tbl_df")
+  # t_stat should be NA (not Inf) when sd is 0
+  expect_true(all(is.na(result$t_stat)))
+  expect_true(all(is.na(result$p_value)))
+})
+
+
+# ============================================================================
+# Round 14: RollingWindowModel na.rm in sigma computation
+# ============================================================================
+
+test_that("RollingWindowModel handles NAs in rolling window", {
+  data <- create_mock_model_data(n_estimation = 60, n_event = 5)
+  # Inject a few NAs into estimation window
+  data$firm_returns[c(5, 10, 15)] <- NA
+
+  model <- RollingWindowModel$new(window_size = 20)
+  model$fit(data)
+  expect_true(model$is_fitted)
+  # sigma should be finite (not NA from missing na.rm)
+  expect_true(is.finite(model$statistics$sigma))
+})
