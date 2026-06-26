@@ -107,8 +107,11 @@ create_multi_event_model_data <- function(n_firms = 5, n_est = 50, n_ev = 11) {
     )
   }))
 
-  # Create model tibble matching the structure expected by PatellZTest/BMPTest
+  # Create model tibble matching the structure expected by PatellZTest/BMPTest.
+  # In the real pipeline the model tibble is keyed by event_id (one fit per
+  # event), so the fixture must carry event_id as well.
   model_tbl = tibble::tibble(
+    event_id = paste0("E", seq_len(n_firms)),
     firm_symbol = paste0("F", seq_len(n_firms)),
     model = lapply(seq_len(n_firms), function(i) {
       mm = MarketModel$new()
@@ -171,6 +174,7 @@ test_that("PatellZTest uses forecast-error-corrected sigma for standardization (
   fec_sigma_f1 = c(0.044, 0.040, 0.042)  # varies by day
   fec_sigma_f2 = c(0.088, 0.080, 0.084)
   model_tbl = tibble::tibble(
+    event_id = c("E1", "E2"),
     firm_symbol = c("F1", "F2"),
     model = list(
       list(statistics = list(sigma = 0.04, forecast_error_corrected_sigma = fec_sigma_f1)),
@@ -216,6 +220,7 @@ test_that("PatellZTest CSAR cumsum is per-firm with per-firm Q_i (GH #6)", {
 
   fec_sigma_val = 0.05
   model_tbl = tibble::tibble(
+    event_id = c("E1", "E2"),
     firm_symbol = c("F1", "F2"),
     model = lapply(1:2, function(i) {
       list(statistics = list(
@@ -470,4 +475,68 @@ test_that("PatellZTest k extraction handles NULL residuals gracefully", {
 
   result <- aar_tbl[[stat_name]][[1]]
   expect_true(all(!is.na(result$aar)))
+})
+
+
+# Regression test for GH #7: a firm appearing in multiple events must not
+# inflate n_events or the BMP/Patell statistics via a many-to-many sigma join.
+create_shared_firm_data <- function(n_events = 6, n_est = 50, n_ev = 11) {
+  set.seed(7)
+  # Only 2 distinct firms spread across n_events events -> firms recur.
+  data = do.call(rbind, lapply(seq_len(n_events), function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", ((i - 1) %% 2) + 1),  # F1, F2, F1, F2, ...
+      relative_index = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+      index_returns = rnorm(n_est + n_ev, mean = 0.0003, sd = 0.015),
+      firm_returns = 0.001 + 1.2 * index_returns + rnorm(n_est + n_ev, sd = 0.01),
+      abnormal_returns = rnorm(n_est + n_ev, mean = 0.001, sd = 0.02),
+      event_window = c(rep(0, n_est), rep(1, n_ev)),
+      estimation_window = c(rep(1, n_est), rep(0, n_ev)),
+      event_date = c(rep(0, n_est), 1, rep(0, n_ev - 1))
+    )
+  }))
+
+  model_tbl = tibble::tibble(
+    event_id = paste0("E", seq_len(n_events)),
+    firm_symbol = paste0("F", ((seq_len(n_events) - 1) %% 2) + 1),
+    model = lapply(seq_len(n_events), function(i) {
+      mm = MarketModel$new()
+      mm$fit(data[data$event_id == paste0("E", i), ])
+      mm
+    })
+  )
+
+  list(data = data, model = model_tbl)
+}
+
+
+test_that("BMPTest does not inflate n_events when firms recur (GH #7)", {
+  md = create_shared_firm_data(n_events = 6)
+  result = BMPTest$new()$compute(md$data, md$model)
+
+  # 6 events, one observation per event at each relative day -> n_events == 6,
+  # not 6 * (#events sharing the firm).
+  expect_true(all(result$n_events == 6))
+  expect_true(all(result$n_valid_events == 6))
+  expect_true(all(is.finite(result$bmp_t)))
+})
+
+
+test_that("KolariPynnonenTest does not inflate n_events when firms recur (GH #7)", {
+  md = create_shared_firm_data(n_events = 6)
+  result = KolariPynnonenTest$new()$compute(md$data, md$model)
+
+  expect_true(all(result$n_events == 6))
+  expect_true(all(result$n_valid_events == 6))
+})
+
+
+test_that("PatellZTest does not inflate n_events when firms recur (GH #7)", {
+  md = create_shared_firm_data(n_events = 6)
+  result = PatellZTest$new()$compute(md$data, md$model)
+
+  expect_true(all(result$n_events == 6))
+  expect_true(all(result$n_valid_events == 6))
+  expect_true(all(is.finite(result$aar_z)))
 })

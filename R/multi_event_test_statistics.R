@@ -100,9 +100,12 @@ PatellZTest <- R6Class("PatellZTest",
                           # Use median k across firms (should be same for all)
                           k_param <- stats::median(model_k$k)
 
+                          # Key all per-event quantities on event_id, not
+                          # firm_symbol: each event is fit separately and a firm
+                          # may recur across events.
                           sd_asar = data_tbl %>%
                             dplyr::filter(estimation_window == 1) %>%
-                            dplyr::group_by(firm_symbol) %>%
+                            dplyr::group_by(event_id) %>%
                             dplyr::summarise(m = dplyr::n(), .groups = "drop") %>%
                             dplyr::mutate(
                               Q_i = ifelse(
@@ -118,19 +121,19 @@ PatellZTest <- R6Class("PatellZTest",
                               fec <- x$statistics$forecast_error_corrected_sigma
                               if (is.null(fec)) NA_real_ else fec
                             })) %>%
-                            dplyr::select(firm_symbol, fec_sigma) %>%
+                            dplyr::select(event_id, fec_sigma) %>%
                             tidyr::unnest(fec_sigma) %>%
-                            dplyr::group_by(firm_symbol) %>%
+                            dplyr::group_by(event_id) %>%
                             dplyr::mutate(day_index = dplyr::row_number()) %>%
                             dplyr::ungroup()
 
                           # Standardize abnormal returns by forecast-error-corrected sigma
                           aar_caar_stats_tmp = data_tbl %>%
                             dplyr::filter(event_window == 1) %>%
-                            dplyr::group_by(firm_symbol) %>%
+                            dplyr::group_by(event_id) %>%
                             dplyr::mutate(day_index = dplyr::row_number()) %>%
                             dplyr::ungroup() %>%
-                            dplyr::left_join(fec_sigma, by = c("firm_symbol", "day_index")) %>%
+                            dplyr::left_join(fec_sigma, by = c("event_id", "day_index")) %>%
                             dplyr::mutate(standardized_abnormal_returns = abnormal_returns / fec_sigma)
 
                           # AAR & AAR Z Test
@@ -149,8 +152,8 @@ PatellZTest <- R6Class("PatellZTest",
                             dplyr::select(-sum_sar)
 
                           sd_caar = aar_caar_stats_tmp %>%
-                            dplyr::left_join(sd_asar, by = "firm_symbol") %>%
-                            dplyr::group_by(firm_symbol) %>%
+                            dplyr::left_join(sd_asar, by = "event_id") %>%
+                            dplyr::group_by(event_id) %>%
                             dplyr::mutate(csar = cumsum(dplyr::coalesce(standardized_abnormal_returns, 0)),
                                           n    = dplyr::row_number(),
                                           csar = csar / sqrt(n * .data$Q_i)) %>%
@@ -406,11 +409,14 @@ BMPTest <- R6Class("BMPTest",
                            x$statistics$sigma %||% NA_real_
                          }))
 
-                       # Standardize abnormal returns by model sigma
+                       # Standardize abnormal returns by model sigma.
+                       # Join on event_id, not firm_symbol: sigma is estimated
+                       # per event, and a firm may appear in several events. A
+                       # firm_symbol join is many-to-many and duplicates rows.
                        sar_data = data_tbl %>%
                          dplyr::filter(event_window == 1) %>%
-                         dplyr::left_join(model %>% dplyr::select(firm_symbol, sigma),
-                                          by = "firm_symbol") %>%
+                         dplyr::left_join(model %>% dplyr::select(event_id, sigma),
+                                          by = "event_id") %>%
                          dplyr::mutate(sar = abnormal_returns / sigma)
 
                        # BMP test: cross-sectional t-test of SARs
@@ -558,11 +564,13 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                        x$statistics$sigma %||% NA_real_
                                      }))
 
-                                   # Standardize abnormal returns by model sigma
+                                   # Standardize abnormal returns by model sigma.
+                                   # Join on event_id (see BMPTest): a firm_symbol
+                                   # join is many-to-many when a firm recurs.
                                    sar_data <- data_tbl %>%
                                      dplyr::filter(event_window == 1) %>%
-                                     dplyr::left_join(model %>% dplyr::select(firm_symbol, sigma),
-                                                      by = "firm_symbol") %>%
+                                     dplyr::left_join(model %>% dplyr::select(event_id, sigma),
+                                                      by = "event_id") %>%
                                      dplyr::mutate(sar = abnormal_returns / sigma)
 
                                    # --- BMP statistics (replicated from BMPTest) ---
@@ -603,14 +611,17 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                    # Compute average pairwise correlation of SARs from estimation window
                                    est_sar_data <- data_tbl %>%
                                      dplyr::filter(estimation_window == 1) %>%
-                                     dplyr::left_join(model %>% dplyr::select(firm_symbol, sigma),
-                                                      by = "firm_symbol") %>%
+                                     dplyr::left_join(model %>% dplyr::select(event_id, sigma),
+                                                      by = "event_id") %>%
                                      dplyr::mutate(sar = abnormal_returns / sigma)
 
-                                   # Pivot to wide: one column per firm
+                                   # Pivot to wide: one column per event. Events,
+                                   # not firms, are the cross-sectional units, so a
+                                   # firm recurring in several events yields distinct
+                                   # columns (a firm_symbol pivot would collide).
                                    est_sar_wide <- est_sar_data %>%
-                                     dplyr::select(relative_index, firm_symbol, sar) %>%
-                                     tidyr::pivot_wider(names_from = firm_symbol,
+                                     dplyr::select(relative_index, event_id, sar) %>%
+                                     tidyr::pivot_wider(names_from = event_id,
                                                         values_from = sar)
 
                                    # Compute correlation matrix of estimation-window SARs
