@@ -141,6 +141,7 @@ test_that("BMPTest handles NA abnormal returns", {
   }))
 
   model_tbl = tibble::tibble(
+    event_id = paste0("E", seq_len(n_firms)),
     firm_symbol = paste0("F", seq_len(n_firms)),
     model = lapply(seq_len(n_firms), function(i) {
       mm = MarketModel$new()
@@ -269,6 +270,7 @@ test_that("PatellZTest with very short estimation window (m <= 4)", {
   }))
 
   model_tbl = tibble::tibble(
+    event_id = paste0("E", 1:3),
     firm_symbol = paste0("F", 1:3),
     model = lapply(1:3, function(i) {
       mm = MarketModel$new()

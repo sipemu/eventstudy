@@ -1,5 +1,14 @@
 # EventStudy 0.40.0
 
+## Bug Fixes
+
+* `BMPTest`, `KolariPynnonenTest`, and `PatellZTest` joined the per-event
+  model (sigma / forecast-error-corrected sigma) on `firm_symbol` instead of
+  `event_id`. When a firm appeared in more than one event this produced a
+  many-to-many join that duplicated rows, inflating `n_events` and the test
+  statistics (`bmp_t`, `kp_t`, `aar_z`). The joins and per-event groupings now
+  key on `event_id` (GH #7).
+
 ## New Features
 
 * 13 return models: Market Model, Market Adjusted, Comparison Period Mean
