@@ -1,0 +1,89 @@
+---
+title: "Article Title"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Article Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r child="_setup.Rmd"}
+```
+
+## 1. Title & Abstract
+
+<!-- One paragraph: what this article covers, who it is for, and what you
+     will be able to do after reading it. -->
+
+## 2. When to Use This Method
+
+<!-- Describe the research context and data requirements that make this
+     method appropriate. Compare to alternatives where helpful. -->
+
+## 3. Intuition
+
+<!-- Non-technical explanation of the core idea. Use a simple analogy or
+     visual description. Avoid equations here. -->
+
+## 4. Model & Null Hypothesis
+
+<!-- State the statistical model formally. Introduce notation, then give
+     the null hypothesis H0 and its economic interpretation. -->
+
+$$
+\text{[Model equation here]}
+$$
+
+The null hypothesis is $H_0: \text{[null]}$.
+
+## 5. Assumptions
+
+<!-- Bulleted list of required assumptions. Flag which are testable
+     (and how) versus maintained. -->
+
+- **[Assumption 1]:** Description.
+- **[Assumption 2]:** Description.
+
+## 6. Worked Example
+
+```{r load-data}
+library(EventStudy)
+data("dieselgate")   # replace with appropriate dataset for this article
+```
+
+```{r fit-pipeline}
+# Replace with the method-specific pipeline call
+task <- EventStudyTask$new(
+  firm_stock_data_tbl = dieselgate$firm,
+  reference_tbl       = dieselgate$index,
+  request_tbl         = dieselgate$request
+)
+params <- ParameterSet$new()   # customise as needed
+task   <- prepare_event_study(task, params)
+task   <- fit_model(task, params)
+task   <- calculate_statistics(task, params)
+```
+
+## 7. Rendered Table
+
+```{r results-table}
+# Summarise key results in a readable table
+knitr::kable(
+  head(tidy(task), 10),
+  caption = "Table caption here."
+)
+```
+
+## 8. Rendered Plot
+
+```{r results-plot, fig.cap="Figure caption here."}
+plot_event_study(task)
+```
+
+## 9. Interpretation
+
+<!-- Walk through the table and plot from Sections 7–8. Explain what the
+     numbers mean economically. Flag common misinterpretations. -->
+
+## References

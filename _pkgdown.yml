@@ -8,13 +8,14 @@ description: >
 
 template:
   bootstrap: 5
+  math-rendering: katex
 
 home:
   sidebar: false
 
 navbar:
   structure:
-    left: [get-started, reference, articles]
+    left: [get-started, reference, articles, methods, gallery]
     right: [search, github]
   components:
     get-started:
@@ -25,6 +26,14 @@ navbar:
       href: reference/index.html
     articles:
       text: "Articles"
+      href: articles/gallery.html
+    methods:
+      text: "Methods"
+      menu:
+        - text: "Overview"
+          href: articles/smoke-test.html
+    gallery:
+      text: "Gallery"
       href: articles/gallery.html
     github:
       icon: fab fa-github fa-lg
@@ -175,6 +184,13 @@ reference:
       - starts_with("print.")
 
 articles:
+  - title: "Methods"
+    desc: >
+      Conceptual explanations of return models, test statistics, and
+      advanced designs — with formulas, assumptions, and references.
+    contents:
+      - articles/smoke-test
+
   - title: "Get Started"
     desc: >
       Package overview with a complete Dieselgate worked example.
