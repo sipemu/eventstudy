@@ -1,96 +1,111 @@
-# Requirements: EventStudy — Documentation Site (pkgdown + CI/CD)
+# Requirements: EventStudy — Documentation Depth (Methods & Worked Examples)
 
-**Defined:** 2026-09-04
-**Milestone:** v0.62.0
-**Core Value:** Trustworthy numbers, trustworthy interpretation — now made discoverable. A curated, professional documentation site (matching the `fdars-r` pattern) that CI keeps current, so the package's capabilities and the AI advisor story are legible to anyone arriving from CRAN or GitHub.
+**Defined:** 2026-09-05
+**Milestone:** v0.63.0
+**Core Value:** Trustworthy numbers, trustworthy interpretation — now made *teachable*. The docs site becomes a pyfda-caliber learning resource (reference: `https://sipemu.github.io/pyfda/`): every method family explained with real statistical exposition + academic references, every method demonstrated with rendered outputs, plus a cross-domain gallery of complete worked examples — all pkgdown-only and CRAN-/CI-clean.
 
 ## v1 Requirements
 
-Requirements for milestone v0.62.0. Each maps to exactly one roadmap phase.
+Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All new rich content is **pkgdown-only** (`vignettes/articles/`, `.Rbuildignore`d) and must render **fully offline** in the existing v0.62.0 CI pkgdown build.
 
-### Site structure (SITE)
+### Learn / Methods articles (METH)
 
-- [x] **SITE-01**: A `_pkgdown.yml` at the package root configures a pkgdown 2.x (Bootstrap 5) site, with `url:` set to `https://sipemu.github.io/eventstudy/` so cross-references and canonical links resolve correctly.
-- [x] **SITE-02**: The Reference index is organized into thematic groups with titles/descriptions — Pipeline & tasks, Return models, Test statistics, Panel/intraday/synthetic control, AI advisor, Diagnostics, Cross-sectional & simulation, Export & reporting, Plotting, Data & datasets — with every exported symbol appearing in exactly one group (no ungrouped/missing-topic warnings).
-- [x] **SITE-03**: The navbar exposes Get Started, Reference, an Articles dropdown, and News/Changelog; all 18 existing vignettes are reachable and grouped meaningfully under Articles (e.g. Core workflow, Models, Inference & robustness, Specialized designs, AI advisor).
-- [x] **SITE-04**: The homepage renders the README as the landing page (or a dedicated intro), building without error from the existing content.
+- [ ] **METH-01**: A "Learn / Methods" section is exposed in the pkgdown navigation (a dedicated navbar menu or Articles group) that collects the conceptual method articles as a coherent learning track.
+- [ ] **METH-02**: A conceptual article for **return models** (market, Fama-French 3/5, Carhart, GARCH/DCC, rolling-window, BHAR, comparison-period-mean, volume/volatility) explains each model's estimation, assumptions, and when-to-use, and cites the primary academic references.
+- [ ] **METH-03**: A conceptual article for **test statistics** (AR/CAR t-tests, Patell Z, BMP, Sign, Kolari-Pynnönen, Calendar-Time Portfolio, cross-sectional t) explains each statistic's null hypothesis, formula, assumptions, and references.
+- [ ] **METH-04**: A conceptual article for **panel / DiD estimators** (TWFE, Sun-Abraham, Callaway-Sant'Anna, Borusyak-Jaravel-Spiess, de Chaisemartin-D'Haultfoeuille) explains staggered-treatment bias, each estimator's approach, and references.
+- [ ] **METH-05**: A conceptual article for **intraday event studies** explains POSIXct/minute-second windows, microstructure considerations, and references.
+- [ ] **METH-06**: A conceptual article for **synthetic control** explains the method, identifying assumptions, donor-pool/weighting mechanics, and references.
+- [ ] **METH-07**: A conceptual article for the **AI advisor** explains the two-layer design (deterministic offline diagnostics + grounded LLM advise), the grounding invariant, provider precedence, and usage.
+- [ ] **METH-08**: A conceptual article for **diagnostics & robustness** (normality, autocorrelation, pre-trend, bootstrap, power) explains each check, how to interpret it, and references.
 
-### Theme (THEME)
+### Rendered outputs (RENDER)
 
-- [x] **THEME-01**: A custom Bootstrap-5 theme is applied via `template.bootstrap: 5` and a `template.bootswatch` (or `template.theme`/`bslib` variables) choosing an accent color and font pairing that reads as professional; no package logo is required.
-- [x] **THEME-02**: Syntax highlighting, code blocks, and the reference/article typography render cleanly under the chosen theme with no contrast or layout regressions in a local `pkgdown::build_site()`.
+- [ ] **RENDER-01**: Every Methods article executes real package code at build time and renders at least one results table (e.g. `knitr::kable`/printed result) and at least one plot for the method(s) it covers — no method is described without a demonstrated output.
+- [ ] **RENDER-02**: All article code executes fully offline — bundled data plus `set.seed()` for any stochastic step — with zero network calls at build time, so articles render reproducibly on a CI runner.
+- [ ] **RENDER-03**: Interactive/HTML plot output (plotly) and MathJax formula rendering coexist on the same page without breaking layout or math (the known pkgdown plotly/MathJax conflict is handled).
 
-### CI/CD deploy (CI)
+### Worked-examples gallery (GALLERY)
 
-- [ ] **CI-01**: A `.github/workflows/pkgdown.yaml` workflow (r-lib standard) builds the pkgdown site on push to `main` and on `release: [published]`, plus manual `workflow_dispatch`.
-- [ ] **CI-02**: The workflow deploys the built site to the `gh-pages` branch via `JamesIves/github-pages-deploy-action` (or `r-lib/actions` deploy step) with least-privilege `contents: write` permissions, so GitHub Pages serves it.
-- [ ] **CI-03**: The workflow installs the package with its Suggests and builds articles, completing green on GitHub Actions (verified by a successful run on the default branch).
+- [ ] **GALLERY-01**: A pyfda-style gallery landing page presents the cross-domain worked examples as a browsable index (cards/thumbnails with short descriptions), reachable from the navbar.
+- [ ] **GALLERY-02**: At least three complete end-to-end worked examples across distinct domains (e.g. earnings surprises, M&A announcements, regulatory/enforcement shocks) each render a full analysis: data → model fit → test statistics → plots → written interpretation.
+- [ ] **GALLERY-03**: Each gallery example cross-links to the relevant Methods articles and to the exported functions it uses (reference pages), so readers can move from example → concept → API.
 
-### Repo linkage (LINK)
+### Curated datasets (DATA)
 
-- [ ] **LINK-01**: DESCRIPTION `URL` includes the pkgdown site URL (`https://sipemu.github.io/eventstudy/`) alongside the existing GitHub URL, and `BugReports` is retained.
-- [ ] **LINK-02**: README gains a documentation-site badge/link near the existing badge row pointing at the live site.
-- [ ] **LINK-03**: `.Rbuildignore` excludes `_pkgdown.yml`, `docs/`, `pkgdown/`, and the pkgdown workflow so the CRAN source tarball is unchanged by the site scaffolding.
+- [ ] **DATA-01**: Each gallery domain example is powered by a curated real dataset with documented `data-raw/` provenance (a reproducible fetch/build script plus a frozen snapshot), following the existing dieselgate dataset pattern.
+- [ ] **DATA-02**: Datasets are sized and placed so the CRAN source tarball stays clean — either compressed, documented `data()` datasets (with `.Rd`) or `.Rbuildignore`d site-only data — with the choice recorded per dataset.
 
-### Build integrity (BUILD)
+### pkgdown-only delivery (DELIVERY)
 
-- [x] **BUILD-01**: `pkgdown::build_site()` completes locally with no errors and no missing-topic/orphaned-reference warnings against the current exports and vignettes.
-- [ ] **BUILD-02**: Network-touching vignettes (e.g. `data-download`) build reproducibly in CI — either already offline-safe, cached, or gated so a transient network failure does not break the docs build; any non-evaluated content is clearly labelled.
-- [ ] **BUILD-03**: `R CMD check --as-cran` shows no new NOTEs/WARNINGs relative to the v0.61.x baseline, the existing test suite stays green, and the package version is bumped to `0.62.0` with a NEWS.md `v0.62.0` entry recording the documentation site.
+- [ ] **DELIVERY-01**: The new Methods articles and gallery live under `vignettes/articles/` and are `.Rbuildignore`d so they render on the site but are absent from the CRAN source tarball.
+- [ ] **DELIVERY-02**: `_pkgdown.yml` navigation integrates the new Learn/Methods track and the Gallery alongside the existing Articles without breaking the existing 18-vignette navigation or the grouped Reference index.
+- [ ] **DELIVERY-03**: The existing 18 CRAN-shipped vignettes remain unchanged and CRAN-shipped — the new rich content is strictly additive.
+
+### Build & release integrity (BUILD)
+
+- [ ] **BUILD-04**: `pkgdown::build_site()` completes locally with zero errors and zero new warnings, including all new Methods articles and the gallery.
+- [ ] **BUILD-05**: The existing v0.62.0 CI `pkgdown.yaml` workflow builds the new articles offline and deploys them to GitHub Pages (green Actions run), with no CI changes required beyond content/config.
+- [ ] **BUILD-06**: `R CMD check --as-cran` shows no new NOTEs/WARNINGs versus the v0.62.0 baseline, the source tarball is not bloated by site-only content, and the existing testthat suite stays green.
 
 ## Future Requirements
 
-Deferred, tracked but not in this roadmap.
+Deferred beyond v0.63.0.
 
-- **Package logo / hex sticker** — add branded artwork to the navbar and homepage once a design exists.
-- **Custom homepage cards** — fdars-r-style illustrated topic cards on the landing page (beyond grouped reference), if desired later.
-- **Versioned/multi-version docs** — `pkgdown` dev-mode versioning for released vs. dev docs.
-- **Advisor Pro (PRO-01/02)** / **Surfaces (SURF-01/02)** — unchanged from prior deferrals.
+### Docs (DOCS-FUTURE)
+
+- **Package logo / hex sticker** — deferred (v0.62.0 decision).
+- **Versioned docs (multi-version pkgdown)** — deferred.
+- **Video / screencast walkthroughs** — out of scope for a static pkgdown site.
 
 ## Out of Scope
 
+Explicitly excluded. Documented to prevent scope creep.
+
 | Feature | Reason |
 |---------|--------|
-| Package logo creation | User chose "custom theme, no logo"; artwork is deferred |
-| Rewriting or adding vignette content | This milestone organizes and publishes existing vignettes; content changes are separate |
-| Changing package APIs or statistical behavior | Purely additive docs + infra milestone |
-| Setting the GitHub repo "About → Website" field | Manual GitHub UI setting; CI cannot set it — flagged as an operator step |
-| Bundling built `docs/` into the CRAN tarball | Site is CI-built and served from gh-pages; `.Rbuildignore` keeps it out |
-| Custom illustrated homepage cards | Deferred to Future; grouped reference + custom theme is the v0.62.0 bar |
+| New statistical methods, models, or estimators | v0.63.0 is documentation depth only — no new compute surface. |
+| Changing the statistical intent of any existing method | Behavior on valid input stays unchanged. |
+| Rewriting the existing 18 CRAN vignettes | They stay concise and CRAN-shipped; new content is additive and pkgdown-only. |
+| Shipping the rich Methods articles / gallery inside the CRAN tarball | Deliberately pkgdown-only to keep the tarball small and `R CMD check` fast. |
+| Full retrieval-corpus (RAG) "Advisor Pro" | The commercial tier; validated via waitlist first, not built here. |
+| MCP server surface | Deferred; the Agent Skill delivers the full loop with less surface area. |
+| Performance / scaling work (streaming, data.table, sparse FE) | Orthogonal; deferred. |
 
 ## Traceability
 
-Mapped during roadmap creation.
+Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SITE-01 | Phase 11 | Complete |
-| SITE-02 | Phase 11 | Complete |
-| SITE-03 | Phase 11 | Complete |
-| SITE-04 | Phase 11 | Complete |
-| THEME-01 | Phase 11 | Complete |
-| THEME-02 | Phase 11 | Complete |
-| CI-01 | Phase 12 | Pending |
-| CI-02 | Phase 12 | Pending |
-| CI-03 | Phase 12 | Pending |
-| LINK-01 | Phase 12 | Pending |
-| LINK-02 | Phase 12 | Pending |
-| LINK-03 | Phase 12 | Pending |
-| BUILD-01 | Phase 11 | Complete |
-| BUILD-02 | Phase 12 | Pending |
-| BUILD-03 | Phase 12 | Pending |
+| METH-01 | TBD | Pending |
+| METH-02 | TBD | Pending |
+| METH-03 | TBD | Pending |
+| METH-04 | TBD | Pending |
+| METH-05 | TBD | Pending |
+| METH-06 | TBD | Pending |
+| METH-07 | TBD | Pending |
+| METH-08 | TBD | Pending |
+| RENDER-01 | TBD | Pending |
+| RENDER-02 | TBD | Pending |
+| RENDER-03 | TBD | Pending |
+| GALLERY-01 | TBD | Pending |
+| GALLERY-02 | TBD | Pending |
+| GALLERY-03 | TBD | Pending |
+| DATA-01 | TBD | Pending |
+| DATA-02 | TBD | Pending |
+| DELIVERY-01 | TBD | Pending |
+| DELIVERY-02 | TBD | Pending |
+| DELIVERY-03 | TBD | Pending |
+| BUILD-04 | TBD | Pending |
+| BUILD-05 | TBD | Pending |
+| BUILD-06 | TBD | Pending |
 
 **Coverage:**
-
-- v1 requirements: 15 total
-- Mapped to phases: 15 ✓
-- Unmapped: 0 ✓
-
-Phase distribution:
-
-- Phase 11 (Curated pkgdown Site + Custom Theme): SITE-01..04, THEME-01, THEME-02, BUILD-01 (7)
-- Phase 12 (CI/CD Deploy + Repo Linkage + Release Integrity): CI-01..03, LINK-01..03, BUILD-02, BUILD-03 (8)
+- v1 requirements: 22 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 22 ⚠️
 
 ---
-*Requirements defined: 2026-09-04*
-*Last updated: 2026-09-04 after roadmap creation — traceability mapped, 15/15 covered*
+*Requirements defined: 2026-09-05*
+*Last updated: 2026-09-05 after initial definition*
