@@ -160,7 +160,10 @@ Plans:
   3. All article code runs fully offline — bundled/simulated data plus `set.seed()` for any stochastic step — with zero network calls, so building twice produces zero numeric diffs.
   4. Each article's key formulas are verified against the primary source paper AND the package source implementation (formula-review gate), so the package's own docs are not subtly wrong.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 15-01-PLAN.md — 7 formula-bearing Methods articles (tracer: methods-return-models) + references.bib additions + _pkgdown.yml Methods-dropdown wiring
 **UI hint**: yes
 
 ### Phase 16: Worked-Examples Gallery + Build & Release Integrity
