@@ -33,8 +33,8 @@ Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All 
 
 ### Curated datasets (DATA)
 
-- [ ] **DATA-01**: Each gallery domain example is powered by a curated real dataset with documented `data-raw/` provenance (a reproducible fetch/build script plus a frozen snapshot), following the existing dieselgate dataset pattern.
-- [ ] **DATA-02**: Datasets are sized and placed so the CRAN source tarball stays clean — either compressed, documented `data()` datasets (with `.Rd`) or `.Rbuildignore`d site-only data — with the choice recorded per dataset.
+- [x] **DATA-01**: Each gallery domain example is powered by a curated real dataset with documented `data-raw/` provenance (a reproducible fetch/build script plus a frozen snapshot), following the existing dieselgate dataset pattern.
+- [x] **DATA-02**: Datasets are sized and placed so the CRAN source tarball stays clean — either compressed, documented `data()` datasets (with `.Rd`) or `.Rbuildignore`d site-only data — with the choice recorded per dataset.
 
 ### pkgdown-only delivery (DELIVERY)
 
@@ -92,8 +92,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | GALLERY-01 | Phase 16 | Pending |
 | GALLERY-02 | Phase 16 | Pending |
 | GALLERY-03 | Phase 16 | Pending |
-| DATA-01 | Phase 14 | Pending |
-| DATA-02 | Phase 14 | Pending |
+| DATA-01 | Phase 14 | Complete |
+| DATA-02 | Phase 14 | Complete |
 | DELIVERY-01 | Phase 13 | Complete |
 | DELIVERY-02 | Phase 13 | Complete |
 | DELIVERY-03 | Phase 13 | Complete |

@@ -141,9 +141,11 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
   2. Each dataset is placed and sized to keep the CRAN tarball clean — either a compressed, documented `data()` dataset with an `.Rd` (`@format`/`@source`) shipped in the same commit as the `.rda`, or an `.Rbuildignore`d site-only `.rds` under `vignettes/articles/data/` — with the placement choice recorded per dataset and the `data/` size budget respected.
   3. Each curated dataset drives a valid end-to-end event study (loads, fits, produces finite statistics) so it is proven usable by a gallery example before that example is authored.
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 Plans:
-- [ ] 14-01-PLAN.md — Build earnings_surprises dataset (tracer), roxygen doc, DATA-SOURCES.md registry, CRAN safety gates
+
+- [x] 14-01-PLAN.md — Build earnings_surprises dataset (tracer), roxygen doc, DATA-SOURCES.md registry, CRAN safety gates
+
 **UI hint**: no
 
 ### Phase 15: Methods Articles + Rendered Outputs
@@ -194,6 +196,6 @@ Plans:
 | 11. Curated pkgdown Site + Custom Theme (local build) | v0.62.0 | 1/1 | Complete    | 2026-09-04 |
 | 12. CI/CD Deploy + Repo Linkage + Release Integrity | v0.62.0 | 0/1 | Planned | - |
 | 13. Article Infrastructure & Conventions Gate | v0.63.0 | 1/1 | Complete    | 2026-09-05 |
-| 14. Curated Per-Domain Datasets | v0.63.0 | 0/? | Not started | - |
+| 14. Curated Per-Domain Datasets | v0.63.0 | 1/1 | In Progress|  |
 | 15. Methods Articles + Rendered Outputs | v0.63.0 | 0/? | Not started | - |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 0/? | Not started | - |

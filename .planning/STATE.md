@@ -5,16 +5,16 @@ milestone_name: Documentation Depth — Methods & Worked Examples
 current_phase: 14
 current_phase_name: Curated Per-Domain Datasets
 status: planning
-stopped_at: Phase 13 complete, ready to plan Phase 14
-last_updated: "2026-09-05T21:04:38.669Z"
+stopped_at: Completed 14-01-PLAN.md (all 3 tasks)
+last_updated: "2026-09-05T21:48:31.967Z"
 last_activity: 2026-09-05
 last_activity_desc: Phase 13 complete, transitioned to Phase 14
-state_head: 921448401fbdbe69cd7e49d20b8a49e86015d455
+state_head: 75878dd8e0bfd90a7fd392cb97b5c0f09a82f4ce
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 2
+  completed_plans: 2
   percent: 17
 ---
 
@@ -65,6 +65,7 @@ Coverage: 22/22 v0.63.0 requirements mapped, 0 unmapped.
 |------|----------|-------|-------|
 | Phase 11-curated-pkgdown-site-custom-theme-local-build P01 | 3777 | 3 tasks | 2 files |
 | Phase 13 P01 | 45 | 3 tasks | 6 files |
+| Phase 14-curated-per-domain-datasets P01 | 8 minutes | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase 11]: DESCRIPTION URL field for pkgdown site URL deferred to Phase 12 LINK-01 (scope guard)
 - [Phase 13]: template.math-rendering: katex must go under template: in _pkgdown.yml (pkgdown 2.2.0 config_math_rendering reads from template.math-rendering)
 - [Phase 13]: plot_event_study() returns ggplot2 in current codebase; use plotly::ggplotly() to deliver interactive plotly figures in articles
+- [Phase 14]: Live Yahoo Finance fetch used for earnings_surprises (AAPL/MSFT/GOOGL Q1 2023); 6.0 KB bzip2 — well under 27 KB cap
+- [Phase 14]: DATA-SOURCES.md provenance registry created with dieselgate + earnings_surprises rows; excluded from CRAN tarball by pre-existing ^data-raw$ .Rbuildignore rule
 
 ### Pending Todos
 
@@ -117,8 +120,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-05T20:55:44.058Z
-Stopped at: Phase 13 complete, ready to plan Phase 14
+Last session: 2026-09-05T21:48:31.940Z
+Stopped at: Completed 14-01-PLAN.md (all 3 tasks)
 Resume file: None
 
 ## Operator Next Steps
