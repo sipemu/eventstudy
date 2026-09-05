@@ -15,7 +15,9 @@ effect of a single treated unit against a data-driven weighted combination of
 untreated "donor" units. SCM is the tool of choice when one unit is treated,
 many candidate controls exist, and no single control is a credible
 counterfactual on its own. It is estimated live here on inline synthetic
-treated-plus-donor data using the base-R `method = "optim"` solver.
+treated-plus-donor data, explicitly choosing `method = "optim"` (pure base-R
+`stats::optim`; the package default is `"quadprog"` when that optional package
+is installed).
 
 ## 2. When to Use This Method
 
@@ -69,8 +71,9 @@ unit tracks its synthetic counterfactual after treatment, i.e. no effect.
 We build inline synthetic data in base R with an explicit local `set.seed(42)`:
 5 donors over 80 periods (long format `unit, time, outcome`) and a treated unit
 (`time, outcome`) that tracks the donor average pre-treatment and jumps after
-$t_0 = 60$. We default to `method = "optim"` (pure `stats::optim` L-BFGS-B, no
-optional package).
+$t_0 = 60$. We explicitly pass `method = "optim"` (pure `stats::optim` L-BFGS-B, no
+extra dependency); the package default is `"quadprog"` when that optional
+package is available.
 
 ```{r build-sc}
 library(EventStudy)
