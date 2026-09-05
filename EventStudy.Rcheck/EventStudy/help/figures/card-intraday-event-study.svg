@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#6f42c1"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#6f42c1" text-anchor="middle">Intraday Event Studies</text>
+  <line x1="30" y1="155" x2="330" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="50" x2="30" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <!-- Candlesticks -->
+  <line x1="60" y1="105" x2="60" y2="125" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="55" y="110" width="10" height="10" fill="#6f42c1" opacity="0.7"/>
+  <line x1="90" y1="98" x2="90" y2="118" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="85" y="102" width="10" height="11" fill="#6f42c1" opacity="0.7"/>
+  <line x1="120" y1="92" x2="120" y2="112" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="115" y="97" width="10" height="10" fill="#6f42c1" opacity="0.7"/>
+  <!-- Event marker -->
+  <line x1="150" y1="45" x2="150" y2="155" stroke="#6f42c1" stroke-width="2" stroke-dasharray="4,3"/>
+  <text x="150" y="42" font-family="sans-serif" font-size="9" fill="#6f42c1" text-anchor="middle">news</text>
+  <!-- Post-event (bigger candles with volatility spike) -->
+  <line x1="150" y1="70" x2="150" y2="130" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="145" y="78" width="10" height="20" fill="#6f42c1"/>
+  <line x1="180" y1="65" x2="180" y2="115" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="175" y="72" width="10" height="18" fill="#6f42c1" opacity="0.8"/>
+  <line x1="210" y1="80" x2="210" y2="120" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="205" y="85" width="10" height="14" fill="#6f42c1" opacity="0.7"/>
+  <line x1="240" y1="88" x2="240" y2="118" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="235" y="92" width="10" height="12" fill="#6f42c1" opacity="0.6"/>
+  <line x1="270" y1="95" x2="270" y2="118" stroke="#6f42c1" stroke-width="1"/>
+  <rect x="265" y="98" width="10" height="10" fill="#6f42c1" opacity="0.5"/>
+  <text x="30" y="168" font-family="sans-serif" font-size="8" fill="#6c757d">09:30</text>
+  <text x="148" y="168" font-family="sans-serif" font-size="8" fill="#6c757d" text-anchor="middle">10:15</text>
+  <text x="305" y="168" font-family="sans-serif" font-size="8" fill="#6c757d">11:00</text>
+</svg>

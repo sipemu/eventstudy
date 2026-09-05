@@ -1,0 +1,8 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "EventStudy: Event Study Analysis in R",
+  author   = person("Simon", "Mueller"),
+  year     = "2026",
+  note     = "R package version 0.3.0",
+  url      = "https://github.com/sipemu/eventstudy"
+)

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#6f42c1"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#6f42c1" text-anchor="middle">Synthetic Control</text>
+  <line x1="30" y1="155" x2="330" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="50" x2="30" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <!-- Treatment event line -->
+  <line x1="175" y1="50" x2="175" y2="155" stroke="#6f42c1" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="175" y="47" font-family="sans-serif" font-size="9" fill="#6f42c1" text-anchor="middle">treatment</text>
+  <!-- Treated unit (solid, diverges down after treatment) -->
+  <path d="M40,120 Q80,115 120,108 Q148,103 175,100 Q205,97 230,115 Q255,130 280,145 Q300,153 320,155" stroke="#6f42c1" stroke-width="2.5" fill="none"/>
+  <!-- Synthetic control (dashed, continues on trend) -->
+  <path d="M40,120 Q80,115 120,108 Q148,103 175,100 Q205,97 230,90 Q255,82 280,75 Q300,70 320,65" stroke="#6f42c1" stroke-width="2" fill="none" stroke-dasharray="6,4" opacity="0.6"/>
+  <!-- Legend -->
+  <line x1="40" y1="175" x2="65" y2="175" stroke="#6f42c1" stroke-width="2.5"/>
+  <text x="70" y="178" font-family="sans-serif" font-size="8" fill="#6c757d">Treated</text>
+  <line x1="120" y1="175" x2="145" y2="175" stroke="#6f42c1" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>
+  <text x="150" y="178" font-family="sans-serif" font-size="8" fill="#6c757d">Synthetic</text>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#0d6efd"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#0d6efd" text-anchor="middle">Diagnostics &amp; Validation</text>
+  <!-- Left panel: residual scatter -->
+  <text x="90" y="50" font-family="sans-serif" font-size="9" fill="#6c757d" text-anchor="middle">Residuals</text>
+  <line x1="30" y1="140" x2="160" y2="140" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="60" x2="30" y2="145" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="100" x2="160" y2="100" stroke="#dee2e6" stroke-width="1" stroke-dasharray="3,3"/>
+  <!-- Scatter dots -->
+  <circle cx="50" cy="95" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="70" cy="88" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="85" cy="108" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="100" cy="92" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="115" cy="112" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="130" cy="85" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="145" cy="97" r="3" fill="#0d6efd" opacity="0.7"/>
+  <!-- Right panel: QQ plot -->
+  <text x="265" y="50" font-family="sans-serif" font-size="9" fill="#6c757d" text-anchor="middle">QQ Plot</text>
+  <line x1="185" y1="140" x2="330" y2="140" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="185" y1="60" x2="185" y2="145" stroke="#adb5bd" stroke-width="1.5"/>
+  <!-- QQ diagonal -->
+  <line x1="195" y1="130" x2="320" y2="65" stroke="#0d6efd" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <!-- QQ dots near line -->
+  <circle cx="205" cy="127" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="225" cy="118" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="245" cy="108" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="265" cy="98" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="285" cy="86" r="3" fill="#0d6efd" opacity="0.7"/>
+  <circle cx="305" cy="76" r="3" fill="#0d6efd" opacity="0.7"/>
+</svg>

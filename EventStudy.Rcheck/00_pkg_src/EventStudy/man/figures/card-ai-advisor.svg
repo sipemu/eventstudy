@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#0dcaf0"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#0097b2" text-anchor="middle">Grounded AI Advisor</text>
+  <!-- Small chart bottom-left -->
+  <line x1="30" y1="155" x2="160" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="100" x2="30" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <polyline points="40,150 65,140 90,125 95,108 115,118 140,128 155,130" stroke="#0dcaf0" stroke-width="2" fill="none"/>
+  <line x1="95" y1="100" x2="95" y2="155" stroke="#0dcaf0" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.7"/>
+  <!-- Speech bubble -->
+  <rect x="175" y="55" width="165" height="85" rx="10" fill="#fff" stroke="#0dcaf0" stroke-width="2"/>
+  <polygon points="195,140 185,158 210,140" fill="#fff" stroke="#0dcaf0" stroke-width="2"/>
+  <polygon points="195,140 210,140 202,148" fill="#fff"/>
+  <!-- Text lines in bubble -->
+  <text x="190" y="78" font-family="sans-serif" font-size="9" fill="#0097b2" font-weight="700">CAR = -38.6%***</text>
+  <line x1="190" y1="88" x2="328" y2="88" stroke="#dee2e6" stroke-width="1"/>
+  <text x="190" y="102" font-family="sans-serif" font-size="8" fill="#6c757d">Patell Z: -4.2 (p=0.001)</text>
+  <text x="190" y="115" font-family="sans-serif" font-size="8" fill="#6c757d">BMP: -3.9, Sign: 0.003</text>
+  <text x="190" y="128" font-family="sans-serif" font-size="8" fill="#6c757d">Bootstrap p: 0.002</text>
+</svg>

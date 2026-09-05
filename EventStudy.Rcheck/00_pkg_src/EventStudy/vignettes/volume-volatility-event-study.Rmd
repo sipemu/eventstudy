@@ -1,0 +1,374 @@
+---
+title: "Volume and Volatility Event Studies"
+author: "Simon Mueller"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Volume and Volatility Event Studies}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Traditional event studies focus on price-based abnormal returns. However,
+corporate events often affect **trading volume** and **return volatility** even
+when the net price effect is ambiguous. For example, an earnings announcement
+may trigger heavy trading and volatility spikes without moving the price much
+in either direction. Volume and volatility event studies capture these
+information-content effects that price-based methods can miss.
+
+The EventStudy package provides two dedicated models:
+
+| Model | Class | Abnormal measure |
+|-------|-------|------------------|
+| Volume | `VolumeModel` | Deviation of (log-)volume from estimation-window mean |
+| Volatility | `VolatilityModel` | Ratio of squared returns to estimation-window variance, minus 1 |
+
+Both models plug into the standard pipeline (`prepare_event_study()` →
+`fit_model()` → `calculate_statistics()`) and are compatible with all existing
+test statistics.
+
+```{r load-packages}
+library(EventStudy)
+library(dplyr)
+library(ggplot2)
+```
+
+# Data Requirements
+
+## Volume Event Study
+
+The `VolumeModel` requires a **`firm_volume`** column in the firm data, in
+addition to the standard `symbol`, `date`, and `adjusted` columns. The volume
+column should contain raw trading volume (number of shares traded):
+
+```{r volume-data}
+firm_tbl <- tibble(
+  symbol   = rep("FIRM_A", 300),
+  date     = format(seq(as.Date("2014-01-01"), by = "day", length.out = 300),
+                    "%d.%m.%Y"),
+  adjusted = 100 * cumprod(1 + rnorm(300, 0.0003, 0.015)),
+  firm_volume = pmax(0, rnorm(300, mean = 1e6, sd = 2e5))
+)
+```
+
+The `firm_volume` column is **preserved through the pipeline** automatically.
+The standard `EventStudyTask` passes through any extra columns present in the
+firm data.
+
+## Volatility Event Study
+
+The `VolatilityModel` does **not** require extra columns---it uses the firm
+returns already computed by `prepare_event_study()`. Abnormal volatility is
+defined as:
+
+$$AV_{i,t} = \frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1$$
+
+where $\hat{\sigma}_i^2$ is the variance of firm returns in the estimation
+window. Positive values indicate higher-than-expected volatility.
+
+# Volume Event Study
+
+## Setup
+
+```{r volume-setup}
+set.seed(42)
+
+# Firm data with volume
+n <- 300
+firm_tbl <- tibble(
+  symbol      = "FIRM_A",
+  date        = format(seq(as.Date("2014-06-01"), by = "day",
+                           length.out = n), "%d.%m.%Y"),
+  adjusted    = 100 * cumprod(1 + rnorm(n, 0.0003, 0.015)),
+  firm_volume = pmax(0, rnorm(n, mean = 1e6, sd = 2e5))
+)
+
+# Index data
+index_tbl <- tibble(
+  symbol   = "INDEX_1",
+  date     = firm_tbl$date,
+  adjusted = 1000 * cumprod(1 + rnorm(n, 0.0002, 0.012))
+)
+
+# Request table
+request_tbl <- tibble(
+  event_id                = 1L,
+  firm_symbol             = "FIRM_A",
+  index_symbol            = "INDEX_1",
+  event_date              = firm_tbl$date[200],
+  group                   = "Earnings",
+  event_window_start      = -10L,
+  event_window_end        = 10L,
+  shift_estimation_window = -11L,
+  estimation_window_length = 150L
+)
+```
+
+## Running the Volume Study
+
+The key difference from a standard event study is passing `VolumeModel$new()`
+as the return model. The `study_type` field on the `ParameterSet` can be set
+to `"volume"` for appropriate axis labels in plots.
+
+```{r volume-run}
+task <- EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+
+params <- ParameterSet$new(
+  return_calculation      = SimpleReturn$new(),
+  return_model            = VolumeModel$new(log_transform = TRUE),
+  single_event_statistics = SingleEventStatisticsSet$new(),
+  multi_event_statistics  = MultiEventStatisticsSet$new()
+)
+params$study_type <- "volume"
+
+task <- task |>
+  prepare_event_study(params) |>
+  fit_model(params) |>
+  calculate_statistics(params)
+```
+
+## Log Transform
+
+By default, `VolumeModel` log-transforms volume (`log(volume + 1)`) before
+computing abnormal volume. This is standard practice because raw volume is
+typically right-skewed. To disable the transform:
+
+```{r volume-no-log}
+vm <- VolumeModel$new(log_transform = FALSE)
+```
+
+## Interpreting Results
+
+Abnormal volume is the difference between observed (log-)volume and the
+estimation-window mean:
+
+$$AVolume_{i,t} = \log(V_{i,t} + 1) - \overline{\log(V_i + 1)}^{\text{est}}$$
+
+Positive values indicate higher-than-normal trading activity. The test
+statistics (AR T-test, CAR T-test, etc.) are applied to these abnormal volume
+measures in the same way as for abnormal returns.
+
+```{r volume-results}
+# Single-event results
+task$get_ar(event_id = 1)
+task$get_car(event_id = 1)
+
+# Tidy output
+tidy.EventStudyTask(task, type = "ar")
+```
+
+## Visualization
+
+```{r volume-plot, fig.width=7, fig.height=4}
+plot_event_study(task, type = "ar", event_id = 1) +
+  labs(title = "Abnormal Volume Around Earnings Announcement",
+       y = "Abnormal Log-Volume")
+```
+
+# Volatility Event Study
+
+## Setup
+
+The volatility study uses the same data structure as a standard event study---no
+extra columns are needed.
+
+```{r volatility-setup}
+set.seed(123)
+
+n <- 300
+firm_tbl <- tibble(
+  symbol   = "FIRM_A",
+  date     = format(seq(as.Date("2014-06-01"), by = "day",
+                        length.out = n), "%d.%m.%Y"),
+  adjusted = 100 * cumprod(1 + rnorm(n, 0.0003, 0.015))
+)
+
+index_tbl <- tibble(
+  symbol   = "INDEX_1",
+  date     = firm_tbl$date,
+  adjusted = 1000 * cumprod(1 + rnorm(n, 0.0002, 0.012))
+)
+
+request_tbl <- tibble(
+  event_id                = 1L,
+  firm_symbol             = "FIRM_A",
+  index_symbol            = "INDEX_1",
+  event_date              = firm_tbl$date[200],
+  group                   = "Earnings",
+  event_window_start      = -10L,
+  event_window_end        = 10L,
+  shift_estimation_window = -11L,
+  estimation_window_length = 150L
+)
+```
+
+## Running the Volatility Study
+
+```{r volatility-run}
+task <- EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+
+params <- ParameterSet$new(
+  return_calculation      = SimpleReturn$new(),
+  return_model            = VolatilityModel$new(),
+  single_event_statistics = SingleEventStatisticsSet$new(),
+  multi_event_statistics  = MultiEventStatisticsSet$new()
+)
+params$study_type <- "volatility"
+
+task <- task |>
+  prepare_event_study(params) |>
+  fit_model(params) |>
+  calculate_statistics(params)
+```
+
+## Interpreting Results
+
+Abnormal volatility is a **variance ratio** minus 1:
+
+$$AV_{i,t} = \frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1$$
+
+- $AV = 0$: volatility matches estimation-window expectations.
+- $AV > 0$: volatility is higher than expected (e.g., information arrival).
+- $AV < 0$: volatility is lower than expected (e.g., quiet trading).
+
+Values around event dates are typically large and positive when events carry
+new information, regardless of the direction of the price move.
+
+```{r volatility-results}
+task$get_ar(event_id = 1)
+task$get_car(event_id = 1)
+
+tidy.EventStudyTask(task, type = "ar")
+```
+
+## Visualization
+
+```{r volatility-plot, fig.width=7, fig.height=4}
+plot_event_study(task, type = "ar", event_id = 1) +
+  labs(title = "Abnormal Volatility Around Earnings Announcement",
+       y = "Abnormal Volatility (Variance Ratio - 1)")
+```
+
+# Combining Price, Volume, and Volatility
+
+A comprehensive event study often examines all three dimensions. You can run
+separate studies on the same data and compare results:
+
+```{r combined-study}
+set.seed(42)
+
+n <- 300
+firm_tbl <- tibble(
+  symbol      = "FIRM_A",
+  date        = format(seq(as.Date("2014-06-01"), by = "day",
+                           length.out = n), "%d.%m.%Y"),
+  adjusted    = 100 * cumprod(1 + rnorm(n, 0.0003, 0.015)),
+  firm_volume = pmax(0, rnorm(n, mean = 1e6, sd = 2e5))
+)
+
+index_tbl <- tibble(
+  symbol   = "INDEX_1",
+  date     = firm_tbl$date,
+  adjusted = 1000 * cumprod(1 + rnorm(n, 0.0002, 0.012))
+)
+
+request_tbl <- tibble(
+  event_id = 1L, firm_symbol = "FIRM_A", index_symbol = "INDEX_1",
+  event_date = firm_tbl$date[200], group = "Earnings",
+  event_window_start = -10L, event_window_end = 10L,
+  shift_estimation_window = -11L, estimation_window_length = 150L
+)
+
+# --- Price study ---
+task_price <- EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+params_price <- ParameterSet$new(return_model = MarketModel$new())
+task_price <- run_event_study(task_price, params_price)
+
+# --- Volume study ---
+task_vol <- EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+params_vol <- ParameterSet$new(return_model = VolumeModel$new())
+params_vol$study_type <- "volume"
+task_vol <- task_vol |>
+  prepare_event_study(params_vol) |>
+  fit_model(params_vol) |>
+  calculate_statistics(params_vol)
+
+# --- Volatility study ---
+task_volat <- EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
+params_volat <- ParameterSet$new(return_model = VolatilityModel$new())
+params_volat$study_type <- "volatility"
+task_volat <- task_volat |>
+  prepare_event_study(params_volat) |>
+  fit_model(params_volat) |>
+  calculate_statistics(params_volat)
+```
+
+```{r combined-plot, fig.width=7, fig.height=8}
+# Extract tidy ARs from each study
+ar_price  <- tidy.EventStudyTask(task_price, type = "ar") %>%
+  mutate(study = "Price (AR)")
+ar_vol    <- tidy.EventStudyTask(task_vol, type = "ar") %>%
+  mutate(study = "Volume (Abnormal Log-Volume)")
+ar_volat  <- tidy.EventStudyTask(task_volat, type = "ar") %>%
+  mutate(study = "Volatility (Variance Ratio - 1)")
+
+combined <- bind_rows(ar_price, ar_vol, ar_volat)
+
+ggplot(combined, aes(x = relative_index, y = abnormal_returns)) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "grey40") +
+  geom_vline(xintercept = 0, linetype = "dotted", colour = "red", alpha = 0.6) +
+  geom_col(fill = "steelblue", alpha = 0.7) +
+  facet_wrap(~ study, ncol = 1, scales = "free_y") +
+  labs(
+    title = "Price, Volume, and Volatility Event Study",
+    x     = "Relative Time to Event",
+    y     = "Abnormal Measure"
+  ) +
+  theme_minimal()
+```
+
+This three-panel view reveals whether the event primarily affects prices,
+trading activity, volatility, or some combination.
+
+# Diagnostics
+
+Model diagnostics work the same way as for price-based studies:
+
+```{r diagnostics}
+# Volume model diagnostics
+model_diagnostics(task_vol)
+plot_diagnostics(task_vol, event_id = 1)
+
+# Volatility model diagnostics
+model_diagnostics(task_volat)
+plot_diagnostics(task_volat, event_id = 1)
+```
+
+The diagnostics include estimation-window residual normality (Shapiro-Wilk),
+autocorrelation (Durbin-Watson, Ljung-Box), and model fit statistics.
+
+# Export
+
+Results can be exported in the same formats as any other study:
+
+```{r export}
+export_results(task_vol, "volume_results.csv")
+export_results(task_vol, "volume_results.xlsx")
+export_results(task_volat, "volatility_results.tex", which = c("model", "ar"))
+```
+
+# References
+
+- Campbell, J. Y. & Hentschel, L. (1992). No news is good news: An asymmetric model of changing volatility in stock returns. *Journal of Financial Economics*, 31(3), 281--318.
+- Beaver, W. H. (1968). The information content of annual earnings announcements. *Journal of Accounting Research*, 6, 67--92.
+- MacKinlay, A. C. (1997). Event Studies in Economics and Finance. *Journal of Economic Literature*, 35(1), 13--39.

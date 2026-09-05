@@ -71,7 +71,7 @@
     {
       "number": "14",
       "name": "Curated Per-Domain Datasets",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "15",
@@ -86,8 +86,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step (plan phase 14)",
-    "reason": "Phase 14 of 6 — needs a plan"
+    "label": "Advance to the next step (plan phase 15)",
+    "reason": "Phase 15 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-05T21:04:38.686Z"
+  "updated_at": "2026-09-05T21:59:07.562Z"
 }

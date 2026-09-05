@@ -1,0 +1,180 @@
+---
+title: "Synthetic Control Methods"
+author: "Simon Mueller"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Synthetic Control Methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Synthetic control methods (Abadie and Gardeazabal, 2003; Abadie, Diamond, and Hainmueller, 2010) provide a data-driven approach to construct a counterfactual for a single treated unit from a weighted combination of donor (control) units. This is particularly useful when:
+
+- There is a single treated unit (e.g., one firm, one country)
+- A traditional event study with many events is not possible
+- You want to visualize the treatment effect as a gap between actual and synthetic trajectories
+
+The EventStudy package implements synthetic control estimation with two optimization methods and includes a placebo test for inference.
+
+# Data Setup
+
+Synthetic control requires:
+- **Treated unit**: time series of the outcome for the treated unit
+- **Donor pool**: time series of outcomes for potential control units
+- **Treatment time**: when the intervention occurs
+
+```{r data}
+library(EventStudy)
+library(tibble)
+
+# Treated unit
+treated_data <- tibble(
+  time = 1:100,
+  outcome = cumsum(rnorm(100, mean = 0.1, sd = 0.5))
+)
+# Inject treatment effect after period 60
+treated_data$outcome[61:100] <- treated_data$outcome[61:100] + 5
+
+# Donor pool (long format)
+donor_data <- do.call(rbind, lapply(paste0("D", 1:10), function(u) {
+  tibble(
+    unit = u,
+    time = 1:100,
+    outcome = cumsum(rnorm(100, mean = 0.1, sd = 0.5))
+  )
+}))
+```
+
+# Creating the Task
+
+```{r task}
+task <- SyntheticControlTask$new(
+  treated_data = treated_data,
+  donor_data = donor_data,
+  treatment_time = 61
+)
+print(task)
+#> SyntheticControlTask
+#>   Donors:      10
+#>   Periods:     100
+#>   Pre-treat:   60
+#>   Post-treat:  40
+#>   Treatment:   61
+#>   Estimated:   FALSE
+```
+
+# Estimation
+
+Two optimization methods are available:
+
+## quadprog (default)
+
+Uses `quadprog::solve.QP()` for exact quadratic programming. Requires the `quadprog` package.
+
+```{r quadprog}
+task <- estimate_synthetic_control(task, method = "quadprog")
+```
+
+## optim (fallback)
+
+Uses `stats::optim()` with a softmax reparameterization. No extra dependencies.
+
+```{r optim}
+task <- estimate_synthetic_control(task, method = "optim")
+```
+
+# Results
+
+After estimation, the task contains:
+
+```{r results}
+# Donor weights (sum to 1, all >= 0)
+task$results$weights
+#>     D1     D2     D3     D4     D5 ...
+#>  0.312  0.000  0.188  0.000  0.500 ...
+
+# Average treatment effect on the treated
+task$results$att
+#> [1] 4.87
+
+# Pre- and post-treatment mean squared prediction error
+task$results$pre_mspe
+task$results$post_mspe
+
+# Full trajectory
+task$results$trajectory
+#> # A tibble: 100 x 4
+#>     time treated synthetic   gap
+#>    <int>   <dbl>     <dbl> <dbl>
+#>  1     1   0.234     0.289 -0.0547
+#>  ...
+```
+
+# Visualization
+
+Three plot types are available:
+
+## Trajectory Plot
+
+Compare the treated unit to its synthetic counterpart:
+
+```{r plot-trajectory}
+plot_synthetic_control(task, type = "trajectory")
+```
+
+## Gap Plot
+
+Visualize the treatment effect (gap between treated and synthetic):
+
+```{r plot-gap}
+plot_synthetic_control(task, type = "gap")
+```
+
+## Placebo Plot
+
+After running the placebo test, overlay placebo gaps:
+
+```{r plot-placebo}
+task <- sc_placebo_test(task)
+plot_synthetic_control(task, type = "placebo")
+```
+
+# Placebo Test
+
+The placebo test re-estimates the synthetic control for each donor unit as a pseudo-treated unit. The treated unit's RMSPE ratio is ranked among all units to produce a p-value:
+
+$$p = \frac{\text{rank of treated ratio}}{N_{donors} + 1}$$
+
+where the RMSPE ratio is $\frac{RMSPE_{post}}{RMSPE_{pre}}$.
+
+```{r placebo}
+task <- sc_placebo_test(task)
+
+# p-value
+task$results$placebo$p_value
+
+# RMSPE ratios for all donor units
+task$results$placebo$rmspe_ratios
+```
+
+You can limit the number of placebo units for faster computation:
+
+```{r placebo-subset}
+task <- sc_placebo_test(task, n_placebo = 5)
+```
+
+# References
+
+- Abadie, A. and Gardeazabal, J. (2003). The Economic Costs of Conflict: A Case Study of the Basque Country. *American Economic Review*, 93(1), 113-132.
+- Abadie, A., Diamond, A., and Hainmueller, J. (2010). Synthetic Control Methods for Comparative Case Studies. *Journal of the American Statistical Association*, 105(490), 493-505.

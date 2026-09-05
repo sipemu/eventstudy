@@ -1,0 +1,347 @@
+pkgname <- "EventStudy"
+source(file.path(R.home("share"), "R", "examples-header.R"))
+options(warn = 1)
+base::assign(".ExTimings", "EventStudy-Ex.timings", pos = 'CheckExEnv')
+base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+base::assign(".format_ptime",
+function(x) {
+  if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
+  if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
+  options(OutDec = '.')
+  format(x[1L:3L], digits = 7L)
+},
+pos = 'CheckExEnv')
+
+### * </HEADER>
+library('EventStudy')
+
+base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+cleanEx()
+nameEx("AnthropicProvider")
+### * AnthropicProvider
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: AnthropicProvider
+### Title: AnthropicProvider
+### Aliases: AnthropicProvider
+
+### ** Examples
+
+## Not run: 
+##D # Reads ANTHROPIC_API_KEY from the environment at call time:
+##D p <- AnthropicProvider$new(model = "claude-opus-4-8")
+##D p$complete("Summarise these event-study diagnostics")
+##D 
+##D # Structured output via a tool-use input_schema:
+##D schema <- list(type = "object",
+##D                properties = list(advice = list(type = "string")))
+##D p$complete("Recommend a test statistic", schema = schema)
+## End(Not run)
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("AnthropicProvider", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("CustomProvider")
+### * CustomProvider
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: CustomProvider
+### Title: CustomProvider
+### Aliases: CustomProvider
+
+### ** Examples
+
+# In-process, no network: the user function supplies the completion text.
+p <- CustomProvider$new(function(prompt, schema) "canned advice")
+res <- p$complete("Summarise these diagnostics")
+res$text
+res$source
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("CustomProvider", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("OpenAICompatProvider")
+### * OpenAICompatProvider
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: OpenAICompatProvider
+### Title: OpenAICompatProvider
+### Aliases: OpenAICompatProvider
+
+### ** Examples
+
+## Not run: 
+##D # OpenAI (reads OPENAI_API_KEY from the environment at call time):
+##D p <- OpenAICompatProvider$new(model = "gpt-4o")
+##D p$complete("Summarise these event-study diagnostics")
+##D 
+##D # Any OpenAI-compatible endpoint works via a base_url override — e.g. a local
+##D # Ollama server (no cloud key needed by the server, but OPENAI_API_KEY is still
+##D # read as the bearer token; set it to any non-empty value for local servers):
+##D p_local <- OpenAICompatProvider$new(
+##D   model = "llama3",
+##D   base_url = "http://localhost:11434/v1"   # Ollama; LM Studio: :1234/v1
+##D )
+##D p_local$complete("Summarise these diagnostics")
+## End(Not run)
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("OpenAICompatProvider", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("dieselgate")
+### * dieselgate
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: dieselgate
+### Title: Volkswagen "Dieselgate" Multi-Automaker Event Study Dataset
+### Aliases: dieselgate
+### Keywords: datasets
+
+### ** Examples
+
+## No test: 
+data(dieselgate)
+
+# Build a multi-group task and run the full pipeline
+task <- EventStudyTask$new(dieselgate$firm, dieselgate$index,
+                           dieselgate$request)
+task <- run_event_study(task, ParameterSet$new())
+
+# Single-firm: VW crash (event_id = 1)
+task$get_car(1L)
+
+# Multi-group: CAAR comparison
+vw_caar    <- task$aar_caar_tbl[task$aar_caar_tbl$group == "VW Group", ]$CSectT[[1]]
+other_caar <- task$aar_caar_tbl[task$aar_caar_tbl$group == "Other", ]$CSectT[[1]]
+tail(vw_caar[, c("relative_index", "caar", "caar_t")], 1)
+tail(other_caar[, c("relative_index", "caar", "caar_t")], 1)
+## End(No test)
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("dieselgate", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("earnings_surprises")
+### * earnings_surprises
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: earnings_surprises
+### Title: Earnings Surprise Multi-Firm Event Study Dataset
+### Aliases: earnings_surprises
+### Keywords: datasets
+
+### ** Examples
+
+## No test: 
+data(earnings_surprises)
+
+# Build task and run the full pipeline
+task <- EventStudyTask$new(earnings_surprises$firm,
+                           earnings_surprises$index,
+                           earnings_surprises$request)
+task <- run_event_study(task, ParameterSet$new())
+
+# Multi-event: AAR/CAAR across all firms
+caar_tbl <- task$aar_caar_tbl$CSectT[[1]]
+tail(caar_tbl[, c("relative_index", "caar", "caar_t")], 1)
+## End(No test)
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("earnings_surprises", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("es_advise")
+### * es_advise
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: es_advise
+### Title: Grounded AI Advice for Event Study Results
+### Aliases: es_advise
+
+### ** Examples
+
+## Not run: 
+##D task    <- run_event_study(my_task, ParameterSet$new())
+##D diag    <- es_diagnostics(task)
+##D 
+##D # Offline KB path (no LLM):
+##D advice_kb <- es_advise(diag, task_type = "recommend_stat")
+##D print(advice_kb)   # es_advice S3
+##D 
+##D # LLM-grounded path:
+##D p         <- provider("openai")
+##D advice    <- es_advise(diag, task_type = "recommend_stat", provider = p)
+##D print(advice)      # Advice S3 with grounding guarantee
+## End(Not run)
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("es_advise", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("es_kb")
+### * es_kb
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: es_kb
+### Title: Access the EventStudy Grounding Knowledge Base
+### Aliases: es_kb
+
+### ** Examples
+
+kb <- es_kb()
+length(kb)             # number of rules
+kb[[1]]$id             # id of first rule
+kb[[1]]$citation       # citation list
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("es_kb", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("flag_robustness")
+### * flag_robustness
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: flag_robustness
+### Title: Flag Robustness Issues via Offline KB Matching
+### Aliases: flag_robustness flag_robustness.default
+###   flag_robustness.EventStudyTask flag_robustness.es_diagnostics
+
+### ** Examples
+
+## Not run: 
+##D task <- run_event_study(my_task, ParameterSet$new())
+##D advice <- flag_robustness(task)
+##D print(advice)
+## End(Not run)
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("flag_robustness", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("nonparametric_intraday_test")
+### * nonparametric_intraday_test
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: nonparametric_intraday_test
+### Title: Non-Parametric Intraday Event Study Test
+### Aliases: nonparametric_intraday_test
+
+### ** Examples
+
+## Not run: 
+##D results <- nonparametric_intraday_test(
+##D   estimation_window = est_data,
+##D   event_window = event_data,
+##D   event_times = c("10:00", "14:30"),
+##D   p = 0.05,
+##D   init_window = 5
+##D )
+## End(Not run)
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("nonparametric_intraday_test", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("provider")
+### * provider
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: provider
+### Title: Construct a Grounded AI Advisor provider
+### Aliases: provider
+
+### ** Examples
+
+# Custom provider runs in-process, no network:
+p <- provider("custom", fn = function(prompt, schema) "advice text")
+p$complete("Summarise")$text
+
+## Not run: 
+##D # HTTP providers make live calls; never run in examples or on CRAN:
+##D p <- provider("openai", model = "gpt-4o")
+##D p$complete("Summarise these diagnostics")
+##D 
+##D a <- provider("anthropic", model = "claude-opus-4-8")
+##D a$complete("Summarise these diagnostics")
+## End(Not run)
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("provider", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+cleanEx()
+nameEx("recommend_stat")
+### * recommend_stat
+
+flush(stderr()); flush(stdout())
+
+base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+### Name: recommend_stat
+### Title: Recommend Test Statistics via Offline KB Matching
+### Aliases: recommend_stat recommend_stat.default
+###   recommend_stat.EventStudyTask recommend_stat.es_diagnostics
+
+### ** Examples
+
+## Not run: 
+##D task <- run_event_study(my_task, ParameterSet$new())
+##D advice <- recommend_stat(task)
+##D print(advice)
+## End(Not run)
+
+
+
+
+base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+base::cat("recommend_stat", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+### * <FOOTER>
+###
+cleanEx()
+options(digits = 7L)
+base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+grDevices::dev.off()
+###
+### Local variables: ***
+### mode: outline-minor ***
+### outline-regexp: "\\(> \\)?### [*]+" ***
+### End: ***
+quit('no')

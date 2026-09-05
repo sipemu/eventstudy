@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#0d6efd"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#0d6efd" text-anchor="middle">Bootstrap Inference</text>
+  <!-- Axes -->
+  <line x1="40" y1="155" x2="320" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="40" y1="60" x2="40" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <!-- Zero line -->
+  <line x1="40" y1="120" x2="320" y2="120" stroke="#dee2e6" stroke-width="1" stroke-dasharray="3,3"/>
+  <!-- Bar 1 -->
+  <rect x="65" y="105" width="30" height="15" fill="#0d6efd" opacity="0.7"/>
+  <line x1="80" y1="88" x2="80" y2="105" stroke="#0d6efd" stroke-width="1.5"/>
+  <line x1="72" y1="88" x2="88" y2="88" stroke="#0d6efd" stroke-width="1.5"/>
+  <!-- Bar 2 -->
+  <rect x="125" y="85" width="30" height="35" fill="#0d6efd" opacity="0.7"/>
+  <line x1="140" y1="68" x2="140" y2="85" stroke="#0d6efd" stroke-width="1.5"/>
+  <line x1="132" y1="68" x2="148" y2="68" stroke="#0d6efd" stroke-width="1.5"/>
+  <!-- Bar 3 -->
+  <rect x="185" y="75" width="30" height="45" fill="#0d6efd" opacity="0.7"/>
+  <line x1="200" y1="60" x2="200" y2="75" stroke="#0d6efd" stroke-width="1.5"/>
+  <line x1="192" y1="60" x2="208" y2="60" stroke="#0d6efd" stroke-width="1.5"/>
+  <!-- Bootstrap resample dots -->
+  <circle cx="260" cy="100" r="3" fill="#0d6efd" opacity="0.4"/>
+  <circle cx="265" cy="105" r="3" fill="#0d6efd" opacity="0.4"/>
+  <circle cx="255" cy="95" r="3" fill="#0d6efd" opacity="0.4"/>
+  <circle cx="270" cy="98" r="3" fill="#0d6efd" opacity="0.4"/>
+  <circle cx="260" cy="110" r="3" fill="#0d6efd" opacity="0.4"/>
+  <circle cx="275" cy="103" r="3" fill="#0d6efd" opacity="0.4"/>
+  <text x="265" y="128" font-family="sans-serif" font-size="8" fill="#6c757d" text-anchor="middle">bootstrap</text>
+</svg>

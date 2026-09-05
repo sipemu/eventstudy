@@ -1,0 +1,1713 @@
+# Edge case tests for real-world messy data scenarios
+# Covers: NA propagation, division by zero, single events, empty windows,
+# zero variance, degenerate inputs
+
+
+# ============================================================================
+# Single-event group edge cases (multi-event stats with n=1)
+# ============================================================================
+
+test_that("CSectTTest with single event produces NA for sd-based stats", {
+  data = tibble::tibble(
+    event_id = "E1",
+    firm_symbol = "F1",
+    relative_index = -5:5,
+    abnormal_returns = rnorm(11, mean = 0.01, sd = 0.02),
+    event_window = 1,
+    estimation_window = 0
+  )
+
+  csect = CSectTTest$new()
+  result = csect$compute(data, NULL)
+
+  expect_equal(nrow(result), 11)
+  # sd() of single value is NA, so aar_t should be NA/NaN
+  expect_true(all(is.na(result$aar_t) | is.nan(result$aar_t)))
+  # AAR itself should still be valid (it's just the single firm's AR)
+  expect_true(all(is.finite(result$aar)))
+})
+
+
+test_that("SignTest with single event returns NA for sign_z (STATS-04)", {
+  # A sign test with n == 1 is statistically invalid — the z-score is
+  # ±1 regardless of data, providing no information. Per STATS-04, the
+  # guard now requires n_valid_events >= 2; with n == 1 sign_z is NA.
+  data = tibble::tibble(
+    event_id = "E1",
+    firm_symbol = "F1",
+    relative_index = -5:5,
+    abnormal_returns = rnorm(11, mean = 0.01, sd = 0.02),
+    event_window = 1,
+    estimation_window = 0
+  )
+
+  sign_test = SignTest$new()
+  result = sign_test$compute(data, NULL)
+
+  expect_equal(nrow(result), 11)
+  # With n == 1 the statistic is invalid — must be NA, not ±1.
+  expect_true(all(is.na(result$sign_z)))
+  # Non-statistic fields are still computed correctly
+  expect_true(all(is.finite(result$aar)))
+})
+
+
+test_that("GeneralizedSignTest with all positive estimation returns (p_hat=1)", {
+  n_est = 50
+  n_ev = 11
+  data = tibble::tibble(
+    event_id = "E1",
+    firm_symbol = "F1",
+    relative_index = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+    abnormal_returns = c(abs(rnorm(n_est, 0.01, 0.005)),  # all positive
+                         rnorm(n_ev, 0.001, 0.02)),
+    event_window = c(rep(0, n_est), rep(1, n_ev)),
+    estimation_window = c(rep(1, n_est), rep(0, n_ev))
+  )
+
+  gsign = GeneralizedSignTest$new()
+  result = gsign$compute(data, NULL)
+
+  expect_equal(nrow(result), n_ev)
+  # p_hat = 1.0 → denominator = sqrt(n * 1 * 0) = 0 → guarded to NA
+  expect_true(all(is.na(result$gsign_z)))
+})
+
+
+test_that("RankTest with single event does not crash", {
+  n_est = 50
+  n_ev = 11
+  data = tibble::tibble(
+    event_id = "E1",
+    firm_symbol = "F1",
+    relative_index = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+    abnormal_returns = rnorm(n_est + n_ev, mean = 0, sd = 0.02),
+    event_window = c(rep(0, n_est), rep(1, n_ev)),
+    estimation_window = c(rep(1, n_est), rep(0, n_ev))
+  )
+
+  rank_test = RankTest$new()
+  result = rank_test$compute(data, NULL)
+
+  expect_equal(nrow(result), n_ev)
+  expect_true("rank_z" %in% names(result))
+})
+
+
+# ============================================================================
+# NA propagation in abnormal returns
+# ============================================================================
+
+test_that("CSectTTest handles NA abnormal returns gracefully", {
+  set.seed(42)
+  data = do.call(rbind, lapply(1:3, function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = -5:5,
+      abnormal_returns = rnorm(11, mean = 0.005, sd = 0.02),
+      event_window = 1,
+      estimation_window = 0
+    )
+  }))
+
+  # Inject NAs in one firm's returns
+  data$abnormal_returns[data$firm_symbol == "F2"] = NA_real_
+
+  csect = CSectTTest$new()
+  result = csect$compute(data, NULL)
+
+  expect_equal(nrow(result), 11)
+  # n_valid_events should be 2 (F1 and F3), not 3
+  expect_true(all(result$n_valid_events == 2))
+  # AAR should still be computed from the 2 valid events
+  expect_true(all(is.finite(result$aar)))
+})
+
+
+test_that("BMPTest handles NA abnormal returns", {
+  # Inline data creation to avoid scope issues with helper defined in another test file
+  set.seed(42)
+  n_firms = 3
+  n_est = 50
+  n_ev = 11
+  data = do.call(rbind, lapply(seq_len(n_firms), function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+      index_returns = rnorm(n_est + n_ev, mean = 0.0003, sd = 0.015),
+      firm_returns = 0.001 + 1.2 * index_returns + rnorm(n_est + n_ev, sd = 0.01),
+      abnormal_returns = rnorm(n_est + n_ev, mean = 0.001, sd = 0.02),
+      event_window = c(rep(0, n_est), rep(1, n_ev)),
+      estimation_window = c(rep(1, n_est), rep(0, n_ev)),
+      event_date = c(rep(0, n_est), 1, rep(0, n_ev - 1))
+    )
+  }))
+
+  model_tbl = tibble::tibble(
+    event_id = paste0("E", seq_len(n_firms)),
+    firm_symbol = paste0("F", seq_len(n_firms)),
+    model = lapply(seq_len(n_firms), function(i) {
+      mm = MarketModel$new()
+      mm$fit(data[data$firm_symbol == paste0("F", i), ])
+      mm
+    })
+  )
+
+  # Inject NAs
+  data$abnormal_returns[data$firm_symbol == "F2" & data$event_window == 1] = NA_real_
+
+  bmp = BMPTest$new()
+  result = bmp$compute(data, model_tbl)
+
+  expect_equal(nrow(result), n_ev)
+  # Should not crash
+  expect_true("bmp_t" %in% names(result))
+})
+
+
+# ============================================================================
+# Zero variance / constant returns
+# ============================================================================
+
+test_that("MarketModel with zero-variance firm returns produces near-zero sigma", {
+  data = create_mock_model_data()
+  # Constant firm returns: lm fits fine (intercept ≈ constant, beta ≈ 0)
+  data$firm_returns = 0.001
+
+  mm = MarketModel$new()
+  result = mm$fit(data)
+  expect_true(length(result) > 0)
+  # Sigma should be essentially zero since residuals ≈ 0
+  expect_lt(mm$statistics$sigma, 1e-10)
+})
+
+
+test_that("MarketModel with zero-variance index returns emits one warning and sets is_fitted FALSE", {
+  data = create_mock_model_data()
+  # Constant index returns → zero variance guard fires (CONTRACT-04)
+  data$index_returns = 0.0005
+
+  mm = MarketModel$new()
+  # The degenerate-input contract (Wave 1) replaced the old crash with a
+  # controlled lenient-mode warning + is_fitted = FALSE instead of an error.
+  expect_warning(mm$fit(data), "zero or near-zero variance")
+  expect_false(mm$is_fitted)
+})
+
+
+test_that("ComparisonPeriodMeanAdjustedModel with constant estimation returns", {
+  # CR-01 / WR-05 contract (Phase 2 robustness hardening):
+  # ComparisonPeriodMeanAdjustedModel is an arithmetic model — it subtracts the
+  # estimation-window mean from event-window returns. It does NOT need variance
+  # in estimation returns to produce well-defined abnormal returns. Zero-variance
+  # (all estimation returns identical) is a valid input: sigma=0, is_fitted=TRUE,
+  # ARs = firm_returns - mean = 0 for event rows where firm_return == constant.
+  data = create_mock_model_data()
+  # All estimation window firm returns identical -> sd(firm_returns) == 0
+  data$firm_returns[data$estimation_window == 1] = 0.001
+
+  cpmam = ComparisonPeriodMeanAdjustedModel$new()
+  cpmam$fit(data)
+
+  # Arithmetic model: zero diff-variance does NOT prevent fitting
+  expect_true(cpmam$is_fitted)
+  expect_equal(cpmam$statistics$sigma, 0, tolerance = 1e-10)
+  ar <- cpmam$abnormal_returns(data)
+  # Event rows where firm_returns are NOT the constant 0.001 will have non-zero ARs;
+  # but all ARs must be finite (no NA from guard, no Inf from sigma=0)
+  expect_false(any(is.nan(ar$abnormal_returns)))
+  expect_false(any(is.infinite(ar$abnormal_returns)))
+})
+
+
+test_that("MarketAdjustedModel with constant estimation residuals", {
+  # CR-01 contract (Phase 2 robustness hardening):
+  # MarketAdjustedModel is an arithmetic model — it subtracts index_returns from
+  # firm_returns. It does NOT need variance in (firm - index) residuals to produce
+  # well-defined abnormal returns. When firm_returns == index_returns, sigma=0,
+  # is_fitted=TRUE, and all ARs = 0 (not NA).
+  data = create_mock_model_data()
+  # Make firm_returns = index_returns exactly -> sd(firm - index) == 0
+  data$firm_returns = data$index_returns
+
+  mam = MarketAdjustedModel$new()
+  mam$fit(data)
+
+  # Arithmetic model: zero diff-variance does NOT prevent fitting
+  expect_true(mam$is_fitted)
+  expect_equal(mam$statistics$sigma, 0, tolerance = 1e-10)
+  ar <- mam$abnormal_returns(data)
+  # firm - index = 0 everywhere, so all event-window ARs should be exactly 0
+  event_ar <- ar$abnormal_returns[data$event_window == 1]
+  expect_true(all(abs(event_ar) < 1e-10))
+  # No NAs or infinities — sigma=0 must not propagate Inf
+  expect_false(any(is.nan(ar$abnormal_returns)))
+  expect_false(any(is.infinite(ar$abnormal_returns)))
+})
+
+
+# ============================================================================
+# Forecast error correction with zero-variance market returns
+# ============================================================================
+
+test_that("Forecast error correction in MarketAdjustedModel uses constant-mean formula", {
+  data = create_mock_model_data()
+  # Constant index returns — should not affect forecast error correction
+  data$index_returns = 0.001
+
+  mam = MarketAdjustedModel$new()
+  mam$fit(data)
+
+  expect_true(mam$is_fitted)
+  # Constant-mean correction: sigma * sqrt(1 + 1/T) — always finite
+  fec = mam$statistics$forecast_error_corrected_sigma
+  expect_true(!is.null(fec))
+  expect_true(all(is.finite(fec)))
+  # All values should be equal (constant correction, no regression term)
+  expect_equal(length(unique(fec)), 1)
+  # Should equal sigma * sqrt(1 + 1/T)
+  T_est = sum(data$estimation_window == 1)
+  expected = mam$statistics$sigma * sqrt(1 + 1 / T_est)
+  expect_equal(fec[1], expected, tolerance = 1e-10)
+})
+
+
+# ============================================================================
+# PatellZTest edge cases
+# ============================================================================
+
+test_that("PatellZTest with very short estimation window (m <= 4)", {
+  # Create data with only 4 observations in estimation window
+  set.seed(42)
+  n_est = 4
+  n_ev = 5
+  data = do.call(rbind, lapply(1:3, function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+      index_returns = rnorm(n_est + n_ev, 0, 0.015),
+      firm_returns = rnorm(n_est + n_ev, 0, 0.02),
+      abnormal_returns = rnorm(n_est + n_ev, 0, 0.02),
+      event_window = c(rep(0, n_est), rep(1, n_ev)),
+      estimation_window = c(rep(1, n_est), rep(0, n_ev)),
+      event_date = c(rep(0, n_est), 1, rep(0, n_ev - 1))
+    )
+  }))
+
+  model_tbl = tibble::tibble(
+    event_id = paste0("E", 1:3),
+    firm_symbol = paste0("F", 1:3),
+    model = lapply(1:3, function(i) {
+      mm = MarketModel$new()
+      mm$fit(data[data$firm_symbol == paste0("F", i), ])
+      mm
+    })
+  )
+
+  patell = PatellZTest$new()
+  # m=4 → Q = (4-2)/(4-4) = 2/0 = Inf
+  # This documents current behavior (Inf propagation)
+  result = patell$compute(data, model_tbl)
+  expect_equal(nrow(result), n_ev)
+})
+
+
+# ============================================================================
+# Return calculation edge cases
+# ============================================================================
+
+test_that("SimpleReturn with zero price produces correct result or NA", {
+  sr = SimpleReturn$new()
+  tbl = tibble::tibble(p = c(100, 0, 50))
+  result = sr$calculate_return(tbl, "p", "r")
+  # (0 - 100) / lag(100) = -1 (divides by lagged price)
+  expect_equal(result$r[2], -1)
+  # (50 - 0) / lag(0) = guarded to NA (was Inf)
+  expect_true(is.na(result$r[3]))
+})
+
+
+test_that("LogReturn with zero price produces NA (guarded)", {
+  lr = LogReturn$new()
+  tbl = tibble::tibble(p = c(100, 0, 50))
+  result = lr$calculate_return(tbl, "p", "r")
+  # log(0/100) = guarded to NA (was -Inf)
+  expect_true(is.na(result$r[2]))
+})
+
+
+test_that("LogReturn with negative price produces NA (guarded)", {
+  lr = LogReturn$new()
+  tbl = tibble::tibble(p = c(100, -10, 50))
+  # Guarded: ratio = -10/100 = -0.1, log of negative → NA
+  result <- lr$calculate_return(tbl, "p", "r")
+  expect_true(is.na(result$r[2]))
+})
+
+
+# ============================================================================
+# Single-day event window
+# ============================================================================
+
+test_that("Full pipeline with single-day event window", {
+  symbols = c("FIRM_A", "FIRM_B")
+  firm_data = create_mock_firm_data(symbols = symbols)
+  index_data = create_mock_index_data()
+
+  n_days = 300
+  start_date = as.Date("2020-01-01")
+  dates = seq(start_date, by = "day", length.out = n_days)
+  dates = dates[!weekdays(dates) %in% c("Saturday", "Sunday")]
+
+  request = tibble::tibble(
+    event_id = 1:2,
+    firm_symbol = symbols,
+    index_symbol = "INDEX_1",
+    event_date = rep(format(dates[180], "%d.%m.%Y"), 2),
+    group = "TestGroup",
+    event_window_start = 0,   # single day: [0, 0]
+    event_window_end = 0,
+    shift_estimation_window = -1,
+    estimation_window_length = 120
+  )
+
+  task = EventStudyTask$new(firm_data, index_data, request)
+  ps = ParameterSet$new()
+  task = run_event_study(task, ps)
+
+  # Should complete without error
+
+  expect_true("model" %in% names(task$data_tbl))
+  # Event window AR should have exactly 1 row per event
+  ar_data = task$data_tbl$data[[1]] %>%
+    dplyr::filter(event_window == 1)
+  expect_equal(nrow(ar_data), 1)
+})
+
+
+# ============================================================================
+# Event date not found in data
+# ============================================================================
+
+test_that("validate_task warns when event date missing from data", {
+  task = create_mock_task()
+  # Mangle the event date to one that doesn't exist
+  task$data_tbl$request[[1]]$event_date = "01.01.1900"
+
+  expect_warning(validate_task(task), "not found")
+})
+
+
+# ============================================================================
+# extract_cars with all-NA abnormal returns
+# ============================================================================
+
+test_that("cross_sectional_regression with all-NA abnormal returns gives NA CARs", {
+  task = create_fitted_mock_task(n_firms = 3)
+
+  # Replace all abnormal returns with NA
+  for (i in seq_len(nrow(task$data_tbl))) {
+    task$data_tbl$data[[i]]$abnormal_returns = NA_real_
+  }
+
+  firm_chars = tibble::tibble(
+    event_id = 1:2,
+    x = c(1.0, 2.0)
+  )
+
+  # All-NA ARs produce all-NA CARs.  lm() on all-NA response fails and the
+  # tryCatch wrapping in cross_sectional_regression() now emits a warning and
+  # returns NULL — so the call must warn, not stop().
+  expect_warning(
+    result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE),
+    regexp = "lm|non-NA|missing|failed",
+    ignore.case = TRUE
+  )
+  expect_null(result)
+})
+
+
+# ============================================================================
+# CalendarTimePortfolioTest with identical AARs (ts_sd = 0)
+# ============================================================================
+
+test_that("CalendarTimePortfolioTest with constant AARs across time", {
+  # All firms have exactly the same abnormal return on every day
+  data = do.call(rbind, lapply(1:5, function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = -5:5,
+      abnormal_returns = 0.01,  # constant across firms and time
+      event_window = 1,
+      estimation_window = 0
+    )
+  }))
+
+  ct = CalendarTimePortfolioTest$new()
+  result = ct$compute(data, NULL)
+
+  expect_equal(nrow(result), 11)
+  # ts_sd = sd(constant) = 0 → caltime_t guarded to NA
+  expect_true(all(is.na(result$caltime_t)))
+})
+
+
+# ============================================================================
+# Empty event window
+# ============================================================================
+
+test_that("CSectTTest with empty event window returns 0-row result", {
+  data = tibble::tibble(
+    event_id = "E1",
+    firm_symbol = "F1",
+    relative_index = seq(-50, -1),
+    abnormal_returns = rnorm(50),
+    event_window = 0,  # no event window at all
+    estimation_window = 1
+  )
+
+  csect = CSectTTest$new()
+  result = csect$compute(data, NULL)
+  expect_equal(nrow(result), 0)
+})
+
+
+# ============================================================================
+# BHARTTest NA coalesce behavior
+# ============================================================================
+
+test_that("BHARTTest replaces NA returns with 0 in compounding", {
+  data = create_mock_model_data()
+  # Inject NA into event window firm_returns
+  data$firm_returns[data$event_window == 1][3] = NA_real_
+
+  bhar = BHARModel$new()
+  bhar$fit(data)
+
+  bhart = BHARTTest$new()
+  result = bhart$compute(bhar$abnormal_returns(data), bhar)
+
+  expect_equal(nrow(result), sum(data$event_window))
+  # Should not have NAs because coalesce(NA, 0) = 0
+  expect_true(all(is.finite(result$bhar)))
+})
+
+
+# ============================================================================
+# Task with many firms (stress test for multi-event stats)
+# ============================================================================
+
+test_that("Full pipeline with 10 firms completes", {
+  task = create_mock_task(n_firms = 10)
+  ps = ParameterSet$new()
+
+  expect_no_error({
+    task = run_event_study(task, ps)
+  })
+
+  expect_equal(nrow(task$data_tbl), 10)
+  expect_false(is.null(task$aar_caar_tbl))
+})
+
+
+# ============================================================================
+# Export with missing AAR stat_name silently skips
+# ============================================================================
+
+test_that("export_results with wrong stat_name skips AAR table", {
+  task = create_fitted_mock_task()
+  tmp = tempfile(fileext = ".csv")
+  on.exit(unlink(tmp), add = TRUE)
+
+  # stat_name="Nonexistent" should silently skip AAR export
+  # but still export other tables (ar, car, model)
+  expect_no_error(
+    export_results(task, tmp, which = c("model"), stat_name = "Nonexistent")
+  )
+  expect_true(file.exists(tmp))
+})
+
+
+# ============================================================================
+# Tidy methods with models that lack alpha/beta
+# ============================================================================
+
+test_that("tidy model for MarketAdjustedModel has sigma but no alpha/beta", {
+  task = create_mock_task()
+  ps = ParameterSet$new(return_model = MarketAdjustedModel$new())
+  task = run_event_study(task, ps)
+
+  result = tidy.EventStudyTask(task, type = "model")
+  # MarketAdjustedModel has no regression, so no alpha/beta
+  expect_false("alpha" %in% result$term)
+  expect_false("beta" %in% result$term)
+  expect_true("sigma" %in% result$term)
+})
+
+
+# ============================================================================
+# Diagnostics with unfitted model in a multi-event task
+# ============================================================================
+
+test_that("model_diagnostics handles unfitted model gracefully", {
+  task = create_mock_task()
+  ps = ParameterSet$new(
+    single_event_statistics = NULL,
+    multi_event_statistics = NULL
+  )
+  task = prepare_event_study(task, ps)
+
+  # Manually create models where one fails
+  task$data_tbl = task$data_tbl %>%
+    dplyr::mutate(model = purrr::map(data, function(d) {
+      mm = MarketModel$new()
+      # Don't fit - leave as unfitted
+      mm
+    }))
+
+  diag = model_diagnostics(task)
+  expect_equal(nrow(diag), 2)
+  expect_true(all(!diag$is_fitted))
+  expect_true(all(is.na(diag$shapiro_p)))
+  expect_true(all(is.na(diag$sigma)))
+})
+
+
+# ============================================================================
+# validate_task with windows already prepared
+# ============================================================================
+
+test_that("validate_task detects multiple event dates", {
+  task = create_mock_task()
+  ps = ParameterSet$new(
+    single_event_statistics = NULL,
+    multi_event_statistics = NULL
+  )
+  task = prepare_event_study(task, ps)
+
+  # Inject a second event_date=1
+  idx = which(task$data_tbl$data[[1]]$event_date == 0)[1]
+  task$data_tbl$data[[1]]$event_date[idx] = 1
+
+  expect_warning(validate_task(task), "Multiple event dates")
+})
+
+
+# ============================================================================
+# ParameterSet with all stats NULL
+# ============================================================================
+
+test_that("run_event_study with both stat sets NULL works", {
+  task = create_mock_task()
+  ps = ParameterSet$new(
+    single_event_statistics = NULL,
+    multi_event_statistics = NULL
+  )
+  task = run_event_study(task, ps)
+
+  expect_true("model" %in% names(task$data_tbl))
+  # No stat columns should be added
+  expect_false("ART" %in% names(task$data_tbl))
+  expect_null(task$aar_caar_tbl)
+})
+
+
+# ============================================================================
+# Task accessor methods
+# ============================================================================
+
+test_that("get_ar errors before fitting", {
+  task = create_mock_task()
+  ps = ParameterSet$new(
+    single_event_statistics = NULL,
+    multi_event_statistics = NULL
+  )
+  task = prepare_event_study(task, ps)
+  expect_error(task$get_ar(), "not been calculated")
+})
+
+
+test_that("get_aar errors before statistics", {
+  task = create_mock_task()
+  expect_error(task$get_aar(), "not been calculated")
+})
+
+
+test_that("get_model_stats errors before fitting", {
+  task = create_mock_task()
+  expect_error(task$get_model_stats(), "not been fitted")
+})
+
+
+test_that("get_ar with invalid event_id errors", {
+  task = create_fitted_mock_task()
+  expect_error(task$get_ar(event_id = 9999), "not found")
+})
+
+
+test_that("get_aar with invalid stat_name errors", {
+  task = create_fitted_mock_task()
+  expect_error(task$get_aar(stat_name = "Nonexistent"), "not found")
+})
+
+
+# ============================================================================
+# Estimation window length is exact (off-by-one regression test)
+# ============================================================================
+
+test_that("Estimation window has exactly estimation_window_length observations", {
+  task = create_mock_task()
+  ps = ParameterSet$new()
+  task = prepare_event_study(task, ps)
+
+  # Check each event's estimation window
+  for (i in seq_len(nrow(task$data_tbl))) {
+    d = task$data_tbl$data[[i]]
+    est_len = task$data_tbl$request[[i]]$estimation_window_length
+    n_est = sum(d$estimation_window == 1)
+    expect_equal(n_est, est_len,
+                 info = paste("Event", i, ": estimation window should have exactly",
+                              est_len, "observations, got", n_est))
+  }
+})
+
+
+# ============================================================================
+# .append_returns uses in_column parameter, not hardcoded "adjusted"
+# ============================================================================
+
+test_that(".append_returns works with non-default target column", {
+  # Create data with 'close' columns instead of 'adjusted'
+  set.seed(42)
+  n = 50
+  tbl = tibble::tibble(
+    firm_close = 100 * cumprod(1 + rnorm(n, 0, 0.02)),
+    index_close = 100 * cumprod(1 + rnorm(n, 0, 0.015))
+  )
+
+  lr = LogReturn$new()
+  result = EventStudy:::.append_returns(tbl, lr, in_column = "close")
+
+  # Should produce firm_returns and index_returns columns
+
+  expect_true("firm_returns" %in% names(result))
+  expect_true("index_returns" %in% names(result))
+  # Should NOT still have only the original columns (no overwrite)
+  expect_false(identical(result$firm_close, result$firm_returns))
+})
+
+
+# --- Regression: prepare_event_study preserves factor-provided market_excess ---
+
+test_that("prepare_event_study does not overwrite market_excess from factor data", {
+  # Bug: When factor_tbl provided a market_excess column (e.g., FF Mkt-RF),
+  # prepare_event_study unconditionally computed market_excess = index_returns - rf,
+  # overwriting the factor-provided value.
+  # Fix: Only compute market_excess if not already present in the data.
+  symbols <- c("FIRM_A")
+  firm_data <- create_mock_firm_data(symbols = symbols)
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = symbols)
+
+  n_days <- 300
+  start_date <- as.Date("2020-01-01")
+  dates <- seq(start_date, by = "day", length.out = n_days)
+  dates <- dates[!weekdays(dates) %in% c("Saturday", "Sunday")]
+
+  set.seed(99)
+  # Factor table WITH market_excess (as FF Mkt-RF would provide)
+  factor_tbl <- tibble::tibble(
+    date = format(dates, "%d.%m.%Y"),
+    risk_free_rate = rep(0.0001, length(dates)),
+    market_excess = rnorm(length(dates), 0.0003, 0.015),
+    smb = rnorm(length(dates), 0, 0.005),
+    hml = rnorm(length(dates), 0, 0.005)
+  )
+
+  task <- EventStudyTask$new(firm_data, index_data, request, factor_tbl = factor_tbl)
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+
+  # Check that the market_excess in the nested data matches the factor_tbl values,
+  # NOT index_returns - risk_free_rate
+  nested_data <- task$data_tbl$data[[1]]
+  expect_true("market_excess" %in% names(nested_data))
+
+  # The factor-provided market_excess should be preserved
+  # (Join produces the factor_tbl value; if overwritten, it would be index_returns - rf)
+  joined_mkt <- nested_data %>%
+    dplyr::inner_join(factor_tbl %>% dplyr::select(date, mkt_factor = market_excess),
+                      by = "date")
+  expect_equal(joined_mkt$market_excess, joined_mkt$mkt_factor, tolerance = 1e-12)
+})
+
+
+# --- Regression: ComparisonPeriodMeanAdjustedModel handles NA returns ---
+
+test_that("ComparisonPeriodMeanAdjustedModel handles NA in estimation returns", {
+  # Bug: mean() without na.rm=TRUE caused NA to propagate when returns have NAs
+  # (e.g., the leading NA from return calculation).
+  data <- create_mock_model_data()
+  # Introduce NA at the beginning (simulating return calculation lag)
+  data$firm_returns[1] <- NA_real_
+
+  cpm <- ComparisonPeriodMeanAdjustedModel$new()
+  cpm$fit(data)
+
+  expect_true(cpm$is_fitted)
+  # Sigma should be finite (not NA)
+  expect_true(is.finite(cpm$statistics$sigma))
+
+  result <- cpm$abnormal_returns(data)
+  # Non-NA rows should have finite abnormal returns
+  non_na_rows <- !is.na(data$firm_returns)
+  expect_true(all(is.finite(result$abnormal_returns[non_na_rows])))
+})
+
+
+# --- Regression: Event date validation ---
+
+test_that(".append_windows warns (lenient) when event date not found in data", {
+  # Previously .append_windows() threw an unconditional stop() when the event
+  # date was missing.  The contract now routes through .handle_degenerate() so
+  # in lenient mode (the default) it emits a warning instead of crashing, and
+  # returns all-zero windows so the model layer degrades cleanly.
+  data <- tibble::tibble(
+    date = c("01.01.2020", "02.01.2020", "03.01.2020"),
+    firm_returns = c(0.01, 0.02, -0.01),
+    index_returns = c(0.005, 0.01, -0.005)
+  )
+
+  request <- list(
+    event_date = "15.06.2020",  # doesn't exist in data
+    event_window_start = -1,
+    event_window_end = 1,
+    shift_estimation_window = -2,
+    estimation_window_length = 1
+  )
+
+  expect_warning(
+    EventStudy:::.append_windows(data, request),
+    "not found"
+  )
+})
+
+
+# --- Regression: cross_sectional all-NA ARs produce NA CARs ---
+
+test_that("cross_sectional .extract_cars returns NA for all-NA abnormal returns", {
+  # Bug: sum(NA, na.rm=TRUE) returned 0, so events with entirely missing
+  # ARs were treated as having zero CAR.
+  # Fix: Now returns NA_real_ when all ARs are NA.
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Replace only the first firm's ARs with NA (leave second firm intact)
+  task$data_tbl$data[[1]]$abnormal_returns <- NA_real_
+
+  firm_chars <- tibble::tibble(
+    event_id = 1:2,
+    x = c(1.0, 2.0)
+  )
+
+  # Should not error but the first firm should have NA CAR
+  result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE)
+  car_data <- result$car_data
+  # First event (all NA) should have NA CAR
+  expect_true(is.na(car_data$car[car_data$event_id == 1]))
+  # Second event should have a non-NA CAR
+  expect_false(is.na(car_data$car[car_data$event_id == 2]))
+})
+
+
+# --- Regression: MarketAdjustedModel handles NA residuals in sd() ---
+
+test_that("MarketAdjustedModel sd(residuals) uses na.rm=TRUE", {
+
+  # Bug: MarketAdjustedModel used sd(residuals) without na.rm=TRUE,
+  # returning NA sigma when residuals contain NAs.
+  task <- create_mock_task()
+  ps <- ParameterSet$new(return_model = MarketAdjustedModel$new())
+  task <- run_event_study(task, ps)
+
+  # Verify sigma is finite (not NA)
+  model_tbl <- task$data_tbl$model
+  sigmas <- purrr::map_dbl(model_tbl, ~ .x$statistics$sigma)
+  expect_true(all(is.finite(sigmas)))
+})
+
+
+# --- Regression: FEC handles constant market returns without division by zero ---
+
+test_that("forecast_error_correction handles constant market returns", {
+  # Bug: When all estimation-window market returns were constant,
+  # sum((x - mean(x))^2) = 0 caused division by zero -> NaN in FEC sigma.
+  # Test the base class method directly since MarketModel's lm() drops
+  # the collinear predictor before reaching FEC.
+  model <- ModelBase$new()
+
+  n_est <- 120
+  n_event <- 5
+  sigma <- 0.02
+
+  # Constant market returns -> ss_market = 0
+  est_market <- rep(0.001, n_est)
+  event_market <- rnorm(n_event, mean = 0.001, sd = 0.01)
+
+  # Call FEC directly (private method accessed via environment)
+  env <- model$.__enclos_env__$private
+  env$calculate_forecast_error_correction(sigma, n_est, est_market, event_market)
+
+  fec <- model$statistics$forecast_error_corrected_sigma
+  fec_car <- model$statistics$forecast_error_corrected_sigma_car
+
+  # Should fall back to constant-mean correction, not NaN
+  expect_true(all(is.finite(fec)))
+  expect_true(all(is.finite(fec_car)))
+  expected <- sigma * sqrt(1 + 1 / n_est)
+  expect_equal(fec, rep(expected, n_event), tolerance = 1e-10)
+  expect_equal(fec_car, rep(0, n_event))
+})
+
+
+# --- Regression: BHARModel degree_of_freedom uses estimation window length ---
+
+test_that("BHARModel degree_of_freedom equals nrow(estimation_tbl) - 1", {
+  # Bug: BHARModel computed df from length(diff(est_bhar)) - 1 = n_est - 2,
+
+  # but sigma was computed from n_est observations, so df should be n_est - 1.
+  task <- create_mock_task()
+  ps <- ParameterSet$new(return_model = BHARModel$new())
+  task <- run_event_study(task, ps)
+
+  model_tbl <- task$data_tbl$model
+  for (m in model_tbl) {
+    df <- m$statistics$degree_of_freedom
+    n_resid <- length(m$statistics$residuals)
+    # df should be nrow(estimation_tbl) - 1, which is n_resid (diff reduces by 1)
+    # So df = (n_resid + 1) - 1 = n_resid
+    expect_equal(df, n_resid)
+  }
+})
+
+
+# --- Regression: VolatilityModel handles zero-variance estimation window ---
+
+test_that("VolatilityModel warns and skips fitting when estimation returns are constant", {
+  # Bug: When var(estimation_tbl$firm_returns) == 0 (constant returns),
+  # division by zero in r^2/var produced Inf/NaN residuals.
+  model <- VolatilityModel$new()
+
+  n <- 120
+  event_n <- 11
+  data_tbl <- tibble::tibble(
+    firm_returns = c(rep(0.001, n), rnorm(event_n, sd = 0.01)),  # constant estimation
+    index_returns = rnorm(n + event_n, sd = 0.01),
+    estimation_window = c(rep(1, n), rep(0, event_n)),
+    event_window = c(rep(0, n), rep(1, event_n)),
+    relative_index = c(seq(-n, -1), seq(0, event_n - 1))
+  )
+
+  expect_warning(model$fit(data_tbl), "zero or NA variance")
+  expect_false(model$is_fitted)
+})
+
+
+# --- Regression: RollingWindowModel rejects effective window size < 3 ---
+
+test_that("RollingWindowModel warns when effective window size < 3", {
+  # Bug: When ws < 3, sigma = sqrt(sum(resid^2) / (ws-2)) caused division
+  # by zero (ws=2 -> denominator=0).
+  skip_if_not_installed("sandwich")
+  model <- RollingWindowModel$new(window_size = 2, min_obs = 2)
+
+  n <- 5  # very small estimation window -> ws = min(2, 5) = 2
+  event_n <- 3
+  data_tbl <- tibble::tibble(
+    firm_returns = rnorm(n + event_n, sd = 0.01),
+    index_returns = rnorm(n + event_n, sd = 0.01),
+    estimation_window = c(rep(1, n), rep(0, event_n)),
+    event_window = c(rep(0, n), rep(1, event_n)),
+    relative_index = c(seq(-n, -1), seq(0, event_n - 1))
+  )
+
+  expect_warning(model$fit(data_tbl), "window size.*must be >= 3")
+  expect_false(model$is_fitted)
+})
+
+
+# --- Regression: PatellZTest Q_i clamps to 1 when m < k+2 ---
+
+test_that("PatellZTest Q_i does not produce NaN with short estimation window", {
+  # Bug: Q_i = (m-k)/(m-k-2) produced negative values when m < k+2,
+  # then sqrt(sum(negative Q_i)) = NaN, breaking the Patell Z-test.
+  # Now clamps Q_i to 1 when estimation window is too short.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(PatellZTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  result <- task$aar_caar_tbl[["PatellZ"]][[1]]
+  # AAR z-statistics should be finite (not NaN)
+  expect_true(all(is.finite(result$aar_z)))
+})
+
+
+# --- Regression: tidy_aar pt(df=0) returns valid p-value with n=1 ---
+
+test_that("tidy_aar does not produce NaN p-values with single firm", {
+  # Bug: pt(stat, df=0) returns NaN when n_valid_events=1 (df=1-1=0).
+  # Now clamps df to be >= 1.
+  # Note: With n_firms=1, CSectTTest aar_t is NA (sd of 1 value = NA),
+  # so p-values are correctly NA (not NaN). The fix guards against the case
+  # where a test statistic IS computed but df=0 would make pt() return NaN.
+  task <- create_mock_task(n_firms = 2)
+  ps <- ParameterSet$new()
+  task <- run_event_study(task, ps)
+
+  result <- tidy.EventStudyTask(task, type = "aar")
+  # p-values should never be NaN (may be NA if stat is NA)
+  non_na_pvals <- result$p.value[!is.na(result$p.value)]
+  expect_true(all(!is.nan(non_na_pvals)))
+  expect_true(all(non_na_pvals >= 0 & non_na_pvals <= 1))
+})
+
+
+# --- Regression: MarketModel FEC uses non-NA observation count ---
+
+test_that("MarketModel FEC uses effective obs count excluding NAs", {
+  # Bug: nrow(estimation_tbl) included rows with NA returns, but lm()
+  # drops NAs via na.omit. This made FEC correction factor too small
+  # (denominator too large).
+  model <- MarketModel$new()
+
+  set.seed(42)
+  n <- 120
+  event_n <- 5
+  firm_ret <- rnorm(n + event_n, sd = 0.02)
+  idx_ret <- rnorm(n + event_n, sd = 0.015)
+
+  # Inject 10 NAs into estimation window
+  na_idx <- sample(1:n, 10)
+  firm_ret[na_idx] <- NA
+
+  data_tbl <- tibble::tibble(
+    firm_returns = firm_ret,
+    index_returns = idx_ret,
+    estimation_window = c(rep(1, n), rep(0, event_n)),
+    event_window = c(rep(0, n), rep(1, event_n)),
+    relative_index = c(seq(-n, -1), seq(0, event_n - 1))
+  )
+
+  model$fit(data_tbl)
+
+  if (model$is_fitted) {
+    fec <- model$statistics$forecast_error_corrected_sigma
+    sigma <- model$statistics$sigma
+
+    # FEC should use n_valid = 110 (not n_total = 120)
+    # With 110 obs: correction factor sqrt(1 + 1/110 + ...) is larger
+    # than with 120 obs: sqrt(1 + 1/120 + ...)
+    # So FEC / sigma > sqrt(1 + 1/120) for all event days
+    min_ratio <- min(fec / sigma)
+    expect_gt(min_ratio, sqrt(1 + 1 / 120))
+  }
+})
+
+
+# ============================================================================
+# Round 10: Crash bugs and wrong-result edge cases
+# ============================================================================
+
+test_that("ARTTest/CARTTest with df=0 do not crash (dist_student_t guard)", {
+  # With exactly p+1 estimation observations, lm() produces df.residual=0
+  # and sigma=NaN. dist_student_t(df=0) throws a hard error.
+  # The guard clamps df to >= 1.
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(
+    firm_symbols = "FIRM_A",
+    estimation_window_length = 3,
+    shift_estimation_window = -6
+  )
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+  task <- fit_model(task, ps)
+
+  model <- task$data_tbl$model[[1]]
+  # With 3 obs and 2 params (intercept + slope), df should be 1
+  # The model stores df.residual from lm() which could be 0 or 1
+
+  # Should not throw "degrees of freedom must be strictly positive"
+  expect_no_error({
+    task <- calculate_statistics(task, ps)
+  })
+})
+
+
+test_that("KolariPynnonenTest with NA in correlation matrix does not crash", {
+  # When a firm has constant SARs, cor() produces NA entries.
+  # The denom becomes NA, and if(NA > 0) crashes.
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(KolariPynnonenTest$new())
+    )
+  )
+
+  # Run the full pipeline — should not crash
+  expect_no_error({
+    task <- run_event_study(task, ps)
+  })
+
+  # Verify results exist
+  expect_true("KP" %in% names(task$aar_caar_tbl))
+})
+
+
+test_that("VolatilityModel with zero variance guards abnormal_returns", {
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = "FIRM_A")
+
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new(return_model = VolatilityModel$new())
+  task <- prepare_event_study(task, ps)
+
+  # Force constant returns in estimation window to trigger zero variance
+  inner <- task$data_tbl$data[[1]]
+  inner$firm_returns[inner$estimation_window == 1] <- 0.01
+  task$data_tbl$data[[1]] <- inner
+
+  # Model should detect zero variance and set is_fitted = FALSE
+  expect_warning(
+    task <- fit_model(task, ps),
+    "zero or NA variance"
+  )
+
+  # abnormal_returns should return NA, not Inf
+  model <- task$data_tbl$model[[1]]
+  expect_false(model$is_fitted)
+  result <- model$abnormal_returns(inner)
+  expect_true(all(is.na(result$abnormal_returns)))
+})
+
+
+test_that("ComparisonPeriodMeanAdjustedModel df excludes NAs", {
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = "FIRM_A")
+
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new(return_model = ComparisonPeriodMeanAdjustedModel$new())
+  task <- prepare_event_study(task, ps)
+
+  # Inject NAs into estimation window
+  inner <- task$data_tbl$data[[1]]
+  est_idx <- which(inner$estimation_window == 1)
+  n_nas <- 10
+  inner$firm_returns[est_idx[1:n_nas]] <- NA
+  task$data_tbl$data[[1]] <- inner
+
+  task <- fit_model(task, ps)
+  model <- task$data_tbl$model[[1]]
+
+  # df should be (n_valid - 1), not (n_total - 1)
+  n_est <- length(est_idx)
+  expect_equal(model$statistics$degree_of_freedom, n_est - n_nas - 1)
+})
+
+
+test_that("RollingWindowModel with NA data uses na.rm and validates params", {
+  firm_data <- create_mock_firm_data(symbols = "FIRM_A")
+  index_data <- create_mock_index_data()
+  request <- create_mock_request(firm_symbols = "FIRM_A")
+
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new(return_model = RollingWindowModel$new(window_size = 30))
+  task <- prepare_event_study(task, ps)
+
+  # Inject NAs into last rolling window
+  inner <- task$data_tbl$data[[1]]
+  est_idx <- which(inner$estimation_window == 1)
+  # Make all index_returns constant in last window → beta = NA
+  last_30 <- tail(est_idx, 30)
+  inner$index_returns[last_30] <- 0.01
+  task$data_tbl$data[[1]] <- inner
+
+  # Should warn about NA params, not crash
+  expect_warning(
+    task <- fit_model(task, ps),
+    "last window parameters are NA"
+  )
+  expect_false(task$data_tbl$model[[1]]$is_fitted)
+})
+
+
+test_that("Bootstrap exceed counter handles NA comparisons", {
+  task <- create_mock_task(n_firms = 2)
+  ps <- ParameterSet$new()
+  task <- run_event_study(task, ps)
+
+  # Should produce finite p-values (not NA from NA poisoning)
+  result <- bootstrap_test(task, n_boot = 50, statistic = "both")
+  expect_true(all(is.finite(result$boot_p_aar)))
+  expect_true(all(is.finite(result$boot_p_caar)))
+})
+
+
+test_that("Simulation weekend filter works regardless of locale", {
+  # .generate_synthetic_data uses format(dates, "%u") which is locale-independent
+  set.seed(42)
+  result <- simulate_event_study(
+    n_events = 3,
+    estimation_window_length = 30,
+    event_window = c(-2, 2),
+    abnormal_return = 0.02,
+    n_simulations = 5
+  )
+  expect_true(is.numeric(result$power))
+  expect_true(result$power >= 0 && result$power <= 1)
+})
+
+
+# ============================================================================
+# Round 11: Crash bugs and silent wrong results
+# ============================================================================
+
+test_that("Synthetic control validates donor completeness for all periods", {
+  # A donor missing post-treatment data would cause silent R vector recycling
+  set.seed(42)
+  treated_data <- tibble::tibble(
+    time = 1:10,
+    outcome = rnorm(10)
+  )
+  donor_data <- tibble::tibble(
+    unit = c(rep("donor1", 10), rep("donor2", 7)),
+    time = c(1:10, 1:7),  # donor2 missing periods 8-10
+    outcome = rnorm(17)
+  )
+
+  task <- SyntheticControlTask$new(
+    treated_data = treated_data,
+    donor_data = donor_data,
+    treatment_time = 6
+  )
+
+  expect_error(
+    estimate_synthetic_control(task),
+    "complete data"
+  )
+})
+
+
+test_that("calculate_statistics is idempotent (no duplicate columns)", {
+  task <- create_mock_task()
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+  task <- fit_model(task, ps)
+  task <- calculate_statistics(task, ps)
+
+  cols_before <- names(task$data_tbl)
+  task <- calculate_statistics(task, ps)
+  cols_after <- names(task$data_tbl)
+
+  # Should have same column names, no duplicates
+  expect_equal(sort(cols_after), sort(cols_before))
+  expect_false(any(grepl("\\.\\.\\.", cols_after)))
+})
+
+
+test_that("Durbin-Watson returns NA (not NaN) for zero residuals", {
+  # Direct test of the DW calculation logic
+  resid <- rep(0, 10)
+  denom <- sum(resid^2)
+  dw_stat <- if (denom < .Machine$double.eps) NA_real_ else sum(diff(resid)^2) / denom
+  expect_true(is.na(dw_stat))
+  expect_false(is.nan(dw_stat))
+})
+
+
+test_that("tidy_ar and tidy_car handle df=0 without NaN", {
+  task <- create_mock_task(n_firms = 1)
+  ps <- ParameterSet$new()
+  task <- prepare_event_study(task, ps)
+  task <- fit_model(task, ps)
+  task <- calculate_statistics(task, ps)
+
+  # Force df=0 in the model
+  task$data_tbl$model[[1]]$.__enclos_env__$private$.statistics$degree_of_freedom <- 0
+
+  # Should not produce NaN p-values
+  ar_tidy <- tidy.EventStudyTask(task, type = "ar")
+  expect_true(all(is.na(ar_tidy$p.value)))  # NA, not NaN
+  expect_false(any(is.nan(ar_tidy$p.value)))
+
+  car_tidy <- tidy.EventStudyTask(task, type = "car")
+  expect_true(all(is.na(car_tidy$p.value)))
+  expect_false(any(is.nan(car_tidy$p.value)))
+})
+
+
+test_that("Panel TWFE handles se=0 without Inf statistic", {
+  skip_if_not_installed("sandwich")
+
+  set.seed(42)
+  n_units <- 10
+  n_periods <- 8
+  panel <- expand.grid(unit_id = 1:n_units, time_id = 1:n_periods)
+  panel <- tibble::as_tibble(panel)
+  panel$treatment_time <- ifelse(panel$unit_id <= 5, 5L, NA_integer_)
+  panel$treated <- as.integer(!is.na(panel$treatment_time) &
+                                panel$time_id >= panel$treatment_time)
+  panel$outcome <- rnorm(nrow(panel)) + 2 * panel$treated
+
+  task <- PanelEventStudyTask$new(
+    panel_data = panel,
+    outcome = "outcome",
+    treatment = "treated",
+    unit_id = "unit_id",
+    time_id = "time_id",
+    treatment_time = "treatment_time"
+  )
+
+  # Should not crash or produce Inf
+  result <- estimate_panel_event_study(task, method = "dynamic_twfe")
+  expect_true(all(is.na(result$coef_tbl$statistic) |
+                    is.finite(result$coef_tbl$statistic)))
+})
+
+
+# ============================================================================
+# Round 12: ModelBase acf guard
+# ============================================================================
+
+test_that("ModelBase first_order_autocorrelation handles < 2 residuals", {
+  # Test acf guard directly: single residual should not crash
+  model <- MarketModel$new()
+  # Fit with normal data first
+  data <- create_mock_model_data(n_estimation = 50, n_event = 5)
+  model$fit(data)
+  expect_true(model$is_fitted)
+
+  # Now verify that the guard works: calling the base method with 1 residual
+  # The guard is in the private method; we verify by checking that models
+  # with very few residuals produce NA for autocorrelation, not a crash
+  model2 <- ComparisonPeriodMeanAdjustedModel$new()
+  data2 <- create_mock_model_data(n_estimation = 3, n_event = 5)
+  expect_no_error(model2$fit(data2))
+})
+
+
+# ============================================================================
+# Round 12: cumsum NA propagation guard in multi-event stats
+# ============================================================================
+
+test_that("CSectTTest handles NA abnormal returns without cumsum propagation", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Inject NA into one event's abnormal returns at one time point
+  task$data_tbl$data[[1]]$abnormal_returns[
+    task$data_tbl$data[[1]]$event_window == 1
+  ][2] <- NA_real_
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(tests = list(CSectTTest$new()))
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  # CAAR should not be all NA after the injection point
+  caar_vals <- task$aar_caar_tbl$CSectT[[1]]$caar
+  expect_true(sum(!is.na(caar_vals)) > 1)
+})
+
+
+# ============================================================================
+# Round 12: sd()=0 division guard in BMPTest
+# ============================================================================
+
+test_that("BMPTest handles identical abnormal returns (sd=0)", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Set all events to have identical abnormal returns
+  for (i in seq_len(nrow(task$data_tbl))) {
+    evt_idx <- task$data_tbl$data[[i]]$event_window == 1
+    task$data_tbl$data[[i]]$abnormal_returns[evt_idx] <- 0.01
+  }
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(tests = list(BMPTest$new()))
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  # bmp_t should be NA (not Inf/NaN) when all SARs have sd=0
+  bmp_vals <- task$aar_caar_tbl$BMP[[1]]$bmp_t
+  expect_true(all(is.na(bmp_vals) | is.finite(bmp_vals)))
+})
+
+
+# ============================================================================
+# Round 12: CalendarTimePortfolioTest ts_sd=0 guard
+# ============================================================================
+
+test_that("CalendarTimePortfolioTest handles constant AAR (ts_sd=0)", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Set all events to have the same abnormal return pattern
+  for (i in seq_len(nrow(task$data_tbl))) {
+    evt_idx <- task$data_tbl$data[[i]]$event_window == 1
+    task$data_tbl$data[[i]]$abnormal_returns[evt_idx] <- rep(0.02, sum(evt_idx))
+  }
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(
+    tests = list(CalendarTimePortfolioTest$new())
+  )
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  caltime_vals <- task$aar_caar_tbl$CalTimeT[[1]]$caltime_t
+  expect_true(all(is.na(caltime_vals) | is.finite(caltime_vals)))
+})
+
+
+# ============================================================================
+# Round 12: GeneralizedSignTest sqrt(0) guard when p_hat=0 or p_hat=1
+# ============================================================================
+
+test_that("GeneralizedSignTest handles p_hat=1 (all positive estimation ARs)", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Make all estimation window abnormal returns positive
+  for (i in seq_len(nrow(task$data_tbl))) {
+    est_idx <- task$data_tbl$data[[i]]$estimation_window == 1
+    task$data_tbl$data[[i]]$abnormal_returns[est_idx] <-
+      abs(task$data_tbl$data[[i]]$abnormal_returns[est_idx]) + 0.001
+  }
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(
+    tests = list(GeneralizedSignTest$new())
+  )
+  expect_no_error(task <- calculate_statistics(task, ps))
+
+  gsign_vals <- task$aar_caar_tbl$GSignT[[1]]$gsign_z
+  expect_true(all(is.na(gsign_vals) | is.finite(gsign_vals)))
+})
+
+
+# ============================================================================
+# Round 12: LogReturn/SimpleReturn zero-price guard
+# ============================================================================
+
+test_that("LogReturn handles zero prices without producing -Inf", {
+  prices <- tibble::tibble(adjusted = c(100, 105, 0, 110, 115))
+  lr <- LogReturn$new()
+  result <- lr$calculate_return(prices)
+  # The zero price should produce NA, not -Inf
+  expect_true(is.na(result$adjusted_return[3]))
+  expect_true(all(is.finite(result$adjusted_return) | is.na(result$adjusted_return)))
+})
+
+test_that("SimpleReturn handles zero lagged price without Inf", {
+  prices <- tibble::tibble(adjusted = c(100, 0, 110, 115, 120))
+  sr <- SimpleReturn$new()
+  result <- sr$calculate_return(prices)
+  # Division by zero lagged price should produce NA, not Inf
+  expect_true(is.na(result$adjusted_return[3]))
+  expect_true(all(is.finite(result$adjusted_return) | is.na(result$adjusted_return)))
+})
+
+
+# ============================================================================
+# Round 12: print.EventStudySummary round(NULL) guard
+# ============================================================================
+
+test_that("print.EventStudySummary handles NULL statistics gracefully", {
+  summary_obj <- structure(
+    list(
+      n_events = 1,
+      groups = "test",
+      symbols = "SYM1",
+      model_stats = list(
+        SYM1 = list(
+          is_fitted = TRUE,
+          alpha = NULL,   # NULL like VolumeModel
+          beta = NULL,
+          sigma = 0.02,
+          r2 = NULL
+        )
+      )
+    ),
+    class = "EventStudySummary"
+  )
+  # Should not crash from round(NULL)
+  expect_no_error(capture.output(print(summary_obj)))
+})
+
+
+# ============================================================================
+# Round 12: LinearFactorModel p-value mapping by name
+# ============================================================================
+
+test_that("LinearFactorModel maps p-values by name not position", {
+  # When lm() drops a collinear term, summary$coefficients has fewer rows.
+  # This test verifies the p-value is mapped to the correct coefficient.
+  model <- FamaFrench3FactorModel$new()
+
+  # FF3 requires: excess_return, market_excess, smb, hml
+  set.seed(42)
+  n <- 60
+  market_excess <- rnorm(n, 0.0003, 0.015)
+  smb <- rnorm(n, 0, 0.01)
+  hml <- rnorm(n, 0, 0.01)
+  data <- tibble::tibble(
+    firm_returns = 0.001 + 1.2 * market_excess + 0.5 * smb + 0.3 * hml + rnorm(n, sd = 0.01),
+    index_returns = market_excess + 0.0001,
+    market_excess = market_excess,
+    excess_return = firm_returns - 0.0001,
+    smb = smb,
+    hml = hml,
+    estimation_window = c(rep(1, 50), rep(0, 10)),
+    event_window = c(rep(0, 50), rep(1, 10)),
+    relative_index = c(seq(-50, -1), seq(1, 10))
+  )
+
+  expect_no_error(model$fit(data))
+  expect_true(model$is_fitted)
+  # The model should have alpha and pval_alpha stats
+  expect_false(is.null(model$statistics$alpha))
+  expect_false(is.null(model$statistics$pval_alpha))
+})
+
+
+# ============================================================================
+# Round 13: NULL sigma from unfitted models → test stat crashes
+# ============================================================================
+
+test_that("ARTTest handles NULL sigma from unfitted model gracefully", {
+  data <- create_mock_model_data(n_estimation = 50, n_event = 5)
+  # Add abnormal_returns column (normally added by fit_model pipeline)
+  data$abnormal_returns <- rnorm(nrow(data), 0, 0.01)
+  unfitted <- MarketModel$new()
+  art <- ARTTest$new()
+  # Compute should not crash; should produce NA ar_t values (sigma is NULL)
+  expect_no_error(result <- art$compute(data, unfitted))
+  expect_true(all(is.na(result$ar_t)))
+})
+
+test_that("CARTTest handles NULL sigma from unfitted model gracefully", {
+  data <- create_mock_model_data(n_estimation = 50, n_event = 5)
+  data$abnormal_returns <- rnorm(nrow(data), 0, 0.01)
+  unfitted <- MarketModel$new()
+  cart <- CARTTest$new()
+  expect_no_error(result <- cart$compute(data, unfitted))
+  expect_true(all(is.na(result$car_t)))
+})
+
+test_that("BMPTest handles NULL sigma from unfitted model via map_dbl", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  # Replace one model with unfitted
+  task$data_tbl$model[[1]] <- MarketModel$new()
+
+  ps <- ParameterSet$new()
+  ps$multi_event_statistics <- MultiEventStatisticsSet$new(tests = list(BMPTest$new()))
+  # Should not crash from map_dbl returning NULL → numeric(0)
+  expect_no_error(task <- calculate_statistics(task, ps))
+})
+
+
+# ============================================================================
+# Round 13: Bootstrap single-firm sd=NA → artificially significant p-value
+# ============================================================================
+
+test_that("bootstrap_test returns NA p-values for single-firm groups", {
+  task <- create_fitted_mock_task(n_firms = 1)
+  # Single firm: sd of 1 observation = NA → p-values should be NA, not 1/1001
+  result <- bootstrap_test(task, n_boot = 10, seed = 42)
+  # With 1 firm, aar_t should be NA (sd undefined) → p-values should be NA
+  expect_true(all(is.na(result$boot_p_aar)))
+})
+
+
+# ============================================================================
+# Round 13: Bootstrap cumsum NA propagation
+# ============================================================================
+
+test_that("bootstrap_test handles NA abnormal returns without cumsum propagation", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  # Inject NA
+  task$data_tbl$data[[1]]$abnormal_returns[
+    task$data_tbl$data[[1]]$event_window == 1
+  ][3] <- NA_real_
+  result <- bootstrap_test(task, n_boot = 10, seed = 42, statistic = "both")
+  # CAAR should not be all NA after the injection point
+  expect_true(sum(!is.na(result$observed_caar)) > 1)
+})
+
+
+# ============================================================================
+# Round 13: model_diagnostics NULL acf1/sigma/r2
+# ============================================================================
+
+test_that("model_diagnostics handles NULL statistics fields gracefully", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  # Replace one model with unfitted model (NULL sigma, acf1, r2)
+  task$data_tbl$model[[1]] <- MarketModel$new()
+  expect_no_error(diag <- model_diagnostics(task))
+  expect_equal(nrow(diag), 2)
+  # Unfitted model should have is_fitted = FALSE row
+  expect_true(any(!diag$is_fitted))
+})
+
+
+# ============================================================================
+# Round 13: plot_diagnostics NULL residuals guard
+# ============================================================================
+
+test_that("plot_diagnostics gives informative error for models without residuals", {
+  task <- create_fitted_mock_task(n_firms = 1)
+  # Replace model with unfitted model
+  task$data_tbl$model[[1]] <- MarketModel$new()
+  expect_error(
+    plot_diagnostics(task, event_id = task$data_tbl$event_id[1]),
+    "not fitted"
+  )
+})
+
+
+# ============================================================================
+# Round 13: LaTeX special character escaping
+# ============================================================================
+
+test_that("export_results escapes LaTeX special characters", {
+  task <- create_fitted_mock_task(n_firms = 2)
+  ps <- ParameterSet$new()
+  task <- calculate_statistics(task, ps)
+
+  # Rename firm_symbol to contain underscore
+  task$data_tbl$firm_symbol <- c("AAPL_US", "MSFT_US")
+
+  tmp <- tempfile(fileext = ".tex")
+  on.exit(unlink(tmp))
+  export_results(task, tmp, which = "model")
+  content <- readLines(tmp)
+  # Underscores should be escaped by knitr::kable (escape=TRUE default)
+  # In the .tex file: AAPL\_US — in R string: "AAPL\\_US"
+  expect_true(any(grepl("AAPL\\_US", content, fixed = TRUE)))
+})
+
+
+# ============================================================================
+# Round 14: Simple model insufficient estimation data guards
+# ============================================================================
+
+test_that("MarketAdjustedModel warns and does not fit with < 2 estimation obs", {
+  # Phase 2: warning message updated to contract-format (includes count + threshold)
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  model <- MarketAdjustedModel$new()
+  expect_warning(model$fit(data), "insufficient estimation observations")
+  expect_false(model$is_fitted)
+})
+
+test_that("ComparisonPeriodMeanAdjustedModel warns with < 2 estimation obs", {
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  model <- ComparisonPeriodMeanAdjustedModel$new()
+  expect_warning(model$fit(data), "insufficient estimation observations")
+  expect_false(model$is_fitted)
+})
+
+test_that("BHARModel warns with < 2 estimation obs", {
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  model <- BHARModel$new()
+  expect_warning(model$fit(data), "insufficient estimation observations")
+  expect_false(model$is_fitted)
+})
+
+test_that("VolumeModel warns with < 2 estimation obs", {
+  data <- create_mock_model_data(n_estimation = 1, n_event = 5)
+  data$firm_volume <- abs(rnorm(nrow(data), 1000, 100))
+  model <- VolumeModel$new()
+  expect_warning(model$fit(data), "insufficient estimation observations")
+  expect_false(model$is_fitted)
+})
+
+
+# ============================================================================
+# Round 14: .tidy_ar/.tidy_car NA df/sigma guard
+# ============================================================================
+
+test_that(".tidy_ar handles NA sigma and df without crashing", {
+  task <- create_fitted_mock_task(n_firms = 1)
+
+  # Create a mock model with NA sigma/df using a list that mimics model structure
+  mock_model <- list(
+    is_fitted = TRUE,
+    statistics = list(sigma = NA_real_, degree_of_freedom = NA_real_)
+  )
+  task$data_tbl$model[[1]] <- mock_model
+
+  result <- tidy.EventStudyTask(task, type = "ar")
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(is.na(result$statistic)))
+  expect_true(all(is.na(result$p.value)))
+})
+
+test_that(".tidy_car handles NA sigma and df without crashing", {
+  task <- create_fitted_mock_task(n_firms = 1)
+
+  mock_model <- list(
+    is_fitted = TRUE,
+    statistics = list(sigma = NA_real_, degree_of_freedom = NA_real_)
+  )
+  task$data_tbl$model[[1]] <- mock_model
+
+  result <- tidy.EventStudyTask(task, type = "car")
+  expect_s3_class(result, "tbl_df")
+  expect_true(all(is.na(result$statistic)))
+  expect_true(all(is.na(result$p.value)))
+})
+
+
+# ============================================================================
+# Round 14: pretrend_test sd=0 guard
+# ============================================================================
+
+test_that("pretrend_test handles zero-variance pre-event AR", {
+  task <- create_fitted_mock_task(n_firms = 2)
+
+  # Set all pre-event abnormal returns to exactly zero
+  for (i in seq_len(nrow(task$data_tbl))) {
+    d <- task$data_tbl$data[[i]]
+    pre_idx <- d$event_window == 1 & d$relative_index < 0
+    d$abnormal_returns[pre_idx] <- 0
+    task$data_tbl$data[[i]] <- d
+  }
+
+  result <- pretrend_test(task)
+  expect_s3_class(result, "tbl_df")
+  # t_stat should be NA (not Inf) when sd is 0
+  expect_true(all(is.na(result$t_stat)))
+  expect_true(all(is.na(result$p_value)))
+})
+
+
+# ============================================================================
+# Round 14: RollingWindowModel na.rm in sigma computation
+# ============================================================================
+
+test_that("RollingWindowModel handles NAs in rolling window", {
+  data <- create_mock_model_data(n_estimation = 60, n_event = 5)
+  # Inject a few NAs into estimation window
+  data$firm_returns[c(5, 10, 15)] <- NA
+
+  model <- RollingWindowModel$new(window_size = 20)
+  model$fit(data)
+  expect_true(model$is_fitted)
+  # sigma should be finite (not NA from missing na.rm)
+  expect_true(is.finite(model$statistics$sigma))
+})

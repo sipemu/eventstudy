@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#fd7e14"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#fd7e14" text-anchor="middle">Custom Test Statistics</text>
+  <!-- Bar chart left -->
+  <line x1="30" y1="155" x2="180" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="55" x2="30" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <rect x="50" y="110" width="30" height="45" fill="#fd7e14" opacity="0.6"/>
+  <line x1="65" y1="92" x2="65" y2="110" stroke="#fd7e14" stroke-width="2"/>
+  <line x1="57" y1="92" x2="73" y2="92" stroke="#fd7e14" stroke-width="2"/>
+  <rect x="100" y="90" width="30" height="65" fill="#fd7e14" opacity="0.6"/>
+  <line x1="115" y1="70" x2="115" y2="90" stroke="#fd7e14" stroke-width="2"/>
+  <line x1="107" y1="70" x2="123" y2="70" stroke="#fd7e14" stroke-width="2"/>
+  <rect x="150" y="100" width="20" height="55" fill="#fd7e14" opacity="0.6"/>
+  <line x1="160" y1="82" x2="160" y2="100" stroke="#fd7e14" stroke-width="2"/>
+  <line x1="152" y1="82" x2="168" y2="82" stroke="#fd7e14" stroke-width="2"/>
+  <!-- Bell curve right -->
+  <line x1="185" y1="155" x2="335" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <path d="M195,150 Q210,148 225,130 Q240,100 260,75 Q265,67 270,75 Q285,100 300,130 Q315,148 325,150" stroke="#fd7e14" stroke-width="2" fill="none"/>
+  <line x1="260" y1="155" x2="260" y2="68" stroke="#fd7e14" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <text x="260" y="63" font-family="sans-serif" font-size="9" fill="#fd7e14" text-anchor="middle">t</text>
+  <!-- Critical region shade -->
+  <path d="M310,150 Q318,148 325,150 L325,155 L310,155 Z" fill="#fd7e14" opacity="0.3"/>
+</svg>

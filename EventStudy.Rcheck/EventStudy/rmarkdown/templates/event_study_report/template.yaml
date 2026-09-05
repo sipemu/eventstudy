@@ -1,0 +1,5 @@
+name: Event Study Report
+description: >
+  Automated event study report with summary statistics, diagnostics,
+  and test results.
+create_dir: false

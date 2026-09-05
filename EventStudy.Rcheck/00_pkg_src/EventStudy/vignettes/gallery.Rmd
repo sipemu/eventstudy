@@ -1,0 +1,160 @@
+---
+title: "Gallery"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Gallery}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{=html}
+<h2 class="es-section-heading es-core">Core Workflow</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="introduction.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-introduction.svg" alt="Introducing EventStudy"></div>
+  <div class="es-gallery-title">Introducing EventStudy</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-core">Core Workflow</span></div>
+</a>
+
+<a class="es-gallery-item" href="result-extraction.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-result-extraction.svg" alt="Result Extraction &amp; Export"></div>
+  <div class="es-gallery-title">Result Extraction &amp; Export</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-core">Core Workflow</span></div>
+</a>
+
+<a class="es-gallery-item" href="diagnostics-validation.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-diagnostics-validation.svg" alt="Diagnostics &amp; Validation"></div>
+  <div class="es-gallery-title">Diagnostics &amp; Validation</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-core">Core Workflow</span></div>
+</a>
+
+<a class="es-gallery-item" href="inference-robustness.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-inference-robustness.svg" alt="Bootstrap Inference &amp; Multiple Testing"></div>
+  <div class="es-gallery-title">Bootstrap Inference &amp; Multiple Testing</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-core">Core Workflow</span></div>
+</a>
+
+</div>
+
+<h2 class="es-section-heading es-models">Return Models</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="factor-models-bhar.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-factor-models-bhar.svg" alt="Factor Models, GARCH &amp; BHAR"></div>
+  <div class="es-gallery-title">Factor Models, GARCH &amp; BHAR</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-models">Return Models</span></div>
+</a>
+
+<a class="es-gallery-item" href="time-varying-models.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-time-varying-models.svg" alt="Time-Varying Volatility Models"></div>
+  <div class="es-gallery-title">Time-Varying Volatility Models</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-models">Return Models</span></div>
+</a>
+
+<a class="es-gallery-item" href="custom-models.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-custom-models.svg" alt="Custom Return Models"></div>
+  <div class="es-gallery-title">Custom Return Models</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-models">Return Models</span></div>
+</a>
+
+<a class="es-gallery-item" href="volume-volatility-event-study.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-volume-volatility-event-study.svg" alt="Volume &amp; Volatility Event Studies"></div>
+  <div class="es-gallery-title">Volume &amp; Volatility Event Studies</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-models">Return Models</span></div>
+</a>
+
+</div>
+
+<h2 class="es-section-heading es-stats">Test Statistics</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="custom-test-statistics.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-custom-test-statistics.svg" alt="Custom Test Statistics"></div>
+  <div class="es-gallery-title">Custom Test Statistics</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-stats">Test Statistics</span></div>
+</a>
+
+</div>
+
+<h2 class="es-section-heading es-advanced">Advanced Designs</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="panel-event-study.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-panel-event-study.svg" alt="Panel DiD Event Studies"></div>
+  <div class="es-gallery-title">Panel DiD Event Studies</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-advanced">Advanced Designs</span></div>
+</a>
+
+<a class="es-gallery-item" href="modern-did-estimators.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-modern-did-estimators.svg" alt="Modern DiD Estimators"></div>
+  <div class="es-gallery-title">Modern DiD Estimators</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-advanced">Advanced Designs</span></div>
+</a>
+
+<a class="es-gallery-item" href="intraday-event-study.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-intraday-event-study.svg" alt="Intraday Event Studies"></div>
+  <div class="es-gallery-title">Intraday Event Studies</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-advanced">Advanced Designs</span></div>
+</a>
+
+<a class="es-gallery-item" href="synthetic-control.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-synthetic-control.svg" alt="Synthetic Control"></div>
+  <div class="es-gallery-title">Synthetic Control</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-advanced">Advanced Designs</span></div>
+</a>
+
+</div>
+
+<h2 class="es-section-heading es-crosssec">Cross-Sectional &amp; Simulation</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="cross-sectional-analysis.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-cross-sectional-analysis.svg" alt="Cross-Sectional Analysis"></div>
+  <div class="es-gallery-title">Cross-Sectional Analysis</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-crosssec">Cross-Sectional &amp; Simulation</span></div>
+</a>
+
+<a class="es-gallery-item" href="simulation-power-analysis.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-simulation-power-analysis.svg" alt="Monte Carlo Power Analysis"></div>
+  <div class="es-gallery-title">Monte Carlo Power Analysis</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-crosssec">Cross-Sectional &amp; Simulation</span></div>
+</a>
+
+</div>
+
+<h2 class="es-section-heading es-advisor">AI Advisor</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="ai-advisor.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-ai-advisor.svg" alt="Grounded AI Advisor"></div>
+  <div class="es-gallery-title">Grounded AI Advisor</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-advisor">AI Advisor</span></div>
+</a>
+
+</div>
+
+<h2 class="es-section-heading es-data">Data &amp; Reporting</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="data-download.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-data-download.svg" alt="Downloading Stock &amp; Factor Data"></div>
+  <div class="es-gallery-title">Downloading Stock &amp; Factor Data</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-data">Data &amp; Reporting</span></div>
+</a>
+
+<a class="es-gallery-item" href="automated-reports.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-automated-reports.svg" alt="Automated Reporting"></div>
+  <div class="es-gallery-title">Automated Reporting</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-data">Data &amp; Reporting</span></div>
+</a>
+
+</div>
+```

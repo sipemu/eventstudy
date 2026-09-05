@@ -1,0 +1,117 @@
+# Intraday Event Studies with EventStudy
+
+## Introduction
+
+Traditional event studies measure abnormal returns at a daily frequency,
+but many corporate events — earnings announcements, regulatory
+decisions, central-bank communications — have effects that materialize
+within minutes or hours. Intraday event studies capture these
+short-lived dynamics by operating on high-frequency (tick or bar) data.
+
+The `EventStudy` package supports two intraday workflows:
+
+1.  **Task-based preparation** via `IntradayEventStudyTask` and
+    [`prepare_intraday_event_study()`](https://sipemu.github.io/eventstudy/reference/prepare_intraday_event_study.md),
+    which compute intraday returns and assign estimation/event windows.
+2.  **Non-parametric significance testing** via
+    [`nonparametric_intraday_test()`](https://sipemu.github.io/eventstudy/reference/nonparametric_intraday_test.md),
+    which implements the methodology of Rinaudo & Saha (2014) in pure R.
+
+This vignette walks through both.
+
+## Data Structure
+
+The non-parametric test requires three inputs:
+
+| Input | Description |
+|----|----|
+| `estimation_window` | A data frame with columns `day`, `time`, and `abnormalReturn`. Contains intraday abnormal returns for multiple estimation days (e.g., 20 trading days before the event). Each day has the same time grid. |
+| `event_window` | A data frame with columns `time` and `abnormalReturn` for the single event day. |
+| `event_times` | A character vector of intraday times at which events occurred (e.g., `c("10:00", "14:30")`). |
+
+The `time` column should be a character representation of the intraday
+time (e.g., `"10:15"`, `"14:30"`), consistent across all days. The
+`abnormalReturn` column contains the pre-computed abnormal return for
+each bar.
+
+[`library`](https://rdrr.io/r/base/library.html)`(`[`tibble`](https://tibble.tidyverse.org/)`)`` `` ``# Estimation window: 20 days x 50 bars per day`` ``estimation_window`` ``<-`` `[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(`` `` day ``=`` `[`rep`](https://rdrr.io/r/base/rep.html)`(``1``:``20``, each ``=`` ``50``)``,`` `` time ``=`` `[`rep`](https://rdrr.io/r/base/rep.html)`(`[`sprintf`](https://rdrr.io/r/base/sprintf.html)`(``"%02d:%02d"``, ``10L`` ``+`` ``1``:``50`` `[`%/%`](https://rdrr.io/r/base/Arithmetic.html)` ``60L``, ``1``:``50`` `[`%%`](https://rdrr.io/r/base/Arithmetic.html)` ``60L``)``, ``20``)``,`` `` abnormalReturn ``=`` `[`rnorm`](https://rdrr.io/r/stats/Normal.html)`(``1000``, ``0``, ``0.001``)`` ``)`` `` ``# Event window: single day, same 50 bars`` ``event_window`` ``<-`` `[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(`` `` time ``=`` `[`sprintf`](https://rdrr.io/r/base/sprintf.html)`(``"%02d:%02d"``, ``10L`` ``+`` ``1``:``50`` `[`%/%`](https://rdrr.io/r/base/Arithmetic.html)` ``60L``, ``1``:``50`` `[`%%`](https://rdrr.io/r/base/Arithmetic.html)` ``60L``)``,`` `` abnormalReturn ``=`` `[`rnorm`](https://rdrr.io/r/stats/Normal.html)`(``50``, ``0``, ``0.001``)`` ``)`` `` ``# Event times to test`` ``event_times`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(``"10:10"``, ``"10:30"``)`
+
+## The IntradayEventStudyTask
+
+For studies where you want to use the full pipeline (return computation,
+window assignment), start with `IntradayEventStudyTask`:
+
+[`library`](https://rdrr.io/r/base/library.html)`(`[`EventStudy`](https://github.com/sipemu/eventstudy)`)`` `` ``# Firm intraday data`` ``firm_data`` ``<-`` `[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(`` `` symbol ``=`` ``"FIRM_A"``,`` `` timestamp ``=`` `[`seq`](https://rdrr.io/r/base/seq.html)`(`[`as.POSIXct`](https://rdrr.io/r/base/as.POSIXlt.html)`(``"2020-06-15 09:30:00"``, tz ``=`` ``"UTC"``)``,`` `` by ``=`` ``"1 min"``, length.out ``=`` ``500``)``,`` `` price ``=`` ``100`` ``*`` `[`cumprod`](https://rdrr.io/r/base/cumsum.html)`(``1`` ``+`` `[`rnorm`](https://rdrr.io/r/stats/Normal.html)`(``500``, ``0``, ``0.001``)``)`` ``)`` `` ``# Index intraday data`` ``index_data`` ``<-`` `[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(`` `` symbol ``=`` ``"INDEX_1"``,`` `` timestamp ``=`` `[`seq`](https://rdrr.io/r/base/seq.html)`(`[`as.POSIXct`](https://rdrr.io/r/base/as.POSIXlt.html)`(``"2020-06-15 09:30:00"``, tz ``=`` ``"UTC"``)``,`` `` by ``=`` ``"1 min"``, length.out ``=`` ``500``)``,`` `` price ``=`` ``1000`` ``*`` `[`cumprod`](https://rdrr.io/r/base/cumsum.html)`(``1`` ``+`` `[`rnorm`](https://rdrr.io/r/stats/Normal.html)`(``500``, ``0``, ``0.0008``)``)`` ``)`` `` ``# Request table`` ``request`` ``<-`` `[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(`` `` event_id ``=`` ``1L``,`` `` firm_symbol ``=`` ``"FIRM_A"``,`` `` index_symbol ``=`` ``"INDEX_1"``,`` `` event_timestamp ``=`` `[`as.POSIXct`](https://rdrr.io/r/base/as.POSIXlt.html)`(``"2020-06-15 14:30:00"``, tz ``=`` ``"UTC"``)``,`` `` group ``=`` ``"Earnings"``,`` `` event_window_start ``=`` ``-``30L``,`` `` event_window_end ``=`` ``30L``,`` `` shift_estimation_window ``=`` ``-``31L``,`` `` estimation_window_length ``=`` ``120L`` ``)`` `` ``# Create task and prepare`` ``task`` ``<-`` `[`IntradayEventStudyTask`](https://sipemu.github.io/eventstudy/reference/IntradayEventStudyTask.md)`$``new``(``firm_data``, ``index_data``, ``request``)`` ``ps`` ``<-`` `[`ParameterSet`](https://sipemu.github.io/eventstudy/reference/ParameterSet.md)`$``new``(``)`` ``task`` ``<-`` `[`prepare_intraday_event_study`](https://sipemu.github.io/eventstudy/reference/prepare_intraday_event_study.md)`(``task``, ``ps``)`
+
+The prepared task contains returns (`firm_returns`, `index_returns`) and
+window flags (`event_window`, `estimation_window`) in the nested data
+column.
+
+## Non-Parametric Test
+
+The
+[`nonparametric_intraday_test()`](https://sipemu.github.io/eventstudy/reference/nonparametric_intraday_test.md)
+function implements the algorithm of Rinaudo & Saha (2014). The key
+idea:
+
+1.  For each event time, accumulate **cumulative abnormal returns
+    (CARs)** observation-by-observation on the event day.
+2.  In parallel, accumulate CARs for the same time range on each
+    estimation day.
+3.  After an initial window (default 5 bars), compare the event-day CAR
+    to the **empirical percentile** of the estimation-day CARs.
+4.  If the event-day CAR falls outside the confidence band, the event is
+    **significant** at that point. The algorithm continues extending the
+    window as long as significance holds.
+5.  When significance is lost, the window stops growing.
+
+This approach is **non-parametric**: no distributional assumptions are
+needed. The confidence band comes directly from the empirical
+distribution of estimation-day CARs.
+
+`results`` ``<-`` `[`nonparametric_intraday_test`](https://sipemu.github.io/eventstudy/reference/nonparametric_intraday_test.md)`(`` `` estimation_window ``=`` ``estimation_window``,`` `` event_window ``=`` ``event_window``,`` `` event_times ``=`` ``event_times``,`` `` p ``=`` ``0.05``,`` `` init_window ``=`` ``5L``,`` `` upper ``=`` ``FALSE`` ``)`
+
+Parameters:
+
+- **`p`**: Significance level (default 0.05). Smaller values require
+  more extreme event-day CARs.
+- **`init_window`**: Number of bars to accumulate before the first
+  significance check (default 5).
+- **`upper`**: If `TRUE`, test the upper tail (positive abnormal
+  returns); if `FALSE` (default), test the lower tail (negative abnormal
+  returns).
+
+## Interpreting Results
+
+The function returns a **named list** of tibbles, one per event time:
+
+`results``[[``"10:10"``]``]`` ``#> # A tibble: 12 x 4`` ``#> id CAR CI fitCI`` ``#> <int> <dbl> <dbl> <dbl>`` ``#> 1 1 -0.00823 -0.00654 -0.00671`` ``#> 2 2 -0.00912 -0.00701 -0.00698`` ``#> ...`
+
+| Column | Description |
+|----|----|
+| `id` | Observation index within the significant window (1, 2, …) |
+| `CAR` | Cumulative abnormal return on the event day |
+| `CI` | Raw empirical confidence interval boundary from estimation days |
+| `fitCI` | Polynomial-smoothed CI (degree-4 polynomial) for smoother visualization |
+
+When an event time is **not significant**, the result is a single-row
+tibble with all values equal to zero:
+
+`results``[[``"10:30"``]``]`` ``#> # A tibble: 1 x 4`` ``#> id CAR CI fitCI`` ``#> <int> <dbl> <dbl> <dbl>`` ``#> 1 1 0 0 0`
+
+The `fitCI` column applies a degree-4 polynomial smoothing to the raw CI
+values. This removes noise from the empirical percentile boundary and
+produces cleaner confidence bands for visualization.
+
+## Plotting Results
+
+The CAR path with confidence bands can be visualized with `ggplot2`:
+
+[`library`](https://rdrr.io/r/base/library.html)`(`[`ggplot2`](https://ggplot2.tidyverse.org)`)`` `` ``plot_np_result`` ``<-`` ``function``(``result_tbl``, ``event_time``)`` ``{`` `` ``if`` ``(`[`nrow`](https://rdrr.io/r/base/nrow.html)`(``result_tbl``)`` ``<=`` ``1`` ``&&`` ``result_tbl``$``CAR``[``1``]`` ``==`` ``0``)`` ``{`` `` `[`message`](https://rdrr.io/r/base/message.html)`(``"Event at "``, ``event_time``, ``" is not significant."``)`` `` `[`return`](https://rdrr.io/r/base/function.html)`(`[`invisible`](https://rdrr.io/r/base/invisible.html)`(``NULL``)``)`` `` ``}`` `` `` `[`ggplot`](https://ggplot2.tidyverse.org/reference/ggplot.html)`(``result_tbl``, `[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``x ``=`` ``id``)``)`` ``+`` `` `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(`[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``y ``=`` ``CAR``)``, colour ``=`` ``"steelblue"``, linewidth ``=`` ``1``)`` ``+`` `` `[`geom_line`](https://ggplot2.tidyverse.org/reference/geom_path.html)`(`[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``y ``=`` ``fitCI``)``, colour ``=`` ``"firebrick"``, linetype ``=`` ``"dashed"``,`` `` linewidth ``=`` ``0.8``)`` ``+`` `` `[`geom_ribbon`](https://ggplot2.tidyverse.org/reference/geom_ribbon.html)`(`[`aes`](https://ggplot2.tidyverse.org/reference/aes.html)`(``ymin ``=`` ``fitCI``, ymax ``=`` ``0``)``, alpha ``=`` ``0.1``, fill ``=`` ``"firebrick"``)`` ``+`` `` `[`labs`](https://ggplot2.tidyverse.org/reference/labs.html)`(`` `` title ``=`` `[`paste`](https://rdrr.io/r/base/paste.html)`(``"Non-Parametric Intraday CAR — Event at"``, ``event_time``)``,`` `` x ``=`` ``"Bars after event"``,`` `` y ``=`` ``"Cumulative Abnormal Return"`` `` ``)`` ``+`` `` `[`theme_minimal`](https://ggplot2.tidyverse.org/reference/ggtheme.html)`(``)`` ``}`` `` ``# Plot the first significant event`` ``plot_np_result``(``results``[[``"10:10"``]``]``, ``"10:10"``)`
+
+## References
+
+- Rinaudo, J.B. & Saha, A. (2014). Non-parametric intraday event
+  studies.
+- MacKinlay, A.C. (1997). Event Studies in Economics and Finance.
+  *Journal of Economic Literature*, 35(1), 13–39.

@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v0.63.0
 milestone_name: Documentation Depth — Methods & Worked Examples
-current_phase: 14
-current_phase_name: Curated Per-Domain Datasets
+current_phase: 15
+current_phase_name: Methods Articles + Rendered Outputs
 status: planning
-stopped_at: Completed 14-01-PLAN.md (all 3 tasks)
-last_updated: "2026-09-05T21:48:31.967Z"
+stopped_at: Phase 14 complete, ready to plan Phase 15
+last_updated: "2026-09-05T21:59:07.551Z"
 last_activity: 2026-09-05
-last_activity_desc: Phase 13 complete, transitioned to Phase 14
-state_head: 75878dd8e0bfd90a7fd392cb97b5c0f09a82f4ce
+last_activity_desc: Phase 14 complete, transitioned to Phase 15
+state_head: 0286410762824ff03b882750bb275269e842643c
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 2
   completed_plans: 2
-  percent: 17
+  percent: 33
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 14 — Curated Per-Domain Datasets
+Phase: 15 — Methods Articles + Rendered Outputs
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-09-05 — Phase 13 complete, transitioned to Phase 14
+Last activity: 2026-09-05 — Phase 14 complete, transitioned to Phase 15
 
 ## Milestone Roadmap (v0.63.0)
 
@@ -121,7 +121,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-09-05T21:48:31.940Z
-Stopped at: Completed 14-01-PLAN.md (all 3 tasks)
+Stopped at: Phase 14 complete, ready to plan Phase 15
 Resume file: None
 
 ## Operator Next Steps

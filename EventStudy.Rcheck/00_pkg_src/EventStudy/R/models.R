@@ -1,0 +1,1538 @@
+#' @title ModelBase
+#' @description Base model class for event study. Each single event study will
+#' get its own model initialization and fitting. Therefore, the input DataFrame
+#' contains the data for a single Event Study. For custom models, except the
+#' child modles of the market model, several statistics must be included, namely
+#' sigma, degree_of_freedom, first_order_auto_correlation, residuals,
+#' forecast_error_corrected_sigma, and forecast_error_corrected_sigma_car. Part
+#' of these statistics are necessary for calculating the Event Study statistics.
+ModelBase <- R6Class("ModelBase",
+                     public = list(
+                       #' @field model_name Name of the model.
+                       model_name = "",
+                       #' @field degenerate_mode Resolved degenerate-input mode injected by
+                       #'   fit_model() before fit() is called. Subclasses that implement the
+                       #'   degenerate-input contract (MarketModel and Phase-2 models) read this
+                       #'   field inside fit() via .resolve_degenerate_mode(self$degenerate_mode).
+                       degenerate_mode = NULL,
+                       #' @field event_id Event identifier threaded from the outer data_tbl row.
+                       #'   Used in degenerate-input error/warning messages.
+                       event_id = NULL,
+                       #' @field firm_symbol Firm identifier threaded from the outer data_tbl row.
+                       #'   Used in degenerate-input error/warning messages.
+                       firm_symbol = NULL,
+                       #' @description
+                       #' Fits the model with given data.
+                       #'
+                       #' @param data_tbl A data frame or tibble containing the data to fit.
+                       fit = function(data_tbl) {
+
+                       },
+                       #' @description
+                       #' Calculate the abnormal returns with given data and fitted model.
+                       #'
+                       #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
+                       abnormal_returns = function(data_tbl) {
+
+                       }
+                     ),
+                     active = list(
+                       #' @field statistics Read-only field to get statistics.
+                       statistics = function(value) {
+                         if (missing(value)) {
+                           private$.statistics
+                         } else {
+                           stop("`$statistics` is read only", call. = FALSE)
+                         }
+                       },
+                       #' @field model Read-only field to get the fitted model.
+                       model = function(value) {
+                         if (missing(value)) {
+                           private$.fitted_model
+                         } else {
+                           stop("`$model` is read only", call. = FALSE)
+                         }
+                       },
+                       #' @field is_fitted Read-only field to check if the model is fitted.
+                       is_fitted = function(value) {
+                         if (missing(value)) {
+                           private$.is_fitted
+                         } else {
+                           stop("`$is_fitted` is read only", call. = FALSE)
+                         }
+                       }
+                     ),
+                     private = list(
+                       .is_fitted = FALSE,
+                       .fitted_model = NULL,
+                       .error = NULL,
+                       # Set TRUE by .handle_degenerate() in lenient mode so
+                       # abnormal_returns() can suppress its redundant "not fitted"
+                       # warning (contract guarantees exactly one warning per event).
+                       .degenerate_handled = FALSE,
+                       #' Statistics object contains different model specific KPIs
+                       #' that describes the fitted model.
+                       .statistics = list(sigma=NULL,
+                                          degree_of_freedom=NULL,
+                                          first_order_auto_correlation=NULL,
+                                          residuals=NULL,
+                                          forecast_error_corrected_sigma=NULL,
+                                          forecast_error_corrected_sigma_car=NULL),
+                       calculate_statistics = function(data_tbl) {
+
+
+                       },
+                       calculate_forecast_error_correction = function(sigma,
+                                                                      estimation_window_length,
+                                                                      estimation_market_returns,
+                                                                      event_market_returns) {
+                         meanMREstW <- mean(estimation_market_returns, na.rm = TRUE)
+                         ss_market <- sum((estimation_market_returns - meanMREstW)^2, na.rm = TRUE)
+                         if (ss_market < .Machine$double.eps) {
+                           # Constant market returns: no OLS correction possible,
+                           # fall back to constant-mean FEC
+                           forecast_error_corrected_sigma <- rep(
+                             sigma * sqrt(1 + 1 / estimation_window_length),
+                             length(event_market_returns)
+                           )
+                           forecast_error_corrected_sigma_car <- rep(0, length(event_market_returns))
+                         } else {
+                           forecast_error_corrected_sigma <- sigma *
+                             sqrt(1 + 1 / estimation_window_length +
+                                    (event_market_returns - meanMREstW)^2 / ss_market)
+                           forecast_error_corrected_sigma_car <- (event_market_returns - meanMREstW) /
+                             sqrt(ss_market)
+                         }
+
+                         private$.statistics$forecast_error_corrected_sigma = forecast_error_corrected_sigma
+                         private$.statistics$forecast_error_corrected_sigma_car = forecast_error_corrected_sigma_car
+                       },
+                       first_order_autocorrelation = function(residuals) {
+                         clean_resid <- c(na.omit(residuals))
+                         if (length(clean_resid) < 2) {
+                           private$.statistics$first_order_auto_correlation <- NA_real_
+                           return(invisible(NULL))
+                         }
+                         first_order_acf = acf(clean_resid, plot=F, 1, type="correlation")
+                         first_order_auto_correlation = first_order_acf[[1]][, , 1][2]
+                         private$.statistics$first_order_auto_correlation = first_order_auto_correlation
+                       },
+                       add_residuals = function(residuals) {
+                         private$.statistics$residuals = residuals
+                       }
+                     )
+)
+
+
+#' Market Model
+#'
+#' The Market Model is a widely used method in event studies to estimate the
+#' expected returns of a stock and calculate its abnormal returns during an
+#' event window. The model is based on a simple linear regression framework and
+#' captures the relationship between a stock’s return and the return of a market
+#' index, such as the S&P 500 or the Dow Jones Industrial Average. The
+#' underlying assumption of the Market Model is that a stock’s return is
+#' primarily influenced by market movements, along with a stock-specific
+#' idiosyncratic component.
+#'
+#' @export
+MarketModel <- R6Class("MarketModel",
+                       inherit = ModelBase,
+                       public = list(
+                         #' @field model_name Name of the model.
+                         model_name = "MarketModel",
+                         #' @field formula The formula applied for calculating the market model
+                         formula = as.formula("firm_returns ~ index_returns"),
+                         #' @field use_hac Logical. Use HAC (Newey-West) standard errors.
+                         use_hac = FALSE,
+                         #' @field hac_lag Integer or NULL. Lag truncation for Newey-West.
+                         #'   NULL uses the automatic bandwidth selection.
+                         hac_lag = NULL,
+                         # degenerate_mode, event_id, firm_symbol — inherited from ModelBase.
+                         #' @description
+                         #' Create a new MarketModel.
+                         #'
+                         #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                         #'   Requires the \pkg{sandwich} package.
+                         #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                         initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                           self$use_hac <- use_hac
+                           self$hac_lag <- hac_lag
+                         },
+                         #' @description
+                         #' Set the formula
+                         #'
+                         #' @param formula A formula.
+                         set_formula = function(formula) {
+                           if (!inherits(formula, "formula")) {
+                             stop("Input must be a formula")
+                           }
+                           self$formula = formula
+                         },
+                         #' @description
+                         #' Fit the model with given data.
+                         #'
+                         #' @param data_tbl Data frame or tibble containing the data to fit.
+                         fit = function(data_tbl) {
+                           estimation_tbl <- data_tbl %>%
+                             dplyr::filter(estimation_window == 1)
+
+                           # Resolve mode once per fit call
+                           mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                           # --- Contract guard: insufficient estimation observations ---
+                           n_valid <- sum(!is.na(estimation_tbl$firm_returns) &
+                                           !is.na(estimation_tbl$index_returns))
+                           if (n_valid < 2) {
+                             .handle_degenerate(
+                               mode        = mode,
+                               condition   = paste0("insufficient estimation observations (", n_valid, " valid, need 2)"),
+                               component   = self$model_name,
+                               event_id    = self$event_id,
+                               firm_symbol = self$firm_symbol,
+                               private_env = private
+                             )
+                             # Explicit flag — required at every call site per contract
+                             # (in strict mode stop() fires above so this is never reached)
+                             private$.is_fitted <- FALSE
+                             return(invisible(self))
+                           }
+
+                           # --- Contract guard: zero or near-zero variance in index returns ---
+                           if (stats::sd(estimation_tbl$index_returns, na.rm = TRUE) < .Machine$double.eps) {
+                             .handle_degenerate(
+                               mode        = mode,
+                               condition   = "zero or near-zero variance in index_returns",
+                               component   = self$model_name,
+                               event_id    = self$event_id,
+                               firm_symbol = self$firm_symbol,
+                               private_env = private
+                             )
+                             private$.is_fitted <- FALSE
+                             return(invisible(self))
+                           }
+
+                           # --- Safe OLS execution ---
+                           safe_mm <- purrr::safely(.f = .estimate_mm_model)
+                           res <- safe_mm(self$formula, estimation_tbl)
+                           if (is.null(res$error)) {
+                             private$.fitted_model <- res$result
+                             private$.is_fitted <- TRUE
+
+                             # Calculate statistics
+                             private$calculate_statistics(data_tbl)
+                           } else {
+                             # lm() failure is a degenerate condition (e.g. rank deficiency)
+                             .handle_degenerate(
+                               mode        = mode,
+                               condition   = conditionMessage(res$error),
+                               component   = self$model_name,
+                               event_id    = self$event_id,
+                               firm_symbol = self$firm_symbol,
+                               private_env = private
+                             )
+                             private$.is_fitted <- FALSE
+                             private$.error <- res$error
+                           }
+                         },
+                         #' @description
+                         #' Calculate the abnormal returns with given data.
+                         #'
+                         #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
+                         abnormal_returns = function(data_tbl) {
+                           if (private$.is_fitted) {
+                             # Calculate abnormal returns
+                             alpha = private$.statistics$alpha
+                             beta = private$.statistics$beta
+                             data_tbl %>%
+                               mutate(abnormal_returns = firm_returns - (alpha + beta * index_returns))
+                           } else if (private$.degenerate_handled) {
+                             # fit() already emitted a contract-formatted warning; suppress
+                             # the redundant "not fitted" warning to honour the contract's
+                             # guarantee of exactly one warning per degenerate event.
+                             data_tbl %>%
+                               mutate(abnormal_returns = NA_real_)
+                           } else {
+                             # Legitimate "not fitted" case: user called abnormal_returns()
+                             # before fit(), or fit() failed for a non-contract reason.
+                             warning("MarketModel is not fitted. Returning NA abnormal returns.")
+                             data_tbl %>%
+                               mutate(abnormal_returns = NA_real_)
+                           }
+                         }
+                       ),
+                       private = list(
+                         calculate_statistics = function(data_tbl) {
+                           # abnormal return calculation
+                           alpha = private$.fitted_model$coefficients[1]
+                           names(alpha) <- NULL
+                           beta = private$.fitted_model$coefficients[2]
+                           names(beta) <- NULL
+
+                           # Calculate statistics
+                           modell_summary = summary(private$.fitted_model)
+                           private$.statistics$alpha = alpha
+                           private$.statistics$pval_alpha = modell_summary$coefficients[1, 4]
+                           private$.statistics$beta = beta
+                           private$.statistics$pval_beta = modell_summary$coefficients[2, 4]
+
+                           private$.statistics$sigma = modell_summary$sigma
+                           private$.statistics$r2 = modell_summary$r.squared
+                           f_stat <- modell_summary$fstatistic[1]
+                           names(f_stat) <- NULL
+                           private$.statistics$f_stat = f_stat
+                           private$.statistics$degree_of_freedom = private$.fitted_model$df.residual
+
+                           # HAC (Newey-West) standard errors
+                           if (self$use_hac) {
+                             if (!requireNamespace("sandwich", quietly = TRUE)) {
+                               stop("Package 'sandwich' is required for HAC standard errors. ",
+                                    "Install it with: install.packages('sandwich')")
+                             }
+                             if (is.null(self$hac_lag)) {
+                               vcov_hac <- sandwich::NeweyWest(private$.fitted_model)
+                             } else {
+                               vcov_hac <- sandwich::NeweyWest(private$.fitted_model,
+                                                                lag = self$hac_lag)
+                             }
+                             private$.statistics$vcov_hac <- vcov_hac
+                             se_hac <- sqrt(diag(vcov_hac))
+                             private$.statistics$se_hac <- se_hac
+                             # Update p-values using HAC SEs
+                             df <- private$.fitted_model$df.residual
+                             private$.statistics$pval_alpha <- 2 * stats::pt(
+                               abs(alpha / se_hac[1]), df = df, lower.tail = FALSE)
+                             private$.statistics$pval_beta <- 2 * stats::pt(
+                               abs(beta / se_hac[2]), df = df, lower.tail = FALSE)
+                           }
+
+                           # residuals & first-order autocorrelation for
+                           # diagnostics
+                           residuals = private$.fitted_model$residuals
+                           private$add_residuals(residuals)
+                           private$first_order_autocorrelation(residuals)
+
+                           # forecast correction term
+                           estimation_tbl = data_tbl %>% filter(estimation_window == 1)
+                           event_window_tbl = data_tbl %>% filter(event_window == 1)
+                           event_market_returns = event_window_tbl$index_returns
+                           estimation_market_returns = estimation_tbl$index_returns
+                           # Use actual non-NA obs count (lm drops NAs via na.omit)
+                           estimation_window_length = sum(
+                             !is.na(estimation_tbl$firm_returns) &
+                               !is.na(estimation_tbl$index_returns)
+                           )
+
+                           private$calculate_forecast_error_correction(modell_summary$sigma,
+                                                                       estimation_window_length,
+                                                                       estimation_market_returns,
+                                                                       event_market_returns)
+                         }
+                       )
+)
+
+
+
+#' Market Adjusted Model
+#'
+#' The Market Adjusted Model is another simple approach used in event studies
+#' to estimate the expected returns of a stock and calculate its abnormal
+#' returns during an event window. This model is less complex than the Market
+#' Model, as it assumes that a stock’s expected return is equal to the market
+#' return, without considering any stock-specific factors. The Market
+#' Adjusted Model is particularly useful in situations where the estimation of
+#' individual stock parameters (such as alpha and beta) is not feasible or
+#' desired, and a basic benchmark for comparison is needed.
+#'
+#' @export
+MarketAdjustedModel <- R6Class("MarketAdjustedModel",
+                               inherit = ModelBase,
+                               public = list(
+                                 #' @field model_name Name of the model.
+                                 model_name = "MarketAdjustedModel",
+                                 #' @description
+                                 #' fit Fit the model with given data.
+                                 #' @param data_tbl Data frame or tibble containing the data to fit.
+                                 fit = function(data_tbl) {
+                                   estimation_tbl <- data_tbl %>%
+                                     dplyr::filter(estimation_window == 1)
+
+                                   # Resolve mode once per fit call
+                                   mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                                   # --- Contract guard: insufficient estimation observations ---
+                                   n_valid <- sum(!is.na(estimation_tbl$firm_returns) &
+                                                    !is.na(estimation_tbl$index_returns))
+                                   if (n_valid < 2) {
+                                     .handle_degenerate(
+                                       mode        = mode,
+                                       condition   = paste0("insufficient estimation observations (", n_valid, " valid, need 2)"),
+                                       component   = self$model_name,
+                                       event_id    = self$event_id,
+                                       firm_symbol = self$firm_symbol,
+                                       private_env = private
+                                     )
+                                     private$.is_fitted <- FALSE
+                                     return(invisible(self))
+                                   }
+
+                                   # NOTE: No zero-variance guard here. MarketAdjustedModel is purely
+                                   # arithmetic (firm_returns - index_returns) and does NOT need the
+                                   # residual series to have non-zero variance to produce valid abnormal
+                                   # returns. A stock that perfectly tracks the index yields
+                                   # abnormal_returns = 0 everywhere — the correct economic answer.
+                                   # sigma == 0 is handled at the test-statistic layer (ART/CART sigma
+                                   # guards produce NA t-stats in that case). Removing the false-degenerate
+                                   # guard here restores correct "never silently wrong" behavior (CR-01).
+
+                                   private$.is_fitted = TRUE
+
+                                   # Calculate statistics
+                                   private$calculate_statistics(data_tbl)
+                                 },
+                                 #' @description
+                                 #' abnormal_returns Calculate the abnormal returns with given data.
+                                 #'
+                                 #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
+                                 abnormal_returns = function(data_tbl) {
+                                   if (private$.is_fitted) {
+                                     data_tbl %>%
+                                       mutate(abnormal_returns = firm_returns - index_returns)
+                                   } else if (private$.degenerate_handled) {
+                                     # fit() already emitted a contract-formatted warning; suppress
+                                     # the redundant warning to honour the one-warning guarantee.
+                                     data_tbl %>%
+                                       mutate(abnormal_returns = NA_real_)
+                                   } else {
+                                     warning("MarketAdjustedModel is not fitted. Returning NA abnormal returns.")
+                                     data_tbl %>%
+                                       mutate(abnormal_returns = NA_real_)
+                                   }
+                                 }
+                               ),
+                               private = list(
+                                 calculate_statistics = function(data_tbl) {
+                                   estimation_tbl = data_tbl %>%
+                                     dplyr::filter(estimation_window == 1)
+
+                                   # residuals & first-order autocorrelation for
+                                   # diagnostics
+                                   residuals = estimation_tbl$firm_returns - estimation_tbl$index_returns
+                                   private$add_residuals(residuals)
+                                   private$first_order_autocorrelation(residuals)
+
+                                   # sigma and degree of freedom (needed by test statistics)
+                                   sigma = sd(residuals, na.rm = TRUE)
+                                   private$.statistics$sigma = sigma
+                                   private$.statistics$degree_of_freedom = sum(!is.na(residuals)) - 1
+
+                                   # Constant-mean forecast error correction (no regression parameters estimated)
+                                   # Use finite-pair count (not nrow) so NA rows don't inflate denominator
+                                   # and understate the correction factor — WR-03 / MODELS-04 fix.
+                                   event_window_tbl = data_tbl %>% filter(event_window == 1)
+                                   n_event = nrow(event_window_tbl)
+                                   n_valid_fec <- max(sum(!is.na(estimation_tbl$firm_returns) &
+                                                            !is.na(estimation_tbl$index_returns)), 1L)
+                                   correction = sigma * sqrt(1 + 1 / n_valid_fec)
+                                   private$.statistics$forecast_error_corrected_sigma = rep(correction, n_event)
+                                   private$.statistics$forecast_error_corrected_sigma_car = rep(0, n_event)
+                                 }
+                               )
+)
+
+
+#' Comparison Period Mean Adjusted Model
+#'
+#' The Comparison Period Mean Adjusted Model is another relatively simple
+#' approach used in event studies to estimate the expected returns of a stock
+#' and calculate its abnormal returns during an event window. This model is
+#' based on the assumption that a stock’s expected return during the event
+#' window is equal to its average return during a comparison period (typically
+#' a pre-event period). This model is particularly useful when researchers want
+#' to control for a stock’s historical performance and do not wish to rely on
+#' market return data.
+#'
+#' @export
+ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel",
+                                             inherit = ModelBase,
+                                             public = list(
+                                               #' @field model_name Name of the model.
+                                               model_name = "ComparisonPeriodMeanAdjustedModel",
+                                               #' @description
+                                               #' Fit the model with given data.
+                                               #'
+                                               #' @param data_tbl Data frame or tibble containing the data to fit.
+                                               fit = function(data_tbl) {
+                                                 est_returns <- data_tbl %>%
+                                                   filter(estimation_window == 1) %>%
+                                                   .[['firm_returns']]
+
+                                                 # Resolve mode once per fit call
+                                                 mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                                                 # --- Contract guard: insufficient estimation observations ---
+                                                 n_valid <- sum(!is.na(est_returns))
+                                                 if (n_valid < 2) {
+                                                   .handle_degenerate(
+                                                     mode        = mode,
+                                                     condition   = paste0("insufficient estimation observations (", n_valid, " valid, need 2)"),
+                                                     component   = self$model_name,
+                                                     event_id    = self$event_id,
+                                                     firm_symbol = self$firm_symbol,
+                                                     private_env = private
+                                                   )
+                                                   private$.is_fitted <- FALSE
+                                                   return(invisible(self))
+                                                 }
+
+                                                 # NOTE: No zero-variance guard here. ComparisonPeriodMeanAdjustedModel
+                                                 # computes abnormal returns as firm_returns minus the estimation-window
+                                                 # mean. A constant-returns fund (all estimation returns identical) still
+                                                 # produces a well-defined mean and thus well-defined abnormal returns.
+                                                 # sigma == 0 propagates to the test-statistic layer where ART/CART sigma
+                                                 # guards already handle it by returning NA t-stats. Removing this guard
+                                                 # restores correct "never silently wrong" behavior (WR-05 / CR-01 family).
+
+                                                 reference_mean <- mean(est_returns, na.rm = TRUE)
+
+                                                 private$.fitted_model = reference_mean
+                                                 private$.is_fitted = TRUE
+
+                                                 # Calculate statistics
+                                                 private$calculate_statistics(data_tbl)
+                                               },
+                                               #' @description
+                                               #' Calculate the abnormal returns with given data.
+                                               #'
+                                               #' @param data_tbl Data frame or tibble containing the data to calculate abnormal returns.
+                                               abnormal_returns = function(data_tbl) {
+                                                 if (private$.is_fitted) {
+                                                   data_tbl %>%
+                                                     mutate(abnormal_returns = firm_returns - private$.fitted_model)
+                                                 } else if (private$.degenerate_handled) {
+                                                   # fit() already emitted a contract-formatted warning; suppress
+                                                   # the redundant warning to honour the one-warning guarantee.
+                                                   data_tbl %>%
+                                                     mutate(abnormal_returns = NA_real_)
+                                                 } else {
+                                                   warning("ComparisonPeriodMeanAdjustedModel is not fitted. Returning NA abnormal returns.")
+                                                   data_tbl %>%
+                                                     mutate(abnormal_returns = NA_real_)
+                                                 }
+                                               }
+                                             ),
+                                             private = list(
+                                               calculate_statistics = function(data_tbl) {
+                                                 estimation_tbl = data_tbl %>%
+                                                   dplyr::filter(estimation_window == 1)
+
+                                                 # residuals & first-order autocorrelation for
+                                                 # diagnostics
+                                                 residuals = estimation_tbl$firm_returns - mean(estimation_tbl$firm_returns, na.rm = TRUE)
+                                                 private$add_residuals(residuals)
+                                                 private$first_order_autocorrelation(residuals)
+
+                                                 # sigma and degree of freedom (needed by test statistics)
+                                                 sigma = sd(residuals, na.rm = TRUE)
+                                                 private$.statistics$sigma = sigma
+                                                 private$.statistics$degree_of_freedom = sum(!is.na(residuals)) - 1
+
+                                                 # Constant-mean forecast error correction (no regression)
+                                                 # Use finite value count (not nrow) so NA rows don't inflate
+                                                 # denominator — WR-03 / MODELS-04 fix.
+                                                 event_window_tbl = data_tbl %>% filter(event_window == 1)
+                                                 n_event = nrow(event_window_tbl)
+                                                 n_valid_fec <- max(sum(!is.na(estimation_tbl$firm_returns)), 1L)
+                                                 correction = sigma * sqrt(1 + 1 / n_valid_fec)
+                                                 private$.statistics$forecast_error_corrected_sigma = rep(correction, n_event)
+                                                 private$.statistics$forecast_error_corrected_sigma_car = rep(0, n_event)
+                                               }
+                                             )
+)
+
+
+
+CustomModel <- R6Class("CustomModel",
+                       inherit = MarketModel,
+                       public = list(
+                         model_name = "CustomModel",
+                         abnormal_returns = function(data_tbl) {
+                           # Guard: if not fitted (via degenerate or pre-fit call), return NA
+                           # without calling predict() on a NULL model (which would error).
+                           if (private$.is_fitted) {
+                             mm_model = private$.fitted_model
+                             data_tbl %>%
+                               mutate(abnormal_returns = firm_returns - predict(mm_model, data_tbl),
+                                      abnormal_returns = ifelse(event_date == 1, abnormal_returns + loss_market_cap, abnormal_returns))
+                           } else if (private$.degenerate_handled) {
+                             # fit() already emitted a contract-formatted warning; suppress
+                             # the redundant warning to honour the one-warning guarantee.
+                             data_tbl %>%
+                               mutate(abnormal_returns = NA_real_)
+                           } else {
+                             warning("CustomModel is not fitted. Returning NA abnormal returns.")
+                             data_tbl %>%
+                               mutate(abnormal_returns = NA_real_)
+                           }
+                         }
+                       )
+)
+
+
+
+#' Linear Factor Model Base
+#'
+#' Base class for multi-factor OLS models used in event studies. All factor
+#' models (Market Model, Fama-French, Carhart) share the same estimation
+#' approach: OLS regression of excess returns on factor returns during the
+#' estimation window.
+#'
+#' @export
+LinearFactorModel <- R6Class("LinearFactorModel",
+                              inherit = ModelBase,
+                              public = list(
+                                #' @field model_name Name of the model.
+                                model_name = "LinearFactorModel",
+                                #' @field formula The regression formula.
+                                formula = NULL,
+                                #' @field required_columns Columns required in the data.
+                                required_columns = c("firm_returns", "index_returns"),
+                                #' @field use_hac Logical. Use HAC (Newey-West) standard errors.
+                                use_hac = FALSE,
+                                #' @field hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                hac_lag = NULL,
+                                #' @description
+                                #' Create a new LinearFactorModel.
+                                #'
+                                #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                  self$use_hac <- use_hac
+                                  self$hac_lag <- hac_lag
+                                },
+                                #' @description
+                                #' Fit the linear factor model via OLS on the estimation window.
+                                #'
+                                #' @param data_tbl Data frame or tibble containing the data to fit.
+                                fit = function(data_tbl) {
+                                  # Validate required columns — plain stop(), not contract
+                                  # (missing columns = programmer error, not degenerate data)
+                                  missing_cols <- setdiff(self$required_columns, names(data_tbl))
+                                  if (length(missing_cols) > 0) {
+                                    stop(self$model_name, " requires columns: ",
+                                         paste(missing_cols, collapse = ", "))
+                                  }
+
+                                  estimation_tbl <- data_tbl %>%
+                                    dplyr::filter(estimation_window == 1)
+
+                                  # Resolve degenerate mode once per fit call (inherited field)
+                                  mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                                  # --- Contract guard: insufficient estimation observations ---
+                                  n_valid <- sum(stats::complete.cases(
+                                    estimation_tbl[self$required_columns]
+                                  ))
+                                  if (n_valid < 2) {
+                                    .handle_degenerate(
+                                      mode        = mode,
+                                      condition   = paste0("insufficient estimation observations (",
+                                                           n_valid, " valid, need 2)"),
+                                      component   = self$model_name,
+                                      event_id    = self$event_id,
+                                      firm_symbol = self$firm_symbol,
+                                      private_env = private
+                                    )
+                                    private$.is_fitted <- FALSE
+                                    return(invisible(self))
+                                  }
+
+                                  # --- Safe OLS execution ---
+                                  # Single-factor zero-variance is handled by lm() (collinear
+                                  # term silently dropped); no per-factor guard needed here.
+                                  safe_lm <- purrr::safely(.f = .estimate_mm_model)
+                                  res <- safe_lm(self$formula, estimation_tbl)
+
+                                  if (is.null(res$error)) {
+                                    private$.fitted_model <- res$result
+                                    private$.is_fitted <- TRUE
+                                    private$calculate_statistics(data_tbl)
+                                  } else {
+                                    # lm() failure (e.g. full rank deficiency) is a
+                                    # degenerate condition — route through contract handler
+                                    .handle_degenerate(
+                                      mode        = mode,
+                                      condition   = conditionMessage(res$error),
+                                      component   = self$model_name,
+                                      event_id    = self$event_id,
+                                      firm_symbol = self$firm_symbol,
+                                      private_env = private
+                                    )
+                                    private$.is_fitted <- FALSE
+                                    private$.error <- res$error
+                                  }
+                                },
+                                #' @description
+                                #' Calculate abnormal returns as observed minus predicted.
+                                #'
+                                #' @param data_tbl Data frame or tibble.
+                                abnormal_returns = function(data_tbl) {
+                                  if (private$.is_fitted) {
+                                    predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                    data_tbl %>%
+                                      dplyr::mutate(abnormal_returns = firm_returns - predicted)
+                                  } else if (private$.degenerate_handled) {
+                                    # fit() already emitted a contract-formatted warning; suppress
+                                    # the redundant warning to honour the one-warning guarantee.
+                                    data_tbl %>%
+                                      dplyr::mutate(abnormal_returns = NA_real_)
+                                  } else {
+                                    warning(self$model_name, " is not fitted. Returning NA abnormal returns.")
+                                    data_tbl %>%
+                                      dplyr::mutate(abnormal_returns = NA_real_)
+                                  }
+                                }
+                              ),
+                              private = list(
+                                calculate_statistics = function(data_tbl) {
+                                  mod <- private$.fitted_model
+                                  mod_summary <- summary(mod)
+
+                                  # Store all coefficients
+                                  coefs <- mod$coefficients
+                                  coef_names <- names(coefs)
+                                  summary_coef_names <- rownames(mod_summary$coefficients)
+                                  for (i in seq_along(coefs)) {
+                                    val <- coefs[i]
+                                    names(val) <- NULL
+                                    private$.statistics[[coef_names[i]]] <- val
+                                    # Match by name, not position (lm drops collinear terms)
+                                    if (coef_names[i] %in% summary_coef_names) {
+                                      private$.statistics[[paste0("pval_", coef_names[i])]] <-
+                                        mod_summary$coefficients[coef_names[i], 4]
+                                    }
+                                  }
+
+                                  # Map intercept to alpha, first factor to beta for compatibility
+                                  private$.statistics$alpha <- coefs[1]
+                                  names(private$.statistics$alpha) <- NULL
+                                  if (coef_names[1] %in% summary_coef_names) {
+                                    private$.statistics$pval_alpha <- mod_summary$coefficients[coef_names[1], 4]
+                                  }
+                                  if (length(coefs) >= 2) {
+                                    private$.statistics$beta <- coefs[2]
+                                    names(private$.statistics$beta) <- NULL
+                                    if (coef_names[2] %in% summary_coef_names) {
+                                      private$.statistics$pval_beta <- mod_summary$coefficients[coef_names[2], 4]
+                                    }
+                                  }
+
+                                  private$.statistics$sigma <- mod_summary$sigma
+                                  private$.statistics$r2 <- mod_summary$r.squared
+                                  f_stat <- mod_summary$fstatistic[1]
+                                  names(f_stat) <- NULL
+                                  private$.statistics$f_stat <- f_stat
+                                  private$.statistics$degree_of_freedom <- mod$df.residual
+
+                                  # HAC (Newey-West) standard errors
+                                  if (self$use_hac) {
+                                    if (!requireNamespace("sandwich", quietly = TRUE)) {
+                                      stop("Package 'sandwich' is required for HAC standard errors. ",
+                                           "Install it with: install.packages('sandwich')")
+                                    }
+                                    if (is.null(self$hac_lag)) {
+                                      vcov_hac <- sandwich::NeweyWest(mod)
+                                    } else {
+                                      vcov_hac <- sandwich::NeweyWest(mod, lag = self$hac_lag)
+                                    }
+                                    private$.statistics$vcov_hac <- vcov_hac
+                                    se_hac <- sqrt(diag(vcov_hac))
+                                    private$.statistics$se_hac <- se_hac
+                                    # Update p-values using HAC SEs
+                                    df <- mod$df.residual
+                                    for (i in seq_along(coefs)) {
+                                      private$.statistics[[paste0("pval_", coef_names[i])]] <-
+                                        2 * stats::pt(abs(coefs[i] / se_hac[i]),
+                                                       df = df, lower.tail = FALSE)
+                                    }
+                                    private$.statistics$pval_alpha <- 2 * stats::pt(
+                                      abs(coefs[1] / se_hac[1]), df = df, lower.tail = FALSE)
+                                    if (length(coefs) >= 2) {
+                                      private$.statistics$pval_beta <- 2 * stats::pt(
+                                        abs(coefs[2] / se_hac[2]), df = df, lower.tail = FALSE)
+                                    }
+                                  }
+
+                                  residuals <- mod$residuals
+                                  private$add_residuals(residuals)
+                                  private$first_order_autocorrelation(residuals)
+
+                                  # Multi-factor forecast error correction using full (X'X)^{-1}
+                                  event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                                  sigma <- mod_summary$sigma
+                                  X_est <- stats::model.matrix(mod)
+                                  XtX_inv <- tryCatch(
+                                    solve(crossprod(X_est)),
+                                    error = function(e) NULL
+                                  )
+                                  if (!is.null(XtX_inv) && nrow(event_window_tbl) > 0) {
+                                    X_evt <- tryCatch(
+                                      stats::model.matrix(self$formula, data = event_window_tbl),
+                                      error = function(e) NULL
+                                    )
+                                    if (!is.null(X_evt)) {
+                                      # hat values: h_t = x_t' (X'X)^{-1} x_t
+                                      hat_vals <- rowSums((X_evt %*% XtX_inv) * X_evt)
+                                      fec <- sigma * sqrt(1 + hat_vals)
+                                      private$.statistics$forecast_error_corrected_sigma <- fec
+                                      fec_car <- (X_evt %*% XtX_inv)[, -1, drop = FALSE]
+                                      private$.statistics$forecast_error_corrected_sigma_car <- fec_car
+                                    } else {
+                                      n_event <- nrow(event_window_tbl)
+                                      correction <- sigma * sqrt(1 + 1 / nrow(X_est))
+                                      private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                                      private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
+                                    }
+                                  } else if (nrow(event_window_tbl) > 0) {
+                                    # Fallback when X'X is singular: use constant-mean FEC
+                                    n_est <- sum(!is.na(mod$residuals))
+                                    n_event <- nrow(event_window_tbl)
+                                    correction <- sigma * sqrt(1 + 1 / max(n_est, 1))
+                                    private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                                    private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
+                                  }
+                                }
+                              )
+)
+
+
+#' Fama-French Three-Factor Model
+#'
+#' Implements the Fama and French (1993) three-factor model:
+#' \deqn{R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s SMB + \beta_h HML + \epsilon}
+#'
+#' The data must contain columns: \code{excess_return} (firm return minus risk-free),
+#' \code{market_excess} (market return minus risk-free), \code{smb}, and \code{hml}.
+#' These can be joined via a factor table in \code{EventStudyTask}.
+#'
+#' @export
+FamaFrench3FactorModel <- R6Class("FamaFrench3FactorModel",
+                                   inherit = LinearFactorModel,
+                                   public = list(
+                                     #' @field model_name Name of the model.
+                                     model_name = "FamaFrench3FactorModel",
+                                     #' @field formula The three-factor regression formula.
+                                     formula = stats::as.formula(
+                                       "excess_return ~ market_excess + smb + hml"
+                                     ),
+                                     #' @field required_columns Required data columns.
+                                     required_columns = c("excess_return", "market_excess",
+                                                          "smb", "hml"),
+                                     #' @description
+                                     #' Create a new FamaFrench3FactorModel.
+                                     #'
+                                     #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                     #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                     initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                       super$initialize(use_hac = use_hac, hac_lag = hac_lag)
+                                     },
+                                     #' @description
+                                     #' Calculate abnormal returns using the three-factor model.
+                                     #'
+                                     #' @param data_tbl Data frame or tibble.
+                                     abnormal_returns = function(data_tbl) {
+                                       if (private$.is_fitted) {
+                                         predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = excess_return - predicted)
+                                       } else if (private$.degenerate_handled) {
+                                         # fit() already emitted a contract-formatted warning; suppress
+                                         # the redundant warning to honour the one-warning guarantee.
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = NA_real_)
+                                       } else {
+                                         warning(self$model_name, " is not fitted.")
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = NA_real_)
+                                       }
+                                     }
+                                   )
+)
+
+
+#' Fama-French Five-Factor Model
+#'
+#' Implements the Fama and French (2015) five-factor model:
+#' \deqn{R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s SMB + \beta_h HML + \beta_r RMW + \beta_c CMA + \epsilon}
+#'
+#' Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
+#' \code{hml}, \code{rmw}, \code{cma}.
+#'
+#' @export
+FamaFrench5FactorModel <- R6Class("FamaFrench5FactorModel",
+                                   inherit = LinearFactorModel,
+                                   public = list(
+                                     #' @field model_name Name of the model.
+                                     model_name = "FamaFrench5FactorModel",
+                                     #' @field formula The five-factor regression formula.
+                                     formula = stats::as.formula(
+                                       "excess_return ~ market_excess + smb + hml + rmw + cma"
+                                     ),
+                                     #' @field required_columns Required data columns.
+                                     required_columns = c("excess_return", "market_excess",
+                                                          "smb", "hml", "rmw", "cma"),
+                                     #' @description
+                                     #' Create a new FamaFrench5FactorModel.
+                                     #'
+                                     #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                     #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                     initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                       super$initialize(use_hac = use_hac, hac_lag = hac_lag)
+                                     },
+                                     #' @description
+                                     #' Calculate abnormal returns using the five-factor model.
+                                     #'
+                                     #' @param data_tbl Data frame or tibble.
+                                     abnormal_returns = function(data_tbl) {
+                                       if (private$.is_fitted) {
+                                         predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = excess_return - predicted)
+                                       } else if (private$.degenerate_handled) {
+                                         # fit() already emitted a contract-formatted warning; suppress
+                                         # the redundant warning to honour the one-warning guarantee.
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = NA_real_)
+                                       } else {
+                                         warning(self$model_name, " is not fitted.")
+                                         data_tbl %>%
+                                           dplyr::mutate(abnormal_returns = NA_real_)
+                                       }
+                                     }
+                                   )
+)
+
+
+#' Carhart Four-Factor Model
+#'
+#' Implements the Carhart (1997) four-factor model, which extends the
+#' Fama-French three-factor model with a momentum factor:
+#' \deqn{R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s SMB + \beta_h HML + \beta_{mom} MOM + \epsilon}
+#'
+#' Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
+#' \code{hml}, \code{mom}.
+#'
+#' @export
+Carhart4FactorModel <- R6Class("Carhart4FactorModel",
+                                inherit = LinearFactorModel,
+                                public = list(
+                                  #' @field model_name Name of the model.
+                                  model_name = "Carhart4FactorModel",
+                                  #' @field formula The four-factor regression formula.
+                                  formula = stats::as.formula(
+                                    "excess_return ~ market_excess + smb + hml + mom"
+                                  ),
+                                  #' @field required_columns Required data columns.
+                                  required_columns = c("excess_return", "market_excess",
+                                                       "smb", "hml", "mom"),
+                                  #' @description
+                                  #' Create a new Carhart4FactorModel.
+                                  #'
+                                  #' @param use_hac Logical. Use HAC (Newey-West) standard errors.
+                                  #' @param hac_lag Integer or NULL. Lag truncation for Newey-West.
+                                  initialize = function(use_hac = FALSE, hac_lag = NULL) {
+                                    super$initialize(use_hac = use_hac, hac_lag = hac_lag)
+                                  },
+                                  #' @description
+                                  #' Calculate abnormal returns using the four-factor model.
+                                  #'
+                                  #' @param data_tbl Data frame or tibble.
+                                  abnormal_returns = function(data_tbl) {
+                                    if (private$.is_fitted) {
+                                      predicted <- predict(private$.fitted_model, newdata = data_tbl)
+                                      data_tbl %>%
+                                        dplyr::mutate(abnormal_returns = excess_return - predicted)
+                                    } else if (private$.degenerate_handled) {
+                                      # fit() already emitted a contract-formatted warning; suppress
+                                      # the redundant warning to honour the one-warning guarantee.
+                                      data_tbl %>%
+                                        dplyr::mutate(abnormal_returns = NA_real_)
+                                    } else {
+                                      warning(self$model_name, " is not fitted.")
+                                      data_tbl %>%
+                                        dplyr::mutate(abnormal_returns = NA_real_)
+                                    }
+                                  }
+                                )
+)
+
+
+#' GARCH Model
+#'
+#' Event study model using GARCH(1,1) for time-varying volatility estimation.
+#' Uses the \pkg{rugarch} package to fit a GARCH(1,1) model with a market
+#' return regressor in the mean equation during the estimation window.
+#' Abnormal returns are computed as the difference between observed returns
+#' and the GARCH conditional mean. The time-varying sigma from GARCH can
+#' be used for standardized test statistics.
+#'
+#' @export
+GARCHModel <- R6Class("GARCHModel",
+                       inherit = ModelBase,
+                       public = list(
+                         #' @field model_name Name of the model.
+                         model_name = "GARCHModel",
+                         #' @field garch_order GARCH order as c(p, q). Default c(1,1).
+                         garch_order = c(1, 1),
+                         #' @description
+                         #' Fit the GARCH model on the estimation window.
+                         #'
+                         #' @param data_tbl Data frame or tibble with firm_returns,
+                         #'   index_returns, estimation_window, event_window columns.
+                         fit = function(data_tbl) {
+                           if (!requireNamespace("rugarch", quietly = TRUE)) {
+                             stop("Package 'rugarch' is required for GARCHModel. ",
+                                  "Install it with: install.packages('rugarch')")
+                           }
+
+                           estimation_tbl <- data_tbl %>%
+                             dplyr::filter(estimation_window == 1)
+
+                           # --- PRE-CALL contract guards (Phase 2) ---
+                           # Inserted BEFORE rugarch::ugarchspec().
+                           # The existing purrr::safely(ugarchfit) / convergence / warning
+                           # failure-handling below is Phase 3 and left untouched.
+
+                           # Resolve degenerate mode once per fit call
+                           mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                           # Guard 1: insufficient finite observation pairs
+                           n_valid <- sum(!is.na(estimation_tbl$firm_returns) &
+                                           !is.na(estimation_tbl$index_returns))
+                           if (n_valid < 2) {
+                             .handle_degenerate(
+                               mode        = mode,
+                               condition   = paste0("insufficient estimation observations (",
+                                                    n_valid, " valid, need 2)"),
+                               component   = self$model_name,
+                               event_id    = self$event_id,
+                               firm_symbol = self$firm_symbol,
+                               private_env = private
+                             )
+                             private$.is_fitted <- FALSE
+                             return(invisible(self))
+                           }
+
+                           # Guard 2: zero or near-zero variance in index_returns
+                           # (index_returns is the external regressor in the GARCH mean equation;
+                           # zero variance makes the mean equation degenerate)
+                           if (stats::sd(estimation_tbl$index_returns, na.rm = TRUE) <
+                               .Machine$double.eps) {
+                             .handle_degenerate(
+                               mode        = mode,
+                               condition   = "zero or near-zero variance in index_returns",
+                               component   = self$model_name,
+                               event_id    = self$event_id,
+                               firm_symbol = self$firm_symbol,
+                               private_env = private
+                             )
+                             private$.is_fitted <- FALSE
+                             return(invisible(self))
+                           }
+                           # --- end PRE-CALL guards ---
+
+                           spec <- rugarch::ugarchspec(
+                             variance.model = list(
+                               model = "sGARCH",
+                               garchOrder = self$garch_order
+                             ),
+                             mean.model = list(
+                               armaOrder = c(0, 0),
+                               include.mean = TRUE,
+                               external.regressors = as.matrix(estimation_tbl$index_returns)
+                             ),
+                             distribution.model = "norm"
+                           )
+
+                           safe_fit <- purrr::safely(rugarch::ugarchfit)
+                           res <- safe_fit(
+                             spec = spec,
+                             data = estimation_tbl$firm_returns,
+                             solver = "hybrid",
+                             solver.control = list(trace = 0)
+                           )
+
+                           if (is.null(res$error)) {
+                             # Check convergence: solver status 0 = converged
+                             converged <- tryCatch({
+                               conv <- rugarch::convergence(res$result)
+                               is.numeric(conv) && conv == 0
+                             }, error = function(e) TRUE)  # if no convergence method, assume OK
+                             if (converged) {
+                               private$.fitted_model <- res$result
+                               private$.is_fitted <- TRUE
+                               tryCatch(
+                                 private$calculate_statistics(data_tbl),
+                                 error = function(e) {
+                                   private$.is_fitted <- FALSE
+                                   private$.degenerate_handled <- TRUE  # suppress second warning in abnormal_returns()
+                                   warning("GARCH model statistics computation failed: ",
+                                           conditionMessage(e),
+                                           ". Returning NA abnormal returns.", call. = FALSE)
+                                 }
+                               )
+                             } else {
+                               private$.is_fitted <- FALSE
+                               warning("GARCH model did not converge. Returning NA abnormal returns.")
+                             }
+                           } else {
+                             private$.is_fitted <- FALSE
+                             private$.error <- res$error
+                             warning("GARCH model fitting failed: ", conditionMessage(res$error))
+                           }
+                         },
+                         #' @description
+                         #' Calculate abnormal returns from the GARCH model.
+                         #'
+                         #' @param data_tbl Data frame or tibble.
+                         abnormal_returns = function(data_tbl) {
+                           if (private$.is_fitted) {
+                             garch_fit <- private$.fitted_model
+                             coefs <- rugarch::coef(garch_fit)
+                             mu <- coefs["mu"]
+                             mxreg1 <- coefs["mxreg1"]
+                             data_tbl %>%
+                               dplyr::mutate(
+                                 expected_return = mu + mxreg1 * index_returns,
+                                 abnormal_returns = firm_returns - expected_return
+                               ) %>%
+                               dplyr::select(-expected_return)
+                           } else if (private$.degenerate_handled) {
+                             # fit() already emitted one contract-formatted warning;
+                             # return NA silently to honour the one-warning guarantee.
+                             data_tbl %>% dplyr::mutate(abnormal_returns = NA_real_)
+                           } else {
+                             warning(self$model_name, " is not fitted. Returning NA abnormal returns.")
+                             data_tbl %>% dplyr::mutate(abnormal_returns = NA_real_)
+                           }
+                         }
+                       ),
+                       private = list(
+                         calculate_statistics = function(data_tbl) {
+                           garch_fit <- private$.fitted_model
+
+                           # Extract conditional sigma from estimation window
+                           cond_sigma <- as.numeric(rugarch::sigma(garch_fit))
+                           avg_sigma <- mean(cond_sigma, na.rm = TRUE)
+                           if (!is.finite(avg_sigma) || avg_sigma <= 0) {
+                             avg_sigma <- sd(as.numeric(rugarch::residuals(garch_fit)), na.rm = TRUE)
+                             if (!is.finite(avg_sigma) || avg_sigma <= 0) avg_sigma <- NA_real_
+                           }
+
+                           coefs <- rugarch::coef(garch_fit)
+                           private$.statistics$alpha <- coefs["mu"]
+                           private$.statistics$beta <- coefs["mxreg1"]
+                           private$.statistics$sigma <- avg_sigma
+                           private$.statistics$garch_sigma <- cond_sigma
+                           private$.statistics$degree_of_freedom <-
+                             max(length(cond_sigma) - length(coefs), 1)
+
+                           # Residuals
+                           residuals <- as.numeric(rugarch::residuals(garch_fit))
+                           private$add_residuals(residuals)
+                           private$first_order_autocorrelation(residuals)
+
+                           # Forecast error correction (using average sigma)
+                           # Use n_valid (finite obs) not nrow — MODELS-04 FEC fix
+                           estimation_tbl <- data_tbl %>% dplyr::filter(estimation_window == 1)
+                           event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                           n_valid_fec <- sum(!is.na(estimation_tbl$firm_returns) &
+                                               !is.na(estimation_tbl$index_returns))
+                           private$calculate_forecast_error_correction(
+                             avg_sigma,
+                             n_valid_fec,
+                             estimation_tbl$index_returns,
+                             event_window_tbl$index_returns
+                           )
+                         }
+                       )
+)
+
+
+#' Buy-and-Hold Abnormal Returns (BHAR) Model
+#'
+#' Implements Buy-and-Hold Abnormal Returns for long-horizon event studies.
+#' BHAR compounds returns over the event window instead of summing:
+#' \deqn{BHAR_i = \prod(1 + R_{i,t}) - \prod(1 + R_{benchmark,t})}
+#'
+#' The benchmark is the market/index return by default. This model is
+#' appropriate for long-horizon studies (months/years) where compounding
+#' effects matter.
+#'
+#' @export
+BHARModel <- R6Class("BHARModel",
+                      inherit = ModelBase,
+                      public = list(
+                        #' @field model_name Name of the model.
+                        model_name = "BHARModel",
+                        #' @description
+                        #' Fit the BHAR model. Computes estimation window statistics.
+                        #'
+                        #' @param data_tbl Data frame or tibble.
+                        fit = function(data_tbl) {
+                          estimation_tbl <- data_tbl %>%
+                            dplyr::filter(estimation_window == 1)
+
+                          # Resolve mode once per fit call
+                          mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                          # --- Contract guard: insufficient estimation observations ---
+                          n_valid <- sum(!is.na(estimation_tbl$firm_returns) &
+                                          !is.na(estimation_tbl$index_returns))
+                          if (n_valid < 2) {
+                            .handle_degenerate(
+                              mode        = mode,
+                              condition   = paste0("insufficient estimation observations (", n_valid, " valid, need 2)"),
+                              component   = self$model_name,
+                              event_id    = self$event_id,
+                              firm_symbol = self$firm_symbol,
+                              private_env = private
+                            )
+                            private$.is_fitted <- FALSE
+                            return(invisible(self))
+                          }
+
+                          # NOTE: No zero-variance guard here. BHARModel computes buy-and-hold
+                          # abnormal returns via compounding and does NOT require the estimation-
+                          # window diff series to have non-zero variance. A stock that tracks the
+                          # index perfectly yields BHAR = 0 — the correct economic answer.
+                          # sigma == 0 propagates to the ART/CART/BHARTTest sigma guards which
+                          # already return NA t-stats. Removing this guard restores correct
+                          # "never silently wrong" behavior (CR-02 Part A).
+
+                          private$.is_fitted <- TRUE
+                          private$calculate_statistics(data_tbl)
+                        },
+                        #' @description
+                        #' Calculate abnormal returns using buy-and-hold compounding.
+                        #'
+                        #' @param data_tbl Data frame or tibble.
+                        abnormal_returns = function(data_tbl) {
+                          if (private$.is_fitted) {
+                            data_tbl %>%
+                              dplyr::group_by(event_window) %>%
+                              dplyr::mutate(
+                                # Compound returns within each window separately
+                                cum_firm = cumprod(1 + dplyr::coalesce(firm_returns, 0)),
+                                cum_index = cumprod(1 + dplyr::coalesce(index_returns, 0)),
+                                abnormal_returns = cum_firm - cum_index
+                              ) %>%
+                              dplyr::ungroup() %>%
+                              dplyr::select(-cum_firm, -cum_index)
+                          } else if (private$.degenerate_handled) {
+                            # fit() already emitted a contract-formatted warning; suppress
+                            # the redundant warning to honour the one-warning guarantee.
+                            # Critically: do NOT run the coalesce-based compounding here,
+                            # as it would produce plausible-looking wrong values when unfitted.
+                            data_tbl %>%
+                              dplyr::mutate(abnormal_returns = NA_real_)
+                          } else {
+                            warning("BHARModel is not fitted. Returning NA abnormal returns.")
+                            data_tbl %>%
+                              dplyr::mutate(abnormal_returns = NA_real_)
+                          }
+                        }
+                      ),
+                      private = list(
+                        calculate_statistics = function(data_tbl) {
+                          estimation_tbl <- data_tbl %>%
+                            dplyr::filter(estimation_window == 1)
+
+                          # Compute estimation-window BHAR residuals
+                          est_bhar <- cumprod(1 + dplyr::coalesce(estimation_tbl$firm_returns, 0)) -
+                            cumprod(1 + dplyr::coalesce(estimation_tbl$index_returns, 0))
+                          # Use incremental differences as residual proxy
+                          residuals <- diff(est_bhar)
+                          private$add_residuals(residuals)
+                          if (length(residuals) >= 2) {
+                            private$first_order_autocorrelation(residuals)
+                          }
+
+                          sigma <- sd(estimation_tbl$firm_returns -
+                                        estimation_tbl$index_returns, na.rm = TRUE)
+                          private$.statistics$sigma <- sigma
+                          # Use .finite_residual_df() to count only non-NA rows (MODELS-03)
+                          # nrow(estimation_tbl) would include NA rows, inflating df incorrectly.
+                          bhar_residuals_finite <- estimation_tbl$firm_returns - estimation_tbl$index_returns
+                          private$.statistics$degree_of_freedom <- .finite_residual_df(bhar_residuals_finite, n_params = 1L)
+
+                          # Constant-mean forecast error correction (no regression)
+                          # Use finite pair count (not nrow) consistent with GARCH/DCC-GARCH
+                          # MODELS-04 fix: nrow would include NA rows, inflating df and
+                          # understating the correction factor (CR-02 Part B).
+                          event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                          n_event <- nrow(event_window_tbl)
+                          n_valid_fec <- max(sum(!is.na(estimation_tbl$firm_returns) &
+                                                   !is.na(estimation_tbl$index_returns)), 1L)
+                          correction <- sigma * sqrt(1 + 1 / n_valid_fec)
+                          private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                          private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
+                        }
+                      )
+)
+
+
+#' Volume Event Study Model
+#'
+#' Model for volume-based event studies. Computes abnormal volume as the
+#' difference between observed volume and expected volume from the estimation
+#' window mean. The data must contain a \code{firm_volume} column (and
+#' optionally \code{index_volume} for market-adjusted volume).
+#'
+#' The existing test statistics infrastructure works on the
+#' \code{abnormal_returns} column, so this model writes abnormal volume
+#' to that same column for compatibility.
+#'
+#' @export
+VolumeModel <- R6Class("VolumeModel",
+                        inherit = ModelBase,
+                        public = list(
+                          #' @field model_name Name of the model.
+                          model_name = "VolumeModel",
+                          #' @field log_transform Whether to log-transform volume. Default TRUE.
+                          log_transform = TRUE,
+                          #' @description
+                          #' Create a new VolumeModel.
+                          #'
+                          #' @param log_transform Whether to log-transform volume before analysis.
+                          initialize = function(log_transform = TRUE) {
+                            self$log_transform <- log_transform
+                          },
+                          #' @description
+                          #' Fit the volume model. Computes expected volume from estimation window.
+                          #'
+                          #' @param data_tbl Data frame or tibble with firm_volume column.
+                          fit = function(data_tbl) {
+                            if (!"firm_volume" %in% names(data_tbl)) {
+                              stop("VolumeModel requires a 'firm_volume' column.")
+                            }
+
+                            estimation_tbl <- data_tbl %>%
+                              dplyr::filter(estimation_window == 1)
+
+                            # Resolve mode once per fit call
+                            mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                            vol <- estimation_tbl$firm_volume
+                            if (self$log_transform) vol <- log(vol + 1)
+
+                            # --- Contract guard: insufficient estimation observations ---
+                            n_valid <- sum(is.finite(vol))
+                            if (n_valid < 2) {
+                              .handle_degenerate(
+                                mode        = mode,
+                                condition   = paste0("insufficient estimation observations (", n_valid, " valid, need 2)"),
+                                component   = self$model_name,
+                                event_id    = self$event_id,
+                                firm_symbol = self$firm_symbol,
+                                private_env = private
+                              )
+                              private$.is_fitted <- FALSE
+                              return(invisible(self))
+                            }
+
+                            # --- Contract guard: zero or near-zero variance in volume ---
+                            if (stats::sd(vol, na.rm = TRUE) < .Machine$double.eps) {
+                              .handle_degenerate(
+                                mode        = mode,
+                                condition   = "zero or near-zero variance in firm_volume (estimation window)",
+                                component   = self$model_name,
+                                event_id    = self$event_id,
+                                firm_symbol = self$firm_symbol,
+                                private_env = private
+                              )
+                              private$.is_fitted <- FALSE
+                              return(invisible(self))
+                            }
+
+                            private$.fitted_model <- mean(vol, na.rm = TRUE)
+                            private$.is_fitted <- TRUE
+                            private$calculate_statistics(data_tbl)
+                          },
+                          #' @description
+                          #' Calculate abnormal volume.
+                          #'
+                          #' @param data_tbl Data frame or tibble.
+                          abnormal_returns = function(data_tbl) {
+                            if (private$.is_fitted) {
+                              expected <- private$.fitted_model
+                              data_tbl %>%
+                                dplyr::mutate(
+                                  .vol = if (self$log_transform) log(firm_volume + 1) else firm_volume,
+                                  abnormal_returns = .vol - expected
+                                ) %>%
+                                dplyr::select(-.vol)
+                            } else if (private$.degenerate_handled) {
+                              # fit() already emitted a contract-formatted warning; suppress
+                              # the redundant warning to honour the one-warning guarantee.
+                              data_tbl %>%
+                                dplyr::mutate(abnormal_returns = NA_real_)
+                            } else {
+                              warning("VolumeModel is not fitted. Returning NA abnormal returns.")
+                              data_tbl %>%
+                                dplyr::mutate(abnormal_returns = NA_real_)
+                            }
+                          }
+                        ),
+                        private = list(
+                          calculate_statistics = function(data_tbl) {
+                            estimation_tbl <- data_tbl %>%
+                              dplyr::filter(estimation_window == 1)
+
+                            vol <- estimation_tbl$firm_volume
+                            if (self$log_transform) vol <- log(vol + 1)
+
+                            expected <- mean(vol, na.rm = TRUE)
+                            residuals <- vol - expected
+                            private$add_residuals(residuals)
+                            if (length(residuals) >= 2) {
+                              private$first_order_autocorrelation(residuals)
+                            }
+
+                            sigma <- sd(residuals, na.rm = TRUE)
+                            private$.statistics$sigma <- sigma
+                            private$.statistics$degree_of_freedom <- sum(is.finite(residuals)) - 1
+
+                            # Constant-mean forecast error correction (no regression)
+                            event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                            n_event <- nrow(event_window_tbl)
+                            n_est <- max(sum(is.finite(residuals)), 1)
+                            correction <- sigma * sqrt(1 + 1 / n_est)
+                            private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                            private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
+                          }
+                        )
+)
+
+
+#' Volatility Event Study Model
+#'
+#' Model for volatility-based event studies. Computes abnormal volatility
+#' as the ratio of event-window squared returns to estimation-window variance.
+#' The abnormal measure is written to the \code{abnormal_returns} column
+#' for compatibility with existing test statistics.
+#'
+#' @export
+VolatilityModel <- R6Class("VolatilityModel",
+                            inherit = ModelBase,
+                            public = list(
+                              #' @field model_name Name of the model.
+                              model_name = "VolatilityModel",
+                              #' @description
+                              #' Fit the volatility model. Estimates expected variance from
+                              #' estimation window.
+                              #'
+                              #' @param data_tbl Data frame or tibble.
+                              fit = function(data_tbl) {
+                                estimation_tbl <- data_tbl %>%
+                                  dplyr::filter(estimation_window == 1)
+
+                                # Resolve mode once per fit call
+                                mode <- .resolve_degenerate_mode(self$degenerate_mode)
+
+                                # --- Contract guard: insufficient estimation observations ---
+                                n_valid <- sum(!is.na(estimation_tbl$firm_returns))
+                                if (n_valid < 2) {
+                                  .handle_degenerate(
+                                    mode        = mode,
+                                    condition   = paste0("insufficient estimation observations (", n_valid, " valid, need 2)"),
+                                    component   = self$model_name,
+                                    event_id    = self$event_id,
+                                    firm_symbol = self$firm_symbol,
+                                    private_env = private
+                                  )
+                                  private$.is_fitted <- FALSE
+                                  return(invisible(self))
+                                }
+
+                                # --- Contract guard: zero or NA variance in firm_returns ---
+                                # IMPORTANT: this guard is placed BEFORE private$.is_fitted <- TRUE
+                                # so the is_fitted flag is never set on degenerate data
+                                # (previously this guard lived in calculate_statistics() AFTER
+                                # is_fitted was set to TRUE, creating an inconsistency window).
+                                est_var <- stats::var(estimation_tbl$firm_returns, na.rm = TRUE)
+                                if (is.na(est_var) || est_var < .Machine$double.eps) {
+                                  .handle_degenerate(
+                                    mode        = mode,
+                                    condition   = "zero or NA variance in firm_returns (estimation window)",
+                                    component   = self$model_name,
+                                    event_id    = self$event_id,
+                                    firm_symbol = self$firm_symbol,
+                                    private_env = private
+                                  )
+                                  private$.is_fitted <- FALSE
+                                  return(invisible(self))
+                                }
+
+                                private$.fitted_model <- est_var
+                                private$.is_fitted <- TRUE
+                                private$calculate_statistics(data_tbl)
+                              },
+                              #' @description
+                              #' Calculate abnormal volatility (squared returns / expected variance - 1).
+                              #'
+                              #' @param data_tbl Data frame or tibble.
+                              abnormal_returns = function(data_tbl) {
+                                if (private$.is_fitted) {
+                                  est_var <- private$.fitted_model
+                                  data_tbl %>%
+                                    dplyr::mutate(
+                                      abnormal_returns = (firm_returns^2 / est_var) - 1
+                                    )
+                                } else if (private$.degenerate_handled) {
+                                  # fit() already emitted a contract-formatted warning; suppress
+                                  # the redundant warning to honour the one-warning guarantee.
+                                  data_tbl %>%
+                                    dplyr::mutate(abnormal_returns = NA_real_)
+                                } else {
+                                  warning("VolatilityModel is not fitted. Returning NA abnormal returns.")
+                                  data_tbl %>%
+                                    dplyr::mutate(abnormal_returns = NA_real_)
+                                }
+                              }
+                            ),
+                            private = list(
+                              calculate_statistics = function(data_tbl) {
+                                # Note: the zero-variance guard has been relocated to fit() BEFORE
+                                # private$.is_fitted <- TRUE. calculate_statistics() is only called
+                                # on the valid-input path, so est_var is guaranteed > 0 here.
+                                estimation_tbl <- data_tbl %>%
+                                  dplyr::filter(estimation_window == 1)
+
+                                est_var <- private$.fitted_model  # already validated in fit()
+                                # Residuals in ratio form to match abnormal_returns = r^2/V - 1
+                                residuals <- estimation_tbl$firm_returns^2 / est_var - 1
+                                private$add_residuals(residuals)
+                                if (length(residuals) >= 2) {
+                                  private$first_order_autocorrelation(residuals)
+                                }
+
+                                sigma <- sd(residuals, na.rm = TRUE)
+                                private$.statistics$sigma <- sigma
+                                private$.statistics$degree_of_freedom <- sum(is.finite(residuals)) - 1
+
+                                # Constant-mean forecast error correction (no regression)
+                                event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
+                                n_event <- nrow(event_window_tbl)
+                                n_est <- max(sum(is.finite(residuals)), 1)
+                                correction <- sigma * sqrt(1 + 1 / n_est)
+                                private$.statistics$forecast_error_corrected_sigma <- rep(correction, n_event)
+                                private$.statistics$forecast_error_corrected_sigma_car <- rep(0, n_event)
+                              }
+                            )
+)
+
+
+.estimate_mm_model <- function(formula, data) {
+  lm(formula, data=data)
+}
