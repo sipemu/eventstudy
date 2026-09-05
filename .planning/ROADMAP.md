@@ -124,7 +124,10 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
   3. A CI dry-run renders one smoke-test article that shows a KaTeX-rendered formula, a resolved academic citation (from the co-located filename-only `references.bib`), and a plotly figure all on the same page with no broken layout, no raw `[@Key]`/`$LaTeX$`, and no plotly/MathJax JS conflict (`math-rendering: katex` set).
   4. A reusable article skeleton (`_setup.Rmd` child with `set.seed`, `options(scipen, digits)`, knitr opts + the 10-section template) exists and is used by the smoke-test article, so downstream authors inherit determinism and structure by default.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 13-01-PLAN.md — shared article infra (`_setup.Rmd`, `references.bib`, 10-section skeleton), `_pkgdown.yml` `math-rendering: katex` + Methods/Gallery navbar, `.Rbuildignore` `^vignettes/articles$`, verified end-to-end by a dieselgate smoke-test article
+
 **UI hint**: yes
 
 ### Phase 14: Curated Per-Domain Datasets
