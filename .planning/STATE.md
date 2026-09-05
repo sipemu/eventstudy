@@ -1,21 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.62.0
-milestone_name: Documentation Site (pkgdown + CI/CD)
-current_phase: 12
-current_phase_name: CI/CD Deploy + Repo Linkage + Release Integrity
-status: executing
-stopped_at: Phase 11 complete, ready to plan Phase 12
-last_updated: "2026-09-05T10:52:59.362Z"
+milestone: v0.63.0
+milestone_name: Documentation Depth — Methods & Worked Examples
+status: planning
+last_updated: "2026-09-05T13:39:50.061Z"
 last_activity: 2026-09-05
-last_activity_desc: Phase 12 execution started
-state_head: 253c2cc9268d9588afe5c1ec774635f195d55096
 progress:
-  total_phases: 2
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 1
-  percent: 50
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -29,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 12 (CI/CD Deploy + Repo Linkage + Release Integrity) — EXECUTING
-Plan: 1 of 1
-Status: Executing Phase 12
-Last activity: 2026-09-05 — Phase 12 execution started
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-09-05 — Milestone v0.63.0 started
 
 ## Milestone Roadmap (v0.62.0)
 

@@ -10,16 +10,17 @@ The package is mature and CRAN-published. The v0.50.0 milestone made it **never 
 
 The package must never produce a silently incorrect statistical result — and now, the AI layer must never present an ungrounded one. On degenerate input the pipeline errors clearly or returns NA with one warning; the advisor cites only diagnostics the package actually computed, and refuses to invent numbers. Trustworthy numbers, trustworthy interpretation.
 
-## Current Milestone: v0.62.0 Documentation Site (pkgdown + CI/CD)
+## Current Milestone: v0.63.0 Documentation Depth — Methods & Worked Examples
 
-**Goal:** Ship a curated, professionally-themed pkgdown documentation website for EventStudy — auto-built and deployed to GitHub Pages by CI on every push to `main` and on releases — and link it prominently from the repo, matching the `fdars-r` documentation pattern.
+**Goal:** Transform the EventStudy docs site from a grouped reference into a pyfda-caliber learning resource — every method family explained with real statistical exposition and academic references, every method demonstrated with rendered outputs (tables, printed results, plots), plus a cross-domain gallery of complete worked examples. Reference standard: `https://sipemu.github.io/pyfda/`.
 
 **Target features:**
-- **Curated `_pkgdown.yml` site** (fdars-r style) — thematically grouped Reference index (Pipeline & tasks · Return models · Test statistics · Panel/intraday/synthetic · AI advisor · Diagnostics/export/plotting), an organized Articles menu over the 18 existing vignettes, custom homepage, News/Changelog
-- **Custom Bootstrap-5 theme** — bootswatch/accent color + fonts (no logo), professional look without artwork
-- **CI/CD deploy workflow** — r-lib standard `pkgdown.yaml` GitHub Action building the site and deploying to the `gh-pages` branch → GitHub Pages, triggered on push to `main` and on release
-- **Repo linkage** — DESCRIPTION `URL` gains the pkgdown site URL, README gets a docs-site badge/link, `.Rbuildignore` keeps pkgdown scaffolding out of the CRAN tarball
-- **CI-/offline-safe build** — the site builds cleanly in Actions; network-touching vignettes (e.g. `data-download`) handled for reproducibility; no new `R CMD check` NOTEs/WARNINGs, CRAN tarball unaffected
+- **Learn/Methods article section** — one conceptual article per method family (return models · test statistics · panel DiD · intraday · synthetic control · AI advisor · diagnostics), each with formulas, assumptions, when-to-use guidance, and academic references
+- **Rendered outputs inline** — each Methods article runs real code and renders tables, printed results, and plots (build-time executed, fully offline/CI-safe)
+- **Cross-domain worked-examples gallery** — pyfda-style gallery of end-to-end workflows across domains (earnings surprises, M&A, regulatory shocks, …), each a complete rendered analysis
+- **Curated real datasets per domain** — new bundled datasets (dieselgate-style, with `data-raw/` provenance) powering the gallery, sized so the CRAN tarball stays clean
+- **pkgdown-only delivery** — the new Methods articles + gallery live in `vignettes/articles/` (`.Rbuildignore`d): they render on the site but stay out of the CRAN tarball; the existing 18 concise vignettes remain CRAN-shipped and untouched
+- **CRAN-/CI-clean build** — the new articles render in the existing v0.62.0 CI pkgdown build fully offline; no new `R CMD check` NOTEs/WARNINGs; tarball not bloated; valid-input behavior unchanged
 
 ## Business Context
 
@@ -53,16 +54,19 @@ The package must never produce a silently incorrect statistical result — and n
 - ✓ **Grounding knowledge base** — pure-R assumption→test KB with academic citations, rule-based offline advice engine — v0.60.0
 - ✓ **Claude Code Agent Skill + Advisor Pro waitlist** — `SKILL.md` loop over existing exports; CRAN-safe opt-in waitlist surface — v0.60.0
 - ✓ **Advisor vignette + bundled multi-automaker dieselgate dataset** — offline-safe CRAN vignette, CI bands + group CAAR comparison, `data-raw/` provenance — v0.61.0
+- ✓ **Curated pkgdown site + custom Bootstrap-5 theme** — thematically grouped Reference index, Articles nav over the 18 vignettes, README homepage, News/Changelog, custom theme (no logo) — v0.62.0
+- ✓ **CI/CD docs deploy + repo linkage + release integrity** — r-lib `pkgdown.yaml` deploy to `gh-pages`/GitHub Pages, DESCRIPTION `URL` + README docs badge + `.Rbuildignore`, network-safe article build, CRAN-clean 0.62.0 release — v0.62.0
 
 ### Active
 
-<!-- This milestone (v0.62.0). Detailed, testable REQ-IDs live in REQUIREMENTS.md. -->
+<!-- This milestone (v0.63.0). Detailed, testable REQ-IDs live in REQUIREMENTS.md. -->
 
-- [ ] **Curated pkgdown site** — `_pkgdown.yml` with thematically grouped Reference index, organized Articles menu over the 18 vignettes, custom homepage, News/Changelog (fdars-r style)
-- [ ] **Custom Bootstrap-5 theme** — bootswatch/accent color + fonts, no logo
-- [ ] **CI/CD docs deploy** — r-lib `pkgdown.yaml` GitHub Action building and deploying to `gh-pages` → GitHub Pages, on push to `main` and on release
-- [ ] **Repo linkage** — DESCRIPTION `URL` + README docs badge/link + `.Rbuildignore` keeps pkgdown scaffolding out of the CRAN tarball
-- [ ] **CI-/offline-safe build** — site builds cleanly in Actions; network-touching vignettes handled; no new `R CMD check` NOTEs/WARNINGs, CRAN tarball unaffected
+- [ ] **Learn/Methods article section** — one conceptual article per method family (return models, test statistics, panel DiD, intraday, synthetic control, AI advisor, diagnostics) with formulas, assumptions, when-to-use, and academic references
+- [ ] **Rendered outputs inline** — each Methods article executes at build time and renders tables, printed results, and plots, fully offline/CI-safe
+- [ ] **Cross-domain worked-examples gallery** — pyfda-style gallery of complete rendered workflows across domains
+- [ ] **Curated real datasets per domain** — new bundled datasets (dieselgate-style, `data-raw/` provenance) powering the gallery, sized to keep the CRAN tarball clean
+- [ ] **pkgdown-only delivery** — new Methods articles + gallery in `vignettes/articles/` (`.Rbuildignore`d); render on site, stay out of the CRAN tarball; existing 18 vignettes untouched
+- [ ] **CRAN-/CI-clean build** — new articles render in the existing CI pkgdown build offline; no new `R CMD check` NOTEs/WARNINGs; tarball not bloated
 
 ### Out of Scope
 
@@ -73,6 +77,9 @@ The package must never produce a silently incorrect statistical result — and n
 - **Native reimplementation of external estimators** (did, DIDmultiplegt, rugarch) — separate independence milestone.
 - **Performance/scaling work** (streaming, data.table backend, sparse FE) — orthogonal; deferred.
 - **Changing the statistical intent of any existing method** — behavior on valid input stays unchanged.
+- **New statistical methods or estimators** — v0.63.0 is documentation depth only; no new models, tests, or task types.
+- **Rewriting the existing 18 CRAN vignettes** — they stay as concise CRAN-shipped vignettes; the new rich content is additive and pkgdown-only.
+- **Shipping the rich Methods articles/gallery inside the CRAN tarball** — deliberately pkgdown-only to keep the tarball small and `R CMD check` fast.
 
 ## Context
 
@@ -106,9 +113,14 @@ The package must never produce a silently incorrect statistical result — and n
 | Freemium: bundled advisor free, retrieval-corpus "Advisor Pro" as a future paid tier gated by a waitlist | Validate commercial demand before building the heavier RAG version | — Pending |
 | Agent Skill surface now, MCP server deferred | The Skill delivers the full loop with less surface area; MCP can follow if agent demand appears | — Pending |
 | Defer performance/scaling and native reimplementation | Real but orthogonal to this milestone | — Pending |
-| Curated pkgdown site (grouped reference, custom homepage) over auto-generated default | Matches the fdars-r reference; a flat index over 30+ exports and 18 vignettes is not discoverable | — Pending |
-| Custom Bootstrap-5 theme, no logo | Professional look without needing artwork; logo can follow later | — Pending |
-| CI deploy to gh-pages on push-to-main + releases (r-lib `pkgdown.yaml`) | Always-current docs; standard, well-supported r-lib workflow; keeps site out of the CRAN tarball | — Pending |
+| Curated pkgdown site (grouped reference, custom homepage) over auto-generated default | Matches the fdars-r reference; a flat index over 30+ exports and 18 vignettes is not discoverable | ✓ v0.62.0 |
+| Custom Bootstrap-5 theme, no logo | Professional look without needing artwork; logo can follow later | ✓ v0.62.0 |
+| CI deploy to gh-pages on push-to-main + releases (r-lib `pkgdown.yaml`) | Always-current docs; standard, well-supported r-lib workflow; keeps site out of the CRAN tarball | ✓ v0.62.0 |
+| New Methods articles + gallery as pkgdown-only (`vignettes/articles/`, `.Rbuildignore`d), not CRAN vignettes | Full-coverage rendered content would bloat the tarball and slow `R CMD check`; site-only keeps CRAN clean while web users get the rich content; existing concise vignettes stay CRAN-shipped | — Pending |
+| Bundle curated real per-domain datasets (dieselgate-style, `data-raw/` provenance) for the gallery | Realistic worked examples beat synthetic-only; matches the pyfda examples standard | — Pending |
+| Datasets used only by site-only articles must not bloat the CRAN tarball — compressed if shipped as documented `data()` datasets, or `.Rbuildignore`d if purely site-only | Full coverage across domains risks tarball growth; per-dataset placement decided in planning | — Pending |
+| Reference standard for docs depth = pyfda site (conceptual method pages + worked-examples gallery + rendered outputs) | Same author/pattern family as the advisor's pyfda/fdars grounding; concrete, agreed bar for "thorough" | — Pending |
+| All rendered articles execute fully offline (bundled data + `set.seed`), no network at build time | Must render in the existing v0.62.0 CI pkgdown build without flakiness; extends the v0.62.0 network-safe-article decision | — Pending |
 
 ## Evolution
 
@@ -129,4 +141,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Update Context with current state
 
 ---
-*Last updated: 2026-09-04 starting milestone v0.62.0 Documentation Site (pkgdown + CI/CD)*
+*Last updated: 2026-09-05 starting milestone v0.63.0 Documentation Depth — Methods & Worked Examples*
