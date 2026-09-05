@@ -11,18 +11,18 @@ Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All 
 ### Learn / Methods articles (METH)
 
 - [x] **METH-01**: A "Learn / Methods" section is exposed in the pkgdown navigation (a dedicated navbar menu or Articles group) that collects the conceptual method articles as a coherent learning track.
-- [ ] **METH-02**: A conceptual article for **return models** (market, Fama-French 3/5, Carhart, GARCH/DCC, rolling-window, BHAR, comparison-period-mean, volume/volatility) explains each model's estimation, assumptions, and when-to-use, and cites the primary academic references.
-- [ ] **METH-03**: A conceptual article for **test statistics** (AR/CAR t-tests, Patell Z, BMP, Sign, Kolari-Pynnönen, Calendar-Time Portfolio, cross-sectional t) explains each statistic's null hypothesis, formula, assumptions, and references.
-- [ ] **METH-04**: A conceptual article for **panel / DiD estimators** (TWFE, Sun-Abraham, Callaway-Sant'Anna, Borusyak-Jaravel-Spiess, de Chaisemartin-D'Haultfoeuille) explains staggered-treatment bias, each estimator's approach, and references.
-- [ ] **METH-05**: A conceptual article for **intraday event studies** explains POSIXct/minute-second windows, microstructure considerations, and references.
-- [ ] **METH-06**: A conceptual article for **synthetic control** explains the method, identifying assumptions, donor-pool/weighting mechanics, and references.
-- [ ] **METH-07**: A conceptual article for the **AI advisor** explains the two-layer design (deterministic offline diagnostics + grounded LLM advise), the grounding invariant, provider precedence, and usage.
-- [ ] **METH-08**: A conceptual article for **diagnostics & robustness** (normality, autocorrelation, pre-trend, bootstrap, power) explains each check, how to interpret it, and references.
+- [x] **METH-02**: A conceptual article for **return models** (market, Fama-French 3/5, Carhart, GARCH/DCC, rolling-window, BHAR, comparison-period-mean, volume/volatility) explains each model's estimation, assumptions, and when-to-use, and cites the primary academic references.
+- [x] **METH-03**: A conceptual article for **test statistics** (AR/CAR t-tests, Patell Z, BMP, Sign, Kolari-Pynnönen, Calendar-Time Portfolio, cross-sectional t) explains each statistic's null hypothesis, formula, assumptions, and references.
+- [x] **METH-04**: A conceptual article for **panel / DiD estimators** (TWFE, Sun-Abraham, Callaway-Sant'Anna, Borusyak-Jaravel-Spiess, de Chaisemartin-D'Haultfoeuille) explains staggered-treatment bias, each estimator's approach, and references.
+- [x] **METH-05**: A conceptual article for **intraday event studies** explains POSIXct/minute-second windows, microstructure considerations, and references.
+- [x] **METH-06**: A conceptual article for **synthetic control** explains the method, identifying assumptions, donor-pool/weighting mechanics, and references.
+- [x] **METH-07**: A conceptual article for the **AI advisor** explains the two-layer design (deterministic offline diagnostics + grounded LLM advise), the grounding invariant, provider precedence, and usage.
+- [x] **METH-08**: A conceptual article for **diagnostics & robustness** (normality, autocorrelation, pre-trend, bootstrap, power) explains each check, how to interpret it, and references.
 
 ### Rendered outputs (RENDER)
 
-- [ ] **RENDER-01**: Every Methods article executes real package code at build time and renders at least one results table (e.g. `knitr::kable`/printed result) and at least one plot for the method(s) it covers — no method is described without a demonstrated output.
-- [ ] **RENDER-02**: All article code executes fully offline — bundled data plus `set.seed()` for any stochastic step — with zero network calls at build time, so articles render reproducibly on a CI runner.
+- [x] **RENDER-01**: Every Methods article executes real package code at build time and renders at least one results table (e.g. `knitr::kable`/printed result) and at least one plot for the method(s) it covers — no method is described without a demonstrated output.
+- [x] **RENDER-02**: All article code executes fully offline — bundled data plus `set.seed()` for any stochastic step — with zero network calls at build time, so articles render reproducibly on a CI runner.
 - [x] **RENDER-03**: Interactive/HTML plot output (plotly) and MathJax formula rendering coexist on the same page without breaking layout or math (the known pkgdown plotly/MathJax conflict is handled).
 
 ### Worked-examples gallery (GALLERY)
@@ -79,15 +79,15 @@ Which phases cover which requirements. Populated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | METH-01 | Phase 13 | Complete |
-| METH-02 | Phase 15 | Pending |
-| METH-03 | Phase 15 | Pending |
-| METH-04 | Phase 15 | Pending |
-| METH-05 | Phase 15 | Pending |
-| METH-06 | Phase 15 | Pending |
-| METH-07 | Phase 15 | Pending |
-| METH-08 | Phase 15 | Pending |
-| RENDER-01 | Phase 15 | Pending |
-| RENDER-02 | Phase 15 | Pending |
+| METH-02 | Phase 15 | Complete |
+| METH-03 | Phase 15 | Complete |
+| METH-04 | Phase 15 | Complete |
+| METH-05 | Phase 15 | Complete |
+| METH-06 | Phase 15 | Complete |
+| METH-07 | Phase 15 | Complete |
+| METH-08 | Phase 15 | Complete |
+| RENDER-01 | Phase 15 | Complete |
+| RENDER-02 | Phase 15 | Complete |
 | RENDER-03 | Phase 13 | Complete |
 | GALLERY-01 | Phase 16 | Pending |
 | GALLERY-02 | Phase 16 | Pending |

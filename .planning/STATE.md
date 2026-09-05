@@ -4,18 +4,18 @@ milestone: v0.63.0
 milestone_name: Documentation Depth — Methods & Worked Examples
 current_phase: 15
 current_phase_name: Methods Articles + Rendered Outputs
-status: planning
-stopped_at: Phase 14 complete, ready to plan Phase 15
-last_updated: "2026-09-05T21:59:07.551Z"
-last_activity: 2026-09-05
-last_activity_desc: Phase 14 complete, transitioned to Phase 15
-state_head: 0286410762824ff03b882750bb275269e842643c
+status: executing
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-09-05T22:36:50.520Z"
+last_activity: 2026-09-06
+last_activity_desc: Phase 15 plan 01 complete — 7 Methods articles rendered + nav wired
+state_head: 87c70d311e5c5c013c443a805d0bf5f3a50b1910
 progress:
   total_phases: 6
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 33
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 4
+  percent: 44
 ---
 
 # Project State
@@ -30,9 +30,9 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 ## Current Position
 
 Phase: 15 — Methods Articles + Rendered Outputs
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-05 — Phase 14 complete, transitioned to Phase 15
+Plan: 15-01 complete (1/1)
+Status: Phase 15 execution complete
+Last activity: 2026-09-06 — 7 Methods articles authored, rendered offline, and wired into _pkgdown.yml Methods dropdown
 
 ## Milestone Roadmap (v0.63.0)
 
@@ -66,6 +66,7 @@ Coverage: 22/22 v0.63.0 requirements mapped, 0 unmapped.
 | Phase 11-curated-pkgdown-site-custom-theme-local-build P01 | 3777 | 3 tasks | 2 files |
 | Phase 13 P01 | 45 | 3 tasks | 6 files |
 | Phase 14-curated-per-domain-datasets P01 | 8 minutes | 3 tasks | 6 files |
+| Phase 15 P01 | 1 session | 8 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,8 @@ Recent decisions affecting current work:
 - [Phase 13]: plot_event_study() returns ggplot2 in current codebase; use plotly::ggplotly() to deliver interactive plotly figures in articles
 - [Phase 14]: Live Yahoo Finance fetch used for earnings_surprises (AAPL/MSFT/GOOGL Q1 2023); 6.0 KB bzip2 — well under 27 KB cap
 - [Phase 14]: DATA-SOURCES.md provenance registry created with dieselgate + earnings_surprises rows; excluded from CRAN tarball by pre-existing ^data-raw$ .Rbuildignore rule
+- [Phase 15]: DW located at R/diagnostics.R:56-61 — carries real Formula-verified provenance, not conceptual
+- [Phase 15]: tidy.EventStudyTask(task,type=...) used directly; broom tidy generic not re-exported by EventStudy
 
 ### Pending Todos
 
@@ -120,8 +123,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-05T21:48:31.940Z
-Stopped at: Phase 14 complete, ready to plan Phase 15
+Last session: 2026-09-05T22:36:20.276Z
+Stopped at: Completed 15-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

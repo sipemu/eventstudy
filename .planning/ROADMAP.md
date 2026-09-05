@@ -69,7 +69,7 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
 
 - [x] **Phase 13: Article Infrastructure & Conventions Gate** — `vignettes/articles/` (`.Rbuildignore`d same commit), shared `_setup.Rmd` (seed + `options`), co-located `references.bib`, `math-rendering: katex` (resolves the plotly/MathJax conflict), reusable 10-section article skeleton, Learn/Methods + Gallery nav slots wired, existing 18 CRAN vignettes left untouched, verified by a CI dry-run rendering a smoke-test formula + citation + plotly figure on one page (completed 2026-09-05)
 - [x] **Phase 14: Curated Per-Domain Datasets** — curated real datasets (dieselgate pattern) for the gallery domains, each with reproducible `data-raw/` provenance + `DATA-SOURCES.md`, `simulate_event_study()` preferred over scraped data, placed and sized (compressed documented `data()` `.rda` or `.Rbuildignore`d site-only `.rds`) so the CRAN tarball stays clean, placement recorded per dataset (completed 2026-09-05)
-- [ ] **Phase 15: Methods Articles + Rendered Outputs** — all 8 conceptual Methods articles (return models, test statistics, panel/DiD, intraday, synthetic control, AI advisor, diagnostics/robustness), each with formulas, assumptions, when-to-use, primary academic references, and at least one build-time-executed rendered table + plot, all offline/`set.seed`, formula-reviewed against primary literature + package source
+- [x] **Phase 15: Methods Articles + Rendered Outputs** — all 8 conceptual Methods articles (return models, test statistics, panel/DiD, intraday, synthetic control, AI advisor, diagnostics/robustness), each with formulas, assumptions, when-to-use, primary academic references, and at least one build-time-executed rendered table + plot, all offline/`set.seed`, formula-reviewed against primary literature + package source
 - [ ] **Phase 16: Worked-Examples Gallery + Build & Release Integrity** — pyfda-style gallery landing card index + ≥3 complete cross-domain worked examples (data → fit → statistics → plots → interpretation), each cross-linked to Methods articles and reference pages, closed out by a green `pkgdown::build_site()`, a green CI `pkgdown.yaml` deploy, and `R CMD check --as-cran` with no new NOTEs/WARNINGs and an unbloated tarball
 
 ## Phase Details
@@ -160,10 +160,12 @@ Plans:
   3. All article code runs fully offline — bundled/simulated data plus `set.seed()` for any stochastic step — with zero network calls, so building twice produces zero numeric diffs.
   4. Each article's key formulas are verified against the primary source paper AND the package source implementation (formula-review gate), so the package's own docs are not subtly wrong.
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 
 Plans:
-- [ ] 15-01-PLAN.md — 7 formula-bearing Methods articles (tracer: methods-return-models) + references.bib additions + _pkgdown.yml Methods-dropdown wiring
+
+- [x] 15-01-PLAN.md — 7 formula-bearing Methods articles (tracer: methods-return-models) + references.bib additions + _pkgdown.yml Methods-dropdown wiring
+
 **UI hint**: yes
 
 ### Phase 16: Worked-Examples Gallery + Build & Release Integrity
@@ -200,5 +202,5 @@ Plans:
 | 12. CI/CD Deploy + Repo Linkage + Release Integrity | v0.62.0 | 0/1 | Planned | - |
 | 13. Article Infrastructure & Conventions Gate | v0.63.0 | 1/1 | Complete    | 2026-09-05 |
 | 14. Curated Per-Domain Datasets | v0.63.0 | 1/1 | Complete    | 2026-09-05 |
-| 15. Methods Articles + Rendered Outputs | v0.63.0 | 0/? | Not started | - |
+| 15. Methods Articles + Rendered Outputs | v0.63.0 | 1/1 | In Progress|  |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 0/? | Not started | - |
