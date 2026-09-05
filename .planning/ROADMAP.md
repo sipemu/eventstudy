@@ -6,6 +6,7 @@
 - ✅ **v0.60.0 Grounded AI Advisor** — Phases 5-8 (shipped 2026-09-04)
 - ✅ **v0.61.0 Advisor Vignette + Dieselgate Walkthrough** — Phases 9-10 (shipped 2026-09-04)
 - 🚧 **v0.62.0 Documentation Site (pkgdown + CI/CD)** — Phases 11-12 (in progress)
+- 🚧 **v0.63.0 Documentation Depth — Methods & Worked Examples** — Phases 13-16 (in progress)
 
 ## Phases
 
@@ -62,6 +63,15 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
 - [x] **Phase 11: Curated pkgdown Site + Custom Theme (local build)** — `_pkgdown.yml` with grouped reference index, organized Articles nav over the 18 vignettes, README homepage, custom Bootstrap-5 theme, verified with a clean local `build_site()` (completed 2026-09-04)
 - [~] **Phase 12: CI/CD Deploy + Repo Linkage + Release Integrity** — r-lib `pkgdown.yaml` workflow deploying to gh-pages, DESCRIPTION URL / README badge / `.Rbuildignore`, network-safe article build, green Actions run, and a CRAN-clean 0.62.0 release (executed 2026-09-05, verification `human_needed`: all 8 reqs wired & verified in-repo; awaits operator: push→green Actions run, enable Pages, full-toolchain `R CMD check --as-cran` confirm)
 
+### 🚧 v0.63.0 Documentation Depth — Methods & Worked Examples (Phases 13-16)
+
+**Milestone Goal:** Transform the v0.62.0 pkgdown site from a grouped reference into a pyfda-caliber learning resource — a Learn/Methods track (one conceptual, formula-bearing, rendered article per method family), a cross-domain worked-examples gallery powered by curated real datasets, all pkgdown-only (`vignettes/articles/`, `.Rbuildignore`d) and rendered fully offline in the existing CI build with no CRAN/`R CMD check` regressions.
+
+- [ ] **Phase 13: Article Infrastructure & Conventions Gate** — `vignettes/articles/` (`.Rbuildignore`d same commit), shared `_setup.Rmd` (seed + `options`), co-located `references.bib`, `math-rendering: katex` (resolves the plotly/MathJax conflict), reusable 10-section article skeleton, Learn/Methods + Gallery nav slots wired, existing 18 CRAN vignettes left untouched, verified by a CI dry-run rendering a smoke-test formula + citation + plotly figure on one page
+- [ ] **Phase 14: Curated Per-Domain Datasets** — curated real datasets (dieselgate pattern) for the gallery domains, each with reproducible `data-raw/` provenance + `DATA-SOURCES.md`, `simulate_event_study()` preferred over scraped data, placed and sized (compressed documented `data()` `.rda` or `.Rbuildignore`d site-only `.rds`) so the CRAN tarball stays clean, placement recorded per dataset
+- [ ] **Phase 15: Methods Articles + Rendered Outputs** — all 8 conceptual Methods articles (return models, test statistics, panel/DiD, intraday, synthetic control, AI advisor, diagnostics/robustness), each with formulas, assumptions, when-to-use, primary academic references, and at least one build-time-executed rendered table + plot, all offline/`set.seed`, formula-reviewed against primary literature + package source
+- [ ] **Phase 16: Worked-Examples Gallery + Build & Release Integrity** — pyfda-style gallery landing card index + ≥3 complete cross-domain worked examples (data → fit → statistics → plots → interpretation), each cross-linked to Methods articles and reference pages, closed out by a green `pkgdown::build_site()`, a green CI `pkgdown.yaml` deploy, and `R CMD check --as-cran` with no new NOTEs/WARNINGs and an unbloated tarball
+
 ## Phase Details
 
 ### Phase 11: Curated pkgdown Site + Custom Theme (local build)
@@ -102,6 +112,66 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
 **Operator step**: Setting the GitHub repo "About → Website" field to the live site URL is a manual GitHub UI action — CI cannot set it. This is an operator task to perform after the first successful deploy, not an automated requirement.
 **UI hint**: no
 
+### Phase 13: Article Infrastructure & Conventions Gate
+
+**Goal**: Every documentation-integrity pitfall (determinism, math escaping, citation resolution, tarball exclusion, plotly/MathJax coexistence, content duplication) is prevented once — in a shared, reusable article skeleton and site config — before any content article is written, with the Learn/Methods track and Gallery visible in the navigation and the existing 18 CRAN vignettes untouched.
+**Depends on**: Phase 12 (a building, CI-deployed v0.62.0 pkgdown site config must exist)
+**Requirements**: METH-01, RENDER-03, DELIVERY-01, DELIVERY-02, DELIVERY-03
+**Success Criteria** (what must be TRUE):
+
+  1. A site visitor sees a dedicated "Learn / Methods" navigation section and a "Gallery" entry in the navbar (wired in both `navbar: structure:` and `navbar: components:`), coherent alongside — and not breaking — the existing Articles listing over the 18 vignettes or the grouped Reference index.
+  2. The new rich content lives under `vignettes/articles/` and `^vignettes/articles$` is in `.Rbuildignore` (added in the same commit that creates the directory) — so articles render on the site but are absent from the CRAN source tarball, and the 18 existing CRAN vignettes are byte-unchanged and still CRAN-shipped.
+  3. A CI dry-run renders one smoke-test article that shows a KaTeX-rendered formula, a resolved academic citation (from the co-located filename-only `references.bib`), and a plotly figure all on the same page with no broken layout, no raw `[@Key]`/`$LaTeX$`, and no plotly/MathJax JS conflict (`math-rendering: katex` set).
+  4. A reusable article skeleton (`_setup.Rmd` child with `set.seed`, `options(scipen, digits)`, knitr opts + the 10-section template) exists and is used by the smoke-test article, so downstream authors inherit determinism and structure by default.
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 14: Curated Per-Domain Datasets
+
+**Goal**: Every gallery domain example has a curated dataset whose provenance is reproducible, whose licensing posture is defensible, and whose placement keeps the CRAN source tarball clean — with the size/documentation discipline established on the first dataset, not deferred to pre-release cleanup.
+**Depends on**: Phase 13 (article infra + delivery conventions define where site-only data lives)
+**Requirements**: DATA-01, DATA-02
+**Success Criteria** (what must be TRUE):
+
+  1. Each gallery domain dataset has documented `data-raw/` provenance — a reproducible fetch/build script plus a frozen snapshot and a `DATA-SOURCES.md`/`license_note` — following the existing dieselgate pattern, with `simulate_event_study()` + `set.seed()` preferred over scraped data wherever it serves the example.
+  2. Each dataset is placed and sized to keep the CRAN tarball clean — either a compressed, documented `data()` dataset with an `.Rd` (`@format`/`@source`) shipped in the same commit as the `.rda`, or an `.Rbuildignore`d site-only `.rds` under `vignettes/articles/data/` — with the placement choice recorded per dataset and the `data/` size budget respected.
+  3. Each curated dataset drives a valid end-to-end event study (loads, fits, produces finite statistics) so it is proven usable by a gallery example before that example is authored.
+
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 15: Methods Articles + Rendered Outputs
+
+**Goal**: A reader can learn every EventStudy method family from a conceptual, formula-bearing article that not only explains the method (estimation/null, assumptions, when-to-use, primary references) but demonstrates it with real package code rendered at build time — no method described without a shown output, all reproducible offline.
+**Depends on**: Phase 13 (article skeleton + conventions); Phase 14 (datasets for rendered examples)
+**Requirements**: METH-02, METH-03, METH-04, METH-05, METH-06, METH-07, METH-08, RENDER-01, RENDER-02
+**Success Criteria** (what must be TRUE):
+
+  1. There is one conceptual article per method family — return models, test statistics, panel/DiD, intraday, synthetic control, AI advisor, and diagnostics/robustness (7 articles covering all 8 METH requirements) — each stating the method's estimation/null, assumptions, when-to-use guidance, and primary academic references.
+  2. Every Methods article executes real package code at build time and renders at least one results table (`knitr::kable`/printed result) and at least one plot for the method(s) it covers.
+  3. All article code runs fully offline — bundled/simulated data plus `set.seed()` for any stochastic step — with zero network calls, so building twice produces zero numeric diffs.
+  4. Each article's key formulas are verified against the primary source paper AND the package source implementation (formula-review gate), so the package's own docs are not subtly wrong.
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 16: Worked-Examples Gallery + Build & Release Integrity
+
+**Goal**: A cross-domain gallery of complete, rendered worked examples makes the package tangible end-to-end and connects example → concept → API, and the entire v0.63.0 documentation-depth addition ships proven clean: local build, CI deploy, and CRAN check all green.
+**Depends on**: Phase 15 (Methods articles to cross-link to); Phase 14 (datasets that power the examples)
+**Requirements**: GALLERY-01, GALLERY-02, GALLERY-03, BUILD-04, BUILD-05, BUILD-06
+**Success Criteria** (what must be TRUE):
+
+  1. A pyfda-style gallery landing page presents the cross-domain worked examples as a browsable card/thumbnail index with short descriptions, reachable from the navbar.
+  2. At least three complete end-to-end worked examples across distinct domains (e.g. earnings surprises, M&A announcements, regulatory/enforcement shocks) each render a full analysis: data → model fit → test statistics → plots → written interpretation.
+  3. Each gallery example cross-links to the relevant Methods articles and to the exported functions it uses (reference pages), so a reader can move example → concept → API.
+  4. `pkgdown::build_site()` completes locally with zero errors and zero new warnings (all Methods articles + gallery included), and the existing CI `pkgdown.yaml` builds the new articles offline and deploys them to GitHub Pages green with no CI changes beyond content/config.
+  5. `R CMD check --as-cran` shows no new NOTEs/WARNINGs versus the v0.62.0 baseline, the source tarball is not bloated by site-only content, and the existing testthat suite stays green.
+
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -118,3 +188,7 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
 | 10. Advisor Vignette + Offline-Safe Build + Docs + Release | v0.61.0 | 1/1 | Complete | 2026-09-04 |
 | 11. Curated pkgdown Site + Custom Theme (local build) | v0.62.0 | 1/1 | Complete    | 2026-09-04 |
 | 12. CI/CD Deploy + Repo Linkage + Release Integrity | v0.62.0 | 0/1 | Planned | - |
+| 13. Article Infrastructure & Conventions Gate | v0.63.0 | 0/? | Not started | - |
+| 14. Curated Per-Domain Datasets | v0.63.0 | 0/? | Not started | - |
+| 15. Methods Articles + Rendered Outputs | v0.63.0 | 0/? | Not started | - |
+| 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 0/? | Not started | - |

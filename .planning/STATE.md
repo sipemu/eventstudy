@@ -1,16 +1,19 @@
 ---
 gsd_state_version: 1.0
 milestone: v0.63.0
-milestone_name: Documentation Depth — Methods & Worked Examples
-status: planning
-last_updated: "2026-09-05T13:39:50.061Z"
+current_phase_name: Phase 13 — Article Infrastructure & Conventions Gate
+status: roadmap-complete
+stopped_at: roadmap created for v0.63.0 (Phases 13-16) (2026-09-05)
+last_updated: "2026-09-05T19:11:18.435Z"
 last_activity: 2026-09-05
+last_activity_desc: Roadmap created — v0.63.0 Phases 13-16
+state_head: df0fa8931e61dcd4851f2243b5536038e5183d08
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 0
+milestone_name: Documentation Depth — Methods & Worked Examples
 ---
 
 # Project State
@@ -20,21 +23,25 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI advisor cites only package-computed diagnostics, never fabricating a result. This milestone makes that legible via a curated docs site.
-**Current focus:** Phase 12 — CI/CD Deploy + Repo Linkage + Release Integrity
+**Current focus:** Phase 13 — Article Infrastructure & Conventions Gate
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 13 — Article Infrastructure & Conventions Gate (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-09-05 — Milestone v0.63.0 started
+Status: Roadmap complete (Phases 13-16); ready to plan Phase 13
+Last activity: 2026-09-05 — Roadmap created for v0.63.0
 
-## Milestone Roadmap (v0.62.0)
+## Milestone Roadmap (v0.63.0)
 
-- **Phase 11: Curated pkgdown Site + Custom Theme (local build)** — SITE-01..04, THEME-01, THEME-02, BUILD-01. Site builds cleanly locally: grouped reference, Articles nav over 18 vignettes, README homepage, custom Bootstrap-5 theme.
-- **Phase 12: CI/CD Deploy + Repo Linkage + Release Integrity** — CI-01..03, LINK-01..03, BUILD-02, BUILD-03. r-lib `pkgdown.yaml` deploys to gh-pages, DESCRIPTION URL / README badge / `.Rbuildignore`, network-safe article build, green Actions run, CRAN-clean 0.62.0 release.
+- **Phase 13: Article Infrastructure & Conventions Gate** — METH-01, RENDER-03, DELIVERY-01..03. `vignettes/articles/` (`.Rbuildignore`d same commit), `_setup.Rmd` (seed + options), co-located `references.bib`, `math-rendering: katex` (plotly/MathJax fix), reusable 10-section skeleton, Learn/Methods + Gallery nav slots, 18 CRAN vignettes untouched, CI dry-run smoke test.
+- **Phase 14: Curated Per-Domain Datasets** — DATA-01, DATA-02. Curated real datasets (dieselgate pattern) with reproducible `data-raw/` provenance + `DATA-SOURCES.md`, `simulate_event_study()` preferred, sized/placed to keep the CRAN tarball clean, placement recorded per dataset.
+- **Phase 15: Methods Articles + Rendered Outputs** — METH-02..08, RENDER-01, RENDER-02. All 8 method-family conceptual articles (formulas, assumptions, when-to-use, references) each with build-time rendered table + plot, fully offline/`set.seed`, formula-reviewed vs primary literature + package source.
+- **Phase 16: Worked-Examples Gallery + Build & Release Integrity** — GALLERY-01..03, BUILD-04..06. pyfda-style gallery card index + ≥3 cross-domain worked examples cross-linked to Methods/reference, green local build + CI deploy + `R CMD check --as-cran` (no new NOTEs/WARNINGs, unbloated tarball, suite green).
 
-Dependency order: Phase 11 (local build) → Phase 12 (CI deploy of that config + release).
+Dependency order: Phase 13 (infra gate) → Phase 14 (datasets) → Phase 15 (Methods articles, needs infra + data) → Phase 16 (gallery + final build/release gate, needs articles + data).
+
+Coverage: 22/22 v0.63.0 requirements mapped, 0 unmapped.
 
 ## Performance Metrics
 
@@ -105,8 +112,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-04T20:59:06.362Z
-Stopped at: Phase 11 complete, ready to plan Phase 12
+Last session: 2026-09-05T19:11:18.426Z
+Stopped at: context exhaustion at 75% (2026-09-05)
 Resume file: None
 
 ## Operator Next Steps

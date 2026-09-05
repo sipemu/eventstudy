@@ -78,34 +78,34 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| METH-01 | TBD | Pending |
-| METH-02 | TBD | Pending |
-| METH-03 | TBD | Pending |
-| METH-04 | TBD | Pending |
-| METH-05 | TBD | Pending |
-| METH-06 | TBD | Pending |
-| METH-07 | TBD | Pending |
-| METH-08 | TBD | Pending |
-| RENDER-01 | TBD | Pending |
-| RENDER-02 | TBD | Pending |
-| RENDER-03 | TBD | Pending |
-| GALLERY-01 | TBD | Pending |
-| GALLERY-02 | TBD | Pending |
-| GALLERY-03 | TBD | Pending |
-| DATA-01 | TBD | Pending |
-| DATA-02 | TBD | Pending |
-| DELIVERY-01 | TBD | Pending |
-| DELIVERY-02 | TBD | Pending |
-| DELIVERY-03 | TBD | Pending |
-| BUILD-04 | TBD | Pending |
-| BUILD-05 | TBD | Pending |
-| BUILD-06 | TBD | Pending |
+| METH-01 | Phase 13 | Pending |
+| METH-02 | Phase 15 | Pending |
+| METH-03 | Phase 15 | Pending |
+| METH-04 | Phase 15 | Pending |
+| METH-05 | Phase 15 | Pending |
+| METH-06 | Phase 15 | Pending |
+| METH-07 | Phase 15 | Pending |
+| METH-08 | Phase 15 | Pending |
+| RENDER-01 | Phase 15 | Pending |
+| RENDER-02 | Phase 15 | Pending |
+| RENDER-03 | Phase 13 | Pending |
+| GALLERY-01 | Phase 16 | Pending |
+| GALLERY-02 | Phase 16 | Pending |
+| GALLERY-03 | Phase 16 | Pending |
+| DATA-01 | Phase 14 | Pending |
+| DATA-02 | Phase 14 | Pending |
+| DELIVERY-01 | Phase 13 | Pending |
+| DELIVERY-02 | Phase 13 | Pending |
+| DELIVERY-03 | Phase 13 | Pending |
+| BUILD-04 | Phase 16 | Pending |
+| BUILD-05 | Phase 16 | Pending |
+| BUILD-06 | Phase 16 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 22 ⚠️
+- Mapped to phases: 22
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-09-05*
-*Last updated: 2026-09-05 after initial definition*
+*Last updated: 2026-09-05 after roadmap creation (Phases 13-16)*
