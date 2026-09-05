@@ -110,6 +110,7 @@ Carhart, M. M. (1997). On persistence in mutual fund performance.
 Useful links:
 \itemize{
   \item \url{https://github.com/sipemu/eventstudy}
+  \item \url{https://sipemu.github.io/eventstudy/}
   \item Report bugs at \url{https://github.com/sipemu/eventstudy/issues}
 }
 
