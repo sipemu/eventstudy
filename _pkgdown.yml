@@ -24,9 +24,6 @@ navbar:
     reference:
       text: "Reference"
       href: reference/index.html
-    articles:
-      text: "Articles"
-      href: articles/gallery.html
     methods:
       text: "Methods"
       menu:
