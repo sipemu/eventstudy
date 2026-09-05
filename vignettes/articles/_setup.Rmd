@@ -1,4 +1,4 @@
-```{r _setup, include=FALSE}
+```{r article-setup, include=FALSE}
 set.seed(42)
 options(scipen = 999, digits = 4)
 knitr::opts_chunk$set(
