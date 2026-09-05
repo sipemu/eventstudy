@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#dc3545"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#dc3545" text-anchor="middle">Power Analysis</text>
+  <line x1="40" y1="155" x2="320" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="40" y1="55" x2="40" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <text x="180" y="172" font-family="sans-serif" font-size="9" fill="#6c757d" text-anchor="middle">Sample Size (n)</text>
+  <text x="20" y="105" font-family="sans-serif" font-size="9" fill="#6c757d" text-anchor="middle" transform="rotate(-90,20,105)">Power</text>
+  <!-- 80% power reference line -->
+  <line x1="40" y1="87" x2="320" y2="87" stroke="#dee2e6" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="325" y="90" font-family="sans-serif" font-size="8" fill="#adb5bd">0.8</text>
+  <!-- Power curve -->
+  <path d="M50,150 Q80,145 110,135 Q140,120 170,100 Q200,80 230,72 Q260,67 290,64 Q305,63 315,62" stroke="#dc3545" stroke-width="2.5" fill="none"/>
+  <!-- Tick on x axis -->
+  <line x1="195" y1="152" x2="195" y2="158" stroke="#adb5bd" stroke-width="1.5"/>
+  <text x="195" y="168" font-family="sans-serif" font-size="8" fill="#6c757d" text-anchor="middle">n*</text>
+  <!-- Vertical to power line -->
+  <line x1="195" y1="87" x2="195" y2="102" stroke="#dc3545" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <circle cx="195" cy="100" r="4" fill="#dc3545"/>
+</svg>

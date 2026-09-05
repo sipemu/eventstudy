@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#6c757d"/>
+  <text x="180" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#6c757d" text-anchor="middle">Data Download</text>
+  <!-- Cloud shape -->
+  <path d="M100,95 Q90,75 105,65 Q115,52 135,58 Q145,45 165,48 Q185,42 195,58 Q215,55 220,72 Q235,72 235,88 Q235,100 220,100 L100,100 Q88,100 88,88 Q88,80 100,95 Z" fill="#fff" stroke="#6c757d" stroke-width="2"/>
+  <!-- Download arrow -->
+  <line x1="165" y1="105" x2="165" y2="140" stroke="#6c757d" stroke-width="2.5"/>
+  <polygon points="155,132 165,148 175,132" fill="#6c757d"/>
+  <!-- Table -->
+  <rect x="95" y="148" width="140" height="40" rx="3" fill="#fff" stroke="#6c757d" stroke-width="1.5"/>
+  <line x1="95" y1="160" x2="235" y2="160" stroke="#6c757d" stroke-width="1"/>
+  <line x1="95" y1="172" x2="235" y2="172" stroke="#6c757d" stroke-width="1"/>
+  <line x1="155" y1="148" x2="155" y2="188" stroke="#6c757d" stroke-width="1"/>
+  <text x="122" y="158" font-family="sans-serif" font-size="8" fill="#6c757d" text-anchor="middle">date</text>
+  <text x="197" y="158" font-family="sans-serif" font-size="8" fill="#6c757d" text-anchor="middle">close</text>
+  <text x="122" y="170" font-family="sans-serif" font-size="8" fill="#212529" text-anchor="middle">2015-09</text>
+  <text x="197" y="170" font-family="sans-serif" font-size="8" fill="#212529" text-anchor="middle">48.32</text>
+</svg>
