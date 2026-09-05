@@ -1,19 +1,21 @@
 ---
 gsd_state_version: 1.0
 milestone: v0.63.0
+milestone_name: Documentation Depth — Methods & Worked Examples
+current_phase: 13
 current_phase_name: Phase 13 — Article Infrastructure & Conventions Gate
 status: roadmap-complete
-stopped_at: roadmap created for v0.63.0 (Phases 13-16) (2026-09-05)
-last_updated: "2026-09-05T19:11:18.435Z"
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-09-05T20:55:44.072Z"
 last_activity: 2026-09-05
 last_activity_desc: Roadmap created — v0.63.0 Phases 13-16
-state_head: df0fa8931e61dcd4851f2243b5536038e5183d08
+state_head: 9c84b60ff0b0f465c42938e68f4752e080d75409
 progress:
-  total_phases: 4
+  total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-milestone_name: Documentation Depth — Methods & Worked Examples
+  total_plans: 1
+  completed_plans: 1
+  percent: 0
 ---
 
 # Project State
@@ -62,6 +64,7 @@ Coverage: 22/22 v0.63.0 requirements mapped, 0 unmapped.
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 11-curated-pkgdown-site-custom-theme-local-build P01 | 3777 | 3 tasks | 2 files |
+| Phase 13 P01 | 45 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -79,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 11]: pkgdown 2.2.0: all .Rd files (even non-exported) must be in reference: groups or an internal section to avoid missing-topic errors
 - [Phase 11]: has_keyword('datasets') resolves dieselgate bundled dataset inclusion without export() requirement
 - [Phase 11]: DESCRIPTION URL field for pkgdown site URL deferred to Phase 12 LINK-01 (scope guard)
+- [Phase 13]: template.math-rendering: katex must go under template: in _pkgdown.yml (pkgdown 2.2.0 config_math_rendering reads from template.math-rendering)
+- [Phase 13]: plot_event_study() returns ggplot2 in current codebase; use plotly::ggplotly() to deliver interactive plotly figures in articles
 
 ### Pending Todos
 
@@ -112,8 +117,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-05T19:11:18.426Z
-Stopped at: context exhaustion at 75% (2026-09-05)
+Last session: 2026-09-05T20:55:44.058Z
+Stopped at: Completed 13-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

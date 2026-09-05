@@ -10,7 +10,7 @@ Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All 
 
 ### Learn / Methods articles (METH)
 
-- [ ] **METH-01**: A "Learn / Methods" section is exposed in the pkgdown navigation (a dedicated navbar menu or Articles group) that collects the conceptual method articles as a coherent learning track.
+- [x] **METH-01**: A "Learn / Methods" section is exposed in the pkgdown navigation (a dedicated navbar menu or Articles group) that collects the conceptual method articles as a coherent learning track.
 - [ ] **METH-02**: A conceptual article for **return models** (market, Fama-French 3/5, Carhart, GARCH/DCC, rolling-window, BHAR, comparison-period-mean, volume/volatility) explains each model's estimation, assumptions, and when-to-use, and cites the primary academic references.
 - [ ] **METH-03**: A conceptual article for **test statistics** (AR/CAR t-tests, Patell Z, BMP, Sign, Kolari-Pynnönen, Calendar-Time Portfolio, cross-sectional t) explains each statistic's null hypothesis, formula, assumptions, and references.
 - [ ] **METH-04**: A conceptual article for **panel / DiD estimators** (TWFE, Sun-Abraham, Callaway-Sant'Anna, Borusyak-Jaravel-Spiess, de Chaisemartin-D'Haultfoeuille) explains staggered-treatment bias, each estimator's approach, and references.
@@ -23,7 +23,7 @@ Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All 
 
 - [ ] **RENDER-01**: Every Methods article executes real package code at build time and renders at least one results table (e.g. `knitr::kable`/printed result) and at least one plot for the method(s) it covers — no method is described without a demonstrated output.
 - [ ] **RENDER-02**: All article code executes fully offline — bundled data plus `set.seed()` for any stochastic step — with zero network calls at build time, so articles render reproducibly on a CI runner.
-- [ ] **RENDER-03**: Interactive/HTML plot output (plotly) and MathJax formula rendering coexist on the same page without breaking layout or math (the known pkgdown plotly/MathJax conflict is handled).
+- [x] **RENDER-03**: Interactive/HTML plot output (plotly) and MathJax formula rendering coexist on the same page without breaking layout or math (the known pkgdown plotly/MathJax conflict is handled).
 
 ### Worked-examples gallery (GALLERY)
 
@@ -38,9 +38,9 @@ Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All 
 
 ### pkgdown-only delivery (DELIVERY)
 
-- [ ] **DELIVERY-01**: The new Methods articles and gallery live under `vignettes/articles/` and are `.Rbuildignore`d so they render on the site but are absent from the CRAN source tarball.
-- [ ] **DELIVERY-02**: `_pkgdown.yml` navigation integrates the new Learn/Methods track and the Gallery alongside the existing Articles without breaking the existing 18-vignette navigation or the grouped Reference index.
-- [ ] **DELIVERY-03**: The existing 18 CRAN-shipped vignettes remain unchanged and CRAN-shipped — the new rich content is strictly additive.
+- [x] **DELIVERY-01**: The new Methods articles and gallery live under `vignettes/articles/` and are `.Rbuildignore`d so they render on the site but are absent from the CRAN source tarball.
+- [x] **DELIVERY-02**: `_pkgdown.yml` navigation integrates the new Learn/Methods track and the Gallery alongside the existing Articles without breaking the existing 18-vignette navigation or the grouped Reference index.
+- [x] **DELIVERY-03**: The existing 18 CRAN-shipped vignettes remain unchanged and CRAN-shipped — the new rich content is strictly additive.
 
 ### Build & release integrity (BUILD)
 
@@ -78,7 +78,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| METH-01 | Phase 13 | Pending |
+| METH-01 | Phase 13 | Complete |
 | METH-02 | Phase 15 | Pending |
 | METH-03 | Phase 15 | Pending |
 | METH-04 | Phase 15 | Pending |
@@ -88,20 +88,21 @@ Which phases cover which requirements. Populated during roadmap creation.
 | METH-08 | Phase 15 | Pending |
 | RENDER-01 | Phase 15 | Pending |
 | RENDER-02 | Phase 15 | Pending |
-| RENDER-03 | Phase 13 | Pending |
+| RENDER-03 | Phase 13 | Complete |
 | GALLERY-01 | Phase 16 | Pending |
 | GALLERY-02 | Phase 16 | Pending |
 | GALLERY-03 | Phase 16 | Pending |
 | DATA-01 | Phase 14 | Pending |
 | DATA-02 | Phase 14 | Pending |
-| DELIVERY-01 | Phase 13 | Pending |
-| DELIVERY-02 | Phase 13 | Pending |
-| DELIVERY-03 | Phase 13 | Pending |
+| DELIVERY-01 | Phase 13 | Complete |
+| DELIVERY-02 | Phase 13 | Complete |
+| DELIVERY-03 | Phase 13 | Complete |
 | BUILD-04 | Phase 16 | Pending |
 | BUILD-05 | Phase 16 | Pending |
 | BUILD-06 | Phase 16 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 22 total
 - Mapped to phases: 22
 - Unmapped: 0

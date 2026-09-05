@@ -124,9 +124,9 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
   3. A CI dry-run renders one smoke-test article that shows a KaTeX-rendered formula, a resolved academic citation (from the co-located filename-only `references.bib`), and a plotly figure all on the same page with no broken layout, no raw `[@Key]`/`$LaTeX$`, and no plotly/MathJax JS conflict (`math-rendering: katex` set).
   4. A reusable article skeleton (`_setup.Rmd` child with `set.seed`, `options(scipen, digits)`, knitr opts + the 10-section template) exists and is used by the smoke-test article, so downstream authors inherit determinism and structure by default.
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 
-- [ ] 13-01-PLAN.md — shared article infra (`_setup.Rmd`, `references.bib`, 10-section skeleton), `_pkgdown.yml` `math-rendering: katex` + Methods/Gallery navbar, `.Rbuildignore` `^vignettes/articles$`, verified end-to-end by a dieselgate smoke-test article
+- [x] 13-01-PLAN.md — shared article infra (`_setup.Rmd`, `references.bib`, 10-section skeleton), `_pkgdown.yml` `math-rendering: katex` + Methods/Gallery navbar, `.Rbuildignore` `^vignettes/articles$`, verified end-to-end by a dieselgate smoke-test article
 
 **UI hint**: yes
 
@@ -191,7 +191,7 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
 | 10. Advisor Vignette + Offline-Safe Build + Docs + Release | v0.61.0 | 1/1 | Complete | 2026-09-04 |
 | 11. Curated pkgdown Site + Custom Theme (local build) | v0.62.0 | 1/1 | Complete    | 2026-09-04 |
 | 12. CI/CD Deploy + Repo Linkage + Release Integrity | v0.62.0 | 0/1 | Planned | - |
-| 13. Article Infrastructure & Conventions Gate | v0.63.0 | 0/? | Not started | - |
+| 13. Article Infrastructure & Conventions Gate | v0.63.0 | 1/1 | In Progress|  |
 | 14. Curated Per-Domain Datasets | v0.63.0 | 0/? | Not started | - |
 | 15. Methods Articles + Rendered Outputs | v0.63.0 | 0/? | Not started | - |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 0/? | Not started | - |
