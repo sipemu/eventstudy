@@ -27,8 +27,22 @@ navbar:
     methods:
       text: "Methods"
       menu:
-        - text: "Overview"
+        - text: "Methods Overview"
           href: articles/smoke-test.html
+        - text: "Return Models"
+          href: articles/methods-return-models.html
+        - text: "Test Statistics"
+          href: articles/methods-test-statistics.html
+        - text: "Panel / DiD"
+          href: articles/methods-panel-did.html
+        - text: "Intraday"
+          href: articles/methods-intraday.html
+        - text: "Synthetic Control"
+          href: articles/methods-synthetic-control.html
+        - text: "AI Advisor"
+          href: articles/methods-ai-advisor.html
+        - text: "Diagnostics & Robustness"
+          href: articles/methods-diagnostics.html
     gallery:
       text: "Gallery"
       href: articles/gallery.html
