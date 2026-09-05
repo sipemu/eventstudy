@@ -95,7 +95,7 @@ the network.
 
 ````{r llm-layer, eval=FALSE}
 # Requires an API key + network; disabled at build time.
-narrative <- advise_llm(task, provider = "anthropic")
+narrative <- es_advise(diag, task_type = "interpret", provider = provider("anthropic"))
 narrative
 #> The market-model fit is strong (median R^2 ~ 0.6). Residual normality is not
 #> rejected for most firms, so the parametric CAR t-test is appropriate; the
