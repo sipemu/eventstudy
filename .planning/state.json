@@ -1,7 +1,7 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v0.62.0 — Documentation Site (pkgdown + CI/CD)",
+  "milestone": "v0.63.0 — Documentation Depth — Methods & Worked Examples",
   "phases": [
     {
       "number": "1",
@@ -62,12 +62,32 @@
       "number": "12",
       "name": "CI/CD Deploy + Repo Linkage + Release Integrity",
       "status": "pending"
+    },
+    {
+      "number": "13",
+      "name": "Article Infrastructure & Conventions Gate",
+      "status": "complete"
+    },
+    {
+      "number": "14",
+      "name": "Curated Per-Domain Datasets",
+      "status": "pending"
+    },
+    {
+      "number": "15",
+      "name": "Methods Articles + Rendered Outputs",
+      "status": "pending"
+    },
+    {
+      "number": "16",
+      "name": "Worked-Examples Gallery + Build & Release Integrity",
+      "status": "pending"
     }
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 12 of 2 · 50% · executing"
+    "label": "Advance to the next step (plan phase 14)",
+    "reason": "Phase 14 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-05T10:52:59.373Z"
+  "updated_at": "2026-09-05T21:04:38.686Z"
 }

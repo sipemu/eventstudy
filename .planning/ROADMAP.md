@@ -67,7 +67,7 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
 
 **Milestone Goal:** Transform the v0.62.0 pkgdown site from a grouped reference into a pyfda-caliber learning resource — a Learn/Methods track (one conceptual, formula-bearing, rendered article per method family), a cross-domain worked-examples gallery powered by curated real datasets, all pkgdown-only (`vignettes/articles/`, `.Rbuildignore`d) and rendered fully offline in the existing CI build with no CRAN/`R CMD check` regressions.
 
-- [ ] **Phase 13: Article Infrastructure & Conventions Gate** — `vignettes/articles/` (`.Rbuildignore`d same commit), shared `_setup.Rmd` (seed + `options`), co-located `references.bib`, `math-rendering: katex` (resolves the plotly/MathJax conflict), reusable 10-section article skeleton, Learn/Methods + Gallery nav slots wired, existing 18 CRAN vignettes left untouched, verified by a CI dry-run rendering a smoke-test formula + citation + plotly figure on one page
+- [x] **Phase 13: Article Infrastructure & Conventions Gate** — `vignettes/articles/` (`.Rbuildignore`d same commit), shared `_setup.Rmd` (seed + `options`), co-located `references.bib`, `math-rendering: katex` (resolves the plotly/MathJax conflict), reusable 10-section article skeleton, Learn/Methods + Gallery nav slots wired, existing 18 CRAN vignettes left untouched, verified by a CI dry-run rendering a smoke-test formula + citation + plotly figure on one page (completed 2026-09-05)
 - [ ] **Phase 14: Curated Per-Domain Datasets** — curated real datasets (dieselgate pattern) for the gallery domains, each with reproducible `data-raw/` provenance + `DATA-SOURCES.md`, `simulate_event_study()` preferred over scraped data, placed and sized (compressed documented `data()` `.rda` or `.Rbuildignore`d site-only `.rds`) so the CRAN tarball stays clean, placement recorded per dataset
 - [ ] **Phase 15: Methods Articles + Rendered Outputs** — all 8 conceptual Methods articles (return models, test statistics, panel/DiD, intraday, synthetic control, AI advisor, diagnostics/robustness), each with formulas, assumptions, when-to-use, primary academic references, and at least one build-time-executed rendered table + plot, all offline/`set.seed`, formula-reviewed against primary literature + package source
 - [ ] **Phase 16: Worked-Examples Gallery + Build & Release Integrity** — pyfda-style gallery landing card index + ≥3 complete cross-domain worked examples (data → fit → statistics → plots → interpretation), each cross-linked to Methods articles and reference pages, closed out by a green `pkgdown::build_site()`, a green CI `pkgdown.yaml` deploy, and `R CMD check --as-cran` with no new NOTEs/WARNINGs and an unbloated tarball
@@ -191,7 +191,7 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
 | 10. Advisor Vignette + Offline-Safe Build + Docs + Release | v0.61.0 | 1/1 | Complete | 2026-09-04 |
 | 11. Curated pkgdown Site + Custom Theme (local build) | v0.62.0 | 1/1 | Complete    | 2026-09-04 |
 | 12. CI/CD Deploy + Repo Linkage + Release Integrity | v0.62.0 | 0/1 | Planned | - |
-| 13. Article Infrastructure & Conventions Gate | v0.63.0 | 1/1 | In Progress|  |
+| 13. Article Infrastructure & Conventions Gate | v0.63.0 | 1/1 | Complete    | 2026-09-05 |
 | 14. Curated Per-Domain Datasets | v0.63.0 | 0/? | Not started | - |
 | 15. Methods Articles + Rendered Outputs | v0.63.0 | 0/? | Not started | - |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 0/? | Not started | - |

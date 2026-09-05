@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v0.63.0
 milestone_name: Documentation Depth — Methods & Worked Examples
-current_phase: 13
-current_phase_name: Phase 13 — Article Infrastructure & Conventions Gate
-status: roadmap-complete
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-09-05T20:55:44.072Z"
+current_phase: 14
+current_phase_name: Curated Per-Domain Datasets
+status: planning
+stopped_at: Phase 13 complete, ready to plan Phase 14
+last_updated: "2026-09-05T21:04:38.669Z"
 last_activity: 2026-09-05
-last_activity_desc: Roadmap created — v0.63.0 Phases 13-16
-state_head: 9c84b60ff0b0f465c42938e68f4752e080d75409
+last_activity_desc: Phase 13 complete, transitioned to Phase 14
+state_head: 921448401fbdbe69cd7e49d20b8a49e86015d455
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 1
   completed_plans: 1
-  percent: 0
+  percent: 17
 ---
 
 # Project State
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: 13 — Article Infrastructure & Conventions Gate (not started)
-Plan: —
-Status: Roadmap complete (Phases 13-16); ready to plan Phase 13
-Last activity: 2026-09-05 — Roadmap created for v0.63.0
+Phase: 14 — Curated Per-Domain Datasets
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-05 — Phase 13 complete, transitioned to Phase 14
 
 ## Milestone Roadmap (v0.63.0)
 
@@ -118,7 +118,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-09-05T20:55:44.058Z
-Stopped at: Completed 13-01-PLAN.md
+Stopped at: Phase 13 complete, ready to plan Phase 14
 Resume file: None
 
 ## Operator Next Steps
