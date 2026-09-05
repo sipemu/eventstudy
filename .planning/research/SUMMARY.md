@@ -1,214 +1,160 @@
 # Project Research Summary
 
-**Project:** EventStudy v0.60.0 "Grounded AI Advisor"
-**Domain:** LLM-agnostic AI advisor layer over a mature CRAN R package (financial event study analysis)
-**Researched:** 2026-09-02
+**Project:** EventStudy — v0.63.0 Documentation Depth: Methods & Worked Examples
+**Domain:** pkgdown rich-article documentation for a mature CRAN R statistics package
+**Researched:** 2026-09-05
 **Confidence:** HIGH
-
----
 
 ## Executive Summary
 
-EventStudy v0.60.0 adds a two-layer grounded AI advisor to the existing statistical pipeline: an offline `es_diagnostics()` layer (pure base R, zero dependencies) that harvests all package-computed signals into a serializable named list, followed by a grounded `es_advise()` layer (LLM provider abstraction via httr2/jsonlite in Suggests) that interprets results with runtime enforcement that every evidence citation comes from the diagnostics. The key design decision is that **the two-layer split is non-negotiable** — the offline diagnostics must work completely independently so it never requires an API key or network access, and the advising must be purely interpretive (never generative of new numbers).
+This milestone is a **documentation-depth** effort, not a code change: transform the existing v0.62.0 pkgdown site from a grouped reference into a pyfda-caliber learning resource (reference standard: `https://sipemu.github.io/pyfda/`). The delivery mechanism is well-established and low-risk — pkgdown treats `vignettes/articles/*.Rmd` as site-only content that is auto-`.Rbuildignore`d by `usethis::use_article()`, rendered by the existing CI workflow, and excluded from the CRAN tarball. Every capability needed (math rendering, tables, static/interactive plots, citations, build caching) is achievable with **zero new DESCRIPTION dependencies** — the entire toolchain (`knitr`, `DT`, `ggplot2`, `plotly`, pandoc-citeproc) is already present. The one hard config decision is settled: use `template.math-rendering: katex`, not `mathjax`, because MathJax has a documented JS conflict with plotly (pkgdown#1338) and both formulas and plots must coexist on the same page.
 
-The tech stack is minimal and established (httr2, jsonlite, R6 for provider strategy pattern) with a critical provider-layer fork decision to settle in planning: whether to use ellmer (tidyverse provider-agnostic client, recommended) or hand-roll with thin httr2 wrappers (more control, less dependency overhead). Both paths keep the offline layer dependency-free and deliver identical R6 seams for custom providers and identical grounding enforcement.
+The recommended approach is a **template-first, foundation-gated build**: bake determinism (`set.seed`, `options(scipen, digits)`), the math-delimiter convention (`$...$`/`$$...$$` only), the shared `references.bib` co-located in `vignettes/articles/`, and the ggplot2-vs-plotly policy into a single reusable article skeleton *before* any content is written. Then produce the two highest-value Methods articles (Return Models, Test Statistics) and one proof-of-concept gallery example (Dieselgate, using already-bundled data), then fan out to the remaining method families and the cross-domain gallery. Content must be genuinely additive — the 18 existing CRAN vignettes cover the *API*; these articles add *formulas, assumptions, when-to-use guidance, academic references, and rendered outputs* that the vignettes deliberately lack (all existing vignettes are `eval=FALSE`).
 
-The core risks are CRAN compliance (network policy, no phoning home, Suggests-guard discipline), grounding violation (the LLM must never cite diagnostics values that don't exist; runtime guards are mandatory, not optional), and statistical correctness (the assumption→test mapping knowledge base must encode the causal relationships documented in Brown & Warner / MacKinlay / BMP literature, testable via decision tables, not prose). These risks are not novel to the project but are load-bearing: the v0.50.0 robustness contract established "never silently wrong," and v0.60.0 must extend that promise into the advisory layer.
-
----
+The dominant risks are all documentation-integrity, not build-mechanics: **subtly wrong statistical formulas** in a statistics package's own docs (mitigate with a per-article formula-correctness review against primary literature + package source + a `test-formula-consistency.R` net), **non-deterministic rendered output** polluting CI diffs and undermining gallery credibility (mitigate with disciplined seeding, verified by building twice and diffing), **silent citation/math-escaping failures** that build clean but render raw `[@Key]`/`$LaTeX$` in the browser (mitigate with a `grep '\[@'` CI gate and filename-only bib paths), and **CRAN cleanliness regressions** from datasets (`data/` is NOT excluded by `.Rbuildignore`; enforce a <=600 KB total budget, mandatory `man/` docs, and legally-redistributable-only sources). Data licensing is the sharpest strategic call: prefer `simulate_event_study()` + `set.seed()` over Yahoo Finance scraping — six new scraped datasets turn one defensible illustrative sample (dieselgate) into a systematic redistribution posture.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The stack is deliberately minimal. **httr2** (v1.2.2) is the modern R HTTP client standard (successor to httr) with built-in retry/timeout/error handling — essential for LLM API calls with graceful degradation. **jsonlite** (≥1.8.0) serializes diagnostics to JSON and parses structured LLM responses with predictable nested-list output. **R6** (already in codebase) provides the only polymorphism mechanism via the `AdvisorProvider` base class and concrete provider subclasses (AnthropicProvider, OpenAICompatibleProvider, CustomProvider) — consistent with how the pipeline uses R6 for models and test statistics.
-
-**Critical fork decision for planning:** Provider dispatch can be implemented via **ellmer** (Posit's tidyverse-native LLM client, handles Anthropic/OpenAI normalization, available on CRAN, more dependencies, less control) or a **thin httr2 layer** (full control, minimal Suggests deps, hand-written provider schema normalization). Both keep the offline `es_diagnostics()` dependency-free. **Recommendation:** default to ellmer for the two built-in providers and keep a lightweight `CustomProvider` R6 hook for users with unsupported endpoints — if ellmer's dependency tree proves too heavy for CRAN comfort during planning, fall back to thin httr2 (implementation is contained, no architectural change needed).
+The stack is essentially "use what's already there, plus one YAML line." No new Imports, no new Suggests. All rich-docs capabilities are delivered by pkgdown's articles mechanism and packages already in DESCRIPTION. See STACK.md for the full `_pkgdown.yml` delta.
 
 **Core technologies:**
-- **httr2 (1.2.2)** — Modern HTTP client with `req_retry()`, `req_timeout()`, `req_error()` — the standard for CRAN-safe LLM integrations
-- **jsonlite (≥1.8.0)** — JSON serialization/parsing; produces predictable nested lists from diagnostics
-- **R6** — Provider abstraction hierarchy (existing pattern in codebase; no new language)
-- **httptest2 (1.2.0)** — Mock HTTP fixtures for offline testing; prevents network calls in CI/CRAN
+- **`vignettes/articles/` + pkgdown 2.2.1**: site-only rendered articles — auto-`.Rbuildignore`d by `usethis::use_article()`, excluded from tarball, zero `R CMD check` impact
+- **`template.math-rendering: katex`** (one YAML line): high-fidelity formula rendering — KaTeX, NOT MathJax, because MathJax conflicts with plotly.js (pkgdown#1338); KaTeX has no such conflict
+- **`knitr::kable()` (primary) + `DT::datatable()` (interactive)**: tables — both already in Suggests; no `gt`/`kableExtra` (unnecessary new deps)
+- **`ggplot2` (Methods articles) + `plotly` (gallery)**: plots — both already in Imports; static for exposition, interactive only where hover is the pedagogical point
+- **pandoc-citeproc + single shared `references.bib`**: academic citations — bundled with Pandoc (installed by CI's `setup-pandoc@v2`); no R citation package needed
+
+**Explicitly rejected:** MathJax (plotly conflict), `gt`/`kableExtra`/`flextable` (needless deps), `Rdpack` (wrong tool for Rmd prose), multiple `.bib` files (pandoc-citeproc error 83), Quarto/`.qmd` (rough pkgdown edges + CI install burden), `pkgdown.offline`/`targets` (unnecessary), caching plotly widget chunks (widgets don't serialize).
 
 ### Expected Features
 
-**Must have (table stakes) for v0.60.0:**
-- `es_diagnostics(task)` — offline, zero-dep diagnostics dict harvesting model fit, autocorrelation, normality tests, CAR/CAAR stats, v0.50.0 contract signals. Why essential: the grounding invariant depends on this.
-- `es_advise(diagnostics, provider=, model=, task_type=)` — grounded Advice S3 object with structured schema, runtime guard, graceful degradation. Why essential: the user-facing feature.
-- **Grounding runtime guard** — post-generation validator rejecting evidence citing keys absent from diagnostics dict. Why essential: runtime enforcement is testable and deterministic.
-- **Provider abstraction** — OpenAI-compatible + Anthropic + custom hook. Why essential: vendor lock-in blocks adoption of non-Anthropic users.
-- **Rule-based test-statistic recommendation** — deterministic mapping (Shapiro-Wilk p < 0.05 → non-parametric; overlap → KP correction). Why essential: answers most common question offline.
-- `es_flag_issues(task)` — pure rule-based interpreter of v0.50.0 contract signals. Why essential: makes the robustness contract human-readable.
-- **CRAN-clean packaging** — zero new Imports, all AI deps in Suggests, @examplesIf guards, skip_on_cran tests, static fixtures. Why essential: CRAN gate.
-- **Agent Skill SKILL.md** — Claude Code orchestration (diagnose → advise → re-run loop). Why essential: stated in PROJECT.md.
+The bar is set by pyfda's method pages (conceptual intro -> key formula in LaTeX -> assumption checklist -> when-to-use decision table -> rendered worked example -> comparative output -> references -> see-also). FEATURES.md defines a reusable 10-section article template that every Methods article must follow (1,500–2,500 words; the assumption checklist, when-to-use table, and comparative output are non-negotiable).
 
-**Should have (v0.60.x):**
-- Report-writing assistance (mode="report_section")
-- Design discussion mode (mode="discuss")
-- `es_analyze()` convenience wrapper
+**Must have (table stakes):**
+- Rendered code output on every article (existing vignettes are all `eval=FALSE` — this is the core differentiator vs. status quo)
+- LaTeX formula rendering for every method family (an econometrics package without math reads as incomplete)
+- When-to-use decision table per method family + academic references per method
+- A distinct "Learn/Methods" navbar section (separate from the existing "Articles" vignette listing)
+- Worked examples with real/realistic data + a gallery landing page with domain cards
 
-**Defer (v1.0+ / Advisor Pro):**
-- Retrieval-grounded corpus RAG
-- Multi-turn conversation state
+**Should have (differentiators):**
+- pyfda-style method-page template with assumption-checklist callout boxes
+- Cross-method comparison tables within a family (Patell vs BMP vs KP vs Sign in one view)
+- AI-Advisor tie-in callout in every method page (connects learning content to the package's unique feature)
+- Cross-domain gallery (8 proposed examples across scandal, earnings, monetary policy, FDA, GDPR, dividends, intraday, synthetic control)
+- Offline-safe build with bundled/simulated datasets
+
+**Defer (v0.64.0):** printed-PDF export of articles, Shiny interactivity (requires a server; incompatible with static pkgdown), cross-article search index (pkgdown already provides site search).
 
 ### Architecture Approach
 
-Two read-only layers above the existing pipeline: (1) **Offline diagnostics** (`es_diagnostics.R`, pure base R) harvests task$data_tbl, model$statistics, model$is_fitted into serializable named list. (2) **Grounded advise** (`es_advise.R`, httr2+jsonlite in Suggests) resolves provider (3-tier: arg → env → default), builds prompts (KB + flat diagnostics schema), calls provider, parses response, runs grounding guard, returns Advice S3.
+The integration is purely additive and file-driven: create `vignettes/articles/` (with a shared `_setup.Rmd` child doc for seed + knitr opts), register new articles in `_pkgdown.yml`'s `articles:` section, and extend the navbar in BOTH `navbar: structure:` AND `navbar: components:` (a new `learn:` + `gallery:` slot). The existing `.github/workflows/pkgdown.yaml` needs **no changes** — it discovers `vignettes/articles/` automatically; only `Config/Needs/website: pkgdown` is added to DESCRIPTION. pkgdown auto-unnests `vignettes/articles/foo.Rmd` -> `articles/foo.html` (content name is the bare filename). See ARCHITECTURE.md for the exact navbar YAML, the full new/modified-file table, and the 6-phase build order (Scaffold -> Datasets -> Methods articles -> Gallery -> navbar wiring -> verification).
 
 **Major components:**
-1. **`es_diagnostics()`** — Zero-dep diagnostics harvester; serializable named list; 100% testable offline
-2. **`AdvisorProvider` R6 hierarchy** — Base class with abstract `call()` method; AnthropicProvider (Messages API), OpenAICompatibleProvider (/chat/completions), CustomProvider (user function)
-3. **Grounding guard** — `.validate_grounding()` flattens diagnostics, checks evidence keys exist, drops/errors on violations
-4. **Knowledge base** — Curated assumption→test decision table (structured R data, testable, cited)
-5. **Advice S3 object** — Structured return; interpretation, recommendations, caveats, grounding_status; print method
+1. **Article infrastructure** — `vignettes/articles/` dir + `_setup.Rmd` shared child + `references.bib` + `.Rbuildignore` entry (`^vignettes/articles$`); the reusable article template lives here
+2. **Bundled/simulated datasets** — dieselgate precedent: `data-raw/*.R` provenance + `data/*.rda` (if shipped) + `R/data-*.R` roxygen doc; or `.rds` in `vignettes/articles/data/` for purely site-only data
+3. **Methods articles (x7)** — return models, test statistics, panel DiD, intraday, synthetic control, diagnostics, AI advisor — each conceptual, formula-bearing, rendered
+4. **Gallery articles (x3–8)** — end-to-end worked examples + a card-index landing page
+5. **`_pkgdown.yml` navbar/articles wiring** — learn + gallery slots, math-rendering config
 
-### Critical Pitfalls (Top 5)
+### Critical Pitfalls
 
-1. **CRAN network policy violations** — httr2 calls without guards in examples/tests/vignettes break R CMD check. Prevention: @examplesIf, skip_on_cran(), vignette eval guards.
-
-2. **API key leakage via fixtures** — vcr cassettes/mocks capture Authorization headers. Prevention: static hand-crafted mocks, filter_sensitive_data config, pre-commit grep.
-
-3. **Grounding guard bypass** — LLM rephrases numbers ("approximately 2%"). Prevention: Runtime R function checks evidence keys; rejects on value tolerance violation.
-
-4. **Statistical KB errors** — Wrong assumption→test mapping (Patell under non-normality). Prevention: Testable decision table; regression tests verify each rule against literature.
-
-5. **Suggests-guard mistakes** — require() instead of requireNamespace(), missing pkg::fun() notation. Prevention: Strict import discipline from Phase 1.
-
----
+1. **Subtly wrong statistical formulas** — a statistics package's own docs are held to a higher bar; a wrong DoF correction or omitted covariance term actively misleads researchers who cite it. *Avoid:* per-article formula review against the PRIMARY paper (Patell 1976, not MacKinlay 1997) AND the package source (`R/*_test_statistics.R`); add `tests/testthat/test-formula-consistency.R` asserting package output == hand-computed formula to 4 decimals.
+2. **Non-deterministic rendered output** — `bootstrap_test()`/`simulate_event_study()`/GARCH without seeding produce different HTML every build, polluting `gh-pages` diffs and destroying gallery credibility. *Avoid:* `set.seed()` in every stochastic chunk + `options(scipen=999, digits=4)` in setup; verify by building twice and diffing `docs/articles/` (zero numeric diffs is the bar).
+3. **Silent citation/math-escaping failures** — clean build, but the browser shows raw `[@MacKinlay1997]` or raw `$LaTeX$`. *Avoid:* co-locate `references.bib` in `vignettes/articles/` with a filename-only path; use only `$...$`/`$$...$$` delimiters; add a `grep -r '\[@' docs/articles/` CI gate that must return empty.
+4. **CRAN cleanliness regressions from datasets** — `.Rbuildignore` does NOT exclude `data/`; undocumented `.rda` = CRAN-blocking WARNING; oversized `data/` = installed-size NOTE. *Avoid:* <=120 KB/dataset, <=600 KB `data/` total; mandatory `man/` doc (`@format`/`@source`) created in the same commit as the `.rda`; add `^vignettes/articles$` to `.Rbuildignore` in the commit that CREATES the directory.
+5. **Data-redistribution legal risk** — Yahoo Finance ToS prohibits redistribution; six scraped datasets escalate one illustrative sample into a systematic collection. *Avoid:* prefer `simulate_event_study()` + `set.seed()` (zero licensing risk, offline-safe, reproducible); reuse bundled `dieselgate` where possible; if scraping is unavoidable, cap scope and add a `meta$license_note` + `data-raw/DATA-SOURCES.md`.
+6. **plotly page-weight / silent blank-figure failures + long CI build time** — 13+ articles x multiple plotly widgets = tens of MB JS; GARCH fits + big bootstraps blow past a reasonable CI budget. *Avoid:* ggplot2 static for Methods articles, one plotly max per gallery article (never `ggplotly()` as a drop-in, never `saveWidget(selfcontained=TRUE)`); cap `n_boot=99`/`n_sim=100` in articles, cache GARCH fits as `.rds`; 60 s/article render budget, <15 min total CI.
 
 ## Implications for Roadmap
 
-Research suggests **4-phase structure** driven by dependency ordering and risk isolation.
+Based on research, the suggested phase structure closely follows the ARCHITECTURE.md build order and the FEATURES.md MVP tiers. The critical dependency is: **infrastructure (template + determinism + citation + math conventions) must be locked before any content**, because 8 of 12 pitfalls are prevented once-and-for-all in the template, and re-discovering them per-article is the primary failure mode.
 
-### Phase 1: Offline Diagnostics + Provider Abstraction Foundation
+### Phase 1: Article Infrastructure & Conventions (gate)
+**Rationale:** Every downstream pitfall (determinism, math escaping, citation resolution, tarball exclusion, plotly policy, content-duplication) is cheapest to prevent in the shared template before content exists. This is the highest-leverage phase.
+**Delivers:** `vignettes/articles/` + `^vignettes/articles$` in `.Rbuildignore` (same commit) - `_setup.Rmd` (seed + `options` + knitr opts) - `references.bib` (co-located, filename-only path) - `math-rendering: katex` in `_pkgdown.yml` - reusable 10-section article skeleton - `Config/Needs/website: pkgdown` in DESCRIPTION - a smoke-test formula + citation verified to render in a CI dry-run - one-paragraph content brief per planned article.
+**Addresses:** LaTeX rendering, reusable template, Learn navbar section (table stakes).
+**Avoids:** Pitfalls 1–2 (determinism), 3 (escaping/citations), 5 (tarball exclusion #8), and 11 (content briefs prevent duplication).
 
-**Rationale:** Offline layer is zero-dep grounding foundation; provider R6 hierarchy testable in isolation; establishes CRAN-safe infrastructure.
+### Phase 2: Curated Datasets
+**Rationale:** Gallery articles depend on data; get the size budget, licensing posture, and `man/` documentation discipline right on the FIRST dataset, not as a pre-CRAN cleanup.
+**Delivers:** Per-dataset `data-raw/*.R` provenance (with `meta$license_note`) + `data-raw/DATA-SOURCES.md` - bundled `data/*.rda` (or `.rds` in `vignettes/articles/data/` for site-only) + `R/data-*.R` roxygen - `simulate_event_study()`-based datasets preferred over scraped data.
+**Uses:** dieselgate precedent (STACK/ARCHITECTURE); `simulate_event_study()` (FEATURES data-strategy Tier 2).
+**Avoids:** Pitfalls 3 (tarball bloat/installed-size NOTE), 4 (redistribution), 9 (undocumented dataset WARNING).
 
-**Delivers:** es_diagnostics() exported; R6 provider hierarchy; unit tests (no network); Suggests-guard patterns established.
+### Phase 3: Core Methods Articles + Proof-of-Concept Gallery
+**Rationale:** Return Models and Test Statistics are the highest-traffic concepts with the most unique formula content; G-1 Dieselgate uses already-bundled data and proves the gallery format end to end.
+**Delivers:** Return Models Methods article - Test Statistics Methods article (both rendered, formula-reviewed) - G-1 Dieselgate gallery example.
+**Implements:** Methods articles + gallery components; `test-formula-consistency.R` begun.
+**Avoids:** Pitfall 7 (formula correctness — review gate per article), 6 (plotly page-weight — static-first), 10 (`stopifnot()` output assertions per chunk).
 
-**Addresses:** es_diagnostics, provider abstraction, CRAN compliance
-**Avoids:** CRAN network policy, key leakage, guard mistakes
-**Research flags:** None — offline-only, standard patterns
+### Phase 4: Remaining Method Families + Core Gallery
+**Rationale:** Diagnostics (advisor tie-in is the unique value-add), Panel DiD (rendered event-time plot is the visual centerpiece), and Synthetic Control (gap plot + placebo) round out the high-value method pages; the differentiation-heavy gallery examples (FOMC/KP, GDPR/Callaway-Sant'Anna) showcase capabilities no competitor documents.
+**Delivers:** Diagnostics, Panel DiD, Synthetic Control Methods articles - G-8 (synthetic control, reuses dieselgate), G-3 (FOMC/KP), G-5 (GDPR staggered panel) gallery examples.
+**Avoids:** Pitfalls 7 (formula review continues), 12 (render-budget + caching for GARCH/heavy models).
 
----
-
-### Phase 2: Knowledge Base + Grounding Guard
-
-**Rationale:** Grounding invariant is load-bearing; must be deterministic and independently testable before any LLM involvement.
-
-**Delivers:** assumption_test_map (structured tibble + citations); `.validate_grounding()` function; 15+ decision-table tests; mock LLM rejection tests.
-
-**Addresses:** Rule-based recommendations, grounding guard, es_flag_issues
-**Avoids:** KB statistical errors, grounding bypass
-**Research flags:** **Needs validation** — Cross-check assumption→test mapping against Brown & Warner (1985), MacKinlay (1997), BMP (1991), KP (2010/2011). Recommend literature-review sub-task.
-
----
-
-### Phase 3: Provider Layer HTTP Integration + Test Harness
-
-**Rationale:** Once diagnostics and guard solid, integrate HTTP; tested entirely with httptest2 mocks (no real keys/calls in CI).
-
-**Delivers:** AnthropicProvider + OpenAICompatibleProvider complete; req_timeout/req_retry logic; static mocks; defensive parsing; timeout/rate-limit tests.
-
-**Addresses:** Provider implementations, graceful degradation, key safety
-**Avoids:** Key leakage, flaky tests, provider drift, injection attacks
-**Research flags:** **Provider fork decision** — ellmer vs. thin httr2. Recommend 1–2 hour spike at Phase 3 start.
-
----
-
-### Phase 4: Advise + Grounding Integration + Agent Skill
-
-**Rationale:** Integrate all layers; write Agent Skill orchestrating full loop. Last phase because depends on everything prior.
-
-**Delivers:** es_advise() complete; Advice S3 object; es_flag_issues(); Agent Skill SKILL.md + references; integration + smoke tests.
-
-**Addresses:** es_advise, Advice schema, Agent Skill, all task_type variants
-**Avoids:** All prior pitfalls mitigated
-**Research flags:** None — integration only
-
----
+### Phase 5: Complete Gallery, Minor Articles & Integration
+**Rationale:** Intraday + AI Advisor articles are shorter/lower-traffic; the remaining gallery examples exercise the last untested surfaces; navbar wiring and the card-index landing page make the section discoverable; the canary test locks the whole thing.
+**Delivers:** Intraday + AI Advisor Methods articles - G-2/G-4/G-6/G-7 gallery examples - gallery landing card index - full `_pkgdown.yml` navbar wiring (learn + gallery slots in BOTH structure and components) - `tests/testthat/test-article-outputs.R` canary - final `R CMD check --as-cran` (0 new NOTEs/WARNINGs) + `pkgdown::build_site_github_pages()` + CI deploy verification.
+**Avoids:** Pitfall 2 (navbar structure+components both updated), 8 (final tarball check), 10 (canary test).
 
 ### Phase Ordering Rationale
 
-- **Offline first** — No external dependencies; forms grounding foundation
-- **Guards second** — Safety invariant; independently testable; regression-heavy
-- **HTTP third** — Integrates after foundation solid; mocked entirely
-- **Integration last** — Each dependency verified; straightforward
-
-Operationalizes dependency inversion: higher-level features depend on lower-level abstractions that are independently testable.
+- **Infrastructure-first is non-negotiable:** the research is emphatic that 8 of 12 pitfalls are template-level and re-discovering them per-article is the dominant failure mode — so conventions gate content.
+- **Datasets before gallery:** gallery articles have a hard data dependency; the size/licensing/documentation discipline must be established on dataset #1 (ARCHITECTURE build order Phase B; PITFALLS 3/4/9 all say "at creation time, not cleanup").
+- **Highest-value content first:** FEATURES MVP tiers put Return Models + Test Statistics + G-1 in P1 because they carry the most unique formula content and G-1 needs no new data.
+- **Method families are independent:** Methods articles can be written in any order (ARCHITECTURE Phase C), so phases 3–5 group by value, not dependency.
+- **Navbar + canary last:** navbar wiring needs the content to exist to link to; the canary test locks all rendered outputs against future API drift (PITFALLS 10).
 
 ### Research Flags
 
-**Needs deeper research:**
-- **Phase 2:** KB correctness — Verify assumption→test mappings against primary literature
-- **Phase 3:** Provider fork (ellmer vs. thin httr2) — Prototype spike needed
+Phases likely needing deeper research during planning:
+- **Phase 2 (Datasets):** dataset-source licensing decisions per gallery domain are consequential and case-specific — the `simulate` vs. scrape call, and the exact size budget per dataset, warrant a focused planning pass (FEATURES data-strategy table + PITFALLS 4 are the inputs).
+- **Phase 3–4 (Methods articles, formula content):** each formula must be verified against the PRIMARY paper AND the package source implementation — this is per-article research, not skippable; the formula-review gate is a merge blocker.
 
-**Standard patterns (skip research):**
-- **Phase 1:** Mirrors existing diagnostics.R, contract.R patterns
-- **Phase 4:** All components independently tested
-
----
+Phases with standard patterns (skip research-phase):
+- **Phase 1 (Infrastructure):** pkgdown articles mechanism, math-rendering config, `.Rbuildignore`, citation setup are all well-documented and confirmed against official sources + the existing dieselgate/CI precedent.
+- **Phase 5 (navbar/integration):** pure `_pkgdown.yml` wiring and CI verification against a known-good v0.62.0 workflow.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| **Stack** | HIGH | httr2 1.2.2, jsonlite, R6 verified on CRAN; provider schema from official APIs; fork is planning decision |
-| **Features** | HIGH | Aligns with PROJECT.md intent; assumption→test table verified against literature |
-| **Architecture** | HIGH | Two-layer pattern from pyfda/fdars; confirmed against codebase R6 conventions |
-| **Pitfalls** | HIGH | CRAN policy verifiable; HTTP patterns from rOpenSci; statistical risks from event-study literature |
+| Stack | MEDIUM | pkgdown behavior verified against official docs; plotly/MathJax conflict verified against pkgdown#1338; CSL `resource_files:` and single-`.bib` quirks verified against community docs but not first-hand in this repo |
+| Features | HIGH | pyfda reference standard analyzed in detail; existing-vignette complement map built from direct inspection; competitor analysis grounded |
+| Architecture | HIGH | pkgdown mechanics confirmed against official source + usethis source code; dieselgate precedent + CI workflow inspected directly in-repo |
+| Pitfalls | HIGH | Every pitfall grounded in direct inspection of `.github/workflows/pkgdown.yaml`, DESCRIPTION, `.Rbuildignore`, `data-raw/dieselgate.R`, and the 19 existing vignettes |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-1. **Provider fork decision** — Spike at Phase 3 start to prototype both implementations
-2. **KB completeness** — Cross-check against Brown & Warner Table III, BMP Table I, KP 2010 Table 2
-3. **Report-writing scope** — Verify generate_report() optional advice param integration
-4. **Vignette strategy** — Defer to v0.60.1 or pre-build static HTML
-5. **Offline rule-based path** — Verify identical results to KB decision table
-
----
+- **CSL `resource_files:` and single-`.bib` behavior (MEDIUM):** the pkgdown quirk requiring `.csl` in `resource_files:` and forbidding multiple `.bib` files is community-documented, not verified in this repo — validate in the Phase 1 CI dry-run (build the smoke-test article and confirm citations render).
+- **Math delimiter portability across pandoc versions (MEDIUM):** local RStudio pandoc vs. CI `setup-pandoc@v2` may differ; PITFALLS 5 recommends verifying `pandoc --version` parity — confirm in the Phase 1 dry-run rather than after content exists.
+- **Dataset placement decision per gallery example (MEDIUM):** `data()` dataset vs. site-only `.rds` in `vignettes/articles/data/` is decided per dataset against the size budget — resolve during Phase 2 planning using the ARCHITECTURE decision framework.
+- **CI build-time headroom (LOW):** the 5–8 min -> 25–40 min estimate is a projection; the concrete GARCH/bootstrap caching strategy (PITFALLS 12) should be validated empirically in Phase 4 when the heavy articles land.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-
-- **CRAN Repository Policy** — Network access, user consent, no phoning home
-- **httr2 (CRAN)** — v1.2.2, retry/timeout/error API; documentation at https://httr2.r-lib.org/
-- **Anthropic Messages API** — Structured output via tool_use; https://docs.anthropic.com/
-- **OpenAI API** — Structured output via response_format.type="json_schema"
-- **EventStudy codebase** — R/contract.R, R/diagnostics.R, R/models.R; R6 patterns, precedence models
+- Direct in-repo inspection — `.github/workflows/pkgdown.yaml`, `DESCRIPTION`, `.Rbuildignore`, `_pkgdown.yml`, `data-raw/dieselgate.R`, `data/dieselgate.rda`, 19 vignette files, `R/single_event_test_statistics.R`, `R/multi_event_test_statistics.R` (ARCHITECTURE, PITFALLS)
+- usethis `use_article()` source — confirms `vignettes/articles/` + exact `.Rbuildignore` entry (ARCHITECTURE)
+- r-pkgs.org (Wickham) — data placement, `Config/Needs/website`, articles-vs-vignettes (ARCHITECTURE)
+- pyfda reference site (`sipemu.github.io/pyfda`) — method-page template standard, analyzed in detail (FEATURES)
 
 ### Secondary (MEDIUM confidence)
+- pkgdown official docs — `build_articles` reference, customise article, 2.1.0 release blog, NEWS (v2.2.1) (STACK, ARCHITECTURE)
+- pkgdown#1338 — documented plotly + MathJax JS conflict (STACK)
+- svPkgdown bibliography example — `resource_files:` CSL trick (STACK)
+- Primary econometrics literature for formula content — Patell (1976), BMP (1991), Fama-French (1993), Kolari-Pynnonen (2010), Abadie-Diamond-Hainmueller (2010), Miller (2023), Callaway-Sant'Anna (2021) (FEATURES)
+- `eventstudies` CRAN package — accepted pattern for bundled simulated event-study data (FEATURES)
 
-- **HTTP Testing in R** (rOpenSci) — vcr, httptest2, secret redaction, CRAN policy
-- **R Packages (2e)** — Suggests/Imports, requireNamespace, skip_if_not_installed patterns
-- **fdars Python package** (PyPI) — Two-layer diagnostic+advise pattern precedent
-
-### Tertiary (PRIMARY LITERATURE, HIGH academic confidence)
-
-- Brown & Warner (1985) — Foundation for normality tests, parametric choice
-- MacKinlay (1997) — Comprehensive test statistic selection framework
-- Patell (1976) — Patell Z test, homoskedasticity assumption
-- BMP (1991) — BMP test under event-induced variance
-- Kolari & Pynnönen (2010/2011) — Cross-correlation corrections, CAR window overlap
+### Tertiary (LOW confidence)
+- CI build-time growth projection (5–8 -> 25–40 min) — estimate pending empirical validation in Phase 4 (PITFALLS)
+- Data-source licensing terms (Yahoo Finance ToS, Ken French library, FRBSF USMPD) — as stated by sources; verify per-jurisdiction before bundling any scraped data (FEATURES, PITFALLS)
 
 ---
-
-## Cross-Cutting Throughlines
-
-Three design decisions recur throughout all research and must be locked:
-
-1. **Two-layer split is non-negotiable:** `es_diagnostics()` works offline (zero new hard deps); `es_advise()` purely interprets from diagnostics (never generates new numbers). Ensures API key never required for core functionality.
-
-2. **Grounding enforced at runtime, not just in prompts:** System prompt instruction insufficient. `.validate_grounding()` must be deterministic R function checking every evidence entry exists in actual diagnostics dict. Testable, verifiable.
-
-3. **CRAN network policy enforced from Phase 1:** Every import guard, skip_on_cran(), mock fixture in place before any HTTP code written. Prevents failure mode where local tests pass but CRAN check fails.
-
----
-
-*Research completed: 2026-09-02*
-*Synthesized by: gsd-synthesizer agent*
-*Ready for roadmap planning: YES*
+*Research completed: 2026-09-05*
+*Ready for roadmap: yes*

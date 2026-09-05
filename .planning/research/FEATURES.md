@@ -1,14 +1,37 @@
 # Feature Research
 
-**Domain:** Grounded AI Advisor for a CRAN R statistical package (financial event study analysis)
-**Researched:** 2026-09-02
-**Confidence:** MEDIUM (statistical grounding mapping HIGH; LLM advisor patterns MEDIUM; SKILL.md anatomy HIGH; CRAN policy HIGH)
+**Domain:** Documentation depth for a financial event-study R package (pkgdown-only Methods articles + worked-examples gallery)
+**Researched:** 2026-09-05
+**Confidence:** HIGH
 
 ---
 
-## Background: The Advisor Pattern
+## Context: What Already Exists
 
-The advisor follows the two-layer pattern from the fdars/pyfda project (github.com/sipemu/pyfda): a deterministic, offline `build_diagnostics` layer that harvests package-computed values, plus a grounded `advise()` layer that passes those values to an LLM and forbids the LLM from introducing numbers not present in the diagnostics. The hard invariant — "interpret only what was computed, never fabricate" — is the statistical analog of the v0.50.0 robustness contract's "never silently wrong."
+The 18 existing CRAN vignettes are concise how-to guides with `eval = FALSE` code and no rendered outputs. They answer "how do I call this function?" They do not answer "what is this method, when should I use it, how does it behave on real data, and what does the output look like?" The v0.63.0 articles are additive and pkgdown-only — they must complement, not duplicate, the existing 18.
+
+**Existing vignette coverage (complement-not-duplicate map):**
+
+| Existing Vignette | What It Covers | What a Methods Article Adds |
+|---|---|---|
+| `introduction.Rmd` | Pipeline API walkthrough, Dieselgate setup (eval=FALSE) | Rendered pipeline output; statistical foundations of the event-study framework |
+| `factor-models-bhar.Rmd` | API for FF3/FF5/Carhart/GARCH/BHAR, factor table setup | Formulas for each model, estimation assumptions, when-to-use decision tree, rendered CAR comparison across models |
+| `time-varying-models.Rmd` | RollingWindow + GARCH API | GARCH(p,q) / DCC-GARCH math, volatility-clustering intuition, rendered sigma-over-time plots |
+| `custom-models.Rmd` | How to subclass ModelBase | Nothing — this is an extension guide, not a method page |
+| `custom-test-statistics.Rmd` | How to subclass TestStatisticBase | Nothing — extension guide |
+| `diagnostics-validation.Rmd` | API for validate_task/model_diagnostics/pretrend_test | What each diagnostic detects statistically; rendered residual plots; decision rules |
+| `inference-robustness.Rmd` | HAC, KP-test, bootstrap, p-adjustment API | HAC/Newey-West theory; KP correction math; rendered bootstrap CI bands |
+| `panel-event-study.Rmd` | TWFE setup, Miller (2023) data structure | Rendered event-time plots; pre-trend test output; TWFE bias illustration |
+| `modern-did-estimators.Rmd` | Sun-Abraham / CS / BJS / de CH API | Heterogeneous-effects theory; rendered group x time estimates; comparison across estimators |
+| `intraday-event-study.Rmd` | POSIXct setup, nonparametric test API | Microstructure contamination; VWAP benchmark; rendered 5-min CAR plot |
+| `synthetic-control.Rmd` | SyntheticControlTask API, placebo | Abadie (2010) theory; rendered gap plot with placebo p-values |
+| `result-extraction.Rmd` | tidy/export/LaTeX API | Nothing — output guide, not a method page |
+| `cross-sectional-analysis.Rmd` | cross_sectional_regression API | Fama-MacBeth structure; rendered coefficient table with CARs on firm chars |
+| `simulation-power-analysis.Rmd` | simulate_event_study API | Power curves rendered; how event-window length affects Type-I error |
+| `volume-volatility-event-study.Rmd` | VolumeModel/VolatilityModel API | Rendered volume-AR and vol-AR plots; interpretation |
+| `ai-advisor.Rmd` | es_diagnostics + es_advise walkthrough with Dieselgate | Nothing — walkthrough, not a method page |
+| `data-download.Rmd` | download_stock_data/factor_data API | Nothing — utility vignette |
+| `automated-reports.Rmd` | generate_report API | Nothing — utility vignette |
 
 ---
 
@@ -16,237 +39,428 @@ The advisor follows the two-layer pattern from the fdars/pyfda project (github.c
 
 ### Table Stakes (Users Expect These)
 
-| Feature | Why Expected | Complexity | Depends On | Notes |
-|---------|--------------|------------|------------|-------|
-| **`es_diagnostics(task)` — offline diagnostics dict** | Every grounded advisor needs a deterministic, serializable feature layer that works with no API key. Users expect diagnostics to be runnable independently. | MEDIUM | `diagnostics.R` (model_diagnostics, pretrend_test), v0.50.0 contract signals (is_fitted, NA counts, zero-variance flags), `single_event_test_statistics.R`, `multi_event_test_statistics.R` | Pure base R; zero new hard deps. Returns a named list: model fit stats, per-event is_fitted/NA/zero-var flags, Shapiro-Wilk p per firm, DW stat, Ljung-Box p, acf1, sigma, r2, pre-trend t/p, CAR/CAAR + p-values, n_events, cross-sectional dispersion (IQR of CARs), event-window overlap count. |
-| **`es_advise(diag, ...)` — grounded Advice object** | Users bringing an LLM to a stats package expect a structured, trustworthy return — not a raw chat response. The Advice schema is the contract. | HIGH | `es_diagnostics()` (must run first), httr2 + jsonlite (Suggests), provider abstraction | Schema fields listed in "Advice Schema" section below. LLM receives only the diagnostics dict as grounding context; runtime guard rejects any evidence field citing values absent from it. |
-| **Grounding runtime guard** | Without this, the "grounded" promise is just a system prompt clause. Users and maintainers need testable enforcement. | MEDIUM | `es_advise()`, Advice schema | Implemented as a post-generation validator: each `evidence` string is checked against the diagnostics keys; any recommendation citing a value not in the dict is dropped with a warning, not silently returned. Covered by regression tests. |
-| **LLM-agnostic provider abstraction** | Researchers use many providers; hard-coding Anthropic would exclude OpenAI/Ollama users and create a single-vendor dependency. | MEDIUM | httr2, jsonlite (both Suggests) | Three-tier precedence: function arg `provider=` → env var `EVENTSTUDY_LLM_PROVIDER` + `EVENTSTUDY_LLM_MODEL` → package default (anthropic/claude-sonnet-4-5). Two code paths: OpenAI-compatible endpoint (covers OpenAI, Ollama, LM Studio, any OpenAI-compatible gateway) + native Anthropic Messages API. Custom-provider hook for anything else: `register_es_provider(name, call_fn)`. |
-| **Advice type: result interpretation** | Users want help reading their CAR/CAAR and p-values in plain language before deciding what to do next. | LOW | Diagnostics dict (car, caar, p_value columns, n_events, significance threshold) | LLM prompt includes: event window, CAR magnitude, significance, n_events. Output: interpretation field of Advice. Must not state a CAR value not present in diagnostics. |
-| **Advice type: test statistic recommendation** | The test-statistic choice is the most common source of mis-specification in event studies; users actively seek guidance on which test to run. | MEDIUM | Diagnostics (shapiro_p, DW, cross-sectional dispersion, n_events, event-window overlap count) | Grounding mapping is fully deterministic — see "Assumption-to-Test Mapping" below. The LLM recommendation is grounded by passing these values; the rule-based mapping also produces a deterministic recommendation that can be used without any LLM call. |
-| **Advice type: model and window recommendation** | Model choice (Market vs FF3 vs Carhart vs GARCH) and window length are the second most common specification questions. | MEDIUM | Diagnostics (r2, sigma, acf1, DW, Ljung-Box p, is_fitted flags, estimation window length, event window length) | Model recommendation: low r2 + high sigma → suggest adding factor data (FF3/Carhart); autocorrelation (DW < 1.5 or Ljung-Box p < 0.05) → GARCH or Rolling-Window; very short windows → warn on Patell correction validity. |
-| **Advice type: robustness-issue flagging from v0.50.0 contract** | The degenerate-input contract surfaces `is_fitted=FALSE`, NA counts, and zero-variance/insufficient-obs flags — users need to understand what these mean and what to do. | LOW | v0.50.0 contract signals: `is_fitted`, `zero_var_flag`, `insufficient_obs_flag`, NA count per event | This advice type requires no LLM call — it is a pure rule-based interpreter over the contract state. Should be available even in offline mode. Produces a flagged_issues field alongside the LLM Advice. |
-| **API key safety** | Users expect that their API key is never logged, bundled, or committed. | LOW | `es_advise()`, provider abstraction | Key comes only from the user's environment (`Sys.getenv`). Never passed through to any log, warning message, or cat() call. No key stored in any R6 object field that serializes. CRAN-mandatory. |
-| **CRAN-clean packaging** | Package must pass R CMD check with zero new NOTEs/WARNINGs. All AI/HTTP deps stay in Suggests. | MEDIUM | httr2, jsonlite, httptest2 or vcr (all Suggests) | Offline `es_diagnostics()` must add zero hard dependencies. `es_advise()` guards every httr2/jsonlite call with `requireNamespace(..., quietly=TRUE)` and stops with an informative message. Tests use record/replay (httptest2 or vcr cassettes) so CRAN check never hits the network. |
-| **Graceful degradation on API failure** | Network calls fail. Users expect a warning, not a crash, when the API is down or rate-limited. | LOW | httr2 retry/backoff via `req_retry()`, `req_timeout()` | `es_advise()` wraps `httr2::req_perform()` in `tryCatch`; on failure returns `NULL` with one `warning()` naming the error. Retry: `req_retry(max_tries=3, backoff=~2^.x)`. Timeout: `req_timeout(30)`. |
+Features that must be present for the docs to feel thorough rather than auto-generated.
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Rendered code output on every article | Without actual output, readers cannot verify the code does what is claimed | MEDIUM | Requires bundled offline data + `set.seed`; existing vignettes are all `eval=FALSE` |
+| LaTeX / MathJax formula rendering for every method | An econometrics package without math in its docs feels incomplete to an academic audience | LOW | pkgdown supports `math-rendering: mathjax` in `_pkgdown.yml`; only requires YAML change + proper `$$` syntax |
+| When-to-use decision guidance per method family | Users need to know which model/test to choose; currently no guidance | MEDIUM | One comparison table + decision tree per family; minimal prose, high value |
+| Academic references per method | Users cite these methods in papers; they need the original papers | LOW | Static bibliography section; known papers (Patell 1976, BMP 1991, Fama-French 1993/1996, etc.) |
+| A Learn/Methods section in the navbar | Without a Methods section, the site reads as a reference-only API dump | LOW | `_pkgdown.yml` navbar + `articles:` grouping; already partially done in the current grouping |
+| Worked examples with real (or realistic) data | Code-only articles without output look like untested stubs | HIGH | Requires bundled datasets or fully offline simulated data with `set.seed` |
+| Gallery landing page with domain cards | Users arrive at the examples section and need quick orientation | MEDIUM | `gallery.Rmd` exists; needs to become a real visual index (card layout + domain labels) |
 
 ### Differentiators (Competitive Advantage)
 
-| Feature | Value Proposition | Complexity | Depends On | Notes |
-|---------|-------------------|------------|------------|-------|
-| **Deterministic rule-based fallback for all advice types** | Unlike pure LLM advisors, every recommendation has a code-verifiable grounding rule. Users can audit why a recommendation was made without an API key. | MEDIUM | Diagnostics dict, assumption→test mapping table | The rule-based engine produces the same structured Advice fields as the LLM path, using if/else logic over diagnostic thresholds. The LLM path enriches the narrative; the rule-based path provides the structure. Both paths populate the same Advice schema — the LLM is additive, not load-bearing. |
-| **Assumption-to-test mapping grounding knowledge base** | A curated reference map of statistical assumptions → test statistic choices (with academic citations: MacKinlay 1997, Brown & Warner 1985, Patell 1976, BMP 1991, Kolari-Pynnönen 2010, 2011) injected as grounded system context. This is domain knowledge not present in general LLMs. | LOW | Grounding knowledge base file (R/sysdata or inst/advisordb/) | Injected into the LLM system prompt as a structured citation block. Never injected as raw text — structured as JSON array of {assumption, test_statistic, citation, when_to_use}. |
-| **Design discussion mode** | Lets users ask open questions like "should I use a rolling window or OLS?" and get a grounded conversational response that cites the current diagnostic values. | MEDIUM | `es_advise(mode="discuss", question=...)`, diagnostics dict | Multi-turn is out of scope; single-turn question + diagnostics context. The LLM must cite only values from the diagnostics in any quantitative claim. |
-| **Report-writing assistance** | Drafts a grounded methods section and results paragraph for `generate_report()`, citing actual computed values. Saves researchers an hour of writing. | MEDIUM | `es_advise(mode="report_section", section=...)`, diagnostics dict, `report.R` `generate_report()` | Returns a character vector of ready-to-paste RMarkdown. Each quantitative claim in the narrative is verified by the grounding guard to cite a diagnostics value. The draft includes CAR/CAAR, significance, model name, test statistic name, estimation window, event window — all from diagnostics. See "Report-Writing Patterns" below. |
-| **Claude Code Agent Skill (`es-advisor` SKILL.md)** | Makes the entire advise workflow invocable from Claude Code as `/es-advisor`, enabling a conversational agentic loop: load → run → diagnose → advise → re-run → compare. Researchers using Claude Code get a hands-free event study assistant. | MEDIUM | SKILL.md + references/ directory containing: ASSUMPTIONS.md (assumption→test map), WORKFLOW.md (step-by-step procedure), CITATIONS.md (academic refs) | SKILL.md anatomy: YAML frontmatter (description triggers), dynamic context injection via `!` lines (runs `Rscript -e "..."` to get current diagnostics), instruction body (phases 1–5 with decision branches). See "Agent Skill Anatomy" below. |
-| **Waitlist surface for "Advisor Pro"** | Validates commercial demand for a future retrieval-grounded paid tier before building the heavy RAG version. Gathers early adopters. | LOW | None (pure docs + URL) | Pattern: a `?AdvisorPro` help page + a one-liner in `es_advise()` output footer + a `NEWS.md` note. Never contacts any server. Just a URL and a note. No telemetry. CRAN-safe. See "Waitlist Pattern" below. |
-| **Offline robustness-issue reporter (no LLM required)** | `es_flag_issues(task)` — a pure rule-based function that reads the v0.50.0 contract state and returns a tibble of human-readable issue descriptions with recommended actions. Available even when no API key is configured. | LOW | v0.50.0 contract signals, diagnostics.R | Returns a tibble: event_id, firm_symbol, issue_type (insufficient_obs / zero_variance / not_fitted / high_na / autocorrelation / non_normality / pre_trend), severity (warning/critical), message, recommended_action. Separable from `es_advise()`. |
+Features that go beyond what any other R event-study package offers.
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| pyfda-style method page template with assumption checklist | Makes the docs feel like a textbook chapter, not a function reference | MEDIUM | A repeatable template lowers per-article marginal cost after the first two are done |
+| Cross-method comparison tables within a family | Lets users see Patell vs BMP vs KP vs Sign in one place instead of reading four pages | MEDIUM | One well-designed table per family (return models, test statistics); decision logic embedded |
+| Advisor tie-in callouts | At the end of each method page, a "What es_advise() checks for this method" note connects learning content to the package's unique feature | LOW | Static prose block; requires no new code |
+| Cross-domain gallery (8 examples, different sectors) | Makes the package feel production-grade by showing it works on real research questions, not just toy examples | HIGH | Depends on dataset availability; highest user value item in the milestone |
+| Rendered interactive Plotly output embedded in articles | Shows the actual interactive experience users will get, not just static screenshots | MEDIUM | Plotly htmlwidgets render natively in pkgdown articles via `htmltools`; requires `eval=TRUE` chunks |
+| Method-page assumption checklist callout box | A formatted callout box listing "This method assumes: (1) …" — scannable, not buried in prose | LOW | Pure Rmd formatting; no code required |
+| Offline-safe build with bundled datasets | Zero network dependency at `pkgdown::build_site()` time — site builds in CI without API keys or internet access | HIGH | Each gallery example needs a bundled dataset (or `simulate_event_study()` output with `set.seed`) |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Streaming LLM responses** | Makes the UI feel faster and more interactive. | In R's single-threaded event loop there is no async I/O; streaming requires either a busy-wait loop (blocking) or a separate process. Adds complexity, is not testable with record/replay mocks, and provides no value for the structured Advice schema which needs the complete JSON before it can be validated. The advisor is a function call, not a chat UI. | Return the complete Advice object synchronously. If users want streaming, they can call the LLM API directly. |
-| **Multi-turn conversation state** | Users want to "chat" with the advisor across multiple exchanges. | State management across R sessions is non-trivial; R has no built-in conversation store. A multi-turn API inflates the token cost per call unpredictably. The grounding invariant becomes harder to enforce when the diagnostics may have changed between turns. | Single-turn design discussion mode covers 90% of the use case. For true multi-turn, users should use a dedicated chat interface that calls `es_diagnostics()` fresh each turn. |
-| **Auto-calling es_advise() on every es_diagnostics() run** | Convenience — users want one function. | Makes every `es_diagnostics()` call dependent on a network connection and an API key. Breaks the offline guarantee. Violates CRAN policy if it contacts a server without explicit user action. Breaks testability of the offline layer. | Keep `es_diagnostics()` and `es_advise()` as separate steps. Provide a convenience wrapper `es_analyze(task, advise=FALSE)` that chains them, with `advise=FALSE` default. |
-| **Hardcoding Anthropic as the only provider** | Simplicity — Anthropic is the author's preference. | Vendor lock-in. Users without Anthropic API keys are excluded. Adds a hard dependency on the Anthropic SDK or native auth scheme. Creates a single point of failure. Harder to test without the specific vendor's sandbox. | Provider abstraction with OpenAI-compatible + Anthropic paths and a custom hook. All three are covered by one record/replay test fixture each. |
-| **Phoning home / telemetry / usage analytics** | Product analytics — knowing how the advisor is used. | Explicitly prohibited by CRAN Repository Policy: "Packages should not send information about the R session to the maintainer's or third-party sites without obtaining confirmation from the user." A CRAN submission that phones home will be rejected. | Gather signal through the waitlist URL click-through (passive) and GitHub issues/stars. Never instrument the package itself. |
-| **Caching LLM responses to disk by default** | Speed / cost — avoid re-running the LLM on the same diagnostics. | A default disk cache creates files in the user's filesystem without their knowledge. CRAN policy requires packages to respect the user's filesystem. An opt-in cache with an explicit path is fine; a default one is not. Also: caching responses that cite diagnostic values means the cache becomes stale when the task changes. | Make caching opt-in: `es_advise(cache=TRUE, cache_dir=tempdir())`. Default: no cache. |
-| **Downloading or embedding a full literature corpus (RAG)** | Better grounding — the LLM could search the full Brown & Warner / MacKinlay corpus. | Heavy dependencies (vector DB, embedding model), unacceptable binary size for CRAN, and the corpus licensing is unclear. This is the "Advisor Pro" scope. Building it in the free tier kills the freemium model. | The curated knowledge base (assumption→test mapping with academic citations) covers the essential methodology grounding. RAG is the Advisor Pro value proposition. |
-| **Generating new statistical results inside the LLM** | "Can the advisor re-run the analysis with different parameters?" | The LLM cannot reliably execute R code or reproduce statistical calculations. Any numbers it generates would not be package-computed and would break the grounding invariant. Attempting to use the LLM to compute statistics creates exactly the "silently wrong number" risk that v0.50.0 was built to eliminate. | For re-running with different parameters, use the actual R pipeline. The Agent Skill orchestrates this via Bash tool calls to `Rscript`. |
-| **Free-text evidence strings in recommendations** | Richer narrative per recommendation. | Free-text evidence bypasses the grounding guard. If the evidence field is unstructured, the guard cannot reliably check whether the cited value exists in the diagnostics. | Evidence field is a named list: `list(diagnostic_key="shapiro_p", value=0.03, threshold=0.05, direction="below")`. The guard checks `diagnostic_key` exists in the diagnostics dict and `value` matches within floating-point tolerance. |
+| Re-implementing methods theory already covered in academic papers | Completeness instinct | Scope-creeps into a textbook; maintenance burden when theory is stable | Write a short summary + link to the original paper; use LaTeX for the key formula only |
+| Live network calls at build time (Yahoo Finance, French library) | Want real live data | Breaks CI behind firewalls; nondeterministic outputs; Yahoo Finance ToS prohibits redistribution | Bundle pre-downloaded snapshots with `data-raw/` provenance scripts; use `simulate_event_study()` for examples that only need plausible structure |
+| Interactive R Shiny widgets in articles | Interactivity appeal | Shiny requires a server; pkgdown articles are static HTML | Use Plotly htmlwidgets (client-side JS only; no server needed); they embed fine in pkgdown |
+| Bundling real stock price data with no clear open license | Realistic examples | Yahoo Finance data has ToS restrictions on redistribution; French library data is copyright Fama and French with no explicit redistribution license | Use simulated data generated by `simulate_event_study()` with `set.seed()`; or use the one verified-clear dataset (VW dieselgate, already bundled); for gallery examples requiring event dates, embed only the event-date list as a small vector |
+| One mega-vignette covering all methods | One-stop shop desire | Unnavigable; breaks pkgdown's section structure; cannot link to a specific section | One article per method family; cross-link liberally |
+| Pixel-perfect article layouts with custom CSS per page | Design polish | CSS scope issues in pkgdown; breaks on pkgdown upgrades | Use standard BS5 callout divs and pkgdown's native card layout; rely on the existing `extra.css` from v0.62.0 |
 
 ---
 
-## Assumption-to-Test Mapping (Grounding Knowledge Base)
+## The pyfda Method-Page Template
 
-This mapping is the core of the test-statistic recommendation advice type. Every entry corresponds to a diagnostics dict key and a threshold, producing a deterministic recommendation that the LLM enriches.
+Based on detailed study of `sipemu.github.io/pyfda` — specifically the Smoothing page (the most fully-realized example, approximately 4,500 words, 8+ rendered figures, 15+ code blocks, 12 sections) and the Introduction page.
 
-| Diagnostic Key | Threshold / Condition | Implication | Recommended Test | Contraindicated Test | Academic Citation |
-|---|---|---|---|---|---|
-| `shapiro_p` (per firm, aggregated as min across events) | < 0.05 (reject normality) | Residuals are non-normal; parametric tests lose validity | `SignTest`, `KolariPynnonenTest` (rank-based variant) | `PatellZTest`, `ARTTest` / `CARTTest` on small N | Kolari & Pynnönen 2010 |
-| `shapiro_p` | ≥ 0.05 (normality not rejected) | Normality assumption plausible | `PatellZTest` or `BMPTest` are valid choices | — | Patell 1976, BMP 1991 |
-| Cross-sectional dispersion (IQR of CARs / mean CAR, when N ≥ 5) | IQR/mean > 1 OR N < 10 | High cross-sectional variance; event-induced variance likely | `BMPTest` (robust to event-induced variance) | `PatellZTest` (over-rejects under event-induced variance) | BMP 1991 |
-| Event-window overlap count (count of event pairs sharing ≥ 1 calendar date) | > 0 | Cross-sectional correlation from overlapping windows | `KolariPynnonenTest` (corrects for r-bar inflation) | `PatellZTest`, `BMPTest` without KP correction | Kolari & Pynnönen 2010 |
-| `acf1` (first-order autocorrelation of estimation residuals) | abs(acf1) > 0.2 | Serial correlation in residuals; OLS standard errors underestimate variance | `BMPTest` (standardization helps), consider GARCH model | `ARTTest` with OLS sigma (understated) | Brown & Warner 1985 |
-| `dw_stat` | < 1.5 or > 2.5 | Significant autocorrelation | Same as acf1 > 0.2 | — | Durbin & Watson 1950 |
-| `ljung_box_p` | < 0.05 | Residuals are autocorrelated | Consider Rolling-Window or GARCH model; use `BMPTest` | `ARTTest` without autocorrelation correction | Box & Jenkins |
-| `r2` (per event, aggregated as median) | < 0.1 | Market model explains little variance; consider multi-factor model | Consider FamaFrench3FactorModel or Carhart4FactorModel | — | MacKinlay 1997 |
-| `r2` | ≥ 0.5 | Model fit adequate | Current model appropriate | — | — |
-| `is_fitted` (any FALSE) | TRUE for any event | Degenerate input: insufficient obs, zero variance, or upstream NA | `es_flag_issues()` — not a test statistic issue | All parametric tests (NA propagation from unfitted model) | v0.50.0 contract |
-| `n_valid_events` (from CSectTTest compute) | < 5 | Too few events for cross-sectional inference | `SignTest` (valid at small N), report with caveat | `CSectTTest`, `PatellZTest` (Central Limit Theorem requires N ≥ 30) | MacKinlay 1997 |
-| `pretrend_p` (from pretrend_test) | < 0.05 | Significant pre-event returns; model may be misspecified or contaminated | Extend estimation window, shift it, or use event-day dummies | Any test (results unreliable until pre-trend resolved) | MacKinlay 1997 |
+### What makes pyfda pages thorough (not stubs)
+
+1. **Conceptual intro before any code** — answers "what problem does this method solve?" in 2–3 sentences with a real-world motivation
+2. **Mathematical notation alongside code** — not a textbook derivation, but the key formula written in LaTeX so readers can match it to academic references
+3. **Reproducible examples with fixed seeds** — every code block runs and produces the shown output
+4. **Side-by-side visualizations comparing methods** — a table or overlay plot showing all variants at once (not one plot per section)
+5. **A "When to Use" decision table** — the single most referenced element; scannable, action-oriented
+6. **Progressive complexity** — definition to simple example to advanced variant to comparative summary
+7. **References section** — 3–5 citations, no more (avoids becoming a literature survey)
+8. **Cross-links to related articles** — "See Also" section directs readers to dependent or complementary topics
+
+### Concrete Page Template (reusable for every EventStudy Methods article)
+
+Every new Methods article in `vignettes/articles/` must use this section structure:
+
+```
+## Overview
+2–3 sentences: what problem this family solves, where it fits in the pipeline,
+and the key invariant the user must understand.
+
+## Methods in This Family
+Quick-reference table: method name | class | one-line distinguishing characteristic.
+
+## Core Formula
+$$key formula in LaTeX$$
+Plain-English gloss of each symbol. No derivation — just identification.
+
+## Assumptions
+Callout box (use a div or blockquote styled as a note):
+  "This method assumes: (1) ... (2) ... (3) ..."
+  "Violated when: [most common real-world violation and what to use instead]"
+
+## When to Use Each Method
+Table: scenario | recommended method | one-line reason.
+Followed by one bold rule-of-thumb sentence.
+
+## Complete Worked Example
+2–3 sentence description of the event/dataset/what output demonstrates.
+Code chunks (eval=TRUE, set.seed fixed):
+  - Load bundled dataset
+  - Run pipeline (prepare -> fit -> calculate_statistics)
+  - plot_event_study() with rendered Plotly output
+  - tidy() or print() showing a result table
+2–3 sentences interpreting the rendered output.
+
+## Comparing Methods in This Family
+One comparative plot or table showing all variants on the same data.
+
+## Diagnostics and Robustness Checks
+Table: diagnostic flag | meaning | action.
+
+## AI Advisor Connection
+Bullet list: which es_diagnostics() fields this method surfaces;
+what the KB rule recommends when each flag fires.
+
+## References
+3–5 citations in author (year) format.
+
+## See Also
+Links to related Methods articles and reference functions.
+```
+
+**Length target:** 1,500–2,500 words of prose plus all code chunks. The assumption checklist, when-to-use table, and comparative output are the three non-negotiable elements in every article.
 
 ---
 
-## Advice Schema (Structured Output Contract)
+## Per-Method-Family Required Content Sections
 
-The LLM must return a JSON object matching this schema. The grounding guard validates it before the Advice object is returned to the user.
+### 1. Return Models Family
 
-### Table-Stakes Fields (must be present)
+**Article title:** "Return Models — Estimating Normal Returns"
 
-```
-Advice {
-  interpretation: character          # plain-language summary of what the results mean
-  recommendations: list of Recommendation {
-    action: character                # what to do (imperative, one sentence)
-    kind: character                  # one of: test_statistic | model | window | robustness | report_writing | design
-    rationale: character             # why this action, referencing diagnostic values by name
-    evidence: list {
-      diagnostic_key: character      # must be a key present in the diagnostics dict
-      value: numeric                 # the actual value from the diagnostics
-      threshold: numeric or NULL     # the threshold that triggered this recommendation
-      direction: character           # "above" | "below" | "equals" | "present"
-    }
-    expected_effect: character       # what changes if user takes this action
-    priority: character              # "required" | "recommended" | "optional"
-  }
-  caveats: character vector          # list of limitations and conditions; always non-empty
-  model_used: character              # the LLM provider + model id that generated this
-  diagnostics_version: character     # SHA or timestamp of the diagnostics dict used
-  grounding_violations: integer      # count of recommendations dropped by guard; 0 is expected
-}
-```
+**Must contain:**
+- Overview table: all 13 models with class name and one-line description
+- Market model OLS formula plus abnormal return definition: `AR_it = R_it - (alpha_i + beta_i * R_mt)`
+- Factor model formula (generic: `AR = R - (alpha + beta_1*F_1 + ... + beta_k*F_k)`) with factor table requirements
+- GARCH(1,1) variance equation; DCC extension one-liner; when volatility-clustering invalidates OLS sigma
+- Rolling-Window: rolling beta concept, window length tradeoff (stability vs. responsiveness)
+- BHAR compound-return formula and the rebalancing-bias argument (why summing daily ARs overstates long-run effects)
+- When-to-use decision table (estimation window < 60 days → rolling window; long horizon > 6 months → BHAR; volatile event period → GARCH; multi-factor risk → FF3/FF5/Carhart)
+- Rendered: one example running MarketModel + FamaFrench3FactorModel on the same events, outputting a CAR comparison table
+- Rendered: `plot_event_study()` with confidence bands
+- Assumption checklist for OLS-based models (i.i.d. residuals, stationarity, no event-induced variance change)
 
-### Optional / Differentiator Fields
+**What the existing vignette does NOT cover:** formulas, assumptions, rendered output, cross-model comparison
 
-```
-  flagged_issues: list of FlaggedIssue  # from rule-based es_flag_issues(); present even without LLM
-  report_draft: character or NULL       # drafted RMarkdown narrative if mode="report_section"
-  raw_response: character or NULL       # raw LLM JSON if user requests it (for debugging)
-```
+### 2. Test Statistics Family
+
+**Article title:** "Test Statistics — Measuring Statistical Significance"
+
+**Must contain:**
+- Classification diagram: Single-event (ARTTest, CARTTest) vs Multi-event (CSectTTest, PatellZ, BMP, Sign, GenSign, Rank, KP, CalTimePF)
+- AR t-test formula including the forecast error correction term `(1/T_e + (R_m - R_m_bar)^2 / sum(...))` — the most commonly misunderstood detail, responsible for the difference between OLS and event-study standard errors
+- Patell standardization formula; key assumption: the event does not change return variance
+- BMP: Patell plus cross-sectional variance correction; assumption: cross-sectional independence
+- KP (Kolari-Pynnonen): BMP plus Scholes-Williams cross-correlation adjustment; when mandatory (economy-wide events, clustered dates)
+- Sign test: non-parametric, does not require normality; fraction of positive ARs vs expected 0.5
+- Calendar-Time Portfolio: Fama-MacBeth monthly portfolio regression; clusters correlation automatically
+- When-to-use table: clustering calendar dates → KP; non-normal residuals → Sign/Rank; few events → bootstrap; long window → CalTimePF
+- Rendered: all multi-event statistics on one dataset, printed as a comparison table showing how test values diverge when assumptions are violated
+- Power and size discussion (cross-reference simulation vignette)
+
+**What the existing vignette does NOT cover:** formulas, full taxonomy, when-to-use, rendered output
+
+### 3. Panel DiD Family
+
+**Article title:** "Panel Event Studies and DiD Estimators"
+
+**Must contain:**
+- TWFE estimating equation; relative-time indicator definition; reference period normalization (why t = -1 is the standard reference)
+- Staggered adoption: why TWFE is biased with heterogeneous effects (Sun-Abraham 2021, Callaway-Sant'Anna 2021); the "negative weights" intuition
+- Sun-Abraham: interaction-weighted estimator formula (schematic); aggregation to ATT
+- Callaway-Sant'Anna: group x time ATT definition; doubly-robust estimation
+- BJS (Borusyak-Jaravel-Spiess): imputation estimator one-liner
+- de Chaisemartin-D'Haultfoeuille: `did_multiplegt` approach; when to use over CS
+- When-to-use table: single cohort → TWFE; staggered + homogeneous effects → TWFE with pre-trend test; staggered + heterogeneous → CS or SA; single-treated unit → synthetic control
+- Rendered: event-time plot with pre-trend and post-treatment estimates plus confidence bands (the primary visual payoff of the panel article)
+- Rendered: pre-trend test table (p-values, joint F-test)
+- Endpoint binning note (what happens at the first and last relative-time period)
+
+**What the existing vignettes DO cover:** API setup (panel-event-study.Rmd), modern estimators (modern-did-estimators.Rmd). **What they do NOT cover:** rendered outputs, theory formulas, estimator comparison table.
+
+### 4. Intraday Family
+
+**Article title:** "Intraday Event Studies — Minute and Second Windows"
+
+**Must contain:**
+- Why intraday differs: bid-ask bounce, microstructure contamination, VWAP benchmark, non-normality of high-frequency returns
+- POSIXct window definition; how `relative_index` maps to minutes; estimation window requirements at intraday frequency
+- Nonparametric test justification (intraday return distributions have fat tails and are not normal)
+- Rendered: 5-minute AR plot around a simulated announcement event
+- When intraday is necessary vs daily: earnings call replay (intraday); central bank press conference (intraday); daily close-to-close for all other uses
+- Assumption: data must be synchronous; how to handle pre-market and after-hours contamination
+
+**What the existing vignette does NOT cover:** rendered output, microstructure theory, when intraday is necessary vs daily
+
+### 5. Synthetic Control Family
+
+**Article title:** "Synthetic Control — Counterfactuals for Single Treated Units"
+
+**Must contain:**
+- Abadie-Gardeazabal (2003) / Abadie-Diamond-Hainmueller (2010) setup: donor pool, outcome variable, predictor matching objective
+- Optimization objective: minimize pre-treatment MSPE (mean squared prediction error)
+- Placebo inference: permute treatment assignment across donor units; compute MSPE ratio for each placebo; p-value = fraction with ratio >= treated unit
+- When to use: single treated unit; long pre-treatment period (at least 2x the event window); no parallel-trends exclusion restriction needed
+- Rendered: gap plot (actual minus synthetic) with placebo lines overlaid
+- Rendered: predictor balance table (pre-treatment outcomes: treated vs synthetic vs donors)
+- When it fails: donor pool too small (< 5 units); poor pre-treatment fit (MSPE ratio < 2)
+
+**What the existing vignette does NOT cover:** rendered output, theory, placebo inference table
+
+### 6. Diagnostics Family
+
+**Article title:** "Model Diagnostics — Validating Event Study Assumptions"
+
+**Must contain:**
+- Shapiro-Wilk: null hypothesis, decision rule (p < 0.05 → reject normality), consequence → Switch to Sign test or Rank test or bootstrap
+- Durbin-Watson / Ljung-Box: what autocorrelation in estimation-window residuals implies for standard errors; consequence → HAC (Newey-West) SEs
+- Pre-trend test: test whether ARs in pre-event window [-k, -1] are jointly zero; Miller (2023) recommendation for k
+- `validate_task()`: what each check catches (missing event dates, window overlap, insufficient estimation observations, all-NA returns)
+- Rendered: `plot_diagnostics()` output with residual QQ plot and ACF plot (deterministic with `set.seed`)
+- Decision table: each diagnostic flag → recommended action → which package function implements the action
+- AI advisor integration: which diagnostics flow directly into `es_diagnostics()` and what KB rule fires
+
+**What the existing vignette does NOT cover:** rendered output (all `eval=FALSE`), theory behind each test, the action table mapping flags to remedies
+
+### 7. AI Advisor Family
+
+**Article title:** "The Grounded AI Advisor — Architecture and Usage"
+
+**Must contain:**
+- The grounding invariant (never fabricate a number) and why it matters for scientific reproducibility
+- Two-layer architecture: `es_diagnostics()` (deterministic, zero-dependency, always available) then `es_advise()` (LLM-grounded, optional)
+- Diagnostics schema: what fields `es_diagnostics()` harvests and why each one is included
+- Six advice modes and what each returns (model selection, test selection, result interpretation, robustness, reporting, comparison)
+- Provider configuration: arg to env var to default precedence; how to configure Anthropic vs OpenAI-compatible vs Ollama
+- Offline mode: what happens when no API key is configured (rule-based KB output from `es_kb`)
+- `recommend_stat()` and `flag_robustness()` as standalone utilities
+- Rendered: `es_diagnostics()` output printed (deterministic, always evaluable without API key)
+- Rendered: `es_advise()` offline KB response (no LLM needed; uses rule-based engine)
+
+**What the existing vignette DOES cover:** the walkthrough with Dieselgate data and both layers. **What a Methods article adds:** the architectural explanation (why two layers), full decision logic for each advice mode, provider setup guide, and `recommend_stat()` / `flag_robustness()` standalone use.
 
 ---
 
-## Agent Skill Anatomy (SKILL.md for `es-advisor`)
+## Cross-Domain Gallery: 8 Concrete Example Proposals
 
-Stored at `.claude/skills/es-advisor/SKILL.md` in the user's project (or committed to the eventstudy repo itself for maintainer use).
+Each gallery example is a complete end-to-end rendered analysis in `vignettes/articles/`. The selection covers the breadth of event study applications and showcases specific method families distinctly from one another.
 
-### YAML Frontmatter
+### G-1: Corporate Scandal — Emissions Manipulation (Dieselgate)
 
-```yaml
+**Domain:** Corporate governance / environmental
+**Event:** VW Dieselgate announcement, September 18 2015
+**Model:** MarketModel + FamaFrench3FactorModel (compare both on same events)
+**Tests:** CARTTest, PatellZ, BMPTest
+**Dataset:** `dieselgate` — already bundled; multi-automaker (VW, BMW, Daimler, Peugeot)
+**Rendered output:** AAR + CAAR plot with 95% CI bands; cross-automaker CAAR comparison table showing spillover effects; Patell vs BMP result comparison showing BMP correction matters for the event-induced variance spike
+**What it demonstrates:** Market model vs FF3 in a volatile-event setting; BMP correction; multi-group comparison with `car_by_group()`
+**Data licensing:** CLEARED. Already bundled with provenance in `data-raw/`. No new licensing issue.
+
+### G-2: Earnings Surprise — Cross-Sectional Regression on SUE
+
+**Domain:** Accounting / corporate finance
+**Event:** Quarterly earnings announcements; positive vs negative surprise
+**Model:** MarketModel (standard; followed by cross-sectional regression of CARs on SUE magnitude)
+**Tests:** CSectTTest; `cross_sectional_regression()` with SUE as regressor; `car_by_group()` for quintile splits
+**Dataset:** Simulated via `simulate_event_study(n_events = 60, seed = 42)` with earnings-surprise magnitude assigned as a firm characteristic column
+**Rendered output:** CAAR plot split by surprise quintile; cross-sectional regression table (CAR ~ SUE + log_size) with coefficient estimates and standard errors
+**What it demonstrates:** Cross-sectional regression as the natural follow-on to abnormal return estimation; `car_quantiles()` for distributional view
+**Data licensing:** CLEARED. Fully simulated by the package. Note in article that real SUE data can be sourced from IBES/Compustat via institutional access.
+
+### G-3: Monetary Policy — FOMC Rate Decisions
+
+**Domain:** Macroeconomics / monetary economics
+**Event:** FOMC announcement dates — rate hike vs hold vs cut
+**Model:** MarketModel with event window [-1, +1]; multi-firm (diversified sector portfolio proxies)
+**Tests:** PatellZ, KolariPynnonenTest (mandatory when all firms move together), bootstrap_test
+**Dataset:** Simulated panel with 20 portfolio-level series + a small vector of FOMC announcement dates (dates are public information from the Federal Reserve website — only dates embedded, no proprietary price data)
+**Rendered output:** AAR plot showing announcement-day spike; KP vs Patell comparison table (KP delivers much wider CIs due to cross-sectional correlation); bootstrap confidence bands
+**What it demonstrates:** Why KP test is mandatory for economy-wide events; how calendar clustering destroys Patell/BMP independence assumption; bootstrap as the non-parametric alternative
+**Data licensing:** CLEARED. FOMC dates are public (Federal Reserve website). Price data fully simulated. Provenance note in article: the U.S. Monetary Policy Event-Study Database (FRBSF USMPD) provides real event-time surprises for researchers who want the real-data version.
+
+### G-4: Drug Approval — FDA Phase 3 Outcomes
+
+**Domain:** Life sciences / pharmaceutical
+**Event:** FDA approval vs rejection decisions (Phase 3 trial outcomes for biotech firms)
+**Model:** MarketModel; event window [-2, +2] to capture pre-announcement leakage; single-event focus
+**Tests:** ARTTest, CARTTest; `plot_car_distribution()` to show bimodal distribution
+**Dataset:** Simulated 15-firm biotech panel with event outcome label (approval vs rejection); designed to replicate the distributional property (large positive CAR on approval, large negative on rejection)
+**Rendered output:** Forest plot of per-event CARs sorted by outcome; histogram of abnormal returns showing bimodal distribution; `plot_car_distribution()` output
+**What it demonstrates:** Single-event focus vs multi-event aggregation; the `plot_car_distribution()` function; interpreting individual-event CARs in small samples; pre-event leakage window choice
+**Data licensing:** CLEARED. Fully simulated. Provenance note: real FDA NDA/BLA approval dates are public at FDA.gov; real prices require institutional data access.
+
+### G-5: Staggered Regulatory Shock — GDPR Enforcement Actions
+
+**Domain:** Regulation / technology / privacy
+**Event:** GDPR enforcement decisions (staggered across 2019–2022; different firms penalized at different times)
+**Model:** Callaway-Sant'Anna panel estimator (staggered adoption design); comparison against biased TWFE
+**Tests:** `estimate_panel_event_study()` with `estimator = "callaway_santanna"`; pre-trend test; TWFE comparison to show the negative-weights bias
+**Dataset:** Simulated staggered-treatment panel (40 firms, 3 treatment cohorts: 2019, 2020, 2022)
+**Rendered output:** Event-time plot showing TWFE aggregated estimate vs CS group-x-time estimates; pre-trend test table; TWFE bias visualization showing the sign reversal that heterogeneous effects produce
+**What it demonstrates:** The heterogeneous-treatment-effect bias in TWFE; when CS/SA is necessary vs sufficient; practical use of `modern-did-estimators` in a regulatory context; the "negative weights" diagnostic
+**Data licensing:** CLEARED. Fully synthetic. Provenance note: real GDPR fines are public (enforcementtracker.com); stock price data for named firms available via `download_stock_data()` for those who want to replicate with real data.
+
+### G-6: Dividend Announcement — Payout Policy and Non-Parametric Tests
+
+**Domain:** Corporate payout policy
+**Event:** Cash dividend initiation vs share buyback announcement
+**Model:** Carhart4FactorModel (momentum factor important for payout studies)
+**Tests:** CSectTTest, SignTest, GeneralizedSignTest; comparison of parametric vs non-parametric outcomes
+**Dataset:** Simulated 30-firm panel; two groups (dividend initiation vs buyback)
+**Rendered output:** CAAR plot for both groups on same axes; Sign test vs t-test comparison table; `car_by_group()` output; discussion of when parametric and non-parametric results diverge
+**What it demonstrates:** Non-parametric tests in practice; group comparison; Carhart model applied to payout events; what divergence between Sign and t-test implies about the return distribution
+**Data licensing:** CLEARED. Fully simulated.
+
+### G-7: Intraday — Central Bank Press Conference
+
+**Domain:** Macroeconomics / intraday microstructure
+**Event:** Simulated central bank press conference starting at 14:30 (ECB/Fed style)
+**Model:** IntradayEventStudyTask; 1-minute windows; VWAP benchmark
+**Tests:** `nonparametric_intraday_test()`
+**Dataset:** Simulated 1-minute OHLC data for 5 broad-market ETF proxies across a 6.5-hour trading day
+**Rendered output:** 5-minute CAR plot showing the announcement spike with pre-event flat region and post-event drift; printed nonparametric test result with p-value
+**What it demonstrates:** POSIXct-based pipeline from raw setup to result; intraday windows and how the CAR plot differs visually from daily studies; microstructure contamination note (bid-ask bounce in the minutes immediately before/after)
+**Data licensing:** CLEARED. Fully simulated at 1-minute frequency.
+
+### G-8: Synthetic Control — Single Firm vs Donor Pool (Dieselgate Subset)
+
+**Domain:** Single-unit causal inference / corporate governance
+**Event:** VW emissions scandal as a single-treated-unit problem (VW vs. the European automotive sector donor pool)
+**Model:** SyntheticControlTask; `estimate_synthetic_control()`; `sc_placebo_test()`
+**Tests:** Placebo MSPE ratio; `plot_synthetic_control()`
+**Dataset:** Subset of the bundled `dieselgate` dataset: VW as the treated unit, BMW + Daimler + Peugeot as donor pool (no new data required)
+**Rendered output:** Gap plot (VW actual minus synthetic VW) with placebo lines overlaid for each donor; predictor balance table (pre-treatment outcomes: treated vs synthetic vs each donor); MSPE ratio for inference (p-value interpretation)
+**What it demonstrates:** Synthetic control as the alternative to standard event study when there is only one treated entity; donor pool selection; how the placebo test yields a p-value without distributional assumptions; contrast with G-1 which uses the same dataset under the multi-event paradigm
+**Data licensing:** CLEARED. Uses existing bundled `dieselgate` dataset. No new dataset required.
+
 ---
-description: >
-  Runs an end-to-end EventStudy analysis cycle: loads data, runs the
-  pipeline, calls es_diagnostics(), calls es_advise(), interprets the
-  Advice object, and can re-run with adjusted parameters for comparison.
-  Use when the user wants to analyze event study results, get test
-  statistic recommendations, check robustness, or draft report sections.
----
-```
 
-### Instruction Body Sections
+## Dataset Strategy and Licensing Analysis
 
-**Phase 1 — Load & Run (Bash tool):**
-The skill checks whether a fitted `EventStudyTask` exists in the session or whether the user needs to run the pipeline. Uses dynamic context injection with `!` lines to introspect the workspace:
-```
-!`Rscript -e "cat(file.exists('results/task.rds'))"`
-```
+### The Core Problem
 
-**Phase 2 — Diagnose:**
-Calls `es_diagnostics(task)` via a Bash Rscript call and captures the resulting list as JSON for injection into subsequent context.
+Real production-quality financial event study data (CRSP, Compustat, IBES, WRDS) is proprietary and cannot be bundled. Yahoo Finance data has ToS restrictions on redistribution (ToS states data is for personal use only). Ken French factor data is copyrighted by Fama and French with no explicit redistribution license. The FRBSF USMPD database has no stated license; contact required before bundling.
 
-**Phase 3 — Advise:**
-Calls `es_advise(diag, provider=<from env>, mode=<from user intent>)` and presents the Advice object in a human-readable format, highlighting grounding_violations=0 as a trust signal.
+### Resolution: Three Tiers
 
-**Phase 4 — Interpret & Recommend:**
-Presents each recommendation with its evidence dict. For test-statistic recommendations, the skill additionally shows the deterministic rule-based recommendation (from the grounding knowledge base) alongside the LLM recommendation so the user can compare.
+**Tier 1 — Already Bundled (use as-is)**
+- `dieselgate`: already in the package, `data-raw/` provenance documented. Covers G-1 and G-8 with no new licensing work.
 
-**Phase 5 — Re-run & Compare (optional):**
-If the user accepts a model or test recommendation, the skill generates the R code to re-run with the new parameters, runs it, and compares the new diagnostics against the old to show the effect.
+**Tier 2 — Simulate with `simulate_event_study()` and `set.seed()`**
+Use the package's own `simulate_event_study()` function with documented seeds for G-2 (earnings), G-3 (FOMC), G-4 (FDA), G-5 (GDPR), G-6 (dividends), G-7 (intraday). Simulated data is:
+- Zero licensing risk — generated by the package itself
+- Offline-safe — no network at build time
+- Reproducible — `set.seed()` makes it deterministic across machines
+- Methodologically honest — each article notes that real data requires institutional access and points to the appropriate source
 
-### Reference Files (in `.claude/skills/es-advisor/references/`)
+Precedent: the `eventstudies` CRAN package (nipfpmf) bundles simulated `SplitDates` + `StockPriceReturns` data. This is the accepted CRAN pattern for event-study packages.
 
-- `ASSUMPTIONS.md` — the full assumption-to-test mapping table in human-readable form
-- `CITATIONS.md` — academic citation list (MacKinlay 1997, BMP 1991, KP 2010/2011, etc.)
-- `WORKFLOW.md` — the 5-phase procedure in detail
-- `API-KEYS.md` — how to configure provider credentials
+**Tier 3 — Provenance-only scripts in `data-raw/` (for reproducibility, not bundled)**
+For gallery examples where real data would be scientifically preferable, include a `data-raw/make_[name].R` script that downloads and processes the data. This lets a researcher with institutional access reproduce the real-data version, while the bundled version uses simulated data. This follows the same pattern as the `dieselgate` dataset established in v0.61.0.
 
----
+### Dataset Decision Table
 
-## Report-Writing Assistance Patterns
+| Gallery Example | Data Strategy | What Gets Bundled | Licensing Status |
+|---|---|---|---|
+| G-1 Dieselgate | Existing bundled `dieselgate` | `dieselgate` (existing) | CLEARED — simulated/curated with public event dates |
+| G-2 Earnings Surprise | Simulate inline via `simulate_event_study(seed=42)` | `earnings_sim` small Rda (< 50 KB) | CLEARED — package-generated |
+| G-3 FOMC | Simulate prices; embed FOMC date vector (12 dates) | `fomc_sim` (dates + simulated prices) | CLEARED — Fed dates are public; prices simulated |
+| G-4 FDA Approvals | Simulate; embed event outcome lookup (15 events) | `fda_sim` | CLEARED — FDA approval dates are public; prices simulated |
+| G-5 GDPR | Fully simulated staggered panel | `gdpr_sim` | CLEARED — fully synthetic |
+| G-6 Dividend/Buyback | Fully simulated | `payout_sim` | CLEARED — fully synthetic |
+| G-7 Intraday | Fully simulated 1-minute OHLC | `intraday_sim` | CLEARED — fully synthetic |
+| G-8 Synthetic Control | Subset of `dieselgate` (no new data) | No new dataset needed | CLEARED — existing bundled data |
 
-The report_section mode drafts a methods + results paragraph grounded in actual computed values. The pattern:
-
-1. The diagnostics dict is passed as structured JSON context to the LLM.
-2. The system prompt includes the sentence: "Every quantitative claim in the drafted text must be traceable to a key in the diagnostics JSON. Do not interpolate, round, or rephrase any numeric value — use it exactly as provided."
-3. The LLM drafts a paragraph template with `{diagnostic_key}` placeholders.
-4. The grounding guard resolves each placeholder against the diagnostics dict and rejects any that cannot be resolved.
-5. The resolved text is returned in `report_draft` and can be pasted directly into the RMarkdown template consumed by `generate_report()`.
-
-Sections supported: `"methods"` (model choice, window parameters, test statistic selection, assumption checks), `"results"` (CAR/CAAR, significance, cross-event summary), `"diagnostics_narrative"` (what the Shapiro-Wilk, DW, Ljung-Box results mean).
-
----
-
-## Waitlist Pattern (CRAN-Safe)
-
-Pattern: documentation-only surface, zero network calls.
-
-- A `?AdvisorPro` help topic (roxygen2 `@name AdvisorPro`) that describes the future paid tier and includes a static URL: `https://eventstudy.de/advisor-pro` (or equivalent).
-- A one-line footer appended to every `es_advise()` print output (the Advice S3 `print` method): `"Advisor Pro (full literature corpus, RAG) — waitlist: https://eventstudy.de/advisor-pro"`.
-- A `NEWS.md` entry announcing the waitlist.
-- The URL is a static string in the package — it never sends a request. Users choose to visit it.
-- This is identical to the pattern used by `renv`, `pak`, and other CRAN packages that advertise commercial services via static documentation.
-
-CRAN policy compliance: the package never sends data to maintainer or third-party sites; the waitlist URL is passive (user-initiated navigation). The `print` footer is informational, not a network call.
+**CRAN tarball note:** All datasets used only by `vignettes/articles/` files (which are `.Rbuildignore`d). Under the pkgdown-only strategy, the simulation code runs inline at article build time, or small Rda files live in `vignettes/articles/data/` and are never installed by `R CMD INSTALL`. Either way the CRAN tarball is not affected. Estimated size per simulated dataset: under 50 KB uncompressed.
 
 ---
 
 ## Feature Dependencies
 
 ```
-es_diagnostics(task)
-    └──requires──> fitted EventStudyTask (fit_model() complete)
-    └──reuses──> diagnostics.R: model_diagnostics(), pretrend_test()
-    └──reuses──> v0.50.0 contract: is_fitted, zero_var_flag, insufficient_obs_flag, NA counts
+LaTeX/MathJax formula rendering
+    requires: `_pkgdown.yml` math-rendering: mathjax config change (one line)
 
-es_advise(diag, ...)
-    └──requires──> es_diagnostics() output (diagnostics dict)
-    └──requires──> httr2, jsonlite (Suggests-guarded)
-    └──uses──> provider abstraction (OpenAI-compat or Anthropic)
-    └──uses──> grounding knowledge base (curated assumption→test map)
-    └──applies──> grounding runtime guard (post-generation validator)
+Rendered Outputs (eval=TRUE chunks)
+    requires: bundled datasets or inline simulate_event_study() with set.seed()
+    requires: vignettes/articles/ delivery path (.Rbuildignore'd)
 
-es_flag_issues(task)
-    └──requires──> fitted EventStudyTask
-    └──reuses──> v0.50.0 contract signals (is_fitted, flags)
-    └──independent of LLM (no es_advise dependency)
+Methods Articles
+    requires: Rendered Outputs (otherwise they are just duplicating existing vignettes)
+    enables:  Advisor Tie-in Callouts (can reference specific diagnostic flags)
 
-report_draft (mode="report_section" in es_advise)
-    └──requires──> es_advise() with mode="report_section"
-    └──feeds──> generate_report() in report.R (optional integration)
+Gallery Examples
+    requires: bundled/simulated datasets
+    requires: Methods Articles (gallery links to method pages for theory)
+    enables:  Gallery Landing Page (needs real content to link to)
 
-Agent Skill (es-advisor SKILL.md)
-    └──orchestrates──> es_diagnostics() → es_advise() → re-run loop
-    └──reads──> references/ASSUMPTIONS.md, CITATIONS.md, WORKFLOW.md
-    └──uses──> Claude Code Bash tool for Rscript calls
+Gallery Landing Page
+    requires: Gallery Examples (needs examples to display as cards)
+    enables:  Navbar Articles link to become meaningful
 ```
 
 ---
 
 ## MVP Definition
 
-### Launch With (v0.60.0)
+### Phase 1 — Foundation (deliver first, unblocks everything else)
 
-- [x] `es_diagnostics(task)` — offline, zero-dep, serializable diagnostics dict harvesting all relevant signals from existing diagnostics.R + v0.50.0 contract — why essential: the grounding contract; everything else depends on it
-- [x] `es_advise(diag, ...)` — grounded Advice object with structured schema, runtime grounding guard, and graceful degradation — why essential: the primary user-facing feature; without it there is no advisor
-- [x] Provider abstraction — OpenAI-compatible + Anthropic paths + custom hook — why essential: vendor lock-in is an immediate adoption blocker for researchers using non-Anthropic providers
-- [x] Rule-based test-statistic recommendation (deterministic, no LLM required) — why essential: answers the most common user question offline; demonstrates the grounding principle without an API key
-- [x] Robustness-issue flagging from v0.50.0 contract (`es_flag_issues`) — why essential: direct payoff of the v0.50.0 investment; makes the contract human-readable
-- [x] CRAN-clean packaging (zero new hard deps, all AI deps in Suggests, httptest2/vcr test fixtures, skip_on_cran guards) — why essential: CRAN submission must pass
-- [x] Agent Skill SKILL.md — why essential: stated in PROJECT.md as a target feature; delivers the conversational loop without MCP complexity
+- [ ] `_pkgdown.yml` math-rendering: mathjax — enables LaTeX in all articles; one YAML line; zero risk
+- [ ] Reusable Rmd method-article skeleton with all 8 sections templated — lowers per-article marginal cost dramatically
+- [ ] Return Models Methods article (rendered) — highest-traffic concept; `factor-models-bhar` is the most complete existing vignette to build from
+- [ ] Test Statistics Methods article (rendered) — second most requested; unique formula content not present in any existing vignette
+- [ ] G-1 Dieselgate gallery example (rendered) — uses existing data; proof-of-concept that the gallery format works
 
-### Add After Validation (v0.60.x)
+### Phase 2 — Method Coverage + Core Gallery
 
-- [ ] Report-writing assistance (mode="report_section") — trigger: user demand in GitHub issues post-launch; adds report.R integration
-- [ ] Design discussion mode (mode="discuss") — trigger: user feedback requesting conversational Q&A
-- [ ] `es_analyze()` convenience wrapper — trigger: users report the two-step call is inconvenient
+- [ ] Diagnostics Methods article (advisor integration callout is the unique value-add)
+- [ ] Panel DiD Methods article (rendered event-time plot is the visual centerpiece)
+- [ ] Synthetic Control Methods article (rendered gap plot with placebo)
+- [ ] G-8 Synthetic control gallery example (uses existing data; exercises `plot_synthetic_control()`)
+- [ ] G-3 FOMC monetary policy gallery (high academic interest; showcases KP test necessity)
+- [ ] G-5 GDPR staggered panel gallery (highest-differentiation example; CS estimator showcase)
 
-### Future Consideration (v1.0+ / Advisor Pro)
+### Phase 3 — Complete Gallery + Minor Articles
 
-- [ ] Retrieval-grounded "Advisor Pro" (full corpus RAG, vector search over Brown & Warner / MacKinlay / BMP papers) — why defer: requires vector DB, embedding infrastructure, corpus licensing; validate demand via waitlist first
-- [ ] MCP server surface — why defer: PROJECT.md explicitly deferred; Agent Skill delivers the same loop with less surface area
-- [ ] Multi-turn conversation state — why defer: single-turn covers the use case; multi-turn adds state-management complexity without proportional value
+- [ ] Intraday Methods article (shortest; new microstructure content)
+- [ ] AI Advisor Methods article (architectural depth beyond the existing walkthrough vignette)
+- [ ] G-2 Earnings + cross-sectional regression gallery
+- [ ] G-4 FDA drug approval gallery (exercises `plot_car_distribution()`)
+- [ ] G-6 Dividend/buyback gallery (non-parametric test showcase)
+- [ ] G-7 Intraday press conference gallery (exercises `IntradayEventStudyTask`)
+- [ ] Gallery landing page updated to real card index with domain labels
+
+### Defer to v0.64.0
+
+- [ ] Printed PDF export of articles — beyond pkgdown's native capability
+- [ ] Full Shiny interactivity — requires a server; incompatible with static pkgdown delivery
+- [ ] Cross-article search index — pkgdown already provides site-level search
 
 ---
 
@@ -254,51 +468,61 @@ Agent Skill (es-advisor SKILL.md)
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| `es_diagnostics()` | HIGH | MEDIUM | P1 |
-| `es_advise()` + Advice schema | HIGH | HIGH | P1 |
-| Grounding runtime guard | HIGH | MEDIUM | P1 |
-| Rule-based test-statistic recommendation | HIGH | LOW | P1 |
-| Provider abstraction (OpenAI-compat + Anthropic) | HIGH | MEDIUM | P1 |
-| `es_flag_issues()` from v0.50.0 contract | MEDIUM | LOW | P1 |
-| CRAN-clean packaging + test fixtures | HIGH | MEDIUM | P1 |
-| Agent Skill SKILL.md | MEDIUM | LOW | P1 |
-| Assumption→test grounding knowledge base | HIGH | LOW | P1 |
-| Waitlist surface | LOW | LOW | P2 |
-| Report-writing assistance | MEDIUM | MEDIUM | P2 |
-| Design discussion mode | MEDIUM | LOW | P2 |
-| `es_analyze()` convenience wrapper | LOW | LOW | P2 |
-| Retrieval-corpus RAG (Advisor Pro) | HIGH | VERY HIGH | P3 |
-| Multi-turn conversation | LOW | HIGH | P3 |
-| Default disk cache | LOW | MEDIUM | P3 (opt-in only) |
+| LaTeX formula rendering (one config line) | HIGH | LOW | P1 |
+| Reusable Rmd article template skeleton | HIGH | LOW | P1 |
+| Return Models Methods article (rendered) | HIGH | MEDIUM | P1 |
+| Test Statistics Methods article (rendered) | HIGH | MEDIUM | P1 |
+| G-1 Dieselgate gallery example (rendered) | HIGH | LOW | P1 |
+| Diagnostics Methods article | MEDIUM | MEDIUM | P2 |
+| Panel DiD Methods article (rendered event-time plot) | HIGH | MEDIUM | P2 |
+| Synthetic Control Methods article (rendered gap plot) | MEDIUM | MEDIUM | P2 |
+| G-8 Synthetic control gallery | MEDIUM | LOW | P2 |
+| G-3 FOMC monetary policy gallery | HIGH | MEDIUM | P2 |
+| G-5 GDPR staggered panel gallery | HIGH | MEDIUM | P2 |
+| G-2 Earnings + cross-sectional gallery | HIGH | MEDIUM | P2 |
+| G-4 FDA approval gallery | MEDIUM | LOW | P2 |
+| Advisor tie-in callout in every Methods article | HIGH | LOW | P2 |
+| Intraday Methods article | LOW | MEDIUM | P3 |
+| AI Advisor Methods article | MEDIUM | LOW | P3 |
+| G-6 Dividend/buyback gallery | MEDIUM | LOW | P3 |
+| G-7 Intraday press conference gallery | MEDIUM | MEDIUM | P3 |
+| Gallery landing page card index redesign | HIGH | MEDIUM | P2 |
 
-**Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
+**Priority key:** P1 = must have for milestone; P2 = should have, same milestone; P3 = nice-to-have, can slip to v0.64.0
+
+---
+
+## Competitor Documentation Analysis
+
+| Feature | `estudy2` (irudnyts) | `eventstudies` (nipfpmf) | EventStudy current (v0.62.0) | v0.63.0 target |
+|---------|---|---|---|---|
+| Method formulas in docs | None — reference pages only | None | None | Full LaTeX per method family |
+| Rendered outputs in articles | None | PDF vignette (eval=TRUE) | None (all eval=FALSE) | Rendered plots and tables in every article |
+| Decision guidance / when-to-use | None | None | None | When-to-use table in every Methods article |
+| Cross-domain gallery | None | None | Dieselgate intro only | 8 cross-domain examples |
+| Academic references | Function-level only | Yes (Kothari-Warner cites) | Minimal | Full per-method bibliography |
+| AI advisor connection | None | None | Yes (v0.60.0, separate vignette) | Callout box in every method page |
+| Non-parametric tests documented | Partial | Yes | Yes (API) | Theory + when-to-use + rendered |
 
 ---
 
 ## Sources
 
-- [EventStudy test statistic explanations — eventstudytools.com](https://www.eventstudytools.com/significance-tests)
-- [Interpreting CAAR and Patell Z — eventstudytools.com](https://www.eventstudytools.com/interpreting-caar-and-patell-z)
-- [AAR & CAAR Statistics — eventstudy.de](https://eventstudy.de/docs/aar-caar-statistics)
-- [fdars Python package with advisor layer — PyPI](https://pypi.org/project/fdars/0.9.0/)
-- [Claude Code Agent Skills documentation](https://code.claude.com/docs/en/skills)
-- [Claude Code Skill Anatomy — claudehasskills.com](https://claudehasskills.com/skill-anatomy/)
-- [CRAN Repository Policy](https://cran.r-project.org/web/packages/policies.html)
-- [R Packages (2e) — Dependencies in Practice](https://r-pkgs.org/dependencies-in-practice.html)
-- [httr2 retry documentation](https://httr2.r-lib.org/reference/req_retry.html)
-- [HTTP testing in R — Graceful HTTP packages](https://books.ropensci.org/http-testing/graceful.html)
-- [7 LLM Guardrails That Reduce Hallucinations — Medium](https://medium.com/@ThinkingLoop/7-llm-guardrails-that-reduce-hallucinations-3d673677fb3f)
-- [Watchdogs and Oracles: Runtime Verification for LLMs — arXiv](https://arxiv.org/pdf/2511.14435)
-- [Evidence-based Text Generation — arXiv](https://arxiv.org/pdf/2508.15396)
-- [Parametric and Nonparametric Event Study Tests: A Review — CCSENET](https://ccsenet.org/journal/index.php/ibr/article/download/38913/23293)
-- Kolari, J. and Pynnönen, S. (2010). "Event study testing with cross-sectional correlation due to partially overlapping event windows." *Review of Financial Studies*, 23(11), 3996–4025.
-- Boehmer, E., Musumeci, J. and Poulsen, A.B. (1991). "Event study methodology under conditions of event-induced variance." *Journal of Financial Economics*, 30(2), 253–272.
-- MacKinlay, A.C. (1997). "Event studies in economics and finance." *Journal of Economic Literature*, 35(1), 13–39.
+- `sipemu.github.io/pyfda` — reference standard; Smoothing page structure analyzed in detail (approximately 4,500 words, 8+ figures, 15+ code blocks, 12 sections including decision table, formula sections, and references)
+- `sipemu.github.io/pyfda/learn/introduction` — Introduction page structure confirming progressive complexity pattern
+- Patell (1976), "Corporate Forecasts of Earnings per Share," *Journal of Accounting Research*, 14(2):246-276
+- Boehmer, Musumeci, Poulsen (1991), "Event-Study Methodology Under Conditions of Event-Induced Variance," *Journal of Financial Economics*, 30(2):253-272
+- Fama, French (1993), "Common Risk Factors in the Returns on Stocks and Bonds," *Journal of Financial Economics*, 33(1):3-56
+- Kolari, Pynnonen (2010), "Event Study Testing with Cross-Sectional Correlation of Abnormal Returns," *Review of Financial Studies*, 23(11):3996-4025
+- Abadie, Diamond, Hainmueller (2010), "Synthetic Control Methods for Comparative Case Studies," *Journal of the American Statistical Association*, 105(490):493-505
+- Miller (2023), "An Introductory Guide to Event Study Models," *Journal of Economic Perspectives*, 37(2):203-230
+- Callaway, Sant'Anna (2021), "Difference-in-Differences with Multiple Time Periods," *Journal of Econometrics*, 225(2):200-230
+- U.S. Monetary Policy Event-Study Database (FRBSF USMPD) — publicly downloadable; no explicit redistribution license stated; contact cmr@sf.frb.org before bundling
+- Yahoo Finance ToS — data intended for personal use only; redistribution not permitted; do not bundle
+- Ken French Data Library (mba.tuck.dartmouth.edu) — Copyright Fama and French; no explicit redistribution license; do not bundle
+- `eventstudies` CRAN package (nipfpmf) — bundles `SplitDates` and `StockPriceReturns` as the accepted CRAN pattern for simulated event-study data
+- pkgdown documentation — `math-rendering: mathjax` configuration; articles rendered from `vignettes/articles/` with `.Rbuildignore` exclusion
 
 ---
-
-*Feature research for: Grounded AI Advisor — EventStudy v0.60.0*
-*Researched: 2026-09-02*
+*Feature research for: EventStudy v0.63.0 — Documentation Depth: Methods and Worked Examples*
+*Researched: 2026-09-05*
