@@ -1,0 +1,156 @@
+---
+title: "Methods: Diagnostics & Robustness"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+# pkgdown article — excluded from the tarball via .Rbuildignore (^vignettes/articles).
+---
+
+```{r child="_setup.Rmd"}
+```
+
+## 1. Title & Abstract
+
+This article covers the **diagnostics and robustness** tools that validate an
+event study's inferential assumptions: residual normality (Shapiro-Wilk),
+autocorrelation (Durbin-Watson and Ljung-Box), pre-event trends, wild-bootstrap
+inference, and Monte-Carlo power analysis. After reading, you will know how to
+check whether the parametric $t$-tests are trustworthy for your data and how to
+fall back on bootstrap inference when they are not. All examples run live and
+offline on `earnings_surprises` and simulated data.
+
+## 2. When to Use This Method
+
+Run diagnostics **before** trusting any test statistic. Normality and
+autocorrelation checks tell you whether the parametric CAR $t$-test's
+distributional assumptions hold; a pre-trend test guards against a
+contaminated estimation window. When assumptions fail, the **wild bootstrap**
+provides distribution-free $p$-values, and a **power simulation** tells you
+whether your design could have detected the effect you care about.
+
+## 3. Intuition
+
+The abnormal-return machinery assumes clean, roughly-normal, serially
+uncorrelated residuals. Diagnostics interrogate each of those assumptions. If
+they hold, the closed-form $t$-tests are fine. If they don't, resample: the
+wild bootstrap perturbs the observed abnormal returns with random $\pm 1$
+weights to build an empirical null, sidestepping the normality assumption
+entirely.
+
+## 4. Model & Null Hypothesis
+
+**Ljung-Box** tests residual autocorrelation up to lag $h$:
+
+<!-- Formula verified: R/diagnostics.R:64-67 (Box.test type=Ljung-Box) matches BoxLjung1978 -->
+
+$$
+Q = n(n+2) \sum_{k=1}^{h} \frac{\hat{\rho}_k^2}{n-k}.
+$$
+
+**Durbin-Watson** targets first-order serial correlation of the residuals
+$e_t$ (the package computes the approximate statistic directly):
+
+<!-- Formula verified: R/diagnostics.R:56-61 matches DurbinWatson1950 -->
+
+$$
+d = \frac{\sum_{t=2}^{n} (e_t - e_{t-1})^2}{\sum_{t=1}^{n} e_t^2}.
+$$
+
+The **wild bootstrap** resamples abnormal returns with Rademacher weights
+$w_b \in \{-1, +1\}$:
+
+<!-- Formula verified: R/bootstrap.R:91-93 matches (wild bootstrap) -->
+
+$$
+AR^{*}_{b} = w_b\, \hat{AR}, \qquad w_b \sim \text{Rademacher}.
+$$
+
+**Power** is the Monte-Carlo rejection rate under a specified true effect:
+
+<!-- Formula verified: R/simulation.R:115 matches (Monte Carlo power) -->
+
+$$
+\text{power} = \frac{1}{S}\sum_{s=1}^{S} \mathbf{1}\{\text{reject } H_0 \text{ in sim } s\}.
+$$
+
+The null hypotheses are: $H_0: \hat{\rho}_k = 0$ (no autocorrelation,
+Ljung-Box / DW $d \approx 2$) and $H_0: \mathbb{E}[AR] = 0$ (no abnormal return,
+bootstrap and power) [@BoxLjung1978; @DurbinWatson1950].
+
+## 5. Assumptions
+
+- **Diagnostics are per-event:** normality and autocorrelation are checked on
+  each event's estimation-window residuals.
+- **DW $\approx 2$** indicates no first-order autocorrelation; values far from 2
+  flag it.
+- **Wild bootstrap** relaxes normality but still assumes the abnormal returns
+  are the correct point estimates to resample.
+- **Power simulation** is only as informative as its assumed effect size and
+  noise structure.
+
+## 6. Worked Example
+
+Diagnostics run live on `earnings_surprises`; bootstrap and power run with an
+explicit `seed = 42` for byte-stability.
+
+```{r load-data}
+library(EventStudy)
+data("earnings_surprises")
+```
+
+```{r fit-pipeline}
+task   <- EventStudyTask$new(
+  earnings_surprises$firm, earnings_surprises$index, earnings_surprises$request
+)
+params <- ParameterSet$new()
+task   <- prepare_event_study(task, params)
+task   <- fit_model(task, params)
+task   <- calculate_statistics(task, params)
+```
+
+```{r diagnostics}
+diag <- model_diagnostics(task)   # Shapiro-Wilk, Durbin-Watson, Ljung-Box per event
+pt   <- pretrend_test(task)       # pre-event trend test
+```
+
+```{r robustness}
+# Power on a simulated design (zero-network, seed-stable):
+sim  <- simulate_event_study(n_events = 20, abnormal_return = 0.02,
+                             n_simulations = 200, seed = 42)
+
+# Wild bootstrap inference on the observed task:
+boot <- bootstrap_test(task, n_boot = 199, seed = 42)
+```
+
+## 7. Rendered Table
+
+```{r results-table}
+knitr::kable(
+  diag,
+  caption = "Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson (dw_stat), Ljung-Box (ljung_box_p)."
+)
+```
+
+## 8. Rendered Plot
+
+```{r results-plot, fig.cap="Monte-Carlo rejection rate (power) by event-window day."}
+plot(sim$rejection_by_day$relative_index,
+     sim$rejection_by_day$rejection_rate,
+     type = "b", pch = 19,
+     xlab = "Relative day", ylab = "Rejection rate",
+     main = "Simulated power by event-window day")
+abline(h = 0.05, lty = 2, col = "grey60")
+```
+
+## 9. Interpretation
+
+Read §7 row by row: a small `shapiro_p` rejects residual normality (prefer the
+bootstrap or a nonparametric test); a `dw_stat` far from 2 or a small
+`ljung_box_p` flags autocorrelation (inference standard errors are then
+understated). The power curve in §8 shows how the design's detection rate rises
+around the event day for the assumed effect — a curve that never lifts much
+above the dashed 0.05 line means the study is underpowered for that effect
+size. When the diagnostics fail, the wild-bootstrap $p$-values in `boot`
+(`boot_p_aar`, `boot_p_caar`) are the assumption-light fallback for reporting
+significance.
+
+## References
