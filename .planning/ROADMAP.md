@@ -141,7 +141,9 @@ Archive: `.planning/milestones/v0.61.0-ROADMAP.md`
   2. Each dataset is placed and sized to keep the CRAN tarball clean — either a compressed, documented `data()` dataset with an `.Rd` (`@format`/`@source`) shipped in the same commit as the `.rda`, or an `.Rbuildignore`d site-only `.rds` under `vignettes/articles/data/` — with the placement choice recorded per dataset and the `data/` size budget respected.
   3. Each curated dataset drives a valid end-to-end event study (loads, fits, produces finite statistics) so it is proven usable by a gallery example before that example is authored.
 
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 14-01-PLAN.md — Build earnings_surprises dataset (tracer), roxygen doc, DATA-SOURCES.md registry, CRAN safety gates
 **UI hint**: no
 
 ### Phase 15: Methods Articles + Rendered Outputs
