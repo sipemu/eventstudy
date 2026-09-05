@@ -2,10 +2,8 @@
 title: "Article Title"
 output: rmarkdown::html_vignette
 bibliography: references.bib
-vignette: >
-  %\VignetteIndexEntry{Article Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+# NOTE: No vignette: block — this file is a template, not a CRAN vignette.
+# It is excluded from the tarball via .Rbuildignore (^vignettes/articles).
 ---
 
 ```{r child="_setup.Rmd"}
