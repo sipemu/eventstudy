@@ -1,16 +1,19 @@
 #' Earnings Surprise Multi-Firm Event Study Dataset
 #'
 #' A small, frozen dataset bundling daily prices for three U.S. large-cap firms
-#' and the S&P 500 benchmark around the Q1 2023 earnings surprise quarter,
+#' and the S&P 500 benchmark around the first-calendar-quarter 2023 (Jan-Mar)
+#' earnings announcements, reported late April / early May 2023,
 #' ready to drive a complete event study pipeline (\code{prepare_event_study()}
 #' -> \code{fit_model()} -> \code{calculate_statistics()}).
 #'
-#' All three firms beat consensus EPS estimates in Q1 2023: Apple Inc. reported
-#' on \strong{2023-05-04} and beat by approximately 8\%, driving a strong
-#' next-day return; Microsoft Corporation reported on \strong{2023-04-25},
-#' beating cloud (Azure) estimates with a roughly +7\% next-day response;
-#' Alphabet Inc. reported on \strong{2023-04-25}, with advertising revenue
-#' exceeding expectations. The bundled window layout uses a 200-trading-day
+#' All three firms beat consensus EPS estimates for their respective
+#' January-to-March 2023 quarters: Apple Inc. reported on \strong{2023-05-04}
+#' (its fiscal Q2 FY2023, which runs Jan-Mar) and beat by approximately 8\%,
+#' driving a strong next-day return; Microsoft Corporation reported on
+#' \strong{2023-04-25} (its fiscal Q3 FY2023, which runs Jan-Mar), beating
+#' cloud (Azure) estimates with a roughly +7\% next-day response; Alphabet Inc.
+#' reported on \strong{2023-04-25} (Q1 CY2023, Jan-Mar), with advertising
+#' revenue exceeding expectations. The bundled window layout uses a 200-trading-day
 #' estimation window ending 6 days before each event and an event window of
 #' \code{[-5, +5]} trading days. Running a market model on this single-group
 #' panel produces a positive cumulative average abnormal return (CAAR) over the

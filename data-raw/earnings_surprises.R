@@ -9,10 +9,11 @@
 #                Microsoft Corporation        (MSFT, NASDAQ)
 #                Alphabet Inc. Class A        (GOOGL, NASDAQ)
 #   Benchmark:   S&P 500 index               (^GSPC)
-#   Event:       Q1 2023 earnings beats:
-#                  2023-05-04 -- AAPL Q1 FY2023 earnings (beat consensus ~8%)
-#                  2023-04-25 -- MSFT Q3 FY2023 earnings (Azure beat; +7% next day)
-#                  2023-04-25 -- GOOGL Q1 2023 earnings  (ad revenue rebound)
+#   Event:       First-calendar-quarter 2023 (Jan-Mar) earnings announcements,
+#                reported late April / early May 2023:
+#                  2023-05-04 -- AAPL Q2 FY2023 earnings (Jan-Mar quarter; beat consensus ~8%)
+#                  2023-04-25 -- MSFT Q3 FY2023 earnings (Jan-Mar quarter; Azure beat; +7% next day)
+#                  2023-04-25 -- GOOGL Q1 CY2023 earnings (Jan-Mar quarter; ad revenue rebound)
 #   Date range:  2022-06-01 to 2023-06-30 (~270 trading days, covers the full
 #                200-day estimation window plus [-5, +5] event window with margin).
 #   Access date: 2026-09-05
@@ -28,9 +29,9 @@ firm_tickers <- c("AAPL", "MSFT", "GOOGL")
 index_ticker <- "^GSPC"
 from_date    <- "2022-06-01"
 to_date      <- "2023-06-30"
-event_dates  <- c("04.05.2023",   # AAPL -- Q1 FY2023 earnings, 2023-05-04 in dd.mm.yyyy
-                  "25.04.2023",   # MSFT -- Q3 FY2023 earnings, 2023-04-25
-                  "25.04.2023")   # GOOGL -- Q1 2023 earnings, 2023-04-25
+event_dates  <- c("04.05.2023",   # AAPL -- Q2 FY2023 earnings (Jan-Mar quarter), 2023-05-04 in dd.mm.yyyy
+                  "25.04.2023",   # MSFT -- Q3 FY2023 earnings (Jan-Mar quarter), 2023-04-25
+                  "25.04.2023")   # GOOGL -- Q1 CY2023 earnings (Jan-Mar quarter), 2023-04-25
 
 # --- Fetch firm prices --------------------------------------------------------
 if (!requireNamespace("tidyquant", quietly = TRUE)) {
@@ -84,9 +85,10 @@ earnings_surprises <- list(
     access_date  = format(Sys.Date(), "%Y-%m-%d"),
     note         = paste(
       "3-firm earnings surprise panel.",
-      "All firms beat consensus EPS estimates in Q1 2023.",
-      "AAPL event: 2023-05-04; MSFT and GOOGL event: 2023-04-25.",
-      "Benchmark: S&P 500 (^GSPC)."
+      "All firms beat consensus EPS estimates in the first calendar quarter of 2023 (Jan-Mar),",
+      "reported late April / early May 2023.",
+      "AAPL event: 2023-05-04 (Q2 FY2023); MSFT event: 2023-04-25 (Q3 FY2023);",
+      "GOOGL event: 2023-04-25 (Q1 CY2023). Benchmark: S&P 500 (^GSPC)."
     )
   )
 )
