@@ -122,6 +122,11 @@ sample of even fifteen deals gives ample power at conventional significance
 levels. Weak or diffuse effects, by contrast, demand far larger samples --
 the familiar power-vs-effect-size tradeoff [@MacKinlay1997].
 
+> **Note:** power estimates above are Monte Carlo averages from 200
+> simulation runs. At p ≈ 0.50 the sampling error is roughly ±3–5
+> percentage points (95% interval), so small differences between adjacent
+> grid points are within simulation noise and should not be over-interpreted.
+
 ## Design implications
 
 Power is jointly determined by the true effect size, the number of events, the
