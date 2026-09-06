@@ -287,6 +287,11 @@ articles:
       - data-download
       - automated-reports
 
+  # Note: example-* articles live in vignettes/articles/ (not vignettes/), so
+  # the articles/ prefix is required in these slugs. All other groups (Core
+  # Workflow, Return Models, etc.) use bare slugs because those Rmds live
+  # directly in vignettes/. When adding a future example-*.Rmd, always include
+  # the articles/ prefix here or the build will silently fail.
   - title: "Worked Examples"
     desc: >
       Complete end-to-end analyses across distinct financial domains -- from
