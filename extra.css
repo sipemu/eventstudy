@@ -105,6 +105,7 @@
 .es-section-heading.es-crosssec { border-bottom-color: #dc3545; color: #dc3545; }
 .es-section-heading.es-advisor  { border-bottom-color: #0dcaf0; color: #0dcaf0; }
 .es-section-heading.es-data     { border-bottom-color: #6c757d; color: #6c757d; }
+.es-section-heading.es-examples { border-bottom-color: #20c997; color: #20c997; }
 
 /* Section description */
 .es-section-desc {
@@ -142,3 +143,4 @@
 .es-tag-crosssec { background: #dc3545; }
 .es-tag-advisor  { background: #0dcaf0; }
 .es-tag-data     { background: #6c757d; }
+.es-tag-examples { background: #20c997; }

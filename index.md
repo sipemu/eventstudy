@@ -266,14 +266,14 @@ pretrend_test(task)
 
 | Model | Class | Description |
 |----|----|----|
-| Market Model | `MarketModel` | OLS: $`R_i = \alpha + \beta R_m + \epsilon`$ |
-| Market Adjusted | `MarketAdjustedModel` | $`AR_i = R_i - R_m`$ |
-| Mean Adjusted | `ComparisonPeriodMeanAdjustedModel` | $`AR_i = R_i - \bar{R}_i^{est}`$ |
-| Fama-French 3-Factor | `FamaFrench3FactorModel` | $`R_i - R_f = \alpha + \beta_m(R_m - R_f) + \beta_s SMB + \beta_h HML + \epsilon`$ |
+| Market Model | `MarketModel` | OLS: R_i = \alpha + \beta R_m + \epsilon |
+| Market Adjusted | `MarketAdjustedModel` | AR_i = R_i - R_m |
+| Mean Adjusted | `ComparisonPeriodMeanAdjustedModel` | AR_i = R_i - \bar{R}\_i^{est} |
+| Fama-French 3-Factor | `FamaFrench3FactorModel` | R_i - R_f = \alpha + \beta_m(R_m - R_f) + \beta_s SMB + \beta_h HML + \epsilon |
 | Fama-French 5-Factor | `FamaFrench5FactorModel` | 3-factor + RMW + CMA |
 | Carhart 4-Factor | `Carhart4FactorModel` | 3-factor + MOM |
 | GARCH(1,1) | `GARCHModel` | Time-varying volatility (requires `rugarch`) |
-| BHAR | `BHARModel` | Buy-and-hold: $`\prod(1+R_i) - \prod(1+R_m)`$ |
+| BHAR | `BHARModel` | Buy-and-hold: \prod(1+R_i) - \prod(1+R_m) |
 | Volume | `VolumeModel` | Abnormal trading volume |
 | Volatility | `VolatilityModel` | Abnormal volatility (variance ratio) |
 | Custom | `CustomModel` | Extend `MarketModel` with custom AR logic |
@@ -302,11 +302,11 @@ task <- run_event_study(task, params)
 
 ### Single Event (per-firm AR/CAR)
 
-| Test        | Class       | Description                               |
-|-------------|-------------|-------------------------------------------|
-| AR T-Test   | `ARTTest`   | $`t = AR_{i,t} / \sigma_i`$               |
-| CAR T-Test  | `CARTTest`  | $`t = CAR_i / (\sqrt{L} \cdot \sigma_i)`$ |
-| BHAR T-Test | `BHARTTest` | t-test on buy-and-hold abnormal returns   |
+| Test        | Class       | Description                             |
+|-------------|-------------|-----------------------------------------|
+| AR T-Test   | `ARTTest`   | t = AR\_{i,t} / \sigma_i                |
+| CAR T-Test  | `CARTTest`  | t = CAR_i / (\sqrt{L} \cdot \sigma_i)   |
+| BHAR T-Test | `BHARTTest` | t-test on buy-and-hold abnormal returns |
 
 ### Multiple Events (cross-sectional AAR/CAAR)
 

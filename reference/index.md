@@ -209,3 +209,5 @@ rates, plus bundled example datasets.
   : Download Risk-Free Rate
 - [`dieselgate`](https://sipemu.github.io/eventstudy/reference/dieselgate.md)
   : Volkswagen "Dieselgate" Multi-Automaker Event Study Dataset
+- [`earnings_surprises`](https://sipemu.github.io/eventstudy/reference/earnings_surprises.md)
+  : Earnings Surprise Multi-Firm Event Study Dataset

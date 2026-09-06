@@ -1,5 +1,27 @@
 # Articles
 
+### Methods
+
+Conceptual explanations of return models, test statistics, and advanced
+designs — with formulas, assumptions, and references.
+
+- [Methods Gate: Smoke
+  Test](https://sipemu.github.io/eventstudy/articles/smoke-test.md):
+- [Methods: Return
+  Models](https://sipemu.github.io/eventstudy/articles/methods-return-models.md):
+- [Methods: Test
+  Statistics](https://sipemu.github.io/eventstudy/articles/methods-test-statistics.md):
+- [Methods: Panel /
+  Difference-in-Differences](https://sipemu.github.io/eventstudy/articles/methods-panel-did.md):
+- [Methods: Intraday Event
+  Studies](https://sipemu.github.io/eventstudy/articles/methods-intraday.md):
+- [Methods: Synthetic
+  Control](https://sipemu.github.io/eventstudy/articles/methods-synthetic-control.md):
+- [Methods: AI
+  Advisor](https://sipemu.github.io/eventstudy/articles/methods-ai-advisor.md):
+- [Methods: Diagnostics &
+  Robustness](https://sipemu.github.io/eventstudy/articles/methods-diagnostics.md):
+
 ### Get Started
 
 Package overview with a complete Dieselgate worked example.
@@ -88,3 +110,15 @@ generation.
   Data](https://sipemu.github.io/eventstudy/articles/data-download.md):
 - [Automated Event Study
   Reports](https://sipemu.github.io/eventstudy/articles/automated-reports.md):
+
+### Worked Examples
+
+Complete end-to-end analyses across distinct financial domains – from
+raw data through model fit, test statistics, plots, and interpretation.
+
+- [Example: Earnings Surprise Analysis (AAPL, MSFT,
+  GOOGL)](https://sipemu.github.io/eventstudy/articles/example-earnings.md):
+- [Example: Regulatory Shock -- Dieselgate VW-Group vs
+  Peers](https://sipemu.github.io/eventstudy/articles/example-regulatory.md):
+- [Example: M&A Deal Announcements -- Power Analysis on Synthetic
+  Data](https://sipemu.github.io/eventstudy/articles/example-ma.md):

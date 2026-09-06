@@ -140,21 +140,20 @@ task_b <- PanelEventStudyTask$new(
 
 Miller presents a general dynamic specification for panel event studies:
 
-``` math
-Y_{it} = \alpha_i + \gamma_t + \sum_{j \neq j^*} \delta_j \cdot D_{it}^j + \varepsilon_{it}
-```
+Y\_{it} = \alpha_i + \gamma_t + \sum\_{j \neq j^\*} \delta_j \cdot
+D\_{it}^j + \varepsilon\_{it}
 
 where:
 
-- $`\alpha_i`$ are **unit fixed effects**, absorbing time-invariant
+- \alpha_i are **unit fixed effects**, absorbing time-invariant
   differences across units;
-- $`\gamma_t`$ are **time fixed effects**, absorbing common shocks that
+- \gamma_t are **time fixed effects**, absorbing common shocks that
   affect all units in a given period;
-- $`D_{it}^j`$ is an **event-time indicator** equal to 1 when unit $`i`$
-  is exactly $`j`$ periods from its treatment date at time $`t`$;
-- $`j^*`$ is the **omitted reference period** (normalized to zero); and
-- $`\delta_j`$ is the treatment effect at event time $`j`$, measured
-  relative to the reference period.
+- D\_{it}^j is an **event-time indicator** equal to 1 when unit i is
+  exactly j periods from its treatment date at time t;
+- j^\* is the **omitted reference period** (normalized to zero); and
+- \delta_j is the treatment effect at event time j, measured relative to
+  the reference period.
 
 The EventStudy package implements this equation in
 [`estimate_panel_event_study()`](https://sipemu.github.io/eventstudy/reference/estimate_panel_event_study.md).
@@ -164,17 +163,14 @@ The `method` argument selects the variant, while `leads`, `lags`, and
 ## Static TWFE: The Single-Coefficient Model (Miller Section II.A)
 
 The simplest panel event study specification restricts all
-post-treatment effects to a single coefficient $`\beta`$:
+post-treatment effects to a single coefficient \beta:
 
-``` math
-Y_{it} = \alpha_i + \gamma_t + \beta \cdot D_{it} + \varepsilon_{it}
-```
+Y\_{it} = \alpha_i + \gamma_t + \beta \cdot D\_{it} + \varepsilon\_{it}
 
-Here $`D_{it} = 1`$ if unit $`i`$ has been treated by time $`t`$
-(post-treatment), and 0 otherwise. The coefficient $`\beta`$ is the
-**average treatment effect on the treated (ATT)** under the assumption
-that the treatment effect is constant across all post-treatment periods
-and cohorts.
+Here D\_{it} = 1 if unit i has been treated by time t (post-treatment),
+and 0 otherwise. The coefficient \beta is the **average treatment effect
+on the treated (ATT)** under the assumption that the treatment effect is
+constant across all post-treatment periods and cohorts.
 
 ``` r
 
@@ -191,9 +187,9 @@ relaxes it.
 
 ## Dynamic TWFE: Event-Time Coefficients (Miller Section II.B)
 
-The dynamic specification estimates a separate coefficient $`\delta_j`$
-for each event-time period, allowing us to trace out the treatment
-effect path:
+The dynamic specification estimates a separate coefficient \delta_j for
+each event-time period, allowing us to trace out the treatment effect
+path:
 
 ``` r
 
@@ -216,9 +212,9 @@ task_a$results$coefficients
 #>              ...
 ```
 
-The pre-treatment coefficients ($`j < 0`$) should be close to zero under
-the parallel trends assumption, while the post-treatment coefficients
-($`j \geq 0`$) capture the treatment effect dynamics.
+The pre-treatment coefficients (j \< 0) should be close to zero under
+the parallel trends assumption, while the post-treatment coefficients (j
+\geq 0) capture the treatment effect dynamics.
 
 ``` r
 
@@ -233,13 +229,12 @@ periods.
 
 One event-time indicator must be omitted to avoid perfect collinearity
 with the unit and time fixed effects. This is the **reference period**
-$`j^*`$, and all coefficients $`\delta_j`$ are interpreted relative to
-it.
+j^\*, and all coefficients \delta_j are interpreted relative to it.
 
 Miller emphasizes that the choice of reference period is not merely a
 mechanical necessity—it has **substantive implications**. The default
 `base_period = -1` normalizes to the period immediately before
-treatment, so that $`\delta_0`$ captures the immediate treatment effect.
+treatment, so that \delta_0 captures the immediate treatment effect.
 Alternative choices include:
 
 ``` r
@@ -254,9 +249,9 @@ task_a <- estimate_panel_event_study(
 )
 ```
 
-With `base_period = -2`, the coefficient at $`j = -1`$ becomes
-interpretable as a test for anticipation effects: if units begin
-reacting before treatment, this coefficient will be non-zero.
+With `base_period = -2`, the coefficient at j = -1 becomes interpretable
+as a test for anticipation effects: if units begin reacting before
+treatment, this coefficient will be non-zero.
 
 Miller also discusses **extended reference periods** where multiple
 pre-treatment periods are pooled as the reference group. While the
@@ -267,15 +262,14 @@ Section 9 on pre-trend testing).
 ## Endpoint Binning (Miller Section IV)
 
 In practice, event time extends beyond the window we estimate. Miller
-discusses **endpoint binning**: grouping all event times below $`-K`$
-(or above $`K`$) into a single bin. This prevents observations far from
-the treatment date from being dropped and captures the cumulative effect
-of treatment at long horizons.
+discusses **endpoint binning**: grouping all event times below -K (or
+above K) into a single bin. This prevents observations far from the
+treatment date from being dropped and captures the cumulative effect of
+treatment at long horizons.
 
 The package automatically bins at the `leads`/`lags` boundaries. The
-coefficient at relative time $`-\text{leads}`$ captures the average
-effect for all event times $`\leq -\text{leads}`$, and similarly for
-$`+\text{lags}`$.
+coefficient at relative time -\text{leads} captures the average effect
+for all event times \leq -\text{leads}, and similarly for +\text{lags}.
 
 ``` r
 
@@ -415,10 +409,10 @@ is fundamentally untestable, we can look for indirect evidence.
 
 ### Visual Inspection
 
-The pre-treatment coefficients $`\delta_j`$ for $`j < 0`$ should be
-close to zero. The event study plot provides a visual check—if the
-pre-treatment coefficients trend systematically away from zero, the
-parallel trends assumption is suspect.
+The pre-treatment coefficients \delta_j for j \< 0 should be close to
+zero. The event study plot provides a visual check—if the pre-treatment
+coefficients trend systematically away from zero, the parallel trends
+assumption is suspect.
 
 ### Joint Test for Pre-trends
 
@@ -465,7 +459,7 @@ would have been absent treatment. This helps readers assess both the
 magnitude and plausibility of the estimates.
 
 From the dynamic model, the counterfactual for a treated unit at event
-time $`j`$ is the observed outcome minus the estimated effect:
+time j is the observed outcome minus the estimated effect:
 
 ``` r
 

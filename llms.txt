@@ -266,14 +266,14 @@ pretrend_test(task)
 
 | Model | Class | Description |
 |----|----|----|
-| Market Model | `MarketModel` | OLS: $`R_i = \alpha + \beta R_m + \epsilon`$ |
-| Market Adjusted | `MarketAdjustedModel` | $`AR_i = R_i - R_m`$ |
-| Mean Adjusted | `ComparisonPeriodMeanAdjustedModel` | $`AR_i = R_i - \bar{R}_i^{est}`$ |
-| Fama-French 3-Factor | `FamaFrench3FactorModel` | $`R_i - R_f = \alpha + \beta_m(R_m - R_f) + \beta_s SMB + \beta_h HML + \epsilon`$ |
+| Market Model | `MarketModel` | OLS: R_i = \alpha + \beta R_m + \epsilon |
+| Market Adjusted | `MarketAdjustedModel` | AR_i = R_i - R_m |
+| Mean Adjusted | `ComparisonPeriodMeanAdjustedModel` | AR_i = R_i - \bar{R}\_i^{est} |
+| Fama-French 3-Factor | `FamaFrench3FactorModel` | R_i - R_f = \alpha + \beta_m(R_m - R_f) + \beta_s SMB + \beta_h HML + \epsilon |
 | Fama-French 5-Factor | `FamaFrench5FactorModel` | 3-factor + RMW + CMA |
 | Carhart 4-Factor | `Carhart4FactorModel` | 3-factor + MOM |
 | GARCH(1,1) | `GARCHModel` | Time-varying volatility (requires `rugarch`) |
-| BHAR | `BHARModel` | Buy-and-hold: $`\prod(1+R_i) - \prod(1+R_m)`$ |
+| BHAR | `BHARModel` | Buy-and-hold: \prod(1+R_i) - \prod(1+R_m) |
 | Volume | `VolumeModel` | Abnormal trading volume |
 | Volatility | `VolatilityModel` | Abnormal volatility (variance ratio) |
 | Custom | `CustomModel` | Extend `MarketModel` with custom AR logic |
@@ -302,11 +302,11 @@ task <- run_event_study(task, params)
 
 ### Single Event (per-firm AR/CAR)
 
-| Test        | Class       | Description                               |
-|-------------|-------------|-------------------------------------------|
-| AR T-Test   | `ARTTest`   | $`t = AR_{i,t} / \sigma_i`$               |
-| CAR T-Test  | `CARTTest`  | $`t = CAR_i / (\sqrt{L} \cdot \sigma_i)`$ |
-| BHAR T-Test | `BHARTTest` | t-test on buy-and-hold abnormal returns   |
+| Test        | Class       | Description                             |
+|-------------|-------------|-----------------------------------------|
+| AR T-Test   | `ARTTest`   | t = AR\_{i,t} / \sigma_i                |
+| CAR T-Test  | `CARTTest`  | t = CAR_i / (\sqrt{L} \cdot \sigma_i)   |
+| BHAR T-Test | `BHARTTest` | t-test on buy-and-hold abnormal returns |
 
 ### Multiple Events (cross-sectional AAR/CAAR)
 
@@ -783,8 +783,32 @@ rates, plus bundled example datasets.
   : Download Risk-Free Rate
 - [`dieselgate`](https://sipemu.github.io/eventstudy/reference/dieselgate.md)
   : Volkswagen "Dieselgate" Multi-Automaker Event Study Dataset
+- [`earnings_surprises`](https://sipemu.github.io/eventstudy/reference/earnings_surprises.md)
+  : Earnings Surprise Multi-Firm Event Study Dataset
 
 # Articles
+
+### Methods
+
+Conceptual explanations of return models, test statistics, and advanced
+designs — with formulas, assumptions, and references.
+
+- [Methods Gate: Smoke
+  Test](https://sipemu.github.io/eventstudy/articles/smoke-test.md):
+- [Methods: Return
+  Models](https://sipemu.github.io/eventstudy/articles/methods-return-models.md):
+- [Methods: Test
+  Statistics](https://sipemu.github.io/eventstudy/articles/methods-test-statistics.md):
+- [Methods: Panel /
+  Difference-in-Differences](https://sipemu.github.io/eventstudy/articles/methods-panel-did.md):
+- [Methods: Intraday Event
+  Studies](https://sipemu.github.io/eventstudy/articles/methods-intraday.md):
+- [Methods: Synthetic
+  Control](https://sipemu.github.io/eventstudy/articles/methods-synthetic-control.md):
+- [Methods: AI
+  Advisor](https://sipemu.github.io/eventstudy/articles/methods-ai-advisor.md):
+- [Methods: Diagnostics &
+  Robustness](https://sipemu.github.io/eventstudy/articles/methods-diagnostics.md):
 
 ### Get Started
 
@@ -874,3 +898,15 @@ generation.
   Data](https://sipemu.github.io/eventstudy/articles/data-download.md):
 - [Automated Event Study
   Reports](https://sipemu.github.io/eventstudy/articles/automated-reports.md):
+
+### Worked Examples
+
+Complete end-to-end analyses across distinct financial domains – from
+raw data through model fit, test statistics, plots, and interpretation.
+
+- [Example: Earnings Surprise Analysis (AAPL, MSFT,
+  GOOGL)](https://sipemu.github.io/eventstudy/articles/example-earnings.md):
+- [Example: Regulatory Shock -- Dieselgate VW-Group vs
+  Peers](https://sipemu.github.io/eventstudy/articles/example-regulatory.md):
+- [Example: M&A Deal Announcements -- Power Analysis on Synthetic
+  Data](https://sipemu.github.io/eventstudy/articles/example-ma.md):

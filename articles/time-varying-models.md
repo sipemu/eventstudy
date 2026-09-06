@@ -72,22 +72,16 @@ abline(h = stats$beta, lty = 2, col = "red")  # final beta
 ### How it Works
 
 1.  For each position in the estimation window, a rolling OLS regression
-    is fit:
-    ``` math
-    R_{firm,t} = \alpha_w + \beta_w R_{market,t} + \varepsilon_t
-    ```
-    where $`w`$ indexes windows of size `window_size`.
+    is fit: R\_{firm,t} = \alpha_w + \beta_w R\_{market,t} +
+    \varepsilon_t where w indexes windows of size `window_size`.
 
-2.  This produces time series of $`\alpha_t`$, $`\beta_t`$, and
-    $`\sigma_t`$.
+2.  This produces time series of \alpha_t, \beta_t, and \sigma_t.
 
 3.  The parameters from the **last** rolling window are used to predict
     expected returns in the event window.
 
-4.  Abnormal returns are computed as:
-    ``` math
-    AR_t = R_{firm,t} - (\hat{\alpha}_{last} + \hat{\beta}_{last} R_{market,t})
-    ```
+4.  Abnormal returns are computed as: AR_t = R\_{firm,t} -
+    (\hat{\alpha}\_{last} + \hat{\beta}\_{last} R\_{market,t})
 
 ## DCC-GARCH Model
 
@@ -136,12 +130,10 @@ ps <- ParameterSet$new(return_model = dcc)
     - The DCC(a,b) layer models the time-varying correlation
 
 2.  The time-varying beta is computed from the conditional covariance
-    matrix $`H_t`$:
-    ``` math
-    \beta_t = \frac{H_{12,t}}{H_{22,t}} = \frac{Cov(R_{firm}, R_{market})_t}{Var(R_{market})_t}
-    ```
+    matrix H_t: \beta_t = \frac{H\_{12,t}}{H\_{22,t}} =
+    \frac{Cov(R\_{firm}, R\_{market})\_t}{Var(R\_{market})\_t}
 
-3.  The last $`\beta_t`$ is used for event-window prediction.
+3.  The last \beta_t is used for event-window prediction.
 
 ### Convergence Notes
 

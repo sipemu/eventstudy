@@ -81,9 +81,8 @@ factor_tbl <- tibble(
 The three-factor model (Fama & French, 1993) explains stock returns
 using market risk, size (SMB), and value (HML) factors:
 
-``` math
-R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s \text{SMB} + \beta_h \text{HML} + \epsilon
-```
+R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s \text{SMB} + \beta_h
+\text{HML} + \epsilon
 
 ### Running the Study
 
@@ -154,9 +153,8 @@ task$get_model_stats(event_id = 1)
 The five-factor model (Fama & French, 2015) adds profitability (RMW) and
 investment (CMA) factors:
 
-``` math
-R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s \text{SMB} + \beta_h \text{HML} + \beta_r \text{RMW} + \beta_c \text{CMA} + \epsilon
-```
+R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s \text{SMB} + \beta_h
+\text{HML} + \beta_r \text{RMW} + \beta_c \text{CMA} + \epsilon
 
 ``` r
 
@@ -179,9 +177,8 @@ task_ff5 <- task_ff5 |>
 The Carhart (1997) model adds a momentum factor (MOM) to the
 three-factor model:
 
-``` math
-R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s \text{SMB} + \beta_h \text{HML} + \beta_{mom} \text{MOM} + \epsilon
-```
+R_i - R_f = \alpha + \beta_m (R_m - R_f) + \beta_s \text{SMB} + \beta_h
+\text{HML} + \beta\_{mom} \text{MOM} + \epsilon
 
 ``` r
 
@@ -206,12 +203,9 @@ clustering**—the tendency of large returns to follow large returns. The
 mean equation includes the market return as a regressor (like the Market
 Model), but the variance is modeled as time-varying:
 
-``` math
-R_{i,t} = \mu + \beta R_{m,t} + \epsilon_t, \quad \epsilon_t \sim N(0, \sigma_t^2)
-```
-``` math
-\sigma_t^2 = \omega + \alpha_1 \epsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2
-```
+R\_{i,t} = \mu + \beta R\_{m,t} + \epsilon_t, \quad \epsilon_t \sim N(0,
+\sigma_t^2) \sigma_t^2 = \omega + \alpha_1 \epsilon\_{t-1}^2 + \beta_1
+\sigma\_{t-1}^2
 
 ### Requirements
 
@@ -275,17 +269,14 @@ is often sufficient.
 
 Standard CARs sum daily abnormal returns:
 
-``` math
-CAR_i = \sum_{t=1}^{T} AR_{i,t}
-```
+CAR_i = \sum\_{t=1}^{T} AR\_{i,t}
 
 For **long horizons** (months or years), this introduces a compounding
 bias. BHAR instead compounds returns, which better reflects the actual
 investor experience:
 
-``` math
-BHAR_i = \prod_{t=1}^{T} (1 + R_{i,t}) - \prod_{t=1}^{T} (1 + R_{m,t})
-```
+BHAR_i = \prod\_{t=1}^{T} (1 + R\_{i,t}) - \prod\_{t=1}^{T} (1 +
+R\_{m,t})
 
 ### Running a BHAR Study
 

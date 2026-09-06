@@ -163,6 +163,8 @@ Useful links:
 
 - <https://github.com/sipemu/eventstudy>
 
+- <https://sipemu.github.io/eventstudy/>
+
 - Report bugs at <https://github.com/sipemu/eventstudy/issues>
 
 ## Author

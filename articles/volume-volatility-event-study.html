@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Volume and Volatility Event Studies • EventStudy</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -32,7 +33,29 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/introduction.html">Get Started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/gallery.html">Articles</a></li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-methods" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Methods</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-methods">
+<li><a class="dropdown-item" href="../articles/smoke-test.html">Methods Overview</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-return-models.html">Return Models</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-test-statistics.html">Test Statistics</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-panel-did.html">Panel / DiD</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-intraday.html">Intraday</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-synthetic-control.html">Synthetic Control</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-ai-advisor.html">AI Advisor</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-diagnostics.html">Diagnostics &amp; Robustness</a></li>
+  </ul>
+</li>
+<li class="nav-item"><a class="nav-link" href="../articles/gallery.html">Gallery</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
+<li><a class="dropdown-item" href="../articles/example-earnings.html">Earnings Surprise</a></li>
+    <li><a class="dropdown-item" href="../articles/example-regulatory.html">Regulatory Shock</a></li>
+    <li><a class="dropdown-item" href="../articles/example-ma.html">M&amp;A Announcements</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -56,7 +79,7 @@
                         <h4 data-toc-skip class="author">Simon
 Mueller</h4>
             
-            <h4 data-toc-skip class="date">2026-09-05</h4>
+            <h4 data-toc-skip class="date">2026-09-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sipemu/eventstudy/blob/main/vignettes/volume-volatility-event-study.Rmd" class="external-link"><code>vignettes/volume-volatility-event-study.Rmd</code></a></small>
       <div class="d-none name"><code>volume-volatility-event-study.Rmd</code></div>
@@ -139,11 +162,11 @@ the firm data.</p>
 extra columns—it uses the firm returns already computed by
 <code><a href="../reference/prepare_event_study.html">prepare_event_study()</a></code>. Abnormal volatility is defined
 as:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><msub><mi>V</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mfrac><msubsup><mi>R</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow><mn>2</mn></msubsup><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>i</mi><mn>2</mn></msubsup></mfrac><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">AV_{i,t} = \frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>i</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\hat{\sigma}_i^2</annotation></semantics></math>
-is the variance of firm returns in the estimation window. Positive
-values indicate higher-than-expected volatility.</p>
+<p><span class="math display">AV_{i,t} =
+\frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1</span></p>
+<p>where <span class="math inline">\hat{\sigma}_i^2</span> is the
+variance of firm returns in the estimation window. Positive values
+indicate higher-than-expected volatility.</p>
 </div>
 </div>
 <div class="section level2">
@@ -223,7 +246,8 @@ disable the transform:</p>
 </h3>
 <p>Abnormal volume is the difference between observed (log-)volume and
 the estimation-window mean:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>V</mi><mi>o</mi><mi>l</mi><mi>u</mi><mi>m</mi><msub><mi>e</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>V</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msup><mover><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>V</mi><mi>i</mi></msub><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">¯</mo></mover><mtext mathvariant="normal">est</mtext></msup></mrow><annotation encoding="application/x-tex">AVolume_{i,t} = \log(V_{i,t} + 1) - \overline{\log(V_i + 1)}^{\text{est}}</annotation></semantics></math></p>
+<p><span class="math display">AVolume_{i,t} = \log(V_{i,t} + 1) -
+\overline{\log(V_i + 1)}^{\text{est}}</span></p>
 <p>Positive values indicate higher-than-normal trading activity. The
 test statistics (AR T-test, CAR T-test, etc.) are applied to these
 abnormal volume measures in the same way as for abnormal returns.</p>
@@ -304,17 +328,18 @@ study—no extra columns are needed.</p>
 <h3 id="interpreting-results-1">Interpreting Results<a class="anchor" aria-label="anchor" href="#interpreting-results-1"></a>
 </h3>
 <p>Abnormal volatility is a <strong>variance ratio</strong> minus 1:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><msub><mi>V</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mfrac><msubsup><mi>R</mi><mrow><mi>i</mi><mo>,</mo><mi>t</mi></mrow><mn>2</mn></msubsup><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>i</mi><mn>2</mn></msubsup></mfrac><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">AV_{i,t} = \frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1</annotation></semantics></math></p>
+<p><span class="math display">AV_{i,t} =
+\frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1</span></p>
 <ul>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>V</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">AV = 0</annotation></semantics></math>:
-volatility matches estimation-window expectations.</li>
+<span class="math inline">AV = 0</span>: volatility matches
+estimation-window expectations.</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>V</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">AV &gt; 0</annotation></semantics></math>:
-volatility is higher than expected (e.g., information arrival).</li>
+<span class="math inline">AV &gt; 0</span>: volatility is higher
+than expected (e.g., information arrival).</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>V</mi><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">AV &lt; 0</annotation></semantics></math>:
-volatility is lower than expected (e.g., quiet trading).</li>
+<span class="math inline">AV &lt; 0</span>: volatility is lower than
+expected (e.g., quiet trading).</li>
 </ul>
 <p>Values around event dates are typically large and positive when
 events carry new information, regardless of the direction of the price

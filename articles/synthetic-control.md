@@ -155,11 +155,9 @@ The placebo test re-estimates the synthetic control for each donor unit
 as a pseudo-treated unit. The treated unit’s RMSPE ratio is ranked among
 all units to produce a p-value:
 
-``` math
-p = \frac{\text{rank of treated ratio}}{N_{donors} + 1}
-```
+p = \frac{\text{rank of treated ratio}}{N\_{donors} + 1}
 
-where the RMSPE ratio is $`\frac{RMSPE_{post}}{RMSPE_{pre}}`$.
+where the RMSPE ratio is \frac{RMSPE\_{post}}{RMSPE\_{pre}}.
 
 ``` r
 

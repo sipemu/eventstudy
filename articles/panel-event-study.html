@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Panel Event Studies: A Guide Following Miller (2023) • EventStudy</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -32,7 +33,29 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/introduction.html">Get Started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/gallery.html">Articles</a></li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-methods" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Methods</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-methods">
+<li><a class="dropdown-item" href="../articles/smoke-test.html">Methods Overview</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-return-models.html">Return Models</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-test-statistics.html">Test Statistics</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-panel-did.html">Panel / DiD</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-intraday.html">Intraday</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-synthetic-control.html">Synthetic Control</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-ai-advisor.html">AI Advisor</a></li>
+    <li><a class="dropdown-item" href="../articles/methods-diagnostics.html">Diagnostics &amp; Robustness</a></li>
+  </ul>
+</li>
+<li class="nav-item"><a class="nav-link" href="../articles/gallery.html">Gallery</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
+<li><a class="dropdown-item" href="../articles/example-earnings.html">Earnings Surprise</a></li>
+    <li><a class="dropdown-item" href="../articles/example-regulatory.html">Regulatory Shock</a></li>
+    <li><a class="dropdown-item" href="../articles/example-ma.html">M&amp;A Announcements</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -56,7 +79,7 @@
                         <h4 data-toc-skip class="author">Simon
 Mueller</h4>
             
-            <h4 data-toc-skip class="date">2026-09-05</h4>
+            <h4 data-toc-skip class="date">2026-09-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sipemu/eventstudy/blob/main/vignettes/panel-event-study.Rmd" class="external-link"><code>vignettes/panel-event-study.Rmd</code></a></small>
       <div class="d-none name"><code>panel-event-study.Rmd</code></div>
@@ -201,34 +224,29 @@ period 10; fifteen are never treated.</p>
 </h2>
 <p>Miller presents a general dynamic specification for panel event
 studies:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mrow><mi>i</mi><mi>t</mi></mrow></msub><mo>=</mo><msub><mi>α</mi><mi>i</mi></msub><mo>+</mo><msub><mi>γ</mi><mi>t</mi></msub><mo>+</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>≠</mo><msup><mi>j</mi><mo>*</mo></msup></mrow></munder><msub><mi>δ</mi><mi>j</mi></msub><mo>⋅</mo><msubsup><mi>D</mi><mrow><mi>i</mi><mi>t</mi></mrow><mi>j</mi></msubsup><mo>+</mo><msub><mi>ε</mi><mrow><mi>i</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Y_{it} = \alpha_i + \gamma_t + \sum_{j \neq j^*} \delta_j \cdot D_{it}^j + \varepsilon_{it}</annotation></semantics></math></p>
+<p><span class="math display">Y_{it} = \alpha_i + \gamma_t + \sum_{j
+\neq j^*} \delta_j \cdot D_{it}^j + \varepsilon_{it}</span></p>
 <p>where:</p>
 <ul>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>α</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\alpha_i</annotation></semantics></math>
-are <strong>unit fixed effects</strong>, absorbing time-invariant
-differences across units;</li>
+<span class="math inline">\alpha_i</span> are <strong>unit fixed
+effects</strong>, absorbing time-invariant differences across
+units;</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>t</mi></msub><annotation encoding="application/x-tex">\gamma_t</annotation></semantics></math>
-are <strong>time fixed effects</strong>, absorbing common shocks that
-affect all units in a given period;</li>
+<span class="math inline">\gamma_t</span> are <strong>time fixed
+effects</strong>, absorbing common shocks that affect all units in a
+given period;</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>D</mi><mrow><mi>i</mi><mi>t</mi></mrow><mi>j</mi></msubsup><annotation encoding="application/x-tex">D_{it}^j</annotation></semantics></math>
-is an <strong>event-time indicator</strong> equal to 1 when unit
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-is exactly
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-periods from its treatment date at time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>;</li>
+<span class="math inline">D_{it}^j</span> is an <strong>event-time
+indicator</strong> equal to 1 when unit <span class="math inline">i</span> is exactly <span class="math inline">j</span> periods from its treatment date at time
+<span class="math inline">t</span>;</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>j</mi><mo>*</mo></msup><annotation encoding="application/x-tex">j^*</annotation></semantics></math>
-is the <strong>omitted reference period</strong> (normalized to zero);
-and</li>
+<span class="math inline">j^*</span> is the <strong>omitted
+reference period</strong> (normalized to zero); and</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>j</mi></msub><annotation encoding="application/x-tex">\delta_j</annotation></semantics></math>
-is the treatment effect at event time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>,
-measured relative to the reference period.</li>
+<span class="math inline">\delta_j</span> is the treatment effect at
+event time <span class="math inline">j</span>, measured relative to the
+reference period.</li>
 </ul>
 <p>The EventStudy package implements this equation in
 <code><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study()</a></code>. The <code>method</code>
@@ -240,19 +258,13 @@ window and normalization.</p>
 <h2 id="static-twfe-the-single-coefficient-model-miller-section-ii-a">Static TWFE: The Single-Coefficient Model (Miller Section II.A)<a class="anchor" aria-label="anchor" href="#static-twfe-the-single-coefficient-model-miller-section-ii-a"></a>
 </h2>
 <p>The simplest panel event study specification restricts all
-post-treatment effects to a single coefficient
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mrow><mi>i</mi><mi>t</mi></mrow></msub><mo>=</mo><msub><mi>α</mi><mi>i</mi></msub><mo>+</mo><msub><mi>γ</mi><mi>t</mi></msub><mo>+</mo><mi>β</mi><mo>⋅</mo><msub><mi>D</mi><mrow><mi>i</mi><mi>t</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mrow><mi>i</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Y_{it} = \alpha_i + \gamma_t + \beta \cdot D_{it} + \varepsilon_{it}</annotation></semantics></math></p>
-<p>Here
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mrow><mi>i</mi><mi>t</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">D_{it} = 1</annotation></semantics></math>
-if unit
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-has been treated by time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
-(post-treatment), and 0 otherwise. The coefficient
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
-is the <strong>average treatment effect on the treated (ATT)</strong>
-under the assumption that the treatment effect is constant across all
+post-treatment effects to a single coefficient <span class="math inline">\beta</span>:</p>
+<p><span class="math display">Y_{it} = \alpha_i + \gamma_t + \beta \cdot
+D_{it} + \varepsilon_{it}</span></p>
+<p>Here <span class="math inline">D_{it} = 1</span> if unit <span class="math inline">i</span> has been treated by time <span class="math inline">t</span> (post-treatment), and 0 otherwise. The
+coefficient <span class="math inline">\beta</span> is the
+<strong>average treatment effect on the treated (ATT)</strong> under the
+assumption that the treatment effect is constant across all
 post-treatment periods and cohorts.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">task_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span><span class="va">task_a</span>, method <span class="op">=</span> <span class="st">"static_twfe"</span><span class="op">)</span></span>
@@ -267,10 +279,8 @@ relaxes it.</p>
 <div class="section level2">
 <h2 id="dynamic-twfe-event-time-coefficients-miller-section-ii-b">Dynamic TWFE: Event-Time Coefficients (Miller Section II.B)<a class="anchor" aria-label="anchor" href="#dynamic-twfe-event-time-coefficients-miller-section-ii-b"></a>
 </h2>
-<p>The dynamic specification estimates a separate coefficient
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>j</mi></msub><annotation encoding="application/x-tex">\delta_j</annotation></semantics></math>
-for each event-time period, allowing us to trace out the treatment
-effect path:</p>
+<p>The dynamic specification estimates a separate coefficient <span class="math inline">\delta_j</span> for each event-time period, allowing
+us to trace out the treatment effect path:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">task_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span></span>
 <span>  <span class="va">task_a</span>,</span>
@@ -289,12 +299,10 @@ effect path:</p>
 <span><span class="co">#&gt;               0    1.95     0.22      8.86   &lt;0.001</span></span>
 <span><span class="co">#&gt;               1    2.03     0.23      8.83   &lt;0.001</span></span>
 <span><span class="co">#&gt;              ...</span></span></code></pre></div>
-<p>The pre-treatment coefficients
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">j &lt; 0</annotation></semantics></math>)
-should be close to zero under the parallel trends assumption, while the
-post-treatment coefficients
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">j \geq 0</annotation></semantics></math>)
-capture the treatment effect dynamics.</p>
+<p>The pre-treatment coefficients (<span class="math inline">j &lt;
+0</span>) should be close to zero under the parallel trends assumption,
+while the post-treatment coefficients (<span class="math inline">j \geq
+0</span>) capture the treatment effect dynamics.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_panel_event_study.html">plot_panel_event_study</a></span><span class="op">(</span><span class="va">task_a</span>, title <span class="op">=</span> <span class="st">"Dynamic TWFE - Single Cohort"</span><span class="op">)</span></span></code></pre></div>
 <p>The plot shows point estimates and confidence intervals at each event
@@ -306,18 +314,14 @@ periods.</p>
 </h2>
 <p>One event-time indicator must be omitted to avoid perfect
 collinearity with the unit and time fixed effects. This is the
-<strong>reference period</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>j</mi><mo>*</mo></msup><annotation encoding="application/x-tex">j^*</annotation></semantics></math>,
-and all coefficients
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>j</mi></msub><annotation encoding="application/x-tex">\delta_j</annotation></semantics></math>
-are interpreted relative to it.</p>
+<strong>reference period</strong> <span class="math inline">j^*</span>,
+and all coefficients <span class="math inline">\delta_j</span> are
+interpreted relative to it.</p>
 <p>Miller emphasizes that the choice of reference period is not merely a
 mechanical necessity—it has <strong>substantive implications</strong>.
 The default <code>base_period = -1</code> normalizes to the period
-immediately before treatment, so that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\delta_0</annotation></semantics></math>
-captures the immediate treatment effect. Alternative choices
-include:</p>
+immediately before treatment, so that <span class="math inline">\delta_0</span> captures the immediate treatment
+effect. Alternative choices include:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Normalize to two periods before treatment</span></span>
 <span><span class="va">task_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span></span>
@@ -327,10 +331,9 @@ include:</p>
 <span>  lags        <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  base_period <span class="op">=</span> <span class="op">-</span><span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>With <code>base_period = -2</code>, the coefficient at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>=</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">j = -1</annotation></semantics></math>
-becomes interpretable as a test for anticipation effects: if units begin
-reacting before treatment, this coefficient will be non-zero.</p>
+<p>With <code>base_period = -2</code>, the coefficient at <span class="math inline">j = -1</span> becomes interpretable as a test for
+anticipation effects: if units begin reacting before treatment, this
+coefficient will be non-zero.</p>
 <p>Miller also discusses <strong>extended reference periods</strong>
 where multiple pre-treatment periods are pooled as the reference group.
 While the package normalizes a single period, you can approximate this
@@ -342,21 +345,14 @@ zero (see Section 9 on pre-trend testing).</p>
 </h2>
 <p>In practice, event time extends beyond the window we estimate. Miller
 discusses <strong>endpoint binning</strong>: grouping all event times
-below
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mi>K</mi></mrow><annotation encoding="application/x-tex">-K</annotation></semantics></math>
-(or above
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>)
-into a single bin. This prevents observations far from the treatment
-date from being dropped and captures the cumulative effect of treatment
-at long horizons.</p>
+below <span class="math inline">-K</span> (or above <span class="math inline">K</span>) into a single bin. This prevents
+observations far from the treatment date from being dropped and captures
+the cumulative effect of treatment at long horizons.</p>
 <p>The package automatically bins at the
 <code>leads</code>/<code>lags</code> boundaries. The coefficient at
-relative time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mtext mathvariant="normal">leads</mtext></mrow><annotation encoding="application/x-tex">-\text{leads}</annotation></semantics></math>
-captures the average effect for all event times
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><mi>−</mi><mtext mathvariant="normal">leads</mtext></mrow><annotation encoding="application/x-tex">\leq -\text{leads}</annotation></semantics></math>,
-and similarly for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mtext mathvariant="normal">lags</mtext></mrow><annotation encoding="application/x-tex">+\text{lags}</annotation></semantics></math>.</p>
+relative time <span class="math inline">-\text{leads}</span> captures
+the average effect for all event times <span class="math inline">\leq
+-\text{leads}</span>, and similarly for <span class="math inline">+\text{lags}</span>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Narrow window: leads = 3, lags = 3</span></span>
 <span><span class="va">task_a_narrow</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span></span>
@@ -495,13 +491,10 @@ evidence.</p>
 <div class="section level3">
 <h3 id="visual-inspection">Visual Inspection<a class="anchor" aria-label="anchor" href="#visual-inspection"></a>
 </h3>
-<p>The pre-treatment coefficients
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>j</mi></msub><annotation encoding="application/x-tex">\delta_j</annotation></semantics></math>
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">j &lt; 0</annotation></semantics></math>
-should be close to zero. The event study plot provides a visual check—if
-the pre-treatment coefficients trend systematically away from zero, the
-parallel trends assumption is suspect.</p>
+<p>The pre-treatment coefficients <span class="math inline">\delta_j</span> for <span class="math inline">j &lt;
+0</span> should be close to zero. The event study plot provides a visual
+check—if the pre-treatment coefficients trend systematically away from
+zero, the parallel trends assumption is suspect.</p>
 </div>
 <div class="section level3">
 <h3 id="joint-test-for-pre-trends">Joint Test for Pre-trends<a class="anchor" aria-label="anchor" href="#joint-test-for-pre-trends"></a>
@@ -549,9 +542,8 @@ but also the <strong>counterfactual outcomes</strong>—what the treated
 units’ outcomes would have been absent treatment. This helps readers
 assess both the magnitude and plausibility of the estimates.</p>
 <p>From the dynamic model, the counterfactual for a treated unit at
-event time
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-is the observed outcome minus the estimated effect:</p>
+event time <span class="math inline">j</span> is the observed outcome
+minus the estimated effect:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Construct counterfactual for treated units</span></span>
 <span><span class="va">coef_lookup</span> <span class="op">&lt;-</span> <span class="va">task_a</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">coefficients</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>

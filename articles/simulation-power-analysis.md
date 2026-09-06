@@ -11,7 +11,7 @@ function provides Monte Carlo simulation to estimate:
 - **Power**: The probability of rejecting the null hypothesis when the
   alternative is true
 - **Size**: The actual rejection rate under the null (should be close to
-  the nominal $`\alpha`$)
+  the nominal \alpha)
 
 ## Basic Usage
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none">
+  <rect width="360" height="200" fill="#f8f9fa"/>
+  <rect width="360" height="6" fill="#20c997"/>
+  <text x="180" y="28" font-family="sans-serif" font-size="12" font-weight="700" fill="#20c997" text-anchor="middle">M&amp;A Deal Announcements</text>
+  <!-- Axes -->
+  <line x1="30" y1="155" x2="330" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <line x1="30" y1="55" x2="30" y2="155" stroke="#adb5bd" stroke-width="1.5"/>
+  <!-- 0.8 power reference line -->
+  <line x1="30" y1="75" x2="330" y2="75" stroke="#adb5bd" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+  <text x="34" y="72" font-family="sans-serif" font-size="7" fill="#6c757d">0.8</text>
+  <!-- Monotone rising power curve: ~0.05 -> ~0.90 -->
+  <polyline points="40,150 80,146 120,138 160,120 200,96 240,78 280,66 320,60" stroke="#20c997" stroke-width="2.5" fill="none"/>
+  <circle cx="40" cy="150" r="2.5" fill="#20c997"/>
+  <circle cx="160" cy="120" r="2.5" fill="#20c997"/>
+  <circle cx="240" cy="78" r="2.5" fill="#20c997"/>
+  <circle cx="320" cy="60" r="2.5" fill="#20c997"/>
+  <!-- Simulated watermark -->
+  <text x="300" y="60" font-family="sans-serif" font-size="8" font-style="italic" fill="#adb5bd" text-anchor="end">Simulated</text>
+  <text x="185" y="168" font-family="sans-serif" font-size="8" fill="#6c757d" text-anchor="middle">Event window</text>
+</svg>

@@ -62,11 +62,9 @@ The Boehmer, Musumeci & Poulsen (BMP) test can be oversized when
 event-window residuals are cross-sectionally correlated. The
 Kolari-Pynnonen adjustment corrects for this:
 
-``` math
-t_{KP} = t_{BMP} \sqrt{\frac{1 - \bar{r}}{1 + (N-1)\bar{r}}}
-```
+t\_{KP} = t\_{BMP} \sqrt{\frac{1 - \bar{r}}{1 + (N-1)\bar{r}}}
 
-where $`\bar{r}`$ is the average pairwise correlation of standardized
+where \bar{r} is the average pairwise correlation of standardized
 abnormal returns in the estimation window.
 
 ``` r
@@ -111,8 +109,7 @@ boot_result
 
 Two weight distributions are available:
 
-- `"rademacher"` (default): $`w_i \in \{-1, +1\}`$ with equal
-  probability
+- `"rademacher"` (default): w_i \in \\-1, +1\\ with equal probability
 - `"mammen"`: Mammen two-point distribution, better for skewed data
 
 You can also bootstrap only the AAR or CAAR statistic:

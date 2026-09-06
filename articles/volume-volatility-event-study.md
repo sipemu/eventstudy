@@ -63,11 +63,9 @@ firm returns already computed by
 [`prepare_event_study()`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md).
 Abnormal volatility is defined as:
 
-``` math
-AV_{i,t} = \frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1
-```
+AV\_{i,t} = \frac{R\_{i,t}^2}{\hat{\sigma}\_i^2} - 1
 
-where $`\hat{\sigma}_i^2`$ is the variance of firm returns in the
+where \hat{\sigma}\_i^2 is the variance of firm returns in the
 estimation window. Positive values indicate higher-than-expected
 volatility.
 
@@ -151,9 +149,8 @@ vm <- VolumeModel$new(log_transform = FALSE)
 Abnormal volume is the difference between observed (log-)volume and the
 estimation-window mean:
 
-``` math
-AVolume_{i,t} = \log(V_{i,t} + 1) - \overline{\log(V_i + 1)}^{\text{est}}
-```
+AVolume\_{i,t} = \log(V\_{i,t} + 1) - \overline{\log(V_i +
+1)}^{\text{est}}
 
 Positive values indicate higher-than-normal trading activity. The test
 statistics (AR T-test, CAR T-test, etc.) are applied to these abnormal
@@ -240,14 +237,12 @@ task <- task |>
 
 Abnormal volatility is a **variance ratio** minus 1:
 
-``` math
-AV_{i,t} = \frac{R_{i,t}^2}{\hat{\sigma}_i^2} - 1
-```
+AV\_{i,t} = \frac{R\_{i,t}^2}{\hat{\sigma}\_i^2} - 1
 
-- $`AV = 0`$: volatility matches estimation-window expectations.
-- $`AV > 0`$: volatility is higher than expected (e.g., information
+- AV = 0: volatility matches estimation-window expectations.
+- AV \> 0: volatility is higher than expected (e.g., information
   arrival).
-- $`AV < 0`$: volatility is lower than expected (e.g., quiet trading).
+- AV \< 0: volatility is lower than expected (e.g., quiet trading).
 
 Values around event dates are typically large and positive when events
 carry new information, regardless of the direction of the price move.
