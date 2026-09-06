@@ -1,0 +1,168 @@
+---
+title: "Example: Earnings Surprise Analysis (AAPL, MSFT, GOOGL)"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+---
+
+```{r child="_setup.Rmd"}
+```
+
+## Abstract
+
+This worked example takes you from the bundled `earnings_surprises` dataset --
+three US mega-caps (AAPL, MSFT, GOOGL) around their Q1-2023 analyst-beat earnings
+dates -- through a complete market-model event study: data loading, pipeline
+execution, cross-sectional and standardized-residual test statistics (Patell Z
+and BMP), and a rendered cumulative-abnormal-return (CAR) plot with written
+interpretation.
+
+For the theory behind the market model, see
+[Return Models](methods-return-models.html); for the Patell Z and BMP tests, see
+[Test Statistics](methods-test-statistics.html).
+
+## Research question
+
+Do AAPL, MSFT, and GOOGL earn significantly positive abnormal returns around
+their quarterly earnings *beats*? Formally, we test the null
+
+$$H_0:\ \mathbb{E}[AR_t] = 0 \quad \text{for all } t \text{ in the event window},$$
+
+against the alternative that the average abnormal return (AAR) and the
+cumulative average abnormal return (CAAR) differ from zero.
+
+## Data
+
+The `earnings_surprises` dataset ships with the package (in `data/`) and requires
+**no network access**. It is a named list of three tibbles -- `firm` (stacked
+daily adjusted prices for the three firms), `index` (the S&P 500 benchmark), and
+`request` (the event specification: one row per firm with event date and
+estimation/event windows) -- plus a `meta` provenance block.
+
+```{r data}
+library(EventStudy)
+data("earnings_surprises", package = "EventStudy")
+
+# The dataset is a list of tibbles; inspect the pieces we consume.
+dplyr::glimpse(earnings_surprises$firm)
+earnings_surprises$request[, c(
+  "event_id", "firm_symbol", "index_symbol", "event_date",
+  "group", "event_window_start", "event_window_end",
+  "estimation_window_length"
+)]
+```
+
+All three events belong to a single `"Earnings Beat"` group, which lets the
+multi-event statistics aggregate them into one AAR/CAAR series.
+
+## Setup and pipeline
+
+`EventStudyTask$new()` takes the three tibbles positionally --
+firm prices, reference (index) prices, and the request table. We fit a
+`MarketModel` and attach the multi-event statistics we care about
+(`CSectTTest`, `PatellZTest`, `BMPTest`) via a `MultiEventStatisticsSet`.
+
+```{r pipeline}
+task <- EventStudyTask$new(
+  earnings_surprises$firm,    # firm daily adjusted prices
+  earnings_surprises$index,   # benchmark index prices
+  earnings_surprises$request  # event / window specification
+)
+
+params <- ParameterSet$new(
+  return_model = MarketModel$new(),
+  multi_event_statistics = MultiEventStatisticsSet$new(
+    tests = list(CSectTTest$new(), PatellZTest$new(), BMPTest$new())
+  )
+)
+
+result <- run_event_study(task, params)
+```
+
+The pipeline builds the task, fits the market model on each firm's estimation
+window, computes abnormal returns over the event window, and evaluates the
+statistics. See [run_event_study()](../reference/run_event_study.html),
+[EventStudyTask](../reference/EventStudyTask.html),
+[ParameterSet](../reference/ParameterSet.html),
+[MarketModel](../reference/MarketModel.html),
+[PatellZTest](../reference/PatellZTest.html), and
+[BMPTest](../reference/BMPTest.html).
+
+## Results table
+
+The `tidy()` method returns per-firm cumulative abnormal returns as a tidy
+tibble. We call the S3 method explicitly (`tidy.EventStudyTask()`), since the
+`broom` generic is not re-exported by the package.
+
+```{r car-table}
+car_tbl <- EventStudy::tidy.EventStudyTask(result, type = "car")
+
+# Show the last (widest) CAR window per firm.
+car_tbl |>
+  dplyr::group_by(firm_symbol) |>
+  dplyr::slice_tail(n = 1) |>
+  dplyr::ungroup() |>
+  dplyr::select(firm_symbol, term, estimate, std.error, statistic, p.value) |>
+  knitr::kable(
+    digits  = 4,
+    caption = "Cumulative Abnormal Returns by firm (widest event window)"
+  )
+```
+
+## Plot
+
+`plot_event_study()` returns a `ggplot`; wrapping it with `plotly::ggplotly()`
+produces an interactive plot for the article.
+
+```{r car-plot, fig.width = 7, fig.height = 4}
+gg <- plot_event_study(
+  result,
+  type    = "car",
+  event_id = 1L,
+  title   = "AAPL: cumulative abnormal return with 95% confidence band"
+)
+plotly::ggplotly(gg)
+```
+
+## Statistical interpretation
+
+The Patell Z and BMP statistics both aggregate the three firms' standardized
+abnormal returns, but BMP additionally corrects for event-induced
+cross-sectional variance.
+
+```{r stat-values}
+pz  <- result$aar_caar_tbl$PatellZ[[1]]
+bmp <- result$aar_caar_tbl$BMP[[1]]
+
+caar_patell <- round(utils::tail(pz$caar,   1L), 4)
+z_patell    <- round(utils::tail(pz$caar_z, 1L), 3)
+t_bmp       <- round(utils::tail(bmp$cbmp_t, 1L), 3)
+```
+
+At the end of the event window the CAAR across the three firms is
+`r caar_patell`. The Patell Z on the cumulative series is `r z_patell` and the
+BMP statistic is `r t_bmp`. Where the two disagree in magnitude, the BMP figure
+is the more conservative -- it inflates the standard error when abnormal returns
+are correlated across firms on the event day, which is exactly the situation a
+common earnings-season calendar can create [@BMP1991]. Read together,
+they tell you whether an apparently significant AAR survives a cross-sectional
+correlation correction.
+
+## Diagnostics note
+
+The market-model OLS residuals underpinning these statistics can be tested for
+autocorrelation and non-normality with
+[es_diagnostics()](../reference/es_diagnostics.html); a poor estimation-window
+fit weakens every downstream statistic. See
+[Diagnostics & Robustness](methods-diagnostics.html) for the full battery.
+
+## Further reading
+
+- [Return Models](methods-return-models.html) -- market-model theory and alternatives.
+- [Test Statistics](methods-test-statistics.html) -- Patell Z and BMP derivations.
+- [run_event_study()](../reference/run_event_study.html) -- pipeline reference page.
+
+## Session info
+
+```{r session-info, echo = FALSE}
+sessionInfo()
+```

@@ -157,4 +157,18 @@ vignette: >
 </a>
 
 </div>
+
+<h2 class="es-section-heading es-examples">Worked Examples</h2>
+
+<div class="es-gallery">
+
+<a class="es-gallery-item" href="example-earnings.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-example-earnings.svg" alt="Earnings Surprise Analysis"></div>
+  <div class="es-gallery-title">Earnings Surprise Analysis</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>
+</a>
+
+<!-- cards for regulatory and M&A are added in Tasks 2 and 3 -->
+
+</div>
 ```

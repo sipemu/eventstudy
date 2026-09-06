@@ -15,7 +15,7 @@ home:
 
 navbar:
   structure:
-    left: [get-started, reference, articles, methods, gallery]
+    left: [get-started, reference, articles, methods, gallery, examples]
     right: [search, github]
   components:
     get-started:
@@ -46,6 +46,15 @@ navbar:
     gallery:
       text: "Gallery"
       href: articles/gallery.html
+    examples:
+      text: "Examples"
+      menu:
+        - text: "Earnings Surprise"
+          href: articles/example-earnings.html
+        - text: "Regulatory Shock"
+          href: articles/example-regulatory.html
+        - text: "M&A Announcements"
+          href: articles/example-ma.html
     github:
       icon: fab fa-github fa-lg
       href: https://github.com/sipemu/eventstudy
@@ -270,3 +279,12 @@ articles:
     contents:
       - data-download
       - automated-reports
+
+  - title: "Worked Examples"
+    desc: >
+      Complete end-to-end analyses across distinct financial domains -- from
+      raw data through model fit, test statistics, plots, and interpretation.
+    contents:
+      - articles/example-earnings
+      - articles/example-regulatory
+      - articles/example-ma
