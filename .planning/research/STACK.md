@@ -1,351 +1,164 @@
 # Stack Research
 
-**Domain:** pkgdown rich-article documentation for a CRAN R package (EventStudy v0.63.0)
-**Researched:** 2026-09-05
-**Confidence:** MEDIUM (pkgdown behavior verified against official docs + known GitHub issues; plotly/MathJax conflict verified against upstream issue tracker; bibliography quirk verified against community documentation)
-
-## Context
-
-This replaces the v0.60.0 AI-advisor stack research. This research answers: what tooling and configuration is needed to build rich rendered pkgdown articles (Methods pages + worked-examples gallery) on top of the existing v0.62.0 pkgdown site? The existing stack (R 4.1.0+, R6, tidyverse, ggplot2, plotly, knitr, rmarkdown, pkgdown, Bootstrap 5) is already in place. Research scope is limited to NEW capabilities: articles mechanism, math rendering, table rendering, plot rendering, and academic citations.
+**Domain:** R package — multi-format automated AI report rendering (v0.64.0 addition to EventStudy)
+**Researched:** 2026-09-06
+**Confidence:** MEDIUM (rmarkdown/knitr API verified via official docs and CRAN package pages; version numbers verified on CRAN 2026-09-06; tinytex detection API verified via CRAN refman; officedown/officer versions and dep tree verified on CRAN)
 
 ---
 
-## 1. Articles Mechanism: vignettes/articles/ vs vignettes/
+## Context: What Already Exists
 
-### How it works
+The following are **already in EventStudy's `Suggests`** and must not be re-added or moved to `Imports`:
 
-pkgdown distinguishes two kinds of rendered content:
+| Package | Current Suggests entry | Role in existing code |
+|---------|------------------------|----------------------|
+| `rmarkdown` | yes (no version pin) | `generate_report()` renderer — `requireNamespace()`-guarded |
+| `knitr` | yes (no version pin) | Vignette builder + report code chunks |
 
-- **Vignettes** (`vignettes/*.Rmd`): CRAN-shipped. Must have `VignetteIndexEntry` in YAML. Included in the tarball. Slow `R CMD check` because they re-build. These are the existing 18 concise vignettes — do not touch them.
-- **Articles** (`vignettes/articles/*.Rmd`): pkgdown-only. No `VignetteIndexEntry`. Excluded from the CRAN tarball via `.Rbuildignore`. Created with `usethis::use_article()` which automatically adds `^vignettes/articles$` to `.Rbuildignore`. Never touched by `R CMD check` — zero impact on check time or tarball size.
-
-The YAML front matter for an article is minimal — no `vignette:` block:
-
-```yaml
----
-title: "Return Models — Methods and Assumptions"
-output: rmarkdown::html_vignette
----
-```
-
-pkgdown renders `vignettes/articles/*.Rmd` to `docs/articles/*.html` using its own document format (a wrapper around `rmarkdown::html_document()` that accepts the pkgdown template, theme, and `self_contained` arguments).
-
-### _pkgdown.yml articles: section
-
-Articles are grouped and navbarred via the `articles:` key. Each group supports:
-
-```yaml
-articles:
-  - title: "Learn / Methods"
-    navbar: "Methods"           # label shown in the navbar dropdown; omit to hide from navbar
-    desc: >
-      Conceptual method pages with formulas, assumptions, and academic references.
-    contents:
-      - return-models-methods   # slug = filename without .Rmd
-      - test-statistics-methods
-      - panel-did-methods
-      - intraday-methods
-      - synthetic-control-methods
-      - diagnostics-methods
-      - ai-advisor-methods
-
-  - title: "Worked Examples"
-    navbar: "Examples"
-    desc: >
-      End-to-end rendered analyses across financial domains.
-    contents:
-      - example-earnings-surprise
-      - example-merger
-      - example-regulatory-shock
-```
-
-If some groups have no `navbar:` key, pkgdown automatically appends a "More..." dropdown item. Sections without `navbar:` are visible only on the articles index page.
-
-### Current _pkgdown.yml integration point
-
-The existing `_pkgdown.yml` has a one-entry `articles:` section covering the 18 existing vignettes in `vignettes/` (not `vignettes/articles/`). The new rich articles live in `vignettes/articles/` and should be added as NEW title groups in the `articles:` section alongside the existing groups. The existing navbar `articles:` component points to `articles/gallery.html` — the gallery article for the new worked-examples gallery should be placed at `vignettes/articles/gallery.html` so this link continues to work, or the navbar href should be updated to point to an index page.
-
-### DESCRIPTION impact
-
-None. No new packages. `vignettes/articles/` is pure `.Rbuildignore`d content.
-
-### CI workflow impact
-
-None structural. `pkgdown::build_site_github_pages()` in `.github/workflows/pkgdown.yaml` already renders all vignettes including `vignettes/articles/`. The `setup-r-dependencies` step with `needs: website` installs all Suggests — any new Suggests added for article rendering will be installed automatically.
+The existing `generate_report()` in `R/report.R` already uses `rmarkdown::render()` with `html_document()` and `pdf_document()`. The new `es_report()` wrapper **must call `generate_report()`** as its lower-level renderer, not bypass it. This is a hard architectural constraint from `PROJECT.md`.
 
 ---
 
-## 2. Math Rendering
+## Recommended Stack — New Additions for v0.64.0
 
-### Recommendation: `template.math-rendering: katex`
+### Core Report Rendering (already in Suggests — no changes needed)
 
-Add one line to `_pkgdown.yml`:
+| Technology | Current CRAN Version | Output Function | Why Sufficient |
+|------------|---------------------|-----------------|----------------|
+| `rmarkdown` | 2.32 (2026-09-01) | `html_document()`, `pdf_document()`, `word_document()`, `md_document()` | All four required output formats are built-in; no new packages needed for HTML/Word/Markdown |
+| `knitr` | 1.52 (2026-09-06) | Code chunk execution engine for `.Rmd` template | Already required for all report rendering; no change |
 
-```yaml
-template:
-  bootstrap: 5
-  math-rendering: katex
-```
+### New Optional Detection Dependency (add to Suggests)
 
-### Why KaTeX, not MathJax or MathML
+| Package | Current CRAN Version | Purpose | Why Suggests Not Imports |
+|---------|---------------------|---------|--------------------------|
+| `tinytex` | 0.60 (2026-06-16) | `tinytex::is_tinytex()` — runtime check whether TinyTeX is the active LaTeX distribution | Only needed for the PDF pre-flight guard; `Sys.which("pdflatex")` covers non-TinyTeX LaTeX installs without this dep. Add to Suggests with `requireNamespace()` guard only. |
 
-pkgdown 2.1.0+ (current: 2.2.1) supports three options under `template.math-rendering`:
+### System-Level Requirements (not R packages — document in `SystemRequirements`)
 
-| Option | Dependencies | Fidelity | Plotly conflict | Verdict |
-|--------|-------------|----------|-----------------|---------|
-| `mathml` | zero (default) | Low — browser-native, poor on complex formulas | None | Good fallback, bad for real math exposition |
-| `mathjax` | CDN-loaded | High | **YES** — documented conflict (pkgdown#1338): plotly.js loads its own MathJax instance, causing a JavaScript clash | Do not use with plotly articles |
-| `katex` | CDN-loaded | High — fast, renders well | None | **Recommended** |
-
-KaTeX does not conflict with plotly. MathJax does. Since plotly is already in DESCRIPTION Imports (always present), and the Methods articles will have both formulas and plots, KaTeX is the only viable high-fidelity option.
-
-### CDN note
-
-KaTeX is CDN-loaded at render time. The existing CI workflow (`pkgdown.yaml`) does not run with strict offline mode — it uses `ubuntu-latest` with network access. This is already the case for the current site build. No change needed.
-
-For the article `.Rmd` files, write formulas in standard LaTeX notation:
-
-```
-Inline: $AR_{it} = R_{it} - E[R_{it}]$
-
-Display: $$CAR_i(\tau_1, \tau_2) = \sum_{t=\tau_1}^{\tau_2} AR_{it}$$
-```
-
-Pandoc processes these before pkgdown applies KaTeX rendering. No special R package needed.
-
-### DESCRIPTION impact
-
-None. `template.math-rendering` is a pkgdown configuration setting — not an R package dependency.
+| Requirement | Role | How to Detect in R | Optional? |
+|-------------|------|---------------------|-----------|
+| pandoc >= 2.8 | All rmarkdown output formats (HTML, PDF, Word, Markdown) | `rmarkdown::pandoc_available("2.8")` | No — required for any rmarkdown render (already a de facto requirement of existing `generate_report()`) |
+| pdflatex / xelatex / lualatex | PDF output only | `nchar(Sys.which("pdflatex")) > 0` or `tinytex::is_tinytex()` | Yes — PDF silently skipped if absent, with one `message()` |
 
 ---
 
-## 3. Table Rendering
+## Output Format Functions — Which Renders What
 
-### Recommendation: `knitr::kable()` as primary, `DT::datatable()` for interactive result sets
+| Target Format | rmarkdown Function | File Extension | External Toolchain Beyond pandoc | Confidence |
+|---------------|-------------------|----------------|----------------------------------|-----------|
+| HTML | `rmarkdown::html_document(toc=TRUE, toc_float=TRUE, theme="flatly", code_folding="hide", self_contained=TRUE)` | `.html` | None — pandoc alone sufficient | MEDIUM (verified via official docs) |
+| PDF | `rmarkdown::pdf_document(toc=TRUE)` | `.pdf` | LaTeX engine (pdflatex/xelatex/lualatex) — must guard | MEDIUM (verified via official docs) |
+| Word (.docx) | `rmarkdown::word_document(toc=TRUE, reference_docx="default")` | `.docx` | None beyond pandoc — officer/officedown NOT required | MEDIUM (verified via official docs) |
+| Markdown | `rmarkdown::md_document(variant="gfm", toc=FALSE, ext=".md")` | `.md` | None — same pandoc requirement as HTML | MEDIUM (verified via official docs) |
 
-#### knitr::kable() — zero new dependency
+The existing `generate_report()` already uses `html_document()` and `pdf_document()`. Extending it to add `word_document()` and `md_document()` requires only adding these two format paths to the existing `format` argument dispatch — no new packages.
 
-`knitr` is already in DESCRIPTION Suggests (required for `VignetteBuilder: knitr`). `knitr::kable()` produces clean HTML tables that render correctly in pkgdown articles. Use `format = "html"` and Bootstrap-class-friendly options:
+---
+
+## Multi-Format Rendering Pattern
+
+Do NOT pass a vector of format names to a single `render()` call relying on YAML frontmatter. That couples format selection to the `.Rmd` template header and makes programmatic control fragile. Use a per-format loop instead:
 
 ```r
-knitr::kable(
-  result_tbl,
-  format    = "html",
-  digits    = 4,
-  caption   = "Cumulative Abnormal Returns",
-  col.names = c("Event", "CAR", "t-stat", "p-value")
-)
+# Called once per enabled format from es_report()
+.render_one_format <- function(template_path, fmt_obj, output_path, params,
+                               intermediates_dir) {
+  rmarkdown::render(
+    input             = template_path,
+    output_format     = fmt_obj,
+    output_file       = basename(output_path),
+    output_dir        = dirname(output_path),
+    params            = params,
+    intermediates_dir = intermediates_dir,   # prevents temp-file collisions
+    envir             = new.env(parent = globalenv()),
+    quiet             = TRUE
+  )
+}
 ```
 
-For the Methods articles (comparison tables, assumption tables, parameter grids), `kable()` is sufficient and adds zero dependency.
+The `intermediates_dir` argument is critical when the same `.Rmd` is rendered to multiple formats: without it, each format's `.md` intermediate file overwrites the previous one, causing the second+ renders to silently use stale intermediate state.
 
-#### DT::datatable() — already in Suggests
+---
 
-`DT` is already in DESCRIPTION Suggests. Use for worked-examples gallery tables where interactivity (sorting, filtering) adds value — e.g., a large cross-event results table. `DT::datatable()` produces an htmlwidget that renders correctly in pkgdown articles (not in `as_is: true` mode, but pkgdown articles use the standard format).
+## Optional Toolchain Guarding Strategy
+
+The offline-first requirement means **no format may hard-stop the entire `es_report()` call**. Each format is independently guarded and silently skipped (with one `message()`) if its toolchain is absent. Only the rmarkdown/knitr/pandoc baseline — which all four formats share — justifies a `stop()`.
 
 ```r
-DT::datatable(
-  results_tbl,
-  options = list(pageLength = 10, scrollX = TRUE),
-  rownames = FALSE
-)
+# Pre-flight helpers — call before attempting any render
+.can_render_any <- function() {
+  requireNamespace("rmarkdown", quietly = TRUE) &&
+    requireNamespace("knitr",     quietly = TRUE) &&
+    rmarkdown::pandoc_available("2.8")
+}
+
+.can_render_pdf <- function() {
+  # Prefer explicit Sys.which: covers system TeX Live, MacTeX, MiKTeX
+  latex_ok <- nchar(Sys.which("pdflatex")) > 0 ||
+               nchar(Sys.which("xelatex"))  > 0 ||
+               nchar(Sys.which("lualatex")) > 0
+  # Augment with tinytex if available (catches PATH-invisible TinyTeX installs)
+  if (!latex_ok && requireNamespace("tinytex", quietly = TRUE)) {
+    latex_ok <- tinytex::is_tinytex()
+  }
+  latex_ok
+}
 ```
 
-#### What NOT to add
+Format-specific guard matrix for `es_report(formats = c("html", "pdf", "word", "md"))`:
 
-- **gt**: powerful but not in DESCRIPTION and pulls many sub-dependencies. Zero benefit over `kable()` for this use case. Do not add.
-- **kableExtra**: not in DESCRIPTION Suggests. Adds Bootstrap-class styling, but pkgdown Bootstrap 5 already provides acceptable table styling via `kable()`. Do not add.
-- **flextable**, **huxtable**, **reactable**: not present, not needed. Do not add.
-
-### DESCRIPTION impact
-
-None — both `knitr` (Suggests) and `DT` (Suggests) are already present.
+| Format | Pre-flight check | Missing action |
+|--------|-----------------|----------------|
+| `html` | `.can_render_any()` | `stop()` — HTML is the baseline; if absent the call is meaningless. Matches existing `generate_report()` behavior. |
+| `pdf` | `.can_render_any()` + `.can_render_pdf()` | `message("PDF skipped: no LaTeX engine found. Install TinyTeX: tinytex::install_tinytex()")` then continue |
+| `word` | `.can_render_any()` (pandoc handles .docx natively) | `message("Word skipped: ...")` — realistically same gate as HTML |
+| `md` | `.can_render_any()` (pandoc handles GFM natively) | `message("Markdown skipped: ...")` — realistically same gate as HTML |
 
 ---
 
-## 4. Plot Rendering
+## Supporting Libraries
 
-### Recommendation: ggplot2 for static (Methods articles), plotly for interactive (worked examples)
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `tinytex` | 0.60 | `is_tinytex()` for TinyTeX detection | Only in PDF pre-flight guard; skip cleanly if absent |
+| `DT` | already in Suggests | Interactive result tables in HTML output | Already present; use in HTML report if available |
 
-Both are already present: `ggplot2` and `plotly` are in DESCRIPTION Imports (always available).
+---
 
-#### ggplot2 static — for Methods articles
+## Development Tools
 
-Methods/conceptual articles (those explaining formulas and assumptions) should use `ggplot2` for illustrative plots (distribution shapes, timeline diagrams, model comparison plots). Static images embed cleanly, have no JS weight, and have no conflict with KaTeX math rendering.
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| pandoc >= 2.8 | Document conversion engine for all four formats | System requirement, not an R package. Check with `rmarkdown::pandoc_available()`. |
+| TinyTeX (optional) | LaTeX distribution for PDF | Install with `tinytex::install_tinytex()` if system LaTeX absent |
+
+---
+
+## Installation
 
 ```r
-# In a Methods article chunk:
-ggplot(sim_data, aes(x = t, y = ar)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = ci_low, ymax = ci_high), alpha = 0.2) +
-  theme_minimal()
+# Only new addition needed in DESCRIPTION Suggests:
+install.packages("tinytex")   # for PDF toolchain detection
+
+# All other required packages already present in EventStudy Suggests:
+# rmarkdown (2.32), knitr (1.52)
+
+# For PDF output, users need LaTeX — recommend TinyTeX:
+tinytex::install_tinytex()    # one-time user setup, not a package dep
 ```
 
-#### plotly interactive — for worked-examples gallery
-
-The worked-examples articles (complete rendered analyses) should use the existing `plot_event_study()`, `plot_car_distribution()`, etc. — which already return plotly widgets. These render correctly in standard pkgdown articles.
-
-#### Plotly + KaTeX co-existence
-
-With `math-rendering: katex` (not `mathjax`), plotly and math formulas coexist without conflict in the same article. This is the reason for the KaTeX recommendation above.
-
-#### htmlwidgets in CI
-
-pkgdown's bundled jQuery/Bootstrap take precedence over widget-bundled versions (since pkgdown 2.0.2). This means the plotly widget's bundled jQuery/Bootstrap are overridden — this has been the behavior since v0.62.0's CI setup, so no new concern. The existing `plot_event_study()` usage in `ai-advisor.Rmd` already demonstrates this works.
-
-### DESCRIPTION impact
-
-None — ggplot2 and plotly are already in Imports.
-
 ---
 
-## 5. Citations and Academic References
+## Alternatives Considered
 
-### Recommendation: shared `refs.bib` + pandoc-citeproc + `resource_files:` trick
-
-#### Mechanism
-
-R Markdown articles use pandoc's built-in citation processing (pandoc-citeproc). No R package needed. The `r-lib/actions/setup-pandoc` step in `.github/workflows/pkgdown.yaml` already installs Pandoc including citeproc.
-
-#### File layout
-
-Place a single shared bibliography file at `vignettes/articles/refs.bib`. Each article references it with a relative path:
-
-```yaml
----
-title: "Return Models — Methods and Assumptions"
-bibliography: refs.bib
-csl: refs.csl
-link-citations: true
-resource_files:
-  - refs.csl
-output: rmarkdown::html_vignette
----
-```
-
-In the body, cite with `[@MacKinlay1997]` syntax. The references section renders automatically at the bottom of the article.
-
-#### The resource_files: trick (mandatory for pkgdown)
-
-pkgdown uses a different mechanism than standard `rmarkdown::render()` to determine which resource files to copy alongside an article. The `.csl` file is NOT copied by default, causing `pandoc-citeproc` to fail silently or error. **You must declare it explicitly in `resource_files:`** in the YAML front matter. This is a documented pkgdown quirk — not a bug, but easy to miss.
-
-The `.bib` file does NOT need `resource_files:` — only the `.csl` file does.
-
-#### Single .bib file (mandatory)
-
-A known pkgdown issue causes pandoc-citeproc error 83 when the `bibliography:` YAML field lists multiple `.bib` files. Use a single concatenated `refs.bib` for all articles. If the bibliography grows large, concatenation is still safer than splitting.
-
-#### CSL choice
-
-Use an economics/finance-appropriate CSL file. Recommended: `apa.csl` (widely recognized) or `chicago-author-date.csl` (standard in finance). Download from the [Zotero CSL repository](https://www.zotero.org/styles) and place at `vignettes/articles/refs.csl`. Add `^vignettes/articles` to `.Rbuildignore` (already handled by `use_article()`) — the `.csl` file is excluded from the tarball automatically.
-
-#### Alternatives NOT recommended
-
-- **Rdpack**: designed for generating Rd documentation cross-references, not for Rmd article prose citations. Heavyweight for this use. Do not add.
-- **citr** (RStudio addin): build-time irrelevant, only for interactive editing. Do not add.
-- **Inline references** (hard-coded text): unmaintainable at scale across 7+ Methods articles. Do not use.
-
-### DESCRIPTION impact
-
-None — pandoc-citeproc is part of Pandoc (installed by `setup-pandoc@v2`), not an R package.
-
----
-
-## 6. Build Tooling and Caching
-
-### Chunk caching: use knitr cache sparingly
-
-knitr supports `cache = TRUE` per chunk. For slow computations in worked-examples (e.g., simulation with many replications), cache to `vignettes/articles/cache/` to avoid re-running on every pkgdown build:
-
-```r
-knitr::opts_chunk$set(cache = TRUE, cache.path = "cache/")
-```
-
-Add `^vignettes/articles/cache` to `.Rbuildignore` (already covered by the `^vignettes/articles` pattern). Cache invalidates automatically when chunk code changes.
-
-**Caution:** do not cache chunks that produce htmlwidgets (plotly) — widgets contain session-dependent JS that does not serialize well to the knitr cache. Cache only pure-R computation chunks, not plot output chunks.
-
-### build_articles() lazy mode
-
-`pkgdown::build_articles(lazy = TRUE)` only re-renders articles whose source `.Rmd` is newer than the output `.html`. This is already the behavior in local development. For CI, `build_site_github_pages()` does a full build — acceptable since CI runs on push-to-main only.
-
-### set.seed() discipline
-
-All stochastic chunks (simulations, bootstrap) must call `set.seed()` at the start of the article's setup chunk to ensure reproducible output across CI builds. This is the existing pattern in `ai-advisor.Rmd`.
-
-### No new R packages for build tooling
-
-Do not add `pkgdown.offline`, `targets`, `tarchetypes`, or any other build-orchestration package. The existing `pkgdown::build_site_github_pages()` call in CI is sufficient.
-
-### DESCRIPTION impact
-
-None.
-
----
-
-## Complete _pkgdown.yml delta
-
-The minimal changes to the existing `_pkgdown.yml` to support the new articles:
-
-```yaml
-# Add to the existing template: block:
-template:
-  bootstrap: 5
-  math-rendering: katex    # ADD THIS LINE
-
-# Existing navbar components stay unchanged.
-# Add new groups to the articles: section alongside existing groups:
-
-articles:
-  # ... existing 8 groups remain unchanged ...
-
-  - title: "Learn / Methods"
-    navbar: "Methods"
-    desc: >
-      Conceptual method pages with formulas, assumptions, when-to-use guidance,
-      and academic references.
-    contents:
-      - return-models-methods
-      - test-statistics-methods
-      - panel-did-methods
-      - intraday-methods
-      - synthetic-control-methods
-      - diagnostics-methods
-      - ai-advisor-methods
-
-  - title: "Worked Examples"
-    navbar: "Examples"
-    desc: >
-      End-to-end rendered event study analyses across financial domains.
-    contents:
-      - example-earnings-surprise
-      - example-merger
-      - example-regulatory-shock
-      - example-intraday-hft
-      - example-panel-policy
-```
-
-The existing navbar already has `articles:` pointing to `articles/gallery.html`. The gallery article should be updated or a new gallery index article created in `vignettes/articles/gallery.Rmd` to serve as the landing page for the examples section. The navbar component `href: articles/gallery.html` remains valid.
-
----
-
-## Recommended Stack Summary
-
-| Capability | Tool | Version | DESCRIPTION field | Notes |
-|------------|------|---------|-------------------|-------|
-| Articles mechanism | `vignettes/articles/` + pkgdown | 2.2.1 | none | `.Rbuildignore`d automatically |
-| Math rendering | `template.math-rendering: katex` | pkgdown 2.2.1 | none | _pkgdown.yml config only; CDN |
-| Simple tables | `knitr::kable()` | knitr ≥ 1.50 | already Suggests | Zero new dep |
-| Interactive tables | `DT::datatable()` | DT current | already Suggests | For result exploration |
-| Static plots | `ggplot2` | current | already Imports | For Methods articles |
-| Interactive plots | `plotly` via existing fns | 4.11.0 | already Imports | For worked examples |
-| Citations | pandoc-citeproc + `.bib` | bundled with Pandoc | none | No R package needed |
-| Build caching | `knitr cache = TRUE` per chunk | knitr | none | For slow sim chunks only |
-
-**New DESCRIPTION Imports additions:** none  
-**New DESCRIPTION Suggests additions:** none  
-**New _pkgdown.yml changes:** one line (`math-rendering: katex`) + new article groups  
-**New .Rbuildignore additions:** `^vignettes/articles$` (added automatically by `usethis::use_article()`)
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| `rmarkdown::word_document()` | `officedown::rdocx_document()` | Only if rich cross-references (bookdown), branded corporate templates with custom table/list styles, or officer-specific formatting blocks are required. None of those apply to this report. |
+| `rmarkdown::md_document(variant="gfm")` | `variant="markdown_strict"` | Strict is better for max portability, but GFM is more readable on GitHub and in standard Markdown viewers — the natural distribution channel for a research report Markdown. |
+| Per-format `render()` loop | Single `render("all")` | "all" requires YAML frontmatter to list formats, making format selection a template concern rather than a caller concern. The loop is fully programmatic and caller-controlled. |
+| `Sys.which("pdflatex")` + optional `tinytex::is_tinytex()` | Hard-require `tinytex` in Suggests for all PDF detection | Many users have system LaTeX (TeX Live, MacTeX, MiKTeX) without TinyTeX. `Sys.which` catches them all; tinytex is an enhancement only for TinyTeX-specific PATH-visibility edge cases. |
+| Keep `generate_report()` as the low-level renderer | Replace or rewrite `generate_report()` | Backward-compat is non-negotiable per PROJECT.md; existing callers must not break. `es_report()` is additive, composing `generate_report()` under the hood. |
 
 ---
 
@@ -353,57 +166,81 @@ The existing navbar already has `articles:` pointing to `articles/gallery.html`.
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| `template.math-rendering: mathjax` | Conflicts with plotly.js (pkgdown#1338 — documented JS clash) | `katex` |
-| `template.math-rendering: mathml` (as sole option) | Acceptable for simple inline formulas but poor fidelity for multi-line display equations (summations, matrices) | `katex` |
-| `gt` package | Not in DESCRIPTION; pulls many sub-deps; no benefit over `kable()` for this use case | `knitr::kable()` |
-| `kableExtra` package | Not in DESCRIPTION Suggests; Bootstrap 5 styling sufficient via `kable()` | `knitr::kable()` |
-| `Rdpack` | Designed for Rd cross-references, not Rmd prose citations | pandoc-citeproc + `.bib` |
-| Multiple `.bib` files in `bibliography:` | Known pkgdown + pandoc-citeproc bug: error 83 when both present | Single concatenated `refs.bib` |
-| CSL file without `resource_files:` | pkgdown does not copy `.csl` at the right time; pandoc-citeproc fails | Always declare in `resource_files:` |
-| `pkgdown.offline` | Unnecessary — CI has network; KaTeX CDN is only external dep | Nothing (CDN is fine) |
-| `quarto` for new articles | Rough edges documented in pkgdown 2.1.0 release notes; adds Quarto installation requirement to CI | Stick with `.Rmd` |
-| `cache = TRUE` on plotly/htmlwidget chunks | Widgets don't serialize reliably to knitr cache | Cache computation chunks only; render plots fresh |
-| Moving new rich articles into `vignettes/` (CRAN vignettes) | Bloats tarball; slows `R CMD check`; risks NOTE on long-running vignettes | Keep in `vignettes/articles/` |
-| Adding any new package to DESCRIPTION Imports | Would force the dep on every user; incompatible with CRAN cleanliness goal | All new docs tooling stays in Suggests or is zero-dep |
+| `officedown` in Suggests | Pulls in officer (>=0.6.7), rvg, xml2, uuid, memoise — ~6 transitive deps for features not needed in a standard statistical report | `rmarkdown::word_document(reference_docx="default")` |
+| `officer` in Suggests | Only useful as an officedown dependency; no direct use case in the report | Not needed |
+| `quarto` CLI dependency | Separate binary runtime, not a CRAN package; adds opaque system requirement; rmarkdown already covers all four formats natively | `rmarkdown` |
+| `pagedown` | HTML-to-PDF via headless Chrome — heavyweight, fragile in CI, adds `chromote`/`processx` deps | `rmarkdown::pdf_document()` + LaTeX |
+| `reporttools`, `reporter`, `r2rtf` | Narrow-scope table/RTF generators; no standard Rmd integration; parallel non-Rmd rendering path required | `rmarkdown` + pandoc |
+| Moving `rmarkdown` or `knitr` to `Imports` | Makes report rendering a hard dep for all users who never call `es_report()` — violates CRAN Suggests discipline | Keep in `Suggests` with `requireNamespace()` guard |
+| `bookdown` output formats (`bookdown::html_document2`, `bookdown::pdf_document2`) | Pulls `bookdown` dep; cross-references are not needed in a single-file statistical report; adds complexity | `rmarkdown::html_document()` / `rmarkdown::pdf_document()` |
 
 ---
 
-## Alternatives Considered
+## DESCRIPTION Changes Required
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Math rendering | `katex` | `mathjax` | Conflicts with plotly; no advantage over KaTeX for this content |
-| Math rendering | `katex` | `mathml` | Poor fidelity for display equations; acceptable only as a fallback |
-| Simple tables | `knitr::kable()` | `gt` | New dependency; heavier; no rendering advantage in pkgdown |
-| Interactive tables | `DT::datatable()` | `reactable` | Not in DESCRIPTION; `DT` already present |
-| Citations | pandoc-citeproc + `.bib` | `Rdpack` | Wrong tool for Rmd articles; designed for Rd |
-| Articles format | `.Rmd` | `.qmd` (Quarto) | Rough edges in pkgdown 2.1.0; adds Quarto install dep to CI |
+```
+Suggests:
+    ...existing entries...,
+    tinytex          # NEW: optional PDF toolchain detection (tinytex::is_tinytex())
+```
+
+No version pin needed for tinytex — `is_tinytex()` has been stable since early versions; any modern CRAN release works.
+
+`rmarkdown` and `knitr` Suggests entries are already present — do not add version pins; unpinned Suggests entries avoid unnecessary `R CMD check` warnings on older R environments.
+
+Add or extend `SystemRequirements: pandoc (>= 2.8)` — this was already implied by the existing `generate_report()` but should be made explicit for v0.64.0.
 
 ---
 
 ## Version Compatibility
 
-| Package | Version in DESCRIPTION | Compatible With | Notes |
-|---------|----------------------|-----------------|-------|
-| pkgdown | any::pkgdown in CI | 2.2.1 current | `math-rendering: katex` requires ≥ 2.1.0 |
-| knitr | Suggests, ≥ 1.43 implied | 1.51+ (2025) | `kable()` stable across versions |
-| DT | Suggests | current (0.33+) | htmlwidget; Bootstrap 5 compatible |
-| plotly | Imports | 4.11.0 (2025) | KaTeX co-existence verified |
-| rmarkdown | Suggests | current | pandoc-citeproc via bundled Pandoc |
+| Package | Minimum Compatible | Rationale |
+|---------|-------------------|-----------|
+| `rmarkdown` | >= 2.14 | `html_document(code_folding)` and `md_document(variant="gfm")` stable; `params` passthrough via `render()` stable |
+| `knitr` | >= 1.37 | `params` passing in `render()` stable across this range |
+| `tinytex` | >= 0.50 | `is_tinytex()` has been stable since well before this version; no strict pin needed |
+| pandoc | >= 2.8 | rmarkdown 2.32 `SystemRequirements` specifies this |
+| R | >= 4.1.0 | Existing package constraint — unchanged |
+
+---
+
+## Stack Patterns by Variant
+
+**If the user requests PDF and LaTeX is absent:**
+- Emit one `message()` with install instructions (`tinytex::install_tinytex()`)
+- Skip PDF silently
+- Continue rendering remaining formats
+
+**If the user requests Word on a system without pandoc:**
+- Emit one `message()` (same pre-flight as HTML)
+- Word format requires the same pandoc gate as HTML; in practice, if HTML renders, Word renders
+
+**If no LLM provider is configured:**
+- `es_advise()` falls back to rule-based offline engine
+- Report renders with rule-based narrative — identical structure, no format changes needed
+
+**If `es_report()` is called without any format argument:**
+- Default to `formats = "html"` — the safest, zero-extra-toolchain format
+- Users opt in to PDF/Word/Markdown explicitly
 
 ---
 
 ## Sources
 
-- [pkgdown: build_articles reference](https://pkgdown.r-lib.org/reference/build_articles.html) — articles mechanism, vignettes/articles/, navbar: field, htmlwidgets limitation with as_is:true (MEDIUM confidence)
-- [pkgdown: Customise your site](https://pkgdown.r-lib.org/articles/customise.html) — `template.math-rendering` options (mathml/katex/mathjax), _pkgdown.yml syntax (MEDIUM confidence)
-- [pkgdown 2.1.0 release blog](https://tidyverse.org/blog/2024/07/pkgdown-2-1-0/) — CDN elimination, math-rendering introduction, version confirmed (MEDIUM confidence)
-- [pkgdown NEWS](https://cran.r-project.org/web/packages/pkgdown/news/news.html) — current version 2.2.1 confirmed (MEDIUM confidence)
-- [pkgdown#1338: plotly and MathJax conflict](https://github.com/r-lib/pkgdown/issues/1338) — documented plotly+MathJax JS clash; KaTeX avoids it (MEDIUM confidence)
-- [usethis: use_vignette/use_article](https://usethis.r-lib.org/reference/use_vignette.html) — use_article() adds `vignettes/articles` to .Rbuildignore automatically (MEDIUM confidence)
-- [svPkgdown bibliography example](https://www.sciviews.org/svPkgdown/articles/test/bibliography.html) — `resource_files:` trick for CSL in pkgdown (MEDIUM confidence)
-- [R Packages (2e): Vignettes](https://r-pkgs.org/vignettes.html) — articles vs vignettes distinction (MEDIUM confidence)
+- CRAN rmarkdown package page — version 2.32, 2026-09-01, pandoc >= 2.8 system requirement (MEDIUM): https://cran.r-project.org/web/packages/rmarkdown/index.html
+- rmarkdown `html_document()` reference — full signature verified (MEDIUM): https://rmarkdown.rstudio.com/docs/reference/html_document.html
+- rmarkdown `word_document()` reference — signature + `reference_docx` behavior verified (MEDIUM): https://rmarkdown.rstudio.com/docs/reference/word_document.html
+- rmarkdown `md_document()` reference — variant options and `ext` parameter verified (MEDIUM): https://rmarkdown.rstudio.com/docs/reference/md_document.html
+- rmarkdown `render()` reference — multi-format vector behavior + `intermediates_dir` (MEDIUM): https://pkgs.rstudio.com/rmarkdown/reference/render.html
+- rmarkdown `pandoc_available()` reference — signature and usage verified (MEDIUM): https://search.r-project.org/CRAN/refmans/rmarkdown/html/pandoc_available.html
+- CRAN knitr package page — version 1.52, 2026-09-06 (MEDIUM): https://cran.r-project.org/web/packages/knitr/index.html
+- CRAN tinytex package page — version 0.60, 2026-06-16 (MEDIUM): https://cran.r-project.org/web/packages/tinytex/index.html
+- tinytex `is_tinytex()` reference — detection logic and return value verified (MEDIUM): https://search.r-project.org/CRAN/refmans/tinytex/html/is_tinytex.html
+- CRAN officedown — version 0.4.1, dep tree (officer, rvg, xml2, uuid, memoise) confirmed (MEDIUM): https://cran.r-project.org/web/packages/officedown/index.html
+- CRAN officer — version 0.7.6, 2026-07-16 (MEDIUM): https://cran.r-project.org/web/packages/officer/index.html
+- officedown vs word_document comparison — feature differences confirmed (MEDIUM): https://rdrr.io/cran/officedown/man/rdocx_document.html
+- R Packages (2e) — Suggests guard pattern (`requireNamespace()` + `stop()` vs graceful degradation) (MEDIUM): https://r-pkgs.org/dependencies-in-practice.html
 
 ---
-*Stack research for: pkgdown rich-article documentation (v0.63.0 Documentation Depth milestone)*
-*Researched: 2026-09-05*
+*Stack research for: R package multi-format automated AI report rendering (v0.64.0)*
+*Researched: 2026-09-06*

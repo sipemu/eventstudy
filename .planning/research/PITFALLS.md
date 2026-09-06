@@ -1,332 +1,269 @@
 # Pitfalls Research
 
-**Domain:** Adding rich rendered pkgdown documentation (conceptual method articles + worked-examples gallery + bundled datasets) to a CRAN R package with CI-deployed pkgdown (v0.63.0 — Documentation Depth)
-**Researched:** 2026-09-05
-**Confidence:** HIGH
+**Domain:** Multi-format AI-narrated report generation added to a CRAN R package (EventStudy v0.64.0)
+**Researched:** 2026-09-06
+**Confidence:** MEDIUM — sources are CRAN official docs, ropensci HTTP-testing book, rmarkdown cookbook, and cross-validated community experience. LLM-grounding findings from 2025-2026 arxiv/production literature. Plotly/webshot2 behavior confirmed from GitHub issues.
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Non-Deterministic Rendered Output Causes Noisy CI Diffs and Untrustworthy Gallery Numbers
+### Pitfall 1: Grounding Guard Does Not Protect Prose in Multi-Section Narrative
 
 **What goes wrong:**
-Articles use stochastic operations — `bootstrap_test()`, `simulate_event_study()`, GARCH fitting, synthetic data generation — without a `set.seed()` call immediately before the stochastic expression, or they set seed once at document top then consume it during an earlier calculation. Output tables, p-values, and power curves differ on every build. The CI job (`pkgdown.yaml`) runs `pkgdown::build_site_github_pages(new_process = FALSE)` in a fresh R session; if rendered HTML differs from the previous commit, the `gh-pages` branch accumulates large spurious diffs, diff-based review is useless, and the gallery loses credibility when printed numbers don't match the surrounding narrative.
+The existing `es_advise()` grounding guard validates `evidence[]` arrays inside structured `recommendations` objects — it drops any recommendation whose cited key or value does not match the computed diagnostics. However, `es_report()` needs to draft free-prose sections: executive summary, data/methods narrative, results interpretation, robustness/caveats. These sections are plain strings in the `interpretation` field or rendered directly as markdown prose. The guard does not scan plain text strings for fabricated numbers. An LLM asked to write "The Patell Z-statistic of 3.72 on day 0 is highly significant..." in a prose paragraph invents that specific value from context — the value never passes through an `evidence[]` array and therefore the guard is blind to it.
 
-This package already has three stochastic components that will appear in the new articles: `bootstrap_test()` (wild bootstrap), `simulate_event_study()` (Monte Carlo), and `GARCHModel`/`DCCGARCHModel` fitting (numerical optimiser path depends on initial values). Existing CRAN vignettes handle this correctly — `diagnostics-validation.Rmd`, `factor-models-bhar.Rmd`, `panel-event-study.Rmd`, and others each call `set.seed(42)` before stochastic chunks. The new articles must replicate this discipline, not re-discover it after the first noisy build.
-
-Additionally, locale-sensitive number formatting (comma vs period decimal separator), `Sys.Date()` embedded in output cells, and OS-specific floating-point differences across the ubuntu/macos/windows R-CMD-check matrix produce non-determinism across runners. pkgdown renders on ubuntu-latest only, but the principle applies to any article output a human reads.
+The risk compounds in a full report because each section is an independent prompt invocation (or a large combined prompt with multiple section headers). Each section's prose has its own hallucination surface. A single-block `report_writing` advice call already had this exposure; a multi-section call amplifies it proportionally.
 
 **Why it happens:**
-Authors write articles interactively in RStudio, where the global session already has a seed state that happens to produce stable output locally. In CI, each build starts from a cold R session with no seed, so results vary. The problem is invisible until after multiple builds accumulate on `gh-pages`.
+The schema enforces the structure of `recommendations[]` but free-text fields (`interpretation`, each section's prose block) are unconstrained strings. Schema validation catches structural problems, not semantic ones. LLMs produce "confident fabrication" — plausible-sounding invented numbers — especially when asked to write narrative that echoes statistical results they saw earlier in the prompt. The longer the prompt context, the more likely a specific number from diagnostics gets paraphrased incorrectly (off by a digit, wrong section) in the prose.
 
 **How to avoid:**
-- Place `set.seed(<fixed integer>)` in the `setup` chunk of every article that calls any stochastic function. Also place it immediately before each stochastic expression if the seed may have been consumed by an earlier call in the same document.
-- Set `options(scipen = 999, digits = 4)` in each article's setup chunk to pin numeric formatting across locales and OS.
-- Never embed `Sys.Date()` or `Sys.time()` in rendered output cells. Date-stamp only in YAML `date:` fields (pkgdown handles those separately) or as a fixed string frozen to the dataset access date.
-- For simulation articles, capture stochastic output in a fixed-seed chunk and then display it in a follow-on read-only chunk (`eval = FALSE` + hard-coded display) if the simulation is too slow for CI but the numbers are the pedagogical point.
-- After `pkgdown::build_site()` locally, run it a second time and diff `docs/articles/` — zero numeric changes is the bar, not "approximately the same."
+1. Restrict prose to templated slots, not open-ended generation. Instead of "write an executive summary citing the results," instruct: "Fill these exact sentence templates using only the values in `{diagnostics_json}`, leaving `[PLACEHOLDER]` for any value not present."
+2. Add a post-generation prose scanner to `.validate_grounding()`. After building the `Advice` object, extract all numeric literals from the `interpretation` string (regex `\b\d+\.?\d*\b`) and cross-check each against the diagnostics. Any number that appears in prose but not in diagnostics within tolerance — append a caveat, optionally redact.
+3. Scope the `report_writing` task type to structured fields only. Each prose section should be a separate field in the JSON schema (e.g., `executive_summary`, `methods_prose`, `results_interpretation`, `caveats_prose`), each accompanied by a `section_evidence[]` array identical in shape to the existing `evidence[]` requirement. This forces the guard's coverage to extend to each section.
+4. System prompt discipline: add an explicit instruction "Every numeric value you write must appear verbatim in the diagnostics JSON above. Do not compute, round, or derive values."
 
 **Warning signs:**
-- Two consecutive local `pkgdown::build_site()` runs produce different HTML for any article.
-- The `gh-pages` branch has commits where the only change is numeric values in table cells.
-- Any article chunk contains `rnorm(`, `sample(`, `bootstrap_test(`, or `simulate_event_study(` without an immediately preceding `set.seed()`.
+- LLM returns numbers in prose that differ from `es_diagnostics()` output by any amount, including rounding.
+- The `interpretation` field contains p-values, t-statistics, or sample sizes not present in the diagnostics object.
+- The report renders successfully but a researcher notices a discrepancy between the prose narrative and the printed table output.
 
-**Phase to address:** Phase 1 (article infrastructure) — bake `set.seed()` and `options()` into the canonical article template before any individual article is written. One template used by all articles eliminates the per-article rediscovery risk.
+**Phase to address:**
+Phase 1 (grounding architecture for the report wrapper). Define the per-section JSON schema and extend `.validate_grounding()` to cover prose fields before any report template work begins. This is the invariant the rest of the milestone depends on.
 
 ---
 
-### Pitfall 2: plotly Widgets Cause JS Bloat, Slow Pages, and Silent CI Render Failures
+### Pitfall 2: CRAN R CMD Check Triggered by Rendering in Examples or Tests
 
 **What goes wrong:**
-`plot_event_study()` and `plot_stocks()` return plotly objects. When rendered inside `rmarkdown::html_vignette` output (what all 18 existing vignettes use), each plotly widget inlines the full plotly.js library (~3.5 MB minified) into the HTML page when `self_contained = TRUE`. pkgdown renders `vignettes/articles/` as full HTML documents via its own pipeline and can deduplicate some JS across pages, but if widgets are embedded using `htmlwidgets::saveWidget()` with `selfcontained = TRUE` anywhere in an article, the deduplication is bypassed and the full library lands inline per page.
+Any call to `generate_report()` or `es_report()` in a `@examples` block or a test that runs unconditionally will cause `R CMD check` to invoke `rmarkdown::render()`, which in turn invokes pandoc (must be present at check time) and potentially LaTeX (for PDF output). CRAN check machines do not have pandoc or tinytex pre-installed reliably. The check fails with an error about a missing system dependency, and CRAN may reject the package with a NOTE or WARNING. Even if pandoc is present, a PDF example will attempt `tinytex::install_tinytex()` or fail with a missing `pdflatex` error.
 
-With 7 method articles + 6 gallery articles = 13 articles each potentially containing 2–4 plotly figures, the site accumulates tens of MB of inlined JS. Page load slows visibly. GitHub Pages has no content-delivery optimization by default. More critically, plotly widgets can silently fail to render in environments where the DOM is not fully initialized before the widget's JS fires — this surfaces as a blank figure area with no error message, which is worse than a missing figure.
-
-The package imports `plotly` unconditionally (it is in `Imports:` in DESCRIPTION), so there is no cost to using it — which makes it the path of least resistance for article authors.
+The existing `generate_report()` already uses `requireNamespace("rmarkdown")` to guard the function body, but that guard does not suppress example execution. `\dontrun{}` in roxygen examples suppresses example execution during `R CMD check --run-donttest` but not during `devtools::run_examples()`.
 
 **Why it happens:**
-`plot_event_study()` is the package's native visualization API; using it in articles feels natural and demonstrates the full product. The page weight and JS deduplication implications are not visible during local authoring.
+Developers write examples that demonstrate the full workflow including rendering, which is correct for documentation purposes but breaks the CRAN check constraint that examples must run to completion in a clean environment without optional system tools.
 
 **How to avoid:**
-- For method articles (statistical exposition, formula illustration, diagnostic output): use ggplot2 static output, not plotly. Add `fig.width = 7, fig.height = 4` chunk options so figures rasterize at a predictable size. The pedagogical point is the pattern of the AR/CAR trajectory, not the hover interactivity.
-- For gallery articles where hover-on-event-day interactivity is genuinely part of the worked example value: allow one plotly widget per article, but do not use `htmlwidgets::saveWidget(..., selfcontained = TRUE)` — let pkgdown's template asset pipeline handle the JS dependency.
-- Never use `plotly::ggplotly()` as a drop-in replacement for a static ggplot in an article chunk. It increases output size, changes figure dimensions unpredictably, and adds the full plotly.js dependency even for a simple line chart.
-- After each article build, check the HTML file size: `ls -lh docs/articles/myarticle.html`. Target under 2 MB per article.
-- Offline rendering test: open the built HTML in a browser with network connectivity disabled. Every figure must be visible. Any blank area reveals a missing or broken dependency.
+1. Wrap any `generate_report()` or `es_report()` call in `@examples` blocks with `\dontrun{}`. This is the correct CRAN convention when the example requires external tools not guaranteed to be present.
+2. In testthat tests, wrap render calls with `skip_on_cran()`, `skip_if_not_installed("rmarkdown")`, and `skip_if_not_installed("knitr")`. For PDF tests additionally: `skip_if(!tinytex::is_tinytex(), "TinyTeX not installed")`. For Word tests: `skip_if_not_installed("officedown")`.
+3. Never test the actual render output (the file on disk) during `R CMD check` — test only the R-level return value and the function's behavior on bad inputs.
+4. For vignettes that demonstrate `es_report()`: place them in `vignettes/articles/` (.Rbuildignore'd) rather than in `vignettes/` (CRAN-shipped), following the pattern already established in v0.63.0 for Methods articles.
 
 **Warning signs:**
-- Any `docs/articles/*.html` exceeds 5 MB.
-- More than one `<script src="...plotly">` or inline plotly JS block in a single article HTML.
-- A figure area is blank when the article is opened offline after a local `pkgdown::build_site()`.
-- An article chunk contains `ggplotly(` on a plot that is not interactive by design.
+- `R CMD check` produces `WARNING: running examples for source file 'report.R' ... Error: pandoc not found`.
+- CI check passes locally (because pandoc/RStudio is installed) but fails on GitHub Actions or CRAN check machines.
+- `devtools::check(run_dont_test = FALSE)` passes but `devtools::check(run_dont_test = TRUE)` fails.
 
-**Phase to address:** Phase 1 (article infrastructure) — decide the ggplot2-vs-plotly policy per article type before writing any article. Encode the decision in the article template's setup comment. Phase 2 (method articles) — enforce static figures throughout. Phase 3 (gallery) — allow plotly selectively, one widget per article maximum.
+**Phase to address:**
+Phase 1 (CRAN hygiene scaffolding). Establish the `\dontrun{}` and skip discipline before adding any new exported functions. Add a CI matrix job that runs `R CMD check` on a minimal Ubuntu runner without pandoc to catch this class of error continuously.
 
 ---
 
-### Pitfall 3: New Bundled Datasets Bloat the CRAN Tarball and Trigger an Installed-Size NOTE
+### Pitfall 3: PDF Rendering via tinytex Breaks in CI and CRAN Environments
 
 **What goes wrong:**
-`vignettes/articles/` is correctly `.Rbuildignore`d so the article source stays out of the CRAN tarball. But `data/` objects (`.rda` files documented via `man/`) ship unconditionally — `.Rbuildignore` does not exclude `data/`. CRAN's automated check triggers a NOTE when the installed package size exceeds 5 MB, with particular scrutiny when `data/` alone exceeds ~1 MB. A six-domain gallery (earnings surprises, M&A, regulatory shocks, pharmaceutical, macro, ESG) with 3–5 firms each over 300+ trading days produces 50–200 KB per dataset before compression. At bzip2 compression (60–75% typical), a gallery with six new datasets adds 90–600 KB to the tarball — potentially pushing `data/` over the CRAN comfort zone when added to the existing `dieselgate.rda` (9.1 KB).
-
-The current DESCRIPTION has `LazyData: true`, which is correct behavior (objects load on access), but all `data/` objects appear in the package's namespace from the moment the package is loaded — the tarball cost is paid at CRAN submission, not at user runtime.
+PDF output from `rmarkdown::pdf_document()` requires a working LaTeX installation. tinytex is the standard solution, but it fails in CI/CRAN environments in several ways: (a) `tlmgr` is out of date relative to the remote mirror, causing installation failures; (b) the entire tinytex installation can be wiped if `tlmgr_install()` fails mid-operation on an outdated mirror; (c) CRAN check machines run with restricted write access — tinytex installs to `$HOME/.TinyTeX` which may not exist; (d) LaTeX package auto-installation (`tinytex.install_packages = TRUE`) triggers network calls during `R CMD check`, which CRAN prohibits.
 
 **Why it happens:**
-Each dataset is created individually for its article; the cumulative tarball impact is not tracked until CRAN submission. `usethis::use_data()` puts everything in `data/` by default with no size warning.
+PDF rendering is the most fragile output format because it has the deepest system dependency chain: R to rmarkdown to pandoc to LaTeX to tinytex/TeX Live to per-document LaTeX packages. Each link can break independently in a clean environment.
 
 **How to avoid:**
-- Establish a per-dataset compressed size budget before writing any `data-raw/` script: target ≤120 KB compressed per dataset; `data/` ceiling of 600 KB total across all v0.63.0 additions (including `dieselgate.rda`).
-- Thin datasets aggressively: cap at 3 firms + 1 index, date range trimmed to estimation window + (3 × event window length) + 10 buffer days. Store only the columns the article consumes: `date`, `symbol`, `adjusted` (or `close`). No factor data columns, no volume data, no intermediate computed columns.
-- For datasets used only by pkgdown-only articles (not referenced from any CRAN-shipped vignette), place the raw `.rda` in `vignettes/articles/data/` (not `data/`), add `^vignettes/articles/data` to `.Rbuildignore`, and document them only in `data-raw/`. This keeps them entirely out of the tarball and the CRAN data-documentation burden.
-- After every new `data-raw/` run, enforce: `R CMD build . --no-build-vignettes && tar tzf EventStudy_*.tar.gz | grep "^EventStudy/data/" | awk '{sum += $5} END {print sum/1024, "KB"}'`.
-- Run `R CMD check --as-cran` locally; a NOTE about installed size is a build-blocking signal before CRAN submission.
+1. Never ship PDF rendering as a default or auto-triggered format. Make `format = "html"` the default in `es_report()`; require the user to explicitly request `format = "pdf"`.
+2. In the function body, guard PDF rendering: check `requireNamespace("tinytex", quietly = TRUE)` and `tinytex::is_tinytex()` before attempting PDF render; stop with an install message if absent.
+3. Tests for PDF output: wrap entirely in `skip_if(!tinytex::is_tinytex(), "TinyTeX not installed")` and `skip_on_cran()`. Never run PDF render tests in the standard suite — put them in a separate `test_report_pdf.R` that is always skipped on CRAN.
+4. In examples and vignettes, show only HTML rendering. Mention PDF in a code comment with `\dontrun{}`.
+5. Do not list `tinytex` in `Suggests` unless the package explicitly calls tinytex API functions. The user's own LaTeX installation is sufficient; tinytex is a user-level concern, not a package dependency.
 
 **Warning signs:**
-- `R CMD check --as-cran` emits `NOTE: installed size is X.XMb; sub-directories of 1Mb or more: data`.
-- `tar tzf *.tar.gz | grep "^EventStudy/data/"` shows total data directory size exceeding 600 KB.
-- A `data-raw/` script fetches more than 12 months of daily data per firm (far more than any single event study needs).
-- `data/` contains `.rda` files that are only referenced in `vignettes/articles/*.Rmd` (not in any CRAN-shipped vignette or exported function).
+- `R CMD check` NOTE: "checking for detritus in the temp directory ... LaTeX errors".
+- CI job fails with "pdflatex: command not found" or "tlmgr: command not found".
+- tinytex auto-installs a LaTeX package during `R CMD check` and CRAN flags a network access violation.
 
-**Phase to address:** Phase 2 (dataset curation) — apply the size budget discipline to the first dataset created; do not defer to a "tidy up before CRAN submission" pass.
+**Phase to address:**
+Phase 2 (multi-format rendering). Establish the PDF guard and skip discipline at the same time as the PDF rendering code is written, not retrofitted later.
 
 ---
 
-### Pitfall 4: Bundled Financial Data That Is Not Legally Redistributable
+### Pitfall 4: Plotly in Static Formats Renders Blank Without webshot2 and Headless Chrome
 
 **What goes wrong:**
-Yahoo Finance's Terms of Service prohibit redistribution of its data in compiled/redistributable forms. The existing `dieselgate.rda` uses Yahoo Finance adjusted prices (via `tidyquant::tq_get()`) and acknowledges this in `data-raw/dieselgate.R` with the note "Small illustrative sample bundled for academic / demonstration use only." The provenance script records `source = "Yahoo Finance (daily adjusted prices)"` but does not record a `license_note` field addressing redistribution rights.
+The existing `generate_report()` uses plotly plots (via `plot_event_study()`) with `interactive = TRUE` in HTML output. When `format = "pdf"` or `format = "docx"`, plotly requires a PNG screenshot fallback via `webshot2`, which requires `chromote`, which requires a system headless Chrome/Chromium installation. Without this chain: the plot chunk either errors, renders blank, or prints a low-resolution PNG screenshot. The user sees a report with empty figure placeholders.
 
-CRAN has not challenged this for one small dataset. If the gallery adds six new datasets, all from Yahoo Finance, the aggregate redistribution surface grows from one illustrative sample to a systematic data collection — a materially different posture that is more likely to attract legal challenge or CRAN policy review. Other common sources have similar restrictions: Bloomberg data is contractually prohibited from redistribution; Refinitiv/LSEG requires a commercial license; CRSP is institution-licensed.
+The current `generate_report()` passes `interactive` as a param but does not implement the static-format fallback. This is a known debt item that becomes critical when PDF/Word support is added.
 
 **Why it happens:**
-`tq_get()` works with no API key, is already a Suggests package in DESCRIPTION, and the dieselgate precedent appears to have worked. Authors extend the pattern to new datasets without re-evaluating the cumulative legal posture.
+Plotly is an HTML widget — it is self-rendering JavaScript. Static formats cannot embed JavaScript. The fallback path (webshot2 to chromote to Chrome screenshot) is a heavy external dependency chain that many users will not have. The `always_allow_html: yes` YAML header is sometimes tried as a workaround but does not reliably produce rendered plots in PDF output.
 
 **How to avoid:**
-- Before writing any new `data-raw/` script, answer: "Can we redistribute this data source in a CRAN package?" Use only sources with clear open-redistribution terms: Kenneth French's Data Library (public domain, factor data), FRED (public domain, macro data), ECB SDW (CC BY 4.0), or academic replication datasets published under CC0.
-- For stock price data where no open alternative exists for the specific event: consider a synthetic-hybrid approach — fetch real event parameters (event date, firm identity, event description) from public records, then generate a small realistic synthetic panel calibrated to the historical volatility/return profile. This eliminates redistribution risk while preserving realism for the worked example.
-- Where Yahoo Finance prices must be used (extending the dieselgate pattern), strictly limit scope: ≤5 firms, ≤18 months, event window only. Add a `meta$license_note` field explicitly addressing redistribution status: `"Yahoo Finance daily adjusted prices; bundled as a small illustrative academic sample. Users must verify compliance with Yahoo Finance Terms of Service for their jurisdiction."`.
-- Create a `data-raw/DATA-SOURCES.md` file documenting the license status, source URL, access date, and redistribution rationale for every dataset. CRAN reviewers and users can then evaluate the terms themselves.
+1. In the report template, detect output format at chunk evaluation time and switch plot type using `knitr::is_html_output()`: use `plot_event_study(task, interactive = TRUE)` (plotly) for HTML, and `plot_event_study(task, interactive = FALSE)` (ggplot2) for all static formats. The `interactive = FALSE` path already exists in `plot_event_study()`.
+2. Never rely on webshot2 as a fallback in a CRAN package. webshot2 is not suitable for CRAN Suggests because it requires chromote which requires system Chrome. Treat the ggplot2 path as the canonical static output.
+3. Document clearly in the function signature: `interactive = TRUE` applies only to HTML format; for PDF/Word/Markdown it is silently overridden to `FALSE` with a `message()`.
 
 **Warning signs:**
-- A new `data-raw/` script calls `tidyquant::tq_get()` and passes the result to `usethis::use_data()` with no `meta$license_note` field addressing redistribution.
-- Any dataset's provenance includes `source = "Bloomberg"`, `source = "Refinitiv"`, or `source = "CRSP"` without an institutional license covering redistribution.
-- A dataset includes more than 500 trading days per firm (harder to defend as an "illustrative sample").
-- `data-raw/DATA-SOURCES.md` does not exist.
+- PDF or Word report has blank figure panels.
+- Chromote/webshot2 warnings appear during render ("PhantomJS not found" or similar).
+- Test that renders to PDF passes on developer machine (has Chrome) but fails in CI.
 
-**Phase to address:** Phase 2 (dataset curation) — evaluate each dataset source before writing the `data-raw/` script. The redistribution question must be answered before the dataset is generated, not at CRAN submission time.
+**Phase to address:**
+Phase 2 (multi-format rendering). The format-conditional plot switching must be in the initial template design, not added as a patch after user complaints.
 
 ---
 
-### Pitfall 5: MathJax Escaping Failures Make Statistical Formulas Render as Raw LaTeX Strings
+### Pitfall 5: Non-ASCII Characters and LaTeX/XML Special Characters Break Static Formats
 
 **What goes wrong:**
-pkgdown injects a MathJax CDN `<script>` tag into article HTML via its page template. At build time (rendering HTML from Rmd), MathJax is not needed — it runs in the browser. So CI builds succeed even when MathJax is misconfigured. The failure is invisible until a human opens the page.
+LLM-generated prose can contain: (a) Unicode smart quotes, em-dashes, degree symbols, or other non-ASCII characters that cause `pdflatex` to fail with `! Package inputenc Error: Unicode character` unless the document uses XeLaTeX or LuaLaTeX; (b) XML special characters (`&`, `<`, `>`) in parameter values passed to the Word template, which silently break `officedown`/`officer` docx generation — the file fails to open in Word with no R-visible error; (c) characters that are outside the default pdflatex Latin-1 encoding even with `\usepackage[utf8]{inputenc}`.
 
-The more acute problem is escaping. pkgdown renders articles via pandoc after knitr processes the `.Rmd`. The sequence knitr → pandoc → pkgdown template introduces escaping subtleties: backslash sequences in `.Rmd` source may be consumed by knitr before pandoc sees them, causing `\(` inline math delimiters to become `(` in pandoc input. With the statistics package's formula density — Patell Z, BMP variance, Kolari-Pynnönen eigenvalue correction, Sun-Abraham estimator — any escaping error converts a rendered formula to raw `$\hat{\sigma}^2_{i,AR}$` in the published page. There is no build warning; the article appears to build successfully.
-
-Different pandoc versions (the author's local version vs. the `r-lib/actions/setup-pandoc@v2` version pinned in CI) may interpret the same `.Rmd` math escaping differently, producing output that looks correct locally but breaks in CI, or vice versa.
+This is specifically dangerous with AI-generated text because LLMs routinely produce typographically correct prose with smart quotes and em-dashes that are fine in HTML but silently break PDF/Word.
 
 **Why it happens:**
-Authors develop articles locally in RStudio, which uses its own bundled pandoc. RStudio Preview renders math correctly. pkgdown CI uses `r-lib/actions/setup-pandoc@v2` which installs a potentially different pandoc version. The difference only surfaces when comparing local and CI outputs.
+HTML output is tolerant — browsers render almost any Unicode. pdflatex is much stricter. officedown docx generation goes through XML serialisation where `&` is the entity separator — embedding it in a string value produces malformed XML. Developers test in HTML and miss the failure until PDF/Word is attempted.
 
 **How to avoid:**
-- Use only `$...$` for inline math and `$$...$$` for display math throughout all articles. Do not mix with `\(...\)` or `\[...\]` — the dollar-sign delimiters are more robustly handled across pandoc versions.
-- For multi-line equations, use `$$\begin{aligned}...\end{aligned}$$` — the most reliably rendered form.
-- After every `pkgdown::build_site()`, visually inspect the first formula in each article by opening the HTML in a browser. Run `grep -r '\\\$\|\\\\(' docs/articles/` to detect raw backslash-dollar or `\(` sequences surviving into HTML output (a sign of escaped-but-unrendered math).
-- Add a CI smoke test: after the pkgdown build, run `grep -c 'MathJax' docs/articles/return-models.html` to verify the MathJax script tag is present.
-- Check that `pandoc --version` in the CI environment matches the version used locally during article development. If they diverge by a major version, test locally using the CI pandoc version via Docker.
+1. Sanitise all LLM-generated text before embedding in the report template. Apply transformations appropriate to the output format: replace `&` with "and" or the appropriate escape, replace smart quotes with straight equivalents for LaTeX, replace em-dash with `---` for LaTeX.
+2. Add a `sanitise_for_format()` helper in the template that is aware of `knitr::is_latex_output()` and `knitr::is_html_output()`.
+3. Use `xelatex` instead of `pdflatex` as the PDF engine in the template YAML (`latex_engine: xelatex`) — this resolves most Unicode encoding issues without needing character substitution.
+4. Declare `\VignetteEncoding{UTF-8}` in any CRAN-shipped vignette.
+5. Run `tools::showNonASCII()` on a sample LLM output fixture during development to discover problem characters early.
 
 **Warning signs:**
-- Any article HTML contains literal `$` characters in paragraph text where formulas should be rendered.
-- `grep -r '\[@' docs/articles/` (for citations) or `grep -r '\$\b' docs/articles/*.html` (for raw math delimiters) returns hits.
-- RStudio Preview shows rendered formulas but the pkgdown-built HTML shows raw LaTeX strings.
-- `pandoc --version` locally differs from the version installed by `r-lib/actions/setup-pandoc@v2`.
+- `pdflatex` error: "Package inputenc Error: Unicode character".
+- Word document fails to open: "The file is corrupt and cannot be opened."
+- CI PDF build succeeds on a XeLaTeX machine but fails on a pdflatex-only machine.
+- LLM output contains `--` (em-dash) or curly quotes visible in `cat()` output.
 
-**Phase to address:** Phase 1 (article infrastructure) — establish the math delimiter convention before article writing begins. Add a smoke-test formula to the article template and verify it renders correctly in a CI dry-run before writing any real content.
+**Phase to address:**
+Phase 2 (multi-format rendering). Build the sanitisation helper during template design, test against a sample LLM response that intentionally includes em-dashes and special characters.
 
 ---
 
-### Pitfall 6: Citation Pipeline Silently Drops References — Published Articles Have Raw [@Key] Markers
+### Pitfall 6: Offline Fallback Silently Degrades Without User Visibility
 
 **What goes wrong:**
-Method articles for a statistics package must cite primary literature: MacKinlay (1997), Brown & Warner (1985), Patell (1976), Boehmer, Musumeci & Poulsen (1991), Kolari & Pynnönen (2010), Callaway & Sant'Anna (2021), etc. The standard approach is `bibliography: references.bib` in the YAML header and `[@MacKinlay1997]`-style citation keys.
+`es_report()` with no provider configured falls back to the existing rule-based offline advice engine. The offline output is complete and correct, but it is qualitatively different from AI-narrated prose: it is a structured list of KB recommendations rather than fluent paragraph-form narrative. If the report renders with no visible distinction between "AI-narrated" and "rule-based" mode, a researcher who expected an AI narrative will not know they received the fallback — and may cite the offline output as AI interpretation in a paper.
 
-The silent failure: if the `.bib` file path cannot be resolved relative to pkgdown's article render working directory, pandoc drops all citations and renders `[@MacKinlay1997]` as literal text in the HTML — no build error, no warning, just raw citation markers on the published page. pkgdown renders articles from the package root (not from `vignettes/articles/`), so a relative path like `bibliography: references.bib` that resolves correctly when `knitr::render()` is called from `vignettes/articles/` fails when called from the package root via pkgdown.
-
-There are currently no citations in any of the 18 existing vignettes (none uses a `bibliography:` YAML field). This milestone will be the first time the citation pipeline is exercised in this project — making path failures likely on the first attempt.
+The inverse problem also exists: a provider is configured but fails (network timeout, quota exceeded, rate limit). The `es_advise()` failure path returns `.empty_advice()` — an `Advice` object with empty `interpretation` and empty `recommendations`. If `es_report()` renders an empty `Advice` without detecting the empty state, the report's AI section is silently blank or omitted with no explanation.
 
 **Why it happens:**
-rmarkdown `bibliography:` path resolution varies between rendering contexts. Authors test locally by knitting from the `vignettes/articles/` directory, where the relative path resolves. pkgdown renders from the package root, where the same path fails silently.
+Graceful degradation is designed to never crash, but "looks fine" and "is delivering the intended value" are different conditions. Empty `Advice` objects and offline KB `Advice` objects both pass `inherits(advice, "Advice")` checks. Without explicit state inspection, the report wrapper cannot distinguish them.
 
 **How to avoid:**
-- Place `references.bib` in `vignettes/articles/` and use `bibliography: references.bib` (filename only, no path component). pkgdown renders articles with the vignette directory as the working directory for file resolution — co-location avoids the path problem entirely.
-- Use a single shared `references.bib` for all articles. Do not create per-article bib files. Since symlinks are unreliable on Windows, commit the single file once and reference it consistently.
-- Add a CI citation check: after `pkgdown::build_site()`, run `grep -r '\[@' docs/articles/` — any hit means a citation failed to render. Gate the CI build on this grep returning empty (add as a step in `pkgdown.yaml` after the build step).
-- Use `knitr::write_bib()` in a `data-raw/` script to auto-generate BibTeX entries for all R packages cited in articles — keeps package version citations accurate and reproducible.
-- Validate by running `grep -l 'References' docs/articles/*.html | wc -l` — should equal the number of articles that have `bibliography:` in their YAML.
+1. Inspect `advice$source` and `advice$is_deterministic` explicitly in `es_report()` before rendering. Use `!is.null(advice) && inherits(advice, "Advice") && !isTRUE(advice$is_deterministic) && nzchar(advice$interpretation)` to detect a live AI-grounded result.
+2. Use distinct section headings: "AI Interpretation (grounded)" for a live LLM path, "Methodology Summary (offline rule-based)" for the KB path, and "AI Interpretation (unavailable — configure a provider with `provider()`)" for the empty-Advice failure case.
+3. Always emit a `message()` from `es_report()` stating which mode was used, so the user sees it in the console even if the report looks complete.
+4. Check `length(advice$recommendations) == 0L && !nzchar(advice$interpretation)` to detect the empty-Advice failure case and render a placeholder section rather than silently omitting it.
+5. Surface `advice$n_dropped` in the report footer so users know if any recommendations were dropped by the grounding guard.
 
 **Warning signs:**
-- Any article HTML contains `[@` as literal text (run `grep -r '\[@' docs/articles/`).
-- A method article on, e.g., test statistics has prose claiming "...as shown in the literature..." with no parenthetical citation and no References section.
-- `grep -r 'bibliography:' vignettes/articles/*.Rmd` shows paths with `../` or `../../` prefixes.
+- Report renders successfully for a user who has no provider configured, but the AI section looks identical to the one produced with a provider.
+- `advice$is_deterministic` is `TRUE` but the section header says "AI Interpretation."
+- `advice$interpretation` is `""` and no placeholder or explanation is rendered.
 
-**Phase to address:** Phase 1 (article infrastructure) — set up `references.bib` and verify citation rendering before any article is written. The citation pipeline is one-time infrastructure; getting it right first eliminates the failure mode entirely.
+**Phase to address:**
+Phase 1 (report wrapper architecture) and Phase 3 (offline-first validation). The mode-detection logic belongs in the wrapper design; the regression test that the offline report clearly communicates its mode belongs in Phase 3.
 
 ---
 
-### Pitfall 7: Documented Statistical Formulas That Are Subtly Wrong
+### Pitfall 7: Multi-Section Prose Grounding Gaps (Interpretation Field Not Validated)
 
 **What goes wrong:**
-A financial statistics package publishing its own conceptual documentation is held to a higher standard than a utility package. If the Patell Z formula is presented with the wrong degrees-of-freedom correction, if the BMP variance expression omits the cross-sectional covariance term, or if the Kolari-Pynnönen adjustment description loses the eigenvalue correction, the article is not just incomplete — it is actively misleading to researchers who cite EventStudy in a paper. Researchers may run the package with an incorrect understanding of what it is computing, then cite the wrong formula from the docs in their methodology section.
+The existing `.validate_grounding()` guard checks `recommendations[].evidence[]` arrays. The `interpretation` field is an unconstrained string — the guard reads it but does not scan it for numeric values. For a single `report_writing` advice call, this means the LLM can write "The event-day abnormal return of 4.2% (t = 3.91, p < 0.01) represents a significant market reaction." If the actual computed value is 3.8% at t = 2.14, the guard is silent.
 
-This is a realistic risk for this specific package: the KP test, BMP test, and Callaway-Sant'Anna estimator all have nuances that are easy to get wrong in LaTeX (sign conventions, normalisation constants, unbalanced panel treatment). The package implementation is the ground truth; the documentation must agree with it exactly — not approximately.
-
-Secondary risk: misattributed citations. Citing "MacKinlay 1997" for the Patell Z formula (MacKinlay reviews the methodology; Patell 1976 is the primary source) is a quality signal that the author read the textbook, not the paper. Citation errors undermine the scholarly credibility of the documentation and are particularly visible to academics who are the primary users.
+For `es_report()` with multiple sections, if each section is a separate `es_advise()` call, each section's `interpretation` field is independently unvalidated. Fabrication risk is proportional to the number of sections and the length of each interpretation string.
 
 **Why it happens:**
-Article authors write formulas from memory or from secondary sources (textbooks, Wikipedia, other package documentation). Minor transcription errors in LaTeX — a missing subscript, a wrong normalisation constant, a `n-2` vs `n-1` degrees-of-freedom difference — are invisible during review because the rendered output looks mathematically plausible. The R implementation and the displayed formula are never mechanically cross-checked.
+The guard architecture was designed for the `recommend_stat` / `flag_robustness` use case where the grounded claim lives in `evidence[]`. The `report_writing` task type uses `interpretation` as a free-form prose field that was not in scope for the original guard. Adding a full report increases the surface area of free-form prose dramatically.
 
 **How to avoid:**
-- For every formula displayed in a method article: identify the primary literature source (the original paper, not a textbook review). The formula in the article must match the primary source exactly — including normalisation constants, subscript notation, and edge-case handling.
-- Cross-check each displayed formula against the package source implementation in `R/single_event_test_statistics.R`, `R/multi_event_test_statistics.R`, and `R/models.R`. The formula in the article and the arithmetic in the R code must be compatible. Add a source comment to the R file: `# Formula: see vignettes/articles/test-statistics.Rmd, equation 3.1` so future maintainers know to update both.
-- Where the implementation deviates from the textbook formula (e.g., a degrees-of-freedom adjustment, a finite-sample correction specific to MacKinlay's appendix), document the deviation explicitly: "Note: the implementation uses [X] rather than [Y] from Patell (1976) because [reason]. This matches Brown & Warner (1985) section 3.2."
-- Require a formula correctness review — a second pass specifically comparing article LaTeX against the primary paper — as a mandatory gate before each method article is merged. Not a general content review; a focused formula-check.
-- Add `tests/testthat/test-formula-consistency.R`: for at least one synthetic example per test statistic, compute the statistic using the package function and hand-compute it using the formula displayed in the article. Assert equality to four decimal places. Formula errors become test failures.
+1. For the multi-section report, prefer structured fields over free prose. Define a schema where each section has a `prose` string field and a `section_evidence[]` array in the same shape as the existing `evidence[]` requirement. The guard then validates every section's evidence array, and the prose becomes a "fill in this template given these validated values" task.
+2. Add a prose numeric scanner to `.validate_grounding()`: extract all decimal numbers from `interpretation` (regex `\b\d+\.?\d*\b`), attempt to match each to the nearest diagnostic value. Any number that cannot be matched within a configurable tolerance triggers an appended caveat.
+3. Instruct the LLM to avoid numeric prose in the system prompt: "In prose sections, do not write numeric values. Instead write qualitative descriptions (e.g. 'highly significant' rather than 't = 3.91'). Numeric values appear only in the evidence[] arrays."
+4. Add a cross-section consistency check: if `es_report()` calls `es_advise()` multiple times, the same diagnostic key cited in two sections must have the same value.
 
 **Warning signs:**
-- An article formula references a variable (e.g., `$M_i$`, `$S^2_{\epsilon_i}$`) that does not appear in the primary paper being cited.
-- The normalisation constant in the displayed formula differs from what is in the R source by more than a sign or a scalar factor.
-- The article cites "MacKinlay 1997" for a test statistic whose primary source is a different paper (Patell 1976, Boehmer et al. 1991, Kolari & Pynnönen 2010).
-- `test-formula-consistency.R` does not exist after the method articles phase is complete.
+- Prose interpretation contains specific decimal values (t-statistics, p-values, return percentages) that differ from `es_diagnostics()` output.
+- The same diagnostic value appears in two sections but with different magnitudes.
+- Guard reports `n_dropped = 0` but the rendered report contains a numerical claim that is not in the diagnostics.
 
-**Phase to address:** Phase 2 (method articles) — formula correctness review is a required merge gate per article, not a milestone-end cleanup. One article → one formula review before the next article begins.
+**Phase to address:**
+Phase 1 (grounding architecture). The prose scanner should be part of the grounding guard design from the start. Define the multi-section JSON schema before writing the prompt or template.
 
 ---
 
-### Pitfall 8: Articles Accidentally Shipped in the CRAN Tarball via Missing .Rbuildignore Entry
+### Pitfall 8: DESCRIPTION Suggests Boundary Violated by New Rendering Dependencies
 
 **What goes wrong:**
-The current `.Rbuildignore` correctly excludes `^data-raw$`, `^docs$`, `^pkgdown$`, and `^_pkgdown\.yml$`. But it does not yet contain an entry for `^vignettes/articles` — because that directory does not yet exist. When `vignettes/articles/` is created for the new articles, `R CMD build` will include it in the CRAN tarball unless `.Rbuildignore` is updated in the same commit.
+`officedown` (Word output), `tinytex` (PDF toolchain check), `webshot2` (plotly static fallback) might be added to `Imports` instead of `Suggests` by mistake, or might be called without a `requireNamespace()` guard. Either causes an `R CMD check` ERROR: a package in `Imports` that is not available on the check machine causes immediate load failure. A package called without `requireNamespace()` while in Suggests produces "Package required but not installed" which CRAN treats as a submission blocker.
 
-The consequence: the CRAN tarball contains `.Rmd` files in `vignettes/articles/` that do not have a `VignetteEngine` declaration in their YAML (they are pkgdown-only articles, not CRAN vignettes). `R CMD check --as-cran` then emits `WARNING: vignette source file 'vignettes/articles/return-models.Rmd' without corresponding vignette builder`. A WARNING is CRAN-blocking.
-
-If `vignettes/articles/data/` is used for purely article-local datasets, the same issue applies to that directory.
+Additionally: `officedown` is a heavy package (imports officer, rlang, knitr, etc.). Adding it to `Imports` would impose it on all users, even those who only want HTML output.
 
 **Why it happens:**
-`.Rbuildignore` entries are added reactively — when `R CMD check` complains — rather than proactively when the directory is created. The gap between "create the directory" and "run R CMD check" is typically days or weeks into the article-writing process.
+During rapid development, it is tempting to add packages to `Imports` for autocomplete convenience and to avoid the `requireNamespace()` boilerplate. The Suggests boundary discipline from v0.60.0 is easily eroded across multiple phases if not enforced by CI.
 
 **How to avoid:**
-- The `.Rbuildignore` entry `^vignettes/articles` must be added in the same commit that creates the `vignettes/articles/` directory. Never as a follow-up commit.
-- After adding the entry, immediately verify: `R CMD build . --no-build-vignettes && tar tzf EventStudy_*.tar.gz | grep articles` should return zero lines.
-- If `vignettes/articles/data/` is used for article-local datasets, add `^vignettes/articles/data` as a separate explicit entry (or rely on `^vignettes/articles` to cover the whole subtree — verify with the tar check above).
-- Add the tar check as a CI step in `R-CMD-check.yaml` or as a local pre-release checklist item.
+1. For each new rendering dependency — rmarkdown, knitr, officedown, officer, flextable — add to `Suggests` only; guard every call site with `requireNamespace("pkg", quietly = TRUE)`.
+2. Run `R CMD check --as-cran` in CI with a matrix that excludes all Suggests packages. This catches unguarded calls immediately.
+3. In the `es_report()` function, at the top of each format-specific branch, check the required Suggests packages explicitly and stop with an install message.
+4. Add a CI job step: `R CMD INSTALL --no-suggests .` then run `devtools::test()`. Any test that fails because a Suggests package is absent reveals an unguarded call.
 
 **Warning signs:**
-- `tar tzf EventStudy_*.tar.gz | grep articles` returns any hits.
-- `R CMD check --as-cran` emits `W  vignette without corresponding vignette builder` after any new article is added.
+- `R CMD check --as-cran` NOTE: "Package suggested but not available for checking: 'officedown'".
+- A test that calls `es_report(format = "docx")` without `skip_if_not_installed("officedown")` fails on a clean CI runner.
+- CRAN submission feedback: "Please add the package to the Suggests field."
 
-**Phase to address:** Phase 1 (article infrastructure) — `.Rbuildignore` entry is a prerequisite to creating `vignettes/articles/`, not a cleanup task.
+**Phase to address:**
+Phase 1 (CRAN hygiene scaffolding) and Phase 2 (multi-format rendering). Both phases must enforce the Suggests discipline; the CI matrix without Suggests is the automated gate.
 
 ---
 
-### Pitfall 9: Dataset Without man/ Documentation Triggers R CMD check WARNING
+### Pitfall 9: Report Template Mutates R6 Task Object via render() Reference Semantics
 
 **What goes wrong:**
-Any object saved to `data/` via `usethis::use_data()` must have a corresponding `man/*.Rd` documentation page, or `R CMD check --as-cran` emits `WARNING: "dataset 'xyz' is not documented"`. This is a WARNING (not a NOTE), which is CRAN-blocking. The existing `dieselgate` dataset presumably has its `man/dieselgate.Rd`; any new dataset added for gallery domains must have one too.
+`rmarkdown::render()` executes the `.Rmd` template in an isolated environment (`envir = new.env(parent = globalenv())`). The current `generate_report()` passes `params = list(task = task, ...)` to inject data. R6 objects are reference types — `params$task` in the template is the same R6 object, not a copy. If the template calls any mutating method (even accidentally, via active bindings with side effects), the modification propagates back to the caller's task object silently and unexpectedly.
 
-Additionally, if the man page exists but lacks `@format` (with field-level descriptions for every column), `@source` (with full URL and access date), or `@examples` (even a one-liner `data(newdataset)` suffices), `R CMD check` emits style-level NOTEs that CRAN reviewers flag.
+Additionally, large `EventStudyTask` objects serialised through the `params` list can cause memory doubling — the original object plus the copy in the render environment both live in RAM simultaneously during rendering.
 
 **Why it happens:**
-`usethis::use_data()` creates the `.rda` file but does not create the documentation stub. Authors write the man page last, after the article is done, and sometimes forget it entirely until `R CMD check` fails.
+Developers expect `params` to create a copy as it does for simple R objects (vectors, data frames). R6 objects break this expectation because they are environments, not values. The current `generate_report()` passes the task directly without cloning.
 
 **How to avoid:**
-- Create the roxygen documentation stub for a new dataset in the same commit as the `data-raw/` script and the `.rda` file. Required fields: `@name`, `@title`, `@description`, `@format` (one `\item` per column), `@source` (URL + access date), `@examples` (one line), `@docType data`.
-- Use `devtools::document()` immediately after creating the stub to verify the `man/*.Rd` is generated correctly.
-- Run `R CMD check --as-cran` locally after adding any new dataset before committing.
-- The existing R-CMD-check.yaml CI matrix (ubuntu/macos/windows with `--as-cran`) provides the safety net, but local verification before pushing avoids wasted CI cycles.
+1. Deep-clone the task before passing to render: `params = list(task = task$clone(deep = TRUE), ...)`.
+2. Make the template read-only with respect to the task: never call mutating methods inside the template. Use only accessor methods.
+3. For very large tasks, extract only the data the template needs before calling render and pass the extracted tibbles instead of the full R6 object.
 
 **Warning signs:**
-- `R CMD check` output shows `W  checking for unstated dependencies...` or `W  No documentation for...` after a `use_data()` call.
-- `data/` contains an `.rda` file with no matching `R/<datasetname>.R` file containing a `#' @name` roxygen block.
-- `devtools::document()` does not produce a `man/<datasetname>.Rd` file.
+- The task object in the calling environment has modified state after `generate_report()` returns.
+- Rendering a large study (50+ firms) causes an out-of-memory error or significant memory spike.
+- The same task rendered twice produces different output due to reference-side-effects from the first render.
 
-**Phase to address:** Phase 2 (dataset curation) — dataset documentation is a required artifact of dataset creation, not a separate step.
+**Phase to address:**
+Phase 2 (multi-format rendering). Add the deep-clone and read-only convention to the template design specification; add a regression test that verifies the task is unmodified after render.
 
 ---
 
-### Pitfall 10: Rendered Outputs Go Stale When the Package API Changes
+### Pitfall 10: knitr Figure Directory Deletion When Rendering Multiple Formats Sequentially
 
 **What goes wrong:**
-Method articles execute real package code at build time (`eval = TRUE`). If a function's output format changes in a future version — a renamed tibble column, a changed `print()` method output, a new diagnostic warning — the article's rendered output becomes inconsistent with the surrounding prose. The prose says "the `ar` column contains..." but the rendered table shows the column is now called `abnormal_return`. The code still runs; the mismatch is only visible to a human reader.
+When `es_report()` renders to multiple formats in a single call (e.g. HTML then PDF then Word), calling `rmarkdown::render()` sequentially for each format can delete the figure directory needed by a subsequent format. This is a documented knitr behaviour: when one format finishes and cleans up its figure path, it may remove the parent figure directory, breaking the next format's figure references.
 
-This failure mode is not caught by `R CMD check`: the new articles are in `vignettes/articles/` (`.Rbuildignore`d) and are not rendered during CRAN's vignette check. The only feedback loop is the pkgdown CI job on push-to-main — which only catches broken code (errors), not semantically stale output (columns renamed but code still executes).
-
-Compounding this: the gallery articles will reference real bundled datasets and real computed statistics. Any future API drift (e.g., `calculate_statistics()` renames a column) that the article's surrounding prose describes explicitly will create a live published inconsistency that users encounter.
+Specifically: HTML renders to `report_files/figure-html/`, PDF renders to `report_files/figure-latex/`. When the HTML render finishes and removes `report_files/`, the PDF render's figure path is gone.
 
 **Why it happens:**
-Documentation is written once and implicitly trusted to stay current. The only process that would catch drift is "update docs whenever API changes," which requires explicit policy enforcement — and it is easy to miss when the focus is on the code change.
+The knitr figure cleanup logic does not coordinate across sequential `render()` calls for the same source file. The bug only manifests in the multi-format combination case, not when each format is rendered in isolation.
 
 **How to avoid:**
-- For every article chunk that produces a named output (tibble columns, print output structure), add a `stopifnot()` assertion immediately after: `stopifnot("ar" %in% names(result), "car" %in% names(result))`. This converts API-drift bugs from invisible mismatches into build-breaking errors — the pkgdown CI job will fail loudly.
-- Add a `tests/testthat/test-article-outputs.R` canary that re-runs the key computations from each article and asserts structural outputs (column names, object classes, statistic names). This runs during `R CMD check` and catches drift before the articles go stale on the deployed site.
-- When the package API changes in a way that affects article outputs, treat "update affected articles" as a required subtask of the API change PR — not a follow-up.
-- Never embed hardcoded numeric output values in article prose ("the t-statistic is -4.23"). Reference values programmatically via inline R (`r round(result$t_stat, 2)`) or annotate that the value depends on the seed and dataset.
+1. Use `rmarkdown::render(output_format = "all")` when rendering multiple formats simultaneously rather than calling render once per format. This lets rmarkdown coordinate figure directory lifecycle internally.
+2. Alternatively, render to a separate temporary file per format with a unique `output_dir` per format, so figure directories do not overlap.
+3. When building `es_report()` for multi-format output, test the `c("html", "pdf", "docx")` combination explicitly, not just each format in isolation.
 
 **Warning signs:**
-- `pkgdown::build_site()` succeeds but a rendered table's column names do not match what the prose describes.
-- `NEWS.md` has an entry noting a renamed output column without a corresponding commit touching `vignettes/articles/`.
-- No `tests/testthat/test-article-outputs.R` exists after the method articles phase is complete.
-- An article chunk does not contain any `stopifnot()` assertions on the output it discusses.
+- Second-format render fails with "figure file not found" or produces blank figures.
+- Figure directories disappear during sequential format rendering.
+- HTML renders correctly but PDF has broken image references.
 
-**Phase to address:** Phase 2 (method articles) and Phase 3 (gallery) — add `stopifnot()` assertions per article as each is written. Phase 4 (integration) — add the canary test file.
-
----
-
-### Pitfall 11: Content Duplication Between New Method Articles and Existing 18 CRAN Vignettes
-
-**What goes wrong:**
-The 18 existing CRAN vignettes already cover every method: introduction, result-extraction, diagnostics-validation, inference-robustness, factor-models-bhar, time-varying-models, modern-did-estimators, panel-event-study, intraday, synthetic-control, etc. The new method articles are meant to add conceptual depth with formulas, assumptions, and academic context — not to repeat the existing walkthrough. If method articles duplicate existing vignettes (same pipeline code, same data, same narrative structure), the site has redundant content that confuses users ("which should I read?") and doubles the maintenance burden: every API change must be updated in two places.
-
-**Why it happens:**
-Article authors naturally start from the existing vignette as a reference for what the function does, then re-explain it from scratch because that is faster than reading the primary literature. The result is a vignette wearing a formula costume.
-
-**How to avoid:**
-- Before writing any article, define a one-paragraph content brief that states: what statistical concept this article covers; what it explicitly defers to the corresponding CRAN vignette; what the reader should know after this article that they could not learn from the vignette alone.
-- Cross-link rather than duplicate: method articles link to the corresponding vignette for usage details and vice versa.
-- A method article should not contain the full `prepare_event_study() → fit_model() → calculate_statistics()` pipeline except as a minimal reproducible setup before the statistical point. If an article needs more than 20 lines of setup code, it has absorbed vignette content.
-- Establish in `_pkgdown.yml` a separate "Learn" navbar section (distinct from the current "Articles" section that lists the vignettes) to visually reinforce the distinction between "how to use" and "why it works."
-
-**Warning signs:**
-- A method article draft contains a code block that is identical or near-identical to a block in the corresponding vignette.
-- `wc -l vignettes/articles/return-models.Rmd` exceeds 500 lines (a sign it has absorbed vignette content).
-- The method article uses the same `dieselgate` dataset in the same event window configuration that the existing `introduction.Rmd` vignette uses, producing identical output tables.
-
-**Phase to address:** Phase 1 (planning) — write content briefs for all articles before writing any article. Use the briefs as acceptance criteria during Phase 2 review.
-
----
-
-### Pitfall 12: Long pkgdown Build Time Blocks CI as Article Count Grows
-
-**What goes wrong:**
-The current pkgdown CI job builds the site synchronously. With 18 existing vignettes and 13 new articles (7 method + 6 gallery), each executing real code, the build can grow from an estimated 5–8 minutes to 25–40 minutes. A 40-minute CI feedback loop on every push-to-main makes iterative article development impractical. The GARCH and DCC-GARCH articles are the highest risk: `GARCHModel$new()$fit()` on a 300-day time series takes 10–30 seconds per firm. A gallery article with 4 firms could add 2–4 minutes per render.
-
-**Why it happens:**
-Each article is developed in isolation; the cumulative build time impact is not considered until all articles are written and CI visibly slows.
-
-**How to avoid:**
-- Benchmark each article's render time during development: `system.time(rmarkdown::render("vignettes/articles/myarticle.Rmd"))` must complete in under 60 seconds. Gate on this before the article is merged.
-- For GARCH and DCC-GARCH articles: pre-fit the model object using a fixed seed and cache it as an `.rds` file in `vignettes/articles/data/`. Load the cached object in the article: `task <- readRDS("cached_garch_fit.rds")`. Update the cache only when the model implementation changes, not on every render.
-- For bootstrap articles: cap `n_boot` at 99 (vs. 999 in production) — 10× faster. Add a comment: `# n_boot = 99 for article render speed; use n_boot = 999 in production`.
-- For simulation articles: cap `n_sim` at 100 (vs. 1000 in production). Add the same explanatory comment.
-- Target total pkgdown CI time under 15 minutes. If it exceeds this after Phase 3, audit article render times and add caching for the slowest articles.
-
-**Warning signs:**
-- The pkgdown CI job takes longer than 15 minutes.
-- Any single article's local render time exceeds 90 seconds.
-- A GARCH or DCC-GARCH article calls `GARCHModel$new()$fit()` inside a loop over multiple firms without a cached-result check.
-
-**Phase to address:** Phase 2 (method articles) and Phase 3 (gallery) — enforce the 60-second render budget per article during writing; add caching for heavy computations in the same PR as the article, not as a follow-up optimization.
+**Phase to address:**
+Phase 2 (multi-format rendering). Include a multi-format combination test from day one; the bug only manifests in the combination case.
 
 ---
 
@@ -334,14 +271,13 @@ Each article is developed in isolation; the cumulative build time impact is not 
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Writing formulas from memory without verifying against primary source | Faster article drafting | Incorrect formulas published in a statistics package's official documentation | Never — always verify against the primary paper |
-| Using Yahoo Finance prices for all gallery datasets | Easy `tq_get()` calls; realistic data | Redistribution risk grows with each new dataset; potential CRAN challenge | One dataset (dieselgate) may be defensible as illustrative academic use; six is a systematic collection |
-| Using plotly for all article figures | Demonstrates native package API; interactive charts | ~3.5 MB JS per page; blank-figure CI silent failures; slow site | Only for gallery pages where hover interactivity is the explicit pedagogical point |
-| Deferring `.Rbuildignore` entry for `vignettes/articles/` | Less upfront setup | CRAN tarball includes article Rmd files; R CMD check WARNING about missing VignetteEngine | Never — add the entry in the same commit that creates the directory |
-| Hardcoding numeric results in article prose | Easier to write | Values go stale when `data-raw/` is re-run; invisible mismatch with rendered output | Never — reference via inline R or annotate that the value is seed-fixed |
-| Omitting `set.seed()` in stochastic article chunks | Less boilerplate | Non-deterministic rendered output; noisy CI diffs; gallery numbers change on every build | Never in any chunk with a random component |
-| Placing gallery datasets in `data/` rather than `vignettes/articles/data/` | Standard `data()` access for article code | Tarball bloat; data documentation burden; CRAN installed-size NOTE | Only for datasets also used in CRAN-shipped vignettes or exported functions |
-| Using `eval = FALSE` + pasted static output for all code chunks | Fast build; no CI failures | Docs diverge immediately from the package; stale output is undetectable | Acceptable only for LLM/API-key-dependent chunks — follow the ai-advisor.Rmd pattern |
+| Skip prose numeric scanning in grounding guard | Faster Phase 1 | Ungrounded numbers appear in report prose; violates "never silently wrong" invariant | Never — the invariant is non-negotiable |
+| Use `rmarkdown::word_document()` instead of `officedown::rdocx_document()` | Fewer dependencies | Tables lose image/hyperlink support in Word; flextable falls back to plain text | Only if Word tables never contain embedded images |
+| Pass full R6 task object to render() without cloning | Simpler code | Mutating template side effects corrupt caller state silently | Only if template is proven read-only and tested |
+| Render all formats in a single `render(output_format = "all")` | Avoids figure directory deletion bug | Higher peak memory; single point of failure for all formats | Acceptable specifically for the multi-format case |
+| Default format renders all at once | Convenient API | PDF/Word toolchain errors break the whole call even when user only needed HTML | Never — make HTML the sole default, others opt-in |
+| Add `tinytex` to Suggests | Documents PDF toolchain | Users without TinyTeX see misleading "package not installed" rather than "LaTeX not found" | Never — tinytex is a user-level concern |
+| Put `es_report()` example outside `\dontrun{}` | Example appears to execute in docs | `R CMD check` fails on CRAN machines without pandoc | Never |
 
 ---
 
@@ -349,30 +285,66 @@ Each article is developed in isolation; the cumulative build time impact is not 
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| pkgdown + `bibliography:` | `bibliography: ../../references.bib` resolves from vignette directory locally but fails in pkgdown render from package root | Place `references.bib` in `vignettes/articles/` and use `bibliography: references.bib` (filename only, no path) |
-| pkgdown + plotly | Using `plotly::ggplotly()` in every article chunk; pkgdown embeds full plotly.js per page | Use ggplot2 for method articles; allow plotly selectively in gallery, relying on pkgdown's asset deduplication |
-| `data/` vs `vignettes/articles/data/` | Storing article-only datasets in `data/` because `usethis::use_data()` makes it easy | Purely article-only datasets go in `vignettes/articles/data/` with a `.Rbuildignore` entry; only datasets used in CRAN vignettes or exported functions go in `data/` |
-| GitHub Actions pkgdown + Suggests packages | A package in `Suggests` that is used in an article is not installed by the default `setup-r-dependencies` step with `needs: website` | Add the package to `Config/Needs/website:` in DESCRIPTION, or add it to `extra-packages:` in the pkgdown workflow step |
-| knitr + MathJax delimiters | Mixing `\(...\)` and `$...$` math delimiters in the same article — some pandoc versions reject one form silently | Use only `$...$` / `$$...$$` throughout all articles |
-| `R CMD build` + `vignettes/articles/` | Creating the directory without a `.Rbuildignore` entry — article Rmds land in the tarball | Add `^vignettes/articles` to `.Rbuildignore` in the same commit that creates the directory; verify with `tar tzf *.tar.gz | grep articles` |
-| testthat + article output assertions | `stopifnot()` assertions in article chunks do not run during `R CMD check` | Mirror key article computations in `tests/testthat/test-article-outputs.R` which does run in `R CMD check` |
+| rmarkdown + Suggests | Calling `rmarkdown::render()` without `requireNamespace()` guard | Guard every call; stop with install message if absent |
+| officedown Word output | Using `rmarkdown::word_document()` output format | Use `officedown::rdocx_document()` for full flextable support |
+| plotly in PDF/Word | Expecting plotly to render via always_allow_html | Use `knitr::is_html_output()` to switch to ggplot2 for static formats |
+| tinytex + CI | Calling `tinytex::install_tinytex()` in tests or examples | Never call install functions in tests; skip PDF tests without tinytex |
+| httptest2 mocking | Calling real LLM API in testthat suite | Use `with_mock_api()` with pre-recorded fixtures; `skip_on_cran()` for live tests |
+| LLM prose + non-ASCII | Embedding LLM output directly in rmarkdown | Sanitise: strip/replace `&`, smart quotes, em-dashes before embedding |
+| R6 task + render params | Passing task directly via params list | Deep-clone before passing: `task$clone(deep = TRUE)` |
+| Multi-format sequential render | Calling `render()` once per format in a loop | Use `render(output_format = "all")` or unique output dirs per format |
+
+---
+
+## Performance Traps
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Full task in render params | Peak RAM doubles during render for large studies | Pre-extract result tibbles; pass only what the template needs | Studies with 50+ firms, long windows |
+| LLM call per report section | Slow report generation; multiple round-trips | Batch all section prompts in one call with a multi-section schema | Reports with 4+ sections on a slow provider |
+| knitr cache across formats | Stale cache from HTML render used for PDF | Set `cache = FALSE` in template for publication reports | Any time chart data changes but cache is not invalidated |
+| Sequential multi-format render | Figure directory deletion mid-run | Use `render(output_format = "all")` | Any multi-format render |
+
+---
+
+## Security Mistakes
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Logging the full prompt (contains diagnostics JSON) | Diagnostic data written to log files | Never log the full prompt; log only provider name, task_type, token count |
+| Embedding provider API key in report metadata | Key exposed in HTML source, PDF metadata, or Word document properties | Never embed API key; source only from environment; strip from render params |
+| LLM-generated content injected without sanitisation into Word XML | XML injection breaks docx structure; malformed documents | Sanitise all LLM text through a format-aware escaper before embedding |
+| Report output file world-readable on shared systems | Diagnostic data (model results, firm identifiers) exposed | Document that output_file defaults to working directory; warn user |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **`.Rbuildignore` entry:** `vignettes/articles/` created AND `^vignettes/articles` in `.Rbuildignore` in the same commit — verify with `R CMD build . --no-build-vignettes && tar tzf EventStudy_*.tar.gz | grep articles` returning empty.
-- [ ] **Dataset documentation:** Every new `.rda` in `data/` has a `man/*.Rd` with `@format` field descriptions — verify with `R CMD check --as-cran` showing zero WARNING/NOTE about undocumented data.
-- [ ] **Formula correctness:** Every formula in every method article verified against the primary literature source AND the package source implementation — not just "it looks right" during authoring.
-- [ ] **Citation rendering:** Every `[@Key]` citation renders as an author-year citation — verify with `grep -r '\[@' docs/articles/` returning empty after every build.
-- [ ] **Determinism:** Every article with a stochastic function has `set.seed()` immediately before it — verify by building the site twice and diffing the HTML.
-- [ ] **Tarball data budget:** `tar tzf EventStudy_*.tar.gz | grep "^EventStudy/data/"` shows total `data/` ≤ 600 KB — verify after every new dataset is added.
-- [ ] **Dataset licensing:** Every `data-raw/` script has a `meta$license_note` or equivalent field addressing redistribution — verify by reading the provenance comment block in each script.
-- [ ] **Build time:** Every article renders in under 60 seconds locally — verify with `system.time(rmarkdown::render(...))` per article.
-- [ ] **Math rendering:** Every article in `docs/articles/` renders formulas visually (not as raw `$...$`) — verify by opening each article in a browser and visually inspecting the first formula block.
-- [ ] **Content non-duplication:** Every method article links to the corresponding CRAN vignette for API usage details rather than repeating the pipeline walkthrough — verify that no method article contains the full three-step pipeline without a "See vignette X" cross-reference.
-- [ ] **Article output assertions:** Every article chunk producing a named output has at least one `stopifnot()` asserting column names or object class — verify by grep on the article source.
-- [ ] **pkgdown build time:** Total CI pkgdown job completes in under 15 minutes — verify after Phase 3 is complete.
+- [ ] **Grounding guard on prose:** Verify `interpretation` field numeric values are cross-checked against diagnostics, not just `evidence[]` arrays.
+- [ ] **Offline section heading:** Confirm the rendered report visibly distinguishes AI-grounded vs. offline rule-based narrative — check `advice$is_deterministic` flag.
+- [ ] **Empty Advice handling:** Confirm an empty `Advice` object (failed provider call) renders a placeholder section, not a blank report.
+- [ ] **PDF plotly fallback:** Confirm PDF/Word output uses ggplot2 static plots, not plotly — check for blank figures in a test render.
+- [ ] **Non-ASCII sanitisation:** Confirm LLM text with em-dashes and smart quotes does not break PDF/Word render — test with a fixture that includes these characters.
+- [ ] **CRAN check clean:** Run `R CMD check --as-cran` without Suggests installed — confirm no ERRORs or WARNINGs.
+- [ ] **R6 task immutability:** Confirm the task object is unmodified after `es_report()` returns — compare `task$results` before and after.
+- [ ] **Multi-format combination:** Confirm rendering HTML + PDF + Word in sequence does not delete figure directories — inspect output directory after the run.
+- [ ] **Word image support:** Confirm flextable tables with images use `officedown::rdocx_document()`, not `rmarkdown::word_document()`.
+- [ ] **Skip discipline:** Confirm every test that calls `generate_report()` or `es_report()` has `skip_on_cran()` and `skip_if_not_installed("rmarkdown")`.
+
+---
+
+## Recovery Strategies
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Ungrounded prose in shipped report | HIGH | Patch grounding guard with prose scanner; add regression test; issue patch release |
+| CRAN rejection for missing `\dontrun{}` | LOW | Add `\dontrun{}` wrapper; resubmit; one-line fix |
+| PDF toolchain breaks CI | MEDIUM | Add `skip_if(!tinytex::is_tinytex())` guards; exclude PDF tests from CRAN matrix |
+| Plotly blank in Word/PDF | MEDIUM | Add `knitr::is_html_output()` branch to template; switch to ggplot2 for static |
+| Non-ASCII breaks Word generation | LOW | Add character sanitisation helper; test with fixture containing problematic chars |
+| R6 task mutation via render | MEDIUM | Add `$clone(deep = TRUE)` before params pass; add before/after state test |
+| Suggests boundary violated | LOW | Move package back to Suggests; add `requireNamespace()` guard; add CI matrix without Suggests |
+| Silent offline fallback | MEDIUM | Add mode-detection logic; add distinct section headings; add console message |
 
 ---
 
@@ -380,33 +352,38 @@ Each article is developed in isolation; the cumulative build time impact is not 
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Non-deterministic rendered output | Phase 1: canonical article template with seed + options block | Build site twice locally; diff `docs/articles/` — zero numeric diffs |
-| plotly page weight and silent render failures | Phase 1: ggplot2-vs-plotly policy; Phase 2: enforce static in method articles; Phase 3: selective plotly in gallery | Article HTML size check; offline browser test |
-| Dataset tarball bloat + installed-size NOTE | Phase 2: per-dataset size budget at creation time | `R CMD build` → `tar tzf` → data directory total ≤ 600 KB |
-| Dataset redistribution licensing | Phase 2: source evaluation before writing any `data-raw/` script | Every `data-raw/` script has `meta$license_note`; `data-raw/DATA-SOURCES.md` exists |
-| MathJax / LaTeX escaping failures | Phase 1: delimiter convention; smoke-test formula in template | `grep -r '\[@' docs/articles/` returns empty; visual inspection of first formula per article |
-| Citation pipeline silent failure | Phase 1: `references.bib` setup + CI grep gate | `grep -r '\[@' docs/articles/` returns empty after every build |
-| Subtly wrong statistical formulas | Phase 2: formula review gate before each article merges | Primary source + implementation cross-check sign-off; `test-formula-consistency.R` exists |
-| Articles shipped in CRAN tarball | Phase 1: `.Rbuildignore` entry in first commit | `tar tzf *.tar.gz \| grep articles` returns empty |
-| Dataset without man/ documentation | Phase 2: documentation as dataset creation prerequisite | `R CMD check --as-cran` zero WARNING on data documentation |
-| Stale rendered outputs after API changes | Phase 2–3: `stopifnot()` assertions per article; Phase 4: canary test file | `R CMD check` fails if canary detects output column drift |
-| Content duplication vs existing vignettes | Phase 1: content briefs per article before writing begins | Each article brief is an acceptance criterion; method articles contain no full pipeline without a vignette cross-reference |
-| Long CI build time | Phase 2–3: 60-second render budget; caching for heavy models | pkgdown CI job under 15 minutes; no single article exceeds 90 seconds locally |
+| Grounding guard does not cover prose | Phase 1 (wrapper architecture) | Test: assert `.validate_grounding()` drops/caveats a recommendation whose interpretation cites a fabricated number |
+| CRAN check triggered by render in examples | Phase 1 (CRAN hygiene) | CI: R CMD check --as-cran on clean runner; all render examples in `\dontrun{}` |
+| PDF tinytex breaks in CI | Phase 2 (multi-format rendering) | CI: PDF test matrix job with `skip_if(!tinytex::is_tinytex())` |
+| Plotly blank in static formats | Phase 2 (multi-format rendering) | Integration test: render to PDF/Word, assert figure files are non-empty PNGs |
+| Non-ASCII characters break PDF/Word | Phase 2 (multi-format rendering) | Test: render template with em-dash and ampersand fixture, assert no error |
+| Silent offline fallback | Phase 1 + Phase 3 (offline-first validation) | Test: confirm `advice$is_deterministic = TRUE` produces distinct heading; confirm empty Advice renders placeholder |
+| Multi-section prose grounding gaps | Phase 1 (grounding architecture) | Test: multi-section schema with fabricated number in interpretation; assert caveat is appended |
+| Suggests boundary violation | Phase 1 + Phase 2 | CI: `R CMD INSTALL --no-suggests` + `devtools::test()` — zero failures |
+| R6 task mutation via render params | Phase 2 (multi-format rendering) | Test: task state before and after `es_report()` is identical |
+| Figure directory deletion in multi-format render | Phase 2 (multi-format rendering) | Integration test: HTML + PDF + Word sequential render, all figure files present after |
 
 ---
 
 ## Sources
 
-- Direct inspection: `.github/workflows/pkgdown.yaml` — `new_process = FALSE`; no network guard in pkgdown step; `extra-packages: any::pkgdown, local::.`; missing `Config/Needs/website:` pattern
-- Direct inspection: `DESCRIPTION` — `LazyData: true`; `plotly` in `Imports:`; Suggests list; current version 0.62.0
-- Direct inspection: `.Rbuildignore` — current exclusions (`^data-raw$`, `^docs$`, `^pkgdown$`, `^_pkgdown\.yml$`); notably absent: `^vignettes/articles`
-- Direct inspection: `data-raw/dieselgate.R` — Yahoo Finance provenance pattern; `meta$source` present; `meta$license_note` absent; the pattern to replicate and improve for new datasets
-- Direct inspection: `data/dieselgate.rda` — 9.1 KB baseline dataset; the comparison point for new dataset size budgeting
-- Direct inspection: 19 vignette files in `vignettes/` — existing `set.seed(42)` convention; `eval = FALSE` pattern for LLM/network chunks; `rmarkdown::html_vignette` output format; zero existing `bibliography:` YAML fields (citation pipeline untested in this project)
-- Direct inspection: `_pkgdown.yml` — Bootstrap 5 template; no MathJax override; current articles nav structure; `articles:` sections covering all 18 existing vignettes
-- Direct inspection: `R/single_event_test_statistics.R`, `R/multi_event_test_statistics.R` — ground-truth implementations that article formulas must match
-- Package knowledge: CRAN installed-size NOTE threshold (~5 MB package / ~1 MB data subdir); pkgdown working directory for article rendering; pandoc `$...$` vs `\(...\)` delimiter compatibility; plotly.js self-contained embed size (~3.5 MB); Yahoo Finance ToS section 5 redistribution restriction; pkgdown asset deduplication behavior for htmlwidgets
+- [R-hub blog: Optimal workflows for package vignettes](https://blog.r-hub.io/2020/06/03/vignettes/) — CRAN vignette build vs. check distinction, VignetteBuilder discipline
+- [ropensci HTTP testing book: Graceful HTTP packages](https://books.ropensci.org/http-testing/graceful.html) — skip_on_cran, offline mock patterns for httr2 packages
+- [httptest2 CRAN package](https://cran.r-project.org/web/packages/httptest2/index.html) — with_mock_api, capture_requests, without_internet for httr2
+- [TDS: Your JSON Is Valid but Your Data Is Wrong](https://towardsdatascience.com/your-json-is-valid-but-your-data-is-wrong-five-failure-modes-llm-structured-outputs-wont-catch/) — five structured-output failure modes that bypass schema validation
+- [Parasoft: Controlling LLM Hallucinations at the Application Level](https://www.parasoft.com/blog/controlling-llm-hallucinations-application-level-best-practices/) — multi-layer grounding defense strategy
+- [R-bloggers: Word Up — officedown/officer/flextable notes](https://www.r-bloggers.com/2022/09/word-up-notes-on-working-with-officer-officedown-and-flextable-to-generate-word-documents-in-rmarkdown/) — XML special characters breaking docx, table rendering issues
+- [officeverse: officedown for Word](https://ardata-fr.github.io/officeverse/officedown-for-word.html) — rdocx_document requirement for image/hyperlink support in flextable
+- [plotly GitHub issue #889](https://github.com/ropensci/plotly/issues/889) — plotly not visible in PDF rmarkdown output
+- [R Markdown Cookbook: LaTeX or HTML output](https://bookdown.org/yihui/rmarkdown-cookbook/latex-html.html) — knitr::is_latex_output() and is_html_output() for conditional generation
+- [Peter Ralph: R+markdown gotchas](https://petrelharp.github.io/r-markdown-tutorial/gotchas.html) — multi-format rendering pitfalls
+- [luke.geek.nz: Silent LLM Fallbacks](https://luke.geek.nz/azure/silent-llm-fallback/) — silent fallback trust erosion
+- [zenml.io: LLM fallback mechanisms](https://www.zenml.io/llmops-database/implementing-llm-fallback-mechanisms-for-production-incident-response-system) — graceful degradation vs. silent failure distinction
+- [GSAR: Typed Grounding for Multi-Agent LLMs](https://arxiv.org/abs/2604.23366) — grounding typology for multi-section report claims
+- [testthat skipping docs](https://testthat.r-lib.org/articles/skipping.html) — skip_on_cran, skip_if_not_installed discipline
+- [R Packages (2e): R CMD check appendix](https://r-pkgs.org/R-CMD-check.html) — non-ASCII character handling, encoding declarations
+- [tinytex GitHub issue #436](https://github.com/rstudio/tinytex/issues/436) — tlmgr mirror failures in CI
 
 ---
-*Pitfalls research for: v0.63.0 Documentation Depth — CRAN R package with CI-deployed pkgdown, rich method articles, worked-examples gallery, bundled datasets*
-*Researched: 2026-09-05*
+*Pitfalls research for: multi-format AI-narrated reporting in a CRAN R package (EventStudy v0.64.0)*
+*Researched: 2026-09-06*
