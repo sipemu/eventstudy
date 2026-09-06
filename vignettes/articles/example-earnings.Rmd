@@ -25,10 +25,10 @@ For the theory behind the market model, see
 Do AAPL, MSFT, and GOOGL earn significantly positive abnormal returns around
 their quarterly earnings *beats*? Formally, we test the null
 
-$$H_0:\ \mathbb{E}[AR_t] = 0 \quad \text{for all } t \text{ in the event window},$$
+$$H_0:\ \mathbb{E}[AAR_t] = 0 \quad \text{for all } t \text{ in the event window},$$
 
-against the alternative that the average abnormal return (AAR) and the
-cumulative average abnormal return (CAAR) differ from zero.
+against the alternative that the cumulative average abnormal return (CAAR)
+differs from zero.
 
 ## Data
 
@@ -133,14 +133,20 @@ cross-sectional variance.
 pz  <- result$aar_caar_tbl$PatellZ[[1]]
 bmp <- result$aar_caar_tbl$BMP[[1]]
 
-caar_patell <- round(utils::tail(pz$caar,   1L), 4)
-z_patell    <- round(utils::tail(pz$caar_z, 1L), 3)
+caar_patell <- round(utils::tail(pz$caar,    1L), 4)
+z_patell    <- round(utils::tail(pz$caar_z,  1L), 3)
 t_bmp       <- round(utils::tail(bmp$cbmp_t, 1L), 3)
+df_bmp      <- utils::tail(bmp$n_valid_events, 1L) - 1L
+
+# Two-sided p-values: Patell Z ~ N(0,1); BMP t ~ t(df_bmp)
+p_patell <- round(2 * pnorm(abs(z_patell), lower.tail = FALSE), 4)
+p_bmp    <- round(2 * pt(abs(t_bmp), df = df_bmp, lower.tail = FALSE), 4)
 ```
 
 At the end of the event window the CAAR across the three firms is
-`r caar_patell`. The Patell Z on the cumulative series is `r z_patell` and the
-BMP statistic is `r t_bmp`. Where the two disagree in magnitude, the BMP figure
+`r caar_patell`. The Patell Z on the cumulative series is `r z_patell`
+(two-sided p = `r p_patell`) and the BMP statistic is `r t_bmp`
+(two-sided p = `r p_bmp`). Where the two disagree in magnitude, the BMP figure
 is the more conservative -- it inflates the standard error when abnormal returns
 are correlated across firms on the event day, which is exactly the situation a
 common earnings-season calendar can create [@BMP1991]. Read together,
