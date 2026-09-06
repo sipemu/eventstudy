@@ -27,9 +27,9 @@ Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All 
 
 ### Worked-examples gallery (GALLERY)
 
-- [ ] **GALLERY-01**: A pyfda-style gallery landing page presents the cross-domain worked examples as a browsable index (cards/thumbnails with short descriptions), reachable from the navbar.
-- [ ] **GALLERY-02**: At least three complete end-to-end worked examples across distinct domains (e.g. earnings surprises, M&A announcements, regulatory/enforcement shocks) each render a full analysis: data → model fit → test statistics → plots → written interpretation.
-- [ ] **GALLERY-03**: Each gallery example cross-links to the relevant Methods articles and to the exported functions it uses (reference pages), so readers can move from example → concept → API.
+- [x] **GALLERY-01**: A pyfda-style gallery landing page presents the cross-domain worked examples as a browsable index (cards/thumbnails with short descriptions), reachable from the navbar.
+- [x] **GALLERY-02**: At least three complete end-to-end worked examples across distinct domains (e.g. earnings surprises, M&A announcements, regulatory/enforcement shocks) each render a full analysis: data → model fit → test statistics → plots → written interpretation.
+- [x] **GALLERY-03**: Each gallery example cross-links to the relevant Methods articles and to the exported functions it uses (reference pages), so readers can move from example → concept → API.
 
 ### Curated datasets (DATA)
 
@@ -44,9 +44,9 @@ Requirements for milestone v0.63.0. Each maps to exactly one roadmap phase. All 
 
 ### Build & release integrity (BUILD)
 
-- [ ] **BUILD-04**: `pkgdown::build_site()` completes locally with zero errors and zero new warnings, including all new Methods articles and the gallery.
-- [ ] **BUILD-05**: The existing v0.62.0 CI `pkgdown.yaml` workflow builds the new articles offline and deploys them to GitHub Pages (green Actions run), with no CI changes required beyond content/config.
-- [ ] **BUILD-06**: `R CMD check --as-cran` shows no new NOTEs/WARNINGs versus the v0.62.0 baseline, the source tarball is not bloated by site-only content, and the existing testthat suite stays green.
+- [x] **BUILD-04**: `pkgdown::build_site()` completes locally with zero errors and zero new warnings, including all new Methods articles and the gallery.
+- [x] **BUILD-05**: The existing v0.62.0 CI `pkgdown.yaml` workflow builds the new articles offline and deploys them to GitHub Pages (green Actions run), with no CI changes required beyond content/config.
+- [x] **BUILD-06**: `R CMD check --as-cran` shows no new NOTEs/WARNINGs versus the v0.62.0 baseline, the source tarball is not bloated by site-only content, and the existing testthat suite stays green.
 
 ## Future Requirements
 
@@ -89,17 +89,17 @@ Which phases cover which requirements. Populated during roadmap creation.
 | RENDER-01 | Phase 15 | Complete |
 | RENDER-02 | Phase 15 | Complete |
 | RENDER-03 | Phase 13 | Complete |
-| GALLERY-01 | Phase 16 | Pending |
-| GALLERY-02 | Phase 16 | Pending |
-| GALLERY-03 | Phase 16 | Pending |
+| GALLERY-01 | Phase 16 | Complete |
+| GALLERY-02 | Phase 16 | Complete |
+| GALLERY-03 | Phase 16 | Complete |
 | DATA-01 | Phase 14 | Complete |
 | DATA-02 | Phase 14 | Complete |
 | DELIVERY-01 | Phase 13 | Complete |
 | DELIVERY-02 | Phase 13 | Complete |
 | DELIVERY-03 | Phase 13 | Complete |
-| BUILD-04 | Phase 16 | Pending |
-| BUILD-05 | Phase 16 | Pending |
-| BUILD-06 | Phase 16 | Pending |
+| BUILD-04 | Phase 16 | Complete |
+| BUILD-05 | Phase 16 | Complete |
+| BUILD-06 | Phase 16 | Complete |
 
 **Coverage:**
 

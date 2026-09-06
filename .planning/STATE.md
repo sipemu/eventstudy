@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v0.63.0
 milestone_name: Documentation Depth — Methods & Worked Examples
-current_phase: 15
-current_phase_name: Methods Articles + Rendered Outputs
+current_phase: 16
+current_phase_name: Worked-Examples Gallery + Build & Release Integrity
 status: executing
-stopped_at: Completed 15-01-PLAN.md
-last_updated: "2026-09-05T22:36:50.520Z"
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-09-06T19:43:24.032Z"
 last_activity: 2026-09-06
-last_activity_desc: Phase 15 plan 01 complete — 7 Methods articles rendered + nav wired
-state_head: 87c70d311e5c5c013c443a805d0bf5f3a50b1910
+last_activity_desc: Phase 15 complete, transitioned to Phase 16
+state_head: 1d443befe18d1319b4bca7507713fb849753b9ba
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 4
   completed_plans: 4
-  percent: 44
+  percent: 50
 ---
 
 # Project State
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-04)
 
 **Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI advisor cites only package-computed diagnostics, never fabricating a result. This milestone makes that legible via a curated docs site.
-**Current focus:** Phase 13 — Article Infrastructure & Conventions Gate
+**Current focus:** Phase 16 — Worked-Examples Gallery + Build & Release Integrity (16-01 executed)
 
 ## Current Position
 
-Phase: 15 — Methods Articles + Rendered Outputs
-Plan: 15-01 complete (1/1)
-Status: Phase 15 execution complete
-Last activity: 2026-09-06 — 7 Methods articles authored, rendered offline, and wired into _pkgdown.yml Methods dropdown
+Phase: 16 — Worked-Examples Gallery + Build & Release Integrity
+Plan: 16-01 complete (1 of 1)
+Status: Plan executed — awaiting phase completion by orchestrator
+Last activity: 2026-09-06 — Completed 16-01-PLAN.md (worked-examples gallery + build/release gate)
 
 ## Milestone Roadmap (v0.63.0)
 
@@ -67,6 +67,7 @@ Coverage: 22/22 v0.63.0 requirements mapped, 0 unmapped.
 | Phase 13 P01 | 45 | 3 tasks | 6 files |
 | Phase 14-curated-per-domain-datasets P01 | 8 minutes | 3 tasks | 6 files |
 | Phase 15 P01 | 1 session | 8 tasks | 9 files |
+| Phase 16 P01 | 55m | 4 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -123,8 +124,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-05T22:36:20.276Z
-Stopped at: Completed 15-01-PLAN.md
+Last session: 2026-09-06T19:43:23.974Z
+Stopped at: Completed 16-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
