@@ -10,17 +10,17 @@ The package is mature and CRAN-published. The v0.50.0 milestone made it **never 
 
 The package must never produce a silently incorrect statistical result — and now, the AI layer must never present an ungrounded one. On degenerate input the pipeline errors clearly or returns NA with one warning; the advisor cites only diagnostics the package actually computed, and refuses to invent numbers. Trustworthy numbers, trustworthy interpretation.
 
-## Current Milestone: v0.63.0 Documentation Depth — Methods & Worked Examples
+## Current Milestone: v0.64.0 Automated AI Reporting
 
-**Goal:** Transform the EventStudy docs site from a grouped reference into a pyfda-caliber learning resource — every method family explained with real statistical exposition and academic references, every method demonstrated with rendered outputs (tables, printed results, plots), plus a cross-domain gallery of complete worked examples. Reference standard: `https://sipemu.github.io/pyfda/`.
+**Goal:** Add a single one-call entry point that takes an event study from data to a polished, publication-ready report — running the pipeline, harvesting diagnostics, generating grounded AI narrative, and rendering to the researcher's chosen format(s) — while never presenting an ungrounded number and always producing a full report even with no LLM configured.
 
 **Target features:**
-- **Learn/Methods article section** — one conceptual article per method family (return models · test statistics · panel DiD · intraday · synthetic control · AI advisor · diagnostics), each with formulas, assumptions, when-to-use guidance, and academic references
-- **Rendered outputs inline** — each Methods article runs real code and renders tables, printed results, and plots (build-time executed, fully offline/CI-safe)
-- **Cross-domain worked-examples gallery** — pyfda-style gallery of end-to-end workflows across domains (earnings surprises, M&A, regulatory shocks, …), each a complete rendered analysis
-- **Curated real datasets per domain** — new bundled datasets (dieselgate-style, with `data-raw/` provenance) powering the gallery, sized so the CRAN tarball stays clean
-- **pkgdown-only delivery** — the new Methods articles + gallery live in `vignettes/articles/` (`.Rbuildignore`d): they render on the site but stay out of the CRAN tarball; the existing 18 concise vignettes remain CRAN-shipped and untouched
-- **CRAN-/CI-clean build** — the new articles render in the existing v0.62.0 CI pkgdown build fully offline; no new `R CMD check` NOTEs/WARNINGs; tarball not bloated; valid-input behavior unchanged
+- **One-call report wrapper** — new additive entry point (e.g. `es_report()` / `run_event_study(..., report=TRUE)`) orchestrating study → `es_diagnostics()` → `es_advise()` → render; `generate_report()` stays as the lower-level renderer it calls (backward-compatible)
+- **Grounded AI narrative** — LLM drafts prose (executive summary, data/methods, results interpretation, robustness/caveats) grounded strictly in package-computed diagnostics via the existing runtime grounding guard
+- **Offline-first fallback** — with no provider configured the report still renders complete, using the existing rule-based offline advice engine for the narrative; AI enriches but is never required
+- **Multi-format output** — HTML, PDF, Word (.docx), and Markdown from the one entry point
+- **Sensible fixed template** — one well-designed report template (exec summary · data/methods · results · robustness/caveats · references); section presence toggled by args, no custom templating
+- **CRAN-/CI-clean** — AI/format dependencies stay in Suggests, `requireNamespace()`-guarded; no new `R CMD check` NOTEs/WARNINGs; existing tests stay green; grounding invariant covered by regression tests
 
 ## Business Context
 
@@ -56,17 +56,22 @@ The package must never produce a silently incorrect statistical result — and n
 - ✓ **Advisor vignette + bundled multi-automaker dieselgate dataset** — offline-safe CRAN vignette, CI bands + group CAAR comparison, `data-raw/` provenance — v0.61.0
 - ✓ **Curated pkgdown site + custom Bootstrap-5 theme** — thematically grouped Reference index, Articles nav over the 18 vignettes, README homepage, News/Changelog, custom theme (no logo) — v0.62.0
 - ✓ **CI/CD docs deploy + repo linkage + release integrity** — r-lib `pkgdown.yaml` deploy to `gh-pages`/GitHub Pages, DESCRIPTION `URL` + README docs badge + `.Rbuildignore`, network-safe article build, CRAN-clean 0.62.0 release — v0.62.0
+- ✓ **Learn/Methods article section** — one conceptual article per method family (formulas, assumptions, when-to-use, academic references) — v0.63.0
+- ✓ **Rendered outputs inline** — each Methods article executes at build time rendering tables, printed results, and plots, fully offline/CI-safe — v0.63.0
+- ✓ **Cross-domain worked-examples gallery** — pyfda-style gallery of complete rendered workflows across domains — v0.63.0
+- ✓ **Curated real per-domain datasets** — new bundled datasets (dieselgate-style, `data-raw/` provenance) with `DATA-SOURCES.md`, sized to keep the CRAN tarball clean — v0.63.0
+- ✓ **pkgdown-only article delivery + CRAN-/CI-clean build** — Methods articles + gallery in `vignettes/articles/` (`.Rbuildignore`d); render on site, stay out of the tarball; 18 concise vignettes untouched; no new NOTEs/WARNINGs — v0.63.0
 
 ### Active
 
-<!-- This milestone (v0.63.0). Detailed, testable REQ-IDs live in REQUIREMENTS.md. -->
+<!-- This milestone (v0.64.0). Detailed, testable REQ-IDs live in REQUIREMENTS.md. -->
 
-- [ ] **Learn/Methods article section** — one conceptual article per method family (return models, test statistics, panel DiD, intraday, synthetic control, AI advisor, diagnostics) with formulas, assumptions, when-to-use, and academic references
-- [ ] **Rendered outputs inline** — each Methods article executes at build time and renders tables, printed results, and plots, fully offline/CI-safe
-- [ ] **Cross-domain worked-examples gallery** — pyfda-style gallery of complete rendered workflows across domains
-- [ ] **Curated real datasets per domain** — new bundled datasets (dieselgate-style, `data-raw/` provenance) powering the gallery, sized to keep the CRAN tarball clean
-- [ ] **pkgdown-only delivery** — new Methods articles + gallery in `vignettes/articles/` (`.Rbuildignore`d); render on site, stay out of the CRAN tarball; existing 18 vignettes untouched
-- [ ] **CRAN-/CI-clean build** — new articles render in the existing CI pkgdown build offline; no new `R CMD check` NOTEs/WARNINGs; tarball not bloated
+- [ ] **One-call report wrapper** — new additive entry point orchestrating study → `es_diagnostics()` → `es_advise()` → render; `generate_report()` stays as the lower-level renderer (backward-compatible)
+- [ ] **Grounded AI narrative** — LLM drafts prose (executive summary, data/methods, results interpretation, robustness/caveats) grounded strictly in package-computed diagnostics via the runtime grounding guard
+- [ ] **Offline-first fallback** — with no provider configured the report still renders complete, using the rule-based offline advice engine for the narrative; AI enriches but is never required
+- [ ] **Multi-format output** — HTML, PDF, Word (.docx), and Markdown from the one entry point
+- [ ] **Sensible fixed template** — one well-designed report template (exec summary · data/methods · results · robustness/caveats · references); section presence toggled by args, no custom templating
+- [ ] **CRAN-/CI-clean** — AI/format dependencies stay in Suggests, `requireNamespace()`-guarded; no new `R CMD check` NOTEs/WARNINGs; existing tests stay green; grounding invariant covered by regression tests
 
 ### Out of Scope
 
@@ -120,7 +125,12 @@ The package must never produce a silently incorrect statistical result — and n
 | Bundle curated real per-domain datasets (dieselgate-style, `data-raw/` provenance) for the gallery | Realistic worked examples beat synthetic-only; matches the pyfda examples standard | — Pending |
 | Datasets used only by site-only articles must not bloat the CRAN tarball — compressed if shipped as documented `data()` datasets, or `.Rbuildignore`d if purely site-only | Full coverage across domains risks tarball growth; per-dataset placement decided in planning | — Pending |
 | Reference standard for docs depth = pyfda site (conceptual method pages + worked-examples gallery + rendered outputs) | Same author/pattern family as the advisor's pyfda/fdars grounding; concrete, agreed bar for "thorough" | — Pending |
-| All rendered articles execute fully offline (bundled data + `set.seed`), no network at build time | Must render in the existing v0.62.0 CI pkgdown build without flakiness; extends the v0.62.0 network-safe-article decision | — Pending |
+| All rendered articles execute fully offline (bundled data + `set.seed`), no network at build time | Must render in the existing v0.62.0 CI pkgdown build without flakiness; extends the v0.62.0 network-safe-article decision | ✓ v0.63.0 |
+| One-call AI report as a new additive wrapper over `generate_report()`, not a signature change | Keeps the existing renderer and its NULL-advice byte-identical path intact; the wrapper composes existing pieces (study → diagnostics → advise → render) | — Pending |
+| Report always renders complete offline; LLM narrative is enrichment, rule-based advice engine is the fallback | Preserves CRAN no-dependency discipline and no-API-key usability — a direct extension of the v0.60.0 offline-first advisor | — Pending |
+| Grounding invariant carries into the report: narrative cites only computed diagnostics, enforced by the existing runtime guard + regression tests | The report is the highest-visibility surface for the advisor; an ungrounded number here is the worst failure mode | — Pending |
+| Multi-format (HTML/PDF/Word/Markdown) via rmarkdown output formats; PDF/Word toolchains kept optional | Researchers hand reports to supervisors/papers in varied formats; LaTeX/Word deps stay at the user-environment level, not hard package deps | — Pending |
+| Sensible fixed template with arg-toggled sections, no custom templating | Fastest path to a polished report; custom templating is deferred surface area, not core to the one-call value | — Pending |
 
 ## Evolution
 
@@ -141,4 +151,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Update Context with current state
 
 ---
-*Last updated: 2026-09-05 starting milestone v0.63.0 Documentation Depth — Methods & Worked Examples*
+*Last updated: 2026-09-06 starting milestone v0.64.0 Automated AI Reporting*

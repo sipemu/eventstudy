@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.63.0
-milestone_name: Documentation Depth — Methods & Worked Examples
-status: Awaiting next milestone
-stopped_at: Phase 16 complete — all phases complete
-last_updated: "2026-09-06T20:25:47.127Z"
+milestone: v0.64.0
+milestone_name: Automated AI Reporting
+status: planning
+last_updated: "2026-09-06T21:13:18.728Z"
 last_activity: 2026-09-06
-last_activity_desc: Milestone v0.63.0 completed and archived
-state_head: ae7bdab734d4801fb6c2ae66fad965890b7f7d5b
 progress:
-  total_phases: 6
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
-  percent: 67
-current_phase: 16
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-04)
 
 ## Current Position
 
-Phase: Milestone v0.63.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-06 — Milestone v0.63.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-06 — Milestone v0.64.0 started
 
 ## Milestone Roadmap (v0.63.0)
 
