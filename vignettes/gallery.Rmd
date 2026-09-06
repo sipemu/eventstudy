@@ -168,7 +168,13 @@ vignette: >
   <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>
 </a>
 
-<!-- cards for regulatory and M&A are added in Tasks 2 and 3 -->
+<a class="es-gallery-item" href="example-regulatory.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-example-regulatory.svg" alt="Regulatory Shock Analysis"></div>
+  <div class="es-gallery-title">Regulatory Shock Analysis</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>
+</a>
+
+<!-- M&A card is added in Task 3 -->
 
 </div>
 ```

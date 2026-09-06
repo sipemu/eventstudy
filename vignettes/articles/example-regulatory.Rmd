@@ -1,0 +1,161 @@
+---
+title: "Example: Regulatory Shock -- Dieselgate VW-Group vs Peers"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+---
+
+```{r child="_setup.Rmd"}
+```
+
+## Abstract
+
+This worked example uses the bundled `dieselgate` dataset to demonstrate a
+**two-group** event study that isolates an idiosyncratic shock from an
+industry-wide one. Volkswagen and Porsche (the directly-exposed *VW Group*) are
+compared against peer automakers BMW and Mercedes-Benz (*Other*). By contrasting
+the cumulative average abnormal return (CAAR) across groups around the
+September 2015 emissions disclosure, we ask whether the scandal caused abnormal
+losses *beyond* the German auto sector as a whole.
+
+For the market model, see [Return Models](methods-return-models.html); for the
+cross-sectional and sign tests, see [Test Statistics](methods-test-statistics.html).
+
+## Research question
+
+Did the VW emissions announcement cause significantly more negative cumulative
+abnormal returns for the VW corporate family (VOW.DE, PAH3.DE) than for the
+industry-peer group (BMW.DE, MBG.DE)? We test, **separately for each group**,
+
+$$H_0:\ \mathbb{E}[CAAR] = 0,$$
+
+and then compare the two groups' CAR distributions directly.
+
+## Data
+
+The `dieselgate` dataset ships in `data/` and needs **no network access**. Like
+the other bundled datasets it is a named list -- `firm` (all four automakers'
+daily adjusted prices, stacked), `index` (the benchmark), a four-row `request`
+carrying the per-firm event windows and the crucial `group` assignment, and a
+`meta` provenance block. See the provenance notes in `?dieselgate`.
+
+```{r data}
+library(EventStudy)
+data("dieselgate", package = "EventStudy")
+
+dplyr::glimpse(dieselgate$firm)
+
+# The group column drives the two-group comparison.
+dplyr::count(dieselgate$request, group)
+```
+
+## Setup and pipeline
+
+We build the task from the three tibbles and fit a market model, attaching the
+cross-sectional t-test (`CSectTTest`) and the `SignTest` as multi-event
+statistics. Both aggregate the firm-level abnormal returns *within each group*.
+
+```{r pipeline}
+task <- EventStudyTask$new(
+  dieselgate$firm,
+  dieselgate$index,
+  dieselgate$request
+)
+
+params <- ParameterSet$new(
+  return_model = MarketModel$new(),
+  multi_event_statistics = MultiEventStatisticsSet$new(
+    tests = list(CSectTTest$new(), SignTest$new())
+  )
+)
+
+result <- run_event_study(task, params)
+```
+
+See [ParameterSet](../reference/ParameterSet.html),
+[MultiEventStatisticsSet](../reference/MultiEventStatisticsSet.html),
+[CSectTTest](../reference/CSectTTest.html), and
+[SignTest](../reference/SignTest.html).
+
+## Results table
+
+The per-group CAAR at the end of the event window is the headline result. We
+pull it from the tidy AAR/CAAR output, and summarise the raw per-firm CARs by
+group with [car_by_group()](../reference/car_by_group.html).
+
+```{r caar-table}
+caar_tbl <- EventStudy::tidy.EventStudyTask(result, type = "aar")
+
+caar_tbl |>
+  dplyr::group_by(group) |>
+  dplyr::slice_tail(n = 1) |>
+  dplyr::ungroup() |>
+  dplyr::select(group, term, caar, caar_statistic, caar_p.value) |>
+  knitr::kable(
+    digits  = 4,
+    caption = "CAAR by group at the end of the event window: VW-Group vs Peers"
+  )
+
+# Group-level CAR summary and a between-group difference test.
+grp <- car_by_group(result)
+knitr::kable(grp$summary, digits = 4,
+             caption = "Per-firm CAR summary by group")
+```
+
+## Plot
+
+```{r caar-plot, fig.width = 7, fig.height = 4}
+gg <- plot_event_study(
+  result,
+  type  = "aar",
+  group = "VW Group",
+  title = "VW Group: cumulative average abnormal return with 95% band"
+)
+plotly::ggplotly(gg)
+```
+
+## Interpretation
+
+```{r stat-values}
+vw_caar  <- result$aar_caar_tbl$CSectT[[
+  which(result$aar_caar_tbl$group == "VW Group")]]
+oth_caar <- result$aar_caar_tbl$CSectT[[
+  which(result$aar_caar_tbl$group == "Other")]]
+
+vw_end   <- round(utils::tail(vw_caar$caar,   1L), 4)
+vw_t     <- round(utils::tail(vw_caar$caar_t, 1L), 2)
+oth_end  <- round(utils::tail(oth_caar$caar,  1L), 4)
+oth_t    <- round(utils::tail(oth_caar$caar_t, 1L), 2)
+```
+
+By the end of the window the *VW Group* CAAR is `r vw_end`
+(cross-sectional *t* = `r vw_t`), while the *Other* group's CAAR is `r oth_end`
+(*t* = `r oth_t`). The contrast is the whole story: VW Group firms crater while
+peer automakers barely move. Because the peer group -- exposed to the same
+macro and sector conditions -- shows no comparable drop, the shock is
+**idiosyncratic** to the VW corporate family rather than an industry-wide
+contagion. The `SignTest` corroborates the direction non-parametrically: with
+every VW-group firm posting negative CARs, the sign statistic points the same
+way as the parametric test, which matters when a two-firm group makes the
+normality assumption of the *t*-test fragile [@Corrado1989]. This two-group
+design is the standard technique for separating firm-specific from sector-wide
+regulatory shocks.
+
+## Diagnostics note
+
+With only a handful of firms per group, groupwise residual autocorrelation and
+non-normality materially affect the standard errors. Check the estimation-window
+fit with [es_diagnostics()](../reference/es_diagnostics.html) before trusting the
+parametric *p*-values.
+
+## Further reading
+
+- [Return Models](methods-return-models.html) -- market-model theory.
+- [Test Statistics](methods-test-statistics.html) -- cross-sectional and sign tests.
+- [Panel / DiD](methods-panel-did.html) -- for staggered-treatment regulatory events.
+- [car_by_group()](../reference/car_by_group.html) -- group CAR summary reference.
+
+## Session info
+
+```{r session-info, echo = FALSE}
+sessionInfo()
+```
