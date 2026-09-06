@@ -181,7 +181,10 @@ Plans:
   4. `pkgdown::build_site()` completes locally with zero errors and zero new warnings (all Methods articles + gallery included), and the existing CI `pkgdown.yaml` builds the new articles offline and deploys them to GitHub Pages green with no CI changes beyond content/config.
   5. `R CMD check --as-cran` shows no new NOTEs/WARNINGs versus the v0.62.0 baseline, the source tarball is not bloated by site-only content, and the existing testthat suite stays green.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 16-01-PLAN.md — earnings/regulatory/M&A worked-example articles + gallery cards + CSS/yml wiring + build & release gate
 **UI hint**: yes
 
 ## Progress
@@ -202,5 +205,5 @@ Plans:
 | 12. CI/CD Deploy + Repo Linkage + Release Integrity | v0.62.0 | 0/1 | Planned | - |
 | 13. Article Infrastructure & Conventions Gate | v0.63.0 | 1/1 | Complete    | 2026-09-05 |
 | 14. Curated Per-Domain Datasets | v0.63.0 | 1/1 | Complete    | 2026-09-05 |
-| 15. Methods Articles + Rendered Outputs | v0.63.0 | 1/1 | In Progress|  |
+| 15. Methods Articles + Rendered Outputs | v0.63.0 | 1/1 | Complete    | 2026-09-06 |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 0/? | Not started | - |
