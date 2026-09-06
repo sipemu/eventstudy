@@ -9,11 +9,21 @@ articles:
   custom-test-statistics: custom-test-statistics.html
   data-download: data-download.html
   diagnostics-validation: diagnostics-validation.html
+  articles/example-earnings: example-earnings.html
+  articles/example-ma: example-ma.html
+  articles/example-regulatory: example-regulatory.html
   factor-models-bhar: factor-models-bhar.html
   gallery: gallery.html
   inference-robustness: inference-robustness.html
   intraday-event-study: intraday-event-study.html
   introduction: introduction.html
+  articles/methods-ai-advisor: methods-ai-advisor.html
+  articles/methods-diagnostics: methods-diagnostics.html
+  articles/methods-intraday: methods-intraday.html
+  articles/methods-panel-did: methods-panel-did.html
+  articles/methods-return-models: methods-return-models.html
+  articles/methods-synthetic-control: methods-synthetic-control.html
+  articles/methods-test-statistics: methods-test-statistics.html
   modern-did-estimators: modern-did-estimators.html
   panel-event-study: panel-event-study.html
   result-extraction: result-extraction.html
@@ -22,7 +32,7 @@ articles:
   synthetic-control: synthetic-control.html
   time-varying-models: time-varying-models.html
   volume-volatility-event-study: volume-volatility-event-study.html
-last_built: 2026-09-05T20:51Z
+last_built: 2026-09-06T19:26Z
 urls:
   reference: https://sipemu.github.io/eventstudy/reference
   article: https://sipemu.github.io/eventstudy/articles

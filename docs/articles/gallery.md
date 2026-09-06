@@ -170,3 +170,31 @@ Data & Reporting
 Automated Reporting
 
 Data & Reporting
+
+## Worked Examples
+
+[](https://sipemu.github.io/eventstudy/articles/example-earnings.md)
+
+![Earnings Surprise
+Analysis](../reference/figures/card-example-earnings.svg)
+
+Earnings Surprise Analysis
+
+Worked Examples
+
+[](https://sipemu.github.io/eventstudy/articles/example-regulatory.md)
+
+![Regulatory Shock
+Analysis](../reference/figures/card-example-regulatory.svg)
+
+Regulatory Shock Analysis
+
+Worked Examples
+
+[](https://sipemu.github.io/eventstudy/articles/example-ma.md)
+
+![M&A Deal Announcements](../reference/figures/card-example-ma.svg)
+
+M&A Deal Announcements
+
+Worked Examples

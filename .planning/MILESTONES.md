@@ -1,5 +1,15 @@
 # Milestones
 
+## v0.63.0 v0.63.0 (Shipped: 2026-09-06)
+
+**Phases completed:** 4 phases, 4 plans, 3 tasks
+
+**Key accomplishments:**
+
+- AAPL/MSFT/GOOGL Q1 2023 earnings-beat panel frozen via live Yahoo Finance fetch, documented with dieselgate-pattern roxygen, pipeline-proven to finite CAAR, and CRAN-clean.
+
+---
+
 ## v0.61.0 v0.61.0 (Shipped: 2026-09-04)
 
 **Phases completed:** 0 phases, 0 plans, 0 tasks

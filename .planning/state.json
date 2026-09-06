@@ -76,18 +76,18 @@
     {
       "number": "15",
       "name": "Methods Articles + Rendered Outputs",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "16",
       "name": "Worked-Examples Gallery + Build & Release Integrity",
-      "status": "pending"
+      "status": "complete"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step (plan phase 15)",
-    "reason": "Phase 15 of 6 — needs a plan"
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-09-05T21:59:07.562Z"
+  "updated_at": "2026-09-06T20:25:47.146Z"
 }
