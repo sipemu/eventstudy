@@ -174,7 +174,11 @@ vignette: >
   <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>
 </a>
 
-<!-- M&A card is added in Task 3 -->
+<a class="es-gallery-item" href="example-ma.html">
+  <div class="es-gallery-thumb"><img src="../reference/figures/card-example-ma.svg" alt="M&amp;A Deal Announcements"></div>
+  <div class="es-gallery-title">M&amp;A Deal Announcements</div>
+  <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>
+</a>
 
 </div>
 ```
