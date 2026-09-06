@@ -136,7 +136,7 @@ macro and sector conditions -- shows no comparable drop, the shock is
 contagion. The `SignTest` corroborates the direction non-parametrically: with
 every VW-group firm posting negative CARs, the sign statistic points the same
 way as the parametric test, which matters when a two-firm group makes the
-normality assumption of the *t*-test fragile [@Corrado1989]. This two-group
+normality assumption of the *t*-test fragile [@Brown1985]. This two-group
 design is the standard technique for separating firm-specific from sector-wide
 regulatory shocks.
 
