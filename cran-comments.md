@@ -169,3 +169,86 @@ packages (`httr2`, `jsonlite` in Suggests). CRAN-02 concern is **confirmed resol
 
 1913 tests pass, 0 failures. The single WARN and 31 SKIPs are pre-existing
 (optional Suggests packages not installed in dev environment).
+
+---
+
+## R CMD check gate result (milestone: Docs Site v0.62.0, Phases 9–12)
+
+**Baseline source:** Phase 12 SUMMARY (BUILD-06 baseline recorded in Phase 16
+CONTEXT.md). This section establishes the accepted v0.62.0 finding set so future
+maintainers have a clear diff baseline for v0.63.0.
+
+### Result summary (v0.62.0 baseline)
+
+- **1 ERROR:** Packages suggested but not available for checking — `rugarch`,
+  `rmgarch`, `did`, `DIDmultiplegt`, `didimputation`, `DT`. **ENV-ONLY**: these
+  are optional Suggests, each guarded by `requireNamespace()`; the ERROR appears
+  only in an offline check environment without those packages installed. It is
+  not a package defect and is not triggered when `_R_CHECK_FORCE_SUGGESTS_=false`.
+- **NOTEs:**
+  - CRAN incoming feasibility — package archived 2024-04-20 (original baseline).
+  - `VignetteBuilder` no prebuilt vignette index (offline environment).
+  - Documentation site URL 404 (resolves after the first GitHub Pages deploy).
+  - Undefined globals `median`/`tail` in `R/es_diagnostics.R` (pre-existing since
+    Phase 5).
+
+**Gate: PASSED** — 0 new findings introduced by Phases 9–12 vs the prior
+(v0.60.0) baseline. All findings are a subset of previously accepted findings.
+
+---
+
+## R CMD check gate result (milestone: Docs Depth v0.63.0, Phase 16, Plan 01)
+
+**Check command:** `devtools::check(document = TRUE, args = c("--no-manual",
+"--no-build-vignettes", "--no-vignettes"), error_on = "never")`
+
+**Check date:** 2026-09-06
+
+**R version:** 4.6.1 (2026-06-24), Linux (Manjaro), x86_64
+
+### Result summary (v0.63.0)
+
+```
+ERRORS: 0   WARNINGS: 0   NOTES: 1
+```
+
+The single NOTE is the **pre-existing** undefined-globals finding:
+
+> `median` (stats) and `tail` (utils) used in `R/es_diagnostics.R` without an
+> explicit `importFrom`.
+
+This NOTE is identical to the one recorded in the v0.60.0 and v0.62.0 sections
+above (pre-existing since Phase 5). No new NOTE and no WARNING were introduced by
+the Phase 16 documentation additions.
+
+### Why v0.63.0 introduces no new CRAN findings
+
+Phase 16 adds only site-level documentation assets, none of which enter the CRAN
+tarball or the checked R sources:
+
+- **3 worked-example articles** live in `vignettes/articles/` and are excluded
+  from the build tarball by the `^vignettes/articles` line in `.Rbuildignore`
+  (confirmed present and unchanged).
+- **3 card SVGs** in `man/figures/` (~4.5 KB combined) are static assets with no
+  external references; they do not add R code, NOTEs, or WARNINGs.
+- **`vignettes/gallery.Rmd`** gained only an additive HTML card section.
+- **`_pkgdown.yml`, `pkgdown/extra.css`** are pkgdown-only site configuration,
+  not part of the R package.
+- No changes were made to `R/`, `NAMESPACE`, `DESCRIPTION`, or `data/`
+  (verified by `git diff --name-only` over the Phase 16 commits).
+
+### pkgdown build note (site-only, not a CRAN finding)
+
+`pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)`
+completes with **0 errors**. It emits 21 benign `VignetteIndexEntry` title-check
+messages; 18 are pre-existing (Phase 15 and earlier vignettes/articles), and 3
+correspond to the new site-only example articles, which intentionally carry no
+`%\VignetteIndexEntry` — the identical, established convention used by the seven
+`methods-*` articles from Phase 15. No new *class* of warning is introduced.
+
+**Gate result: PASSED** — 0 errors, 0 warnings, and the single NOTE is a strict
+subset of the v0.62.0 baseline.
+
+### Test environment (v0.63.0)
+
+* local: Linux (Manjaro), R 4.6.1 — `R CMD check`: 0 errors / 0 warnings / 1 note.

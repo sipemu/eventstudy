@@ -210,6 +210,13 @@ articles:
       advanced designs — with formulas, assumptions, and references.
     contents:
       - articles/smoke-test
+      - articles/methods-return-models
+      - articles/methods-test-statistics
+      - articles/methods-panel-did
+      - articles/methods-intraday
+      - articles/methods-synthetic-control
+      - articles/methods-ai-advisor
+      - articles/methods-diagnostics
 
   - title: "Get Started"
     desc: >
