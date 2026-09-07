@@ -5,16 +5,16 @@ milestone_name: Automated AI Reporting
 current_phase: 17
 current_phase_name: Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline
 status: executing
-stopped_at: Completed 17-01-PLAN.md
-last_updated: "2026-09-07T07:49:50.758Z"
+stopped_at: Completed 17-02-PLAN.md
+last_updated: "2026-09-07T07:57:30.474Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 17 execution started
-state_head: 23310888ba35273515db0de25219a804cada852a
+state_head: e10397203566dc9163ce56bdbb2db7bd49ea2269
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-09-06)
 ## Current Position
 
 Phase: 17 (Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-09-07 — Phase 17 execution started
 
@@ -81,6 +81,7 @@ Recent decisions affecting current work:
 - Sensible fixed template with arg-toggled sections, no custom templating (RPTC-01 deferred).
 - [Phase 17]: report_writing moved from LLM_ONLY_TYPES to KB_TYPES (OFFLINE-01); offline OfflineNarrative S3 returned without provider
 - [Phase 17]: narrative=NULL seam added to generate_report() after advice=; NULL path byte-identical (REPORT-03)
+- [Phase 17]: Regex alternation order longest-first prevents 4-digit year split in prose scanner
 
 ### Pending Todos
 
@@ -119,8 +120,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-07T07:49:50.743Z
-Stopped at: Completed 17-01-PLAN.md
+Last session: 2026-09-07T07:57:30.456Z
+Stopped at: Completed 17-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

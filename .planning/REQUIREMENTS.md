@@ -25,9 +25,9 @@ Requirements for the v0.64.0 milestone. Each maps to a roadmap phase.
 
 ### Grounding Hardening (GROUND)
 
-- [ ] **GROUND-01**: The grounding guard scans narrative prose for numeric literals absent from `es_diagnostics()` (within tolerance), extending coverage beyond the existing structured `evidence[]` arrays
-- [ ] **GROUND-02**: A grounding failure degrades safely — the offending section is dropped or flagged with one warning; an unverified number is never emitted silently into the rendered report
-- [ ] **GROUND-03**: Regression tests lock the report-path grounding invariant (a fabricated number in prose is caught, not rendered)
+- [x] **GROUND-01**: The grounding guard scans narrative prose for numeric literals absent from `es_diagnostics()` (within tolerance), extending coverage beyond the existing structured `evidence[]` arrays
+- [x] **GROUND-02**: A grounding failure degrades safely — the offending section is dropped or flagged with one warning; an unverified number is never emitted silently into the rendered report
+- [x] **GROUND-03**: Regression tests lock the report-path grounding invariant (a fabricated number in prose is caught, not rendered)
 
 ### Offline-First Fallback (OFFLINE)
 
@@ -94,9 +94,9 @@ Which phases cover which requirements. Filled during roadmap creation.
 | NARR-03 | Phase 18 | Pending |
 | NARR-04 | Phase 18 | Pending |
 | NARR-05 | Phase 18 | Pending |
-| GROUND-01 | Phase 17 | Pending |
-| GROUND-02 | Phase 17 | Pending |
-| GROUND-03 | Phase 17 | Pending |
+| GROUND-01 | Phase 17 | Complete |
+| GROUND-02 | Phase 17 | Complete |
+| GROUND-03 | Phase 17 | Complete |
 | OFFLINE-01 | Phase 17 | Complete |
 | OFFLINE-02 | Phase 18 | Pending |
 | FORMAT-01 | Phase 18 | Pending |
