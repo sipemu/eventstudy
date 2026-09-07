@@ -25,6 +25,8 @@ devtools::install_github("sipemu/eventstudy")
 
 - **AI Advisor** (new in 0.60.0): Grounded, LLM-agnostic advice via `es_advise()` plus offline `es_diagnostics()`. Interprets only package-computed numbers and never fabricates results. Works fully offline with no API key required; optional LLM providers (Anthropic, OpenAI-compatible, custom) can be supplied via `provider()`.
 
+- **One-Call Reporting** (new in 0.64.0): Generate a complete, multi-format event study report in a single call: `es_report(task)` -- deep-clones the task, harvests diagnostics, and renders HTML/PDF/Word/Markdown with a grounded narrative (offline by default). Also available as `run_event_study(..., report = TRUE)`.
+
 - **13 Return Models**: Market Model, Market Adjusted, Mean Adjusted, Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.
 
 - **11 Test Statistics**: Parametric (AR T, CAR T, BHAR T, Cross-Sectional T, Patell Z, BMP) and non-parametric (Sign, Generalized Sign, Rank, Calendar-Time Portfolio).

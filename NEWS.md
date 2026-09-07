@@ -1,3 +1,29 @@
+# EventStudy 0.64.0
+
+## One-Call Reporting: es_report() and run_event_study(report = TRUE)
+
+* **New `es_report()` orchestrator.** A single function call converts a fitted
+  `EventStudyTask` into a complete, publication-ready report. The function
+  deep-clones the task (non-mutation guarantee), runs `es_diagnostics()` to
+  harvest diagnostic metadata, assembles a grounded narrative via
+  `generate_report()` (assembled once before any format loop), and renders
+  output to one or more formats. Returns a named character vector of output
+  path(s) visibly, so the path prints at the REPL without an explicit
+  `print()`.
+
+* **Multi-format output.** `es_report()` accepts `format = c("html", "pdf",
+  "word", "md")` and renders one file per format sharing a common basename.
+  All formats are fully offline by default (no API key, no network required);
+  an optional `provider` argument enables LLM-grounded narrative when
+  available.
+
+* **Additive `run_event_study(report = FALSE, report_args = list())`
+  convenience.** The pipeline entry-point gains two new optional arguments.
+  When `report = FALSE` (the default), behaviour is byte-identical to the
+  previous release -- no allocation overhead, no side effects. When
+  `report = TRUE`, `es_report()` is called after the pipeline completes and
+  the rendered path(s) are attached as `attr(task, "report_path")`.
+
 # EventStudy 0.62.0
 
 ## Documentation site + CI/CD deploy
