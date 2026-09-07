@@ -4,18 +4,44 @@
 \alias{run_event_study}
 \title{Run a Complete Event Study}
 \usage{
-run_event_study(task, parameter_set = ParameterSet$new())
+run_event_study(
+  task,
+  parameter_set = ParameterSet$new(),
+  report = FALSE,
+  report_args = list()
+)
 }
 \arguments{
 \item{task}{An EventStudyTask object.}
 
 \item{parameter_set}{A ParameterSet object defining the event study.
 Defaults to a new ParameterSet with default settings.}
+
+\item{report}{Logical. When \code{FALSE} (default), the function behaves
+exactly as before this parameter was added. When \code{TRUE}, also renders
+a report via \code{\link{es_report}()} after the pipeline completes and
+attaches the rendered path(s) as \code{attr(task, "report_path")}.}
+
+\item{report_args}{Named list forwarded to \code{\link{es_report}()} when
+\code{report = TRUE}. May include \code{output_file}, \code{format},
+\code{provider}, and any other argument accepted by \code{es_report()}.
+Defaults to \code{list()} (uses \code{es_report()} defaults, which render
+\code{"event_study_report.html"} in the working directory).}
 }
 \value{
-The task object with all results computed.
+The task object with all results computed. When \code{report = TRUE},
+  the returned task additionally carries \code{attr(task, "report_path")}
+  with the path(s) of the rendered report file(s). The return type is always
+  a fitted \code{EventStudyTask} in both paths.
 }
 \description{
 Convenience wrapper that runs the full event study pipeline: prepare data,
 fit models, and calculate test statistics in a single call.
+}
+\examples{
+\dontrun{
+task <- run_event_study(my_task, ParameterSet$new(), report = TRUE)
+attr(task, "report_path")  # path to the rendered HTML
+}
+
 }

@@ -4,7 +4,14 @@
 \alias{es_advise}
 \title{Grounded AI Advice for Event Study Results}
 \usage{
-es_advise(diagnostics, task_type, provider = NULL, model = NULL, ...)
+es_advise(
+  diagnostics,
+  task_type,
+  provider = NULL,
+  model = NULL,
+  section_hint = NULL,
+  ...
+)
 }
 \arguments{
 \item{diagnostics}{An \code{es_diagnostics} object returned by

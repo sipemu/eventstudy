@@ -2,37 +2,44 @@
 % Please edit documentation in R/report.R
 \name{generate_report}
 \alias{generate_report}
-\title{Generate Event Study Report}
+\title{Generate Event Study Report (Multi-Format)}
 \usage{
 generate_report(
   task,
   output_file = "event_study_report.html",
-  format = c("html", "pdf"),
+  format = "html",
   title = "Event Study Report",
   author = NULL,
-  sections = c("summary", "data", "diagnostics", "single_event", "multi_event",
-    "cross_sectional", "appendix"),
+  sections = c("exec_summary", "data_methods", "results", "diagnostics", "robustness",
+    "references"),
   cross_sectional = NULL,
   confidence_level = 0.95,
   interactive = TRUE,
   advice = NULL,
+  narrative = NULL,
+  provider = NULL,
   ...
 )
 }
 \arguments{
 \item{task}{A fitted \code{EventStudyTask} or \code{PanelEventStudyTask}.}
 
-\item{output_file}{Output file path. Default \code{"event_study_report.html"}.}
+\item{output_file}{Output file path (extension overridden per format).
+Default \code{"event_study_report.html"}.}
 
-\item{format}{Output format: \code{"html"} (default) or \code{"pdf"}.}
+\item{format}{Character vector of output formats, any subset of
+\code{c("html", "pdf", "word", "md")}. Default \code{"html"}.
+Multiple formats render one file per format sharing a common basename.
+Missing optional toolchains emit one \code{message()} each and are skipped;
+only inability to render HTML raises \code{stop()}.}
 
-\item{title}{Report title.}
+\item{title}{Report title string.}
 
-\item{author}{Author name (optional).}
+\item{author}{Author name (optional, default \code{""}).}
 
-\item{sections}{Character vector of sections to include. Any subset of:
-\code{"summary"}, \code{"data"}, \code{"diagnostics"}, \code{"single_event"},
-\code{"multi_event"}, \code{"cross_sectional"}, \code{"appendix"}.}
+\item{sections}{Character vector of sections to include. Default is all six
+fixed sections:
+\code{c("exec_summary","data_methods","results","diagnostics","robustness","references")}.}
 
 \item{cross_sectional}{Optional cross-sectional regression results to include.}
 
@@ -43,18 +50,47 @@ Default TRUE.}
 
 \item{advice}{An optional grounded \code{Advice} object returned by
 \code{\link{es_advise}(task_type = "report_writing")}. When supplied and
-a valid \code{Advice}, renders a new \strong{AI Advisor Interpretation}
-section in the report. When \code{NULL} (the default), the existing render
-path is completely unchanged (byte-identical output). A supplied but
-invalid \code{advice} (not an \code{Advice} object) is silently coerced to
-\code{NULL} with exactly one \code{warning()} — the report is never broken.}
+valid, renders an \strong{AI Advisor Interpretation} section. A supplied but
+invalid \code{advice} is silently coerced to \code{NULL} with one
+\code{warning()} -- the report is never broken.}
+
+\item{narrative}{An optional named list keyed by section (e.g.
+\code{list(exec_summary = "...", data_methods = "...", results = "...",
+robustness = "...")}), typically from
+\code{\link{assemble_report_narrative}()}. When \code{NULL} (default), the
+render output is byte-identical to the v0.63.x baseline. A supplied but
+invalid \code{narrative} is silently coerced to \code{NULL} with one
+\code{warning()}.}
+
+\item{provider}{Optional LLM provider passed to
+\code{\link{assemble_report_narrative}()} when \code{narrative} is
+\code{NULL}. If both \code{provider} and \code{narrative} are \code{NULL},
+a fully offline narrative is assembled. Ignored when a pre-built
+\code{narrative} list is supplied by the caller.}
 
 \item{...}{Additional arguments passed to \code{rmarkdown::render}.}
 }
 \value{
-The path to the generated report (invisibly).
+A named character vector of output file paths, invisibly, keyed by
+  format name (e.g. \code{c(html = "/tmp/report.html", pdf = "/tmp/report.pdf")}).
+  A single-format call returns a length-1 named vector: \code{result[["html"]]}
+  and \code{result[[1L]]} both resolve (backward-compatible with prior
+  single-path callers).
 }
 \description{
-Renders an automated HTML or PDF report from a completed event study task.
-Uses a bundled RMarkdown template with configurable sections.
+Renders an automated report from a completed event study task in one or more
+output formats. Uses a bundled RMarkdown template with configurable sections.
+The narrative is assembled ONCE before the format loop -- \code{es_advise} is
+never called per format (NARR-01).
+}
+\examples{
+\dontrun{
+task <- run_event_study(my_task, ParameterSet$new())
+# Single format (backward-compatible)
+path <- generate_report(task, format = "html")
+# Multi-format
+paths <- generate_report(task, format = c("html", "pdf"))
+paths[["html"]]
+}
+
 }

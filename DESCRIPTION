@@ -1,7 +1,7 @@
 Package: EventStudy
 Type: Package
 Title: Event Study Analysis
-Version: 0.62.0
+Version: 0.64.0
 Date: 2026-09-05
 Authors@R:
     c(person(given = "Simon",
