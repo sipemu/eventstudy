@@ -10,10 +10,10 @@ Requirements for the v0.64.0 milestone. Each maps to a roadmap phase.
 
 ### Report Orchestration (REPORT)
 
-- [ ] **REPORT-01**: User can call a single entry point `es_report()` on a fitted `EventStudyTask` that harvests diagnostics (`es_diagnostics()`), assembles narrative (`es_advise()`), renders the report, and returns the output file path(s)
+- [x] **REPORT-01**: User can call a single entry point `es_report()` on a fitted `EventStudyTask` that harvests diagnostics (`es_diagnostics()`), assembles narrative (`es_advise()`), renders the report, and returns the output file path(s)
 - [ ] **REPORT-02**: User can produce a report as part of a standard run via `run_event_study(..., report = TRUE)` (additive; defaults to `FALSE`, no behavior change when omitted)
 - [x] **REPORT-03**: `generate_report()` gains a `narrative = NULL` parameter it uses as the lower-level renderer, and its existing `narrative = NULL` / `advice = NULL` output stays byte-identical (backward compatible)
-- [ ] **REPORT-04**: `es_report()` deep-clones the task before rendering so the caller's `EventStudyTask` object is never mutated
+- [x] **REPORT-04**: `es_report()` deep-clones the task before rendering so the caller's `EventStudyTask` object is never mutated
 
 ### Grounded AI Narrative (NARR)
 
@@ -85,10 +85,10 @@ Which phases cover which requirements. Filled during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REPORT-01 | Phase 19 | Pending |
+| REPORT-01 | Phase 19 | Complete |
 | REPORT-02 | Phase 19 | Pending |
 | REPORT-03 | Phase 17 | Complete |
-| REPORT-04 | Phase 19 | Pending |
+| REPORT-04 | Phase 19 | Complete |
 | NARR-01 | Phase 18 | Complete |
 | NARR-02 | Phase 18 | Complete |
 | NARR-03 | Phase 18 | Complete |
