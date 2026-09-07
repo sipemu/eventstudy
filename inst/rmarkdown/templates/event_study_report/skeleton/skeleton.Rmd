@@ -17,6 +17,7 @@ params:
   confidence_level: 0.95
   interactive: TRUE
   advice: NULL
+  narrative: NULL
 ---
 
 ```{r setup, include=FALSE}
@@ -213,6 +214,31 @@ if (length(advice$caveats) > 0L) {
   cat("### Caveats\n\n")
   for (cv in advice$caveats) cat("-", cv, "\n")
   cat("\n")
+}
+```
+
+```{r narrative-section, results='asis', eval=!is.null(params$narrative)}
+# REPORT-03 (Phase 17): offline / LLM narrative prose sections
+# eval= guard: NULL path emits nothing (byte-identical to baseline)
+narrative <- params$narrative
+if (!is.null(narrative) && is.list(narrative)) {
+  cat("\n## AI/Offline Narrative\n\n")
+  if (nzchar(narrative$exec_summary %||% "")) {
+    cat("### Executive Summary\n\n")
+    cat(narrative$exec_summary, "\n\n")
+  }
+  if (nzchar(narrative$data_methods %||% "")) {
+    cat("### Data & Methods\n\n")
+    cat(narrative$data_methods, "\n\n")
+  }
+  if (nzchar(narrative$results %||% "")) {
+    cat("### Results\n\n")
+    cat(narrative$results, "\n\n")
+  }
+  if (nzchar(narrative$robustness %||% "")) {
+    cat("### Robustness & Caveats\n\n")
+    cat(narrative$robustness, "\n\n")
+  }
 }
 ```
 

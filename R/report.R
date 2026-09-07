@@ -22,6 +22,14 @@
 #'   path is completely unchanged (byte-identical output). A supplied but
 #'   invalid \code{advice} (not an \code{Advice} object) is silently coerced to
 #'   \code{NULL} with exactly one \code{warning()} — the report is never broken.
+#' @param narrative An optional named list keyed by section (e.g.
+#'   \code{list(exec_summary = "...", data_methods = "...", results = "...",
+#'   robustness = "...")}), typically the prose sections from an
+#'   \code{\link{es_advise}(task_type = "report_writing")} offline or LLM call.
+#'   When \code{NULL} (the default), the render output is byte-identical to the
+#'   v0.63.x baseline (REPORT-03 backward-compat). A supplied but invalid
+#'   \code{narrative} (not a named list) is silently coerced to \code{NULL}
+#'   with exactly one \code{warning()} — the report is never broken.
 #' @param ... Additional arguments passed to \code{rmarkdown::render}.
 #'
 #' @return The path to the generated report (invisibly).
@@ -39,6 +47,7 @@ generate_report <- function(task,
                               confidence_level = 0.95,
                               interactive = TRUE,
                               advice = NULL,
+                              narrative = NULL,
                               ...) {
   if (!requireNamespace("rmarkdown", quietly = TRUE)) {
     stop("Package 'rmarkdown' is required for report generation. ",
@@ -100,6 +109,16 @@ generate_report <- function(task,
     advice <- NULL
   }
 
+  # Validate narrative param: a supplied non-list degrades gracefully (REPORT-03).
+  # NULL path is byte-identical to baseline (no template change when NULL).
+  if (!is.null(narrative) && !is.list(narrative)) {
+    warning(
+      "generate_report(): 'narrative' must be a named list or NULL — narrative will be skipped.",
+      call. = FALSE
+    )
+    narrative <- NULL
+  }
+
   # Render
   rmarkdown::render(
     input = template_path,
@@ -114,7 +133,8 @@ generate_report <- function(task,
       cross_sectional = cross_sectional,
       confidence_level = confidence_level,
       interactive = interactive,
-      advice = advice
+      advice = advice,
+      narrative = narrative
     ),
     envir = new.env(parent = globalenv()),
     quiet = TRUE,
