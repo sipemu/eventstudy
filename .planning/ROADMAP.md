@@ -89,7 +89,7 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
 
 - [x] **Phase 17: Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline** — extend the grounding guard to scan free-text narrative prose for ungrounded numeric literals, resolve the `report_writing`-is-LLM-only gap so a full report narrative renders with no provider, add the backward-compatible `narrative=` seam to `generate_report()`, and establish the `\dontrun{}`/`skip_on_cran()`/Suggests CRAN hygiene discipline (completed 2026-09-07)
 - [x] **Phase 18: Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly** — build the section-by-section grounded narrative assembler and the fixed report template (exec summary · data/methods · results · diagnostics · robustness/caveats · references) rendered to HTML/PDF/Word/Markdown with static-plot fallback, per-format prose sanitisation, graceful toolchain skips, and offline-vs-AI mode visibility (completed 2026-09-07)
-- [ ] **Phase 19: One-Call `es_report()` Orchestrator, `run_event_study(report=)` & CRAN-Clean Release Gate** — the public `es_report()` entry point composing study → diagnostics → advise → render (returning output paths, deep-cloning the task), the additive `run_event_study(..., report=)` convenience, and the final CRAN-clean build/release gate verifying no new NOTEs/WARNINGs and a green suite
+- [x] **Phase 19: One-Call `es_report()` Orchestrator, `run_event_study(report=)` & CRAN-Clean Release Gate** — the public `es_report()` entry point composing study → diagnostics → advise → render (returning output paths, deep-cloning the task), the additive `run_event_study(..., report=)` convenience, and the final CRAN-clean build/release gate verifying no new NOTEs/WARNINGs and a green suite
 
 ## Phase Details
 
@@ -171,4 +171,4 @@ Plans:
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 1/1 | Complete | 2026-09-06 |
 | 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 3/3 | Complete    | 2026-09-07 |
 | 18. Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly | v0.64.0 | 2/2 | Complete    | 2026-09-07 |
-| 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 3/3 | In Progress|  |
+| 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 3/3 | Complete    | 2026-09-07 |

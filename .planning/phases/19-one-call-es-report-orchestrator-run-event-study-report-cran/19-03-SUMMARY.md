@@ -102,7 +102,7 @@ coverage:
         ref: "devtools::check(cran=TRUE, error_on='never') -> 0 errors, 0 warnings, 1 note"
         status: pass
     human_judgment: true
-    rationale: "Release gate requires explicit human sign-off per plan Task 3 (type=checkpoint:human-verify, gate=blocking-human). Human must confirm Note is pre-existing and approve v0.64.0 release."
+    rationale: "Release gate required explicit human sign-off per plan Task 3 (type=checkpoint:human-verify, gate=blocking-human). Human APPROVED 2026-09-07: confirmed Note is pre-existing, no regressions vs baseline, v0.64.0 release signed off."
 
 duration: 45min
 completed: 2026-09-07
@@ -111,15 +111,15 @@ status: complete
 
 # Phase 19 Plan 03: Release Gate (DESCRIPTION 0.64.0, NEWS, README, CRAN check) Summary
 
-**NAMESPACE exports es_report, DESCRIPTION bumped to 0.64.0, NEWS/README updated, CRAN check 0 errors 0 warnings 1 pre-existing note -- awaiting human release sign-off (Task 3 gate)**
+**NAMESPACE exports es_report, DESCRIPTION bumped to 0.64.0, NEWS/README updated, CRAN check 0 errors 0 warnings 1 pre-existing note -- release gate HUMAN-APPROVED, v0.64.0 signed off**
 
 ## Performance
 
-- **Duration:** ~45 min
+- **Duration:** ~50 min
 - **Started:** 2026-09-07T14:07:00Z
-- **Completed:** 2026-09-07T14:52:00Z (Tasks 1-2 complete; Task 3 awaiting human)
-- **Tasks:** 2 of 3 complete (Task 3 is a blocking-human checkpoint)
-- **Files modified:** 11
+- **Completed:** 2026-09-07T14:57:00Z (all 3 tasks complete; Task 3 gate human-approved)
+- **Tasks:** 3 of 3 complete (Task 3 blocking-human gate signed off by human)
+- **Files modified:** 13
 
 ## Accomplishments
 
@@ -213,17 +213,17 @@ This NOTE is from `R/es_diagnostics.R` (introduced Phase 5, commit 495ebdc) and 
 
 **Test suite:** `[ FAIL 0 | WARN 4 | SKIP 29 | PASS 2261 ]` -- all green.
 
-## Task 3 -- AWAITING HUMAN SIGN-OFF
+## Task 3 -- HUMAN-APPROVED (release gate signed off 2026-09-07)
 
-Task 3 is `type="checkpoint:human-verify" gate="blocking-human"`. The automated portions are complete. Human confirmation is required before v0.64.0 is closed.
+Task 3 is `type="checkpoint:human-verify" gate="blocking-human"`. The automated portions were run and presented to the human, who APPROVED the v0.64.0 release gate.
 
-**Human checklist:**
-1. Confirm `devtools::test()` shows FAIL 0 (see above: FAIL 0 | PASS 2261)
-2. Confirm `devtools::check(cran=TRUE)` shows 0 errors, 0 new WARNINGs/NOTEs vs baseline (see above: 0 errors, 0 warnings, 1 pre-existing note)
-3. Confirm: `grep 'export(es_report)' NAMESPACE` -- PASS
-4. Confirm: `grep '^Version: 0.64.0' DESCRIPTION` -- PASS
-5. Confirm: `grep 'EventStudy 0.64.0' NEWS.md` -- PASS
-6. Approve to close v0.64.0
+**Human sign-off confirmed:**
+1. `devtools::test()` shows FAIL 0 | PASS 2261 -- CONFIRMED
+2. `devtools::check(cran=TRUE)` shows 0 errors, 0 warnings, 1 pre-existing note (no new NOTEs/WARNINGs vs baseline) -- CONFIRMED
+3. `grep 'export(es_report)' NAMESPACE` -- PASS
+4. `grep '^Version: 0.64.0' DESCRIPTION` -- PASS
+5. `grep 'EventStudy 0.64.0' NEWS.md` -- PASS
+6. **v0.64.0 APPROVED for release** -- milestone gate passed, no regressions vs Phase 17 baseline.
 
 ## Known Stubs
 
