@@ -1,7 +1,7 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v0.63.0 — Documentation Depth — Methods & Worked Examples",
+  "milestone": "v0.64.0 — Automated AI Reporting",
   "phases": [
     {
       "number": "1",
@@ -61,7 +61,7 @@
     {
       "number": "12",
       "name": "CI/CD Deploy + Repo Linkage + Release Integrity",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "13",
@@ -82,12 +82,27 @@
       "number": "16",
       "name": "Worked-Examples Gallery + Build & Release Integrity",
       "status": "complete"
+    },
+    {
+      "number": "17",
+      "name": "Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline",
+      "status": "pending"
+    },
+    {
+      "number": "18",
+      "name": "Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly",
+      "status": "pending"
+    },
+    {
+      "number": "19",
+      "name": "es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate",
+      "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:progress",
-    "label": "Show progress",
-    "reason": "Unsure of state — showing progress"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 17 of 3 · 0% · executing"
   },
-  "updated_at": "2026-09-06T20:25:47.146Z"
+  "updated_at": "2026-09-07T07:42:24.966Z"
 }
