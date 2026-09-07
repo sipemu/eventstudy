@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v0.64.0
 milestone_name: Automated AI Reporting
 status: planning
-last_updated: "2026-09-06T21:13:18.728Z"
-last_activity: 2026-09-06
+last_updated: "2026-09-07T00:00:00.000Z"
+last_activity: 2026-09-07
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,52 +17,44 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-04)
+See: .planning/PROJECT.md (updated 2026-09-06)
 
-**Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI advisor cites only package-computed diagnostics, never fabricating a result. This milestone makes that legible via a curated docs site.
-**Current focus:** Phase 16 — Worked-Examples Gallery + Build & Release Integrity (16-01 executed)
+**Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics, never fabricating a result.
+**Current focus:** Phase 17 — Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline (ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-09-06 — Milestone v0.64.0 started
+Phase: 17 of 19 (Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline)
+Plan: — (roadmap created, not yet planned)
+Status: Ready to plan
+Last activity: 2026-09-07 — v0.64.0 roadmap created (Phases 17-19), 22/22 requirements mapped
 
-## Milestone Roadmap (v0.63.0)
+Progress: [░░░░░░░░░░] 0%
 
-- **Phase 13: Article Infrastructure & Conventions Gate** — METH-01, RENDER-03, DELIVERY-01..03. `vignettes/articles/` (`.Rbuildignore`d same commit), `_setup.Rmd` (seed + options), co-located `references.bib`, `math-rendering: katex` (plotly/MathJax fix), reusable 10-section skeleton, Learn/Methods + Gallery nav slots, 18 CRAN vignettes untouched, CI dry-run smoke test.
-- **Phase 14: Curated Per-Domain Datasets** — DATA-01, DATA-02. Curated real datasets (dieselgate pattern) with reproducible `data-raw/` provenance + `DATA-SOURCES.md`, `simulate_event_study()` preferred, sized/placed to keep the CRAN tarball clean, placement recorded per dataset.
-- **Phase 15: Methods Articles + Rendered Outputs** — METH-02..08, RENDER-01, RENDER-02. All 8 method-family conceptual articles (formulas, assumptions, when-to-use, references) each with build-time rendered table + plot, fully offline/`set.seed`, formula-reviewed vs primary literature + package source.
-- **Phase 16: Worked-Examples Gallery + Build & Release Integrity** — GALLERY-01..03, BUILD-04..06. pyfda-style gallery card index + ≥3 cross-domain worked examples cross-linked to Methods/reference, green local build + CI deploy + `R CMD check --as-cran` (no new NOTEs/WARNINGs, unbloated tarball, suite green).
+## Milestone Roadmap (v0.64.0)
 
-Dependency order: Phase 13 (infra gate) → Phase 14 (datasets) → Phase 15 (Methods articles, needs infra + data) → Phase 16 (gallery + final build/release gate, needs articles + data).
+- **Phase 17: Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline** — GROUND-01..03, OFFLINE-01, REPORT-03. Extend the grounding guard to scan free-text narrative prose for numeric literals absent from `es_diagnostics()` (the milestone's core-value gate, lands first); resolve the `report_writing`-is-LLM-only `stop()` so narrative renders offline via the rule-based engine; add backward-compatible `narrative=NULL` seam to `generate_report()` (NULL path byte-identical); establish `\dontrun{}` / `skip_on_cran()` / Suggests CRAN hygiene.
+- **Phase 18: Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly** — NARR-01..05, FORMAT-01..04, TMPL-01/02, OFFLINE-02. Section-by-section grounded narrative assembler (one LLM call per section, independent of format count); references from KB citations; static significance calibration; fixed joint-hypothesis caveat. Fixed template (exec summary · data/methods · results · diagnostics · robustness/caveats · references), arg-toggled sections, data/methods+results auto-filled from task+diagnostics. Renders HTML/PDF/Word/Markdown; ggplot2 static for non-HTML via `knitr::is_html_output()`; per-format prose sanitiser; graceful toolchain skips; visible AI-vs-offline mode distinction.
+- **Phase 19: es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate** — REPORT-01/02/04, CRAN-01/02. Public `es_report()` composing study → diagnostics → advise → render, returning output path(s), deep-cloning the task (no caller mutation); additive `run_event_study(..., report=TRUE)` (defaults FALSE, byte-identical when omitted); final `R CMD check --as-cran` gate (tinytex Suggests-only, no new NOTEs/WARNINGs, suite green, NEWS v0.64.0).
 
-Coverage: 22/22 v0.63.0 requirements mapped, 0 unmapped.
+Dependency order: Phase 17 (grounding + offline + CRAN discipline, blocking) → Phase 18 (renderer/template/multi-format, needs the `narrative=` seam + offline fallback + prose guard) → Phase 19 (orchestrator + convenience param + final release gate, needs the renderer).
+
+Coverage: 22/22 v0.64.0 requirements mapped, 0 unmapped. (CRAN-01/02 established in Phase 17, formally owned + verified in Phase 19.)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed (all milestones): 11
+- Total plans completed (all milestones): 16
 - Average duration: -
 - Total execution time: 0 hours
 
 **Recent Trend:**
 
-- Last 5 plans: n/a
+- Last 5 plans: n/a (new milestone)
 - Trend: n/a
 
 *Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 11-curated-pkgdown-site-custom-theme-local-build P01 | 3777 | 3 tasks | 2 files |
-| Phase 13 P01 | 45 | 3 tasks | 6 files |
-| Phase 14-curated-per-domain-datasets P01 | 8 minutes | 3 tasks | 6 files |
-| Phase 15 P01 | 1 session | 8 tasks | 9 files |
-| Phase 16 P01 | 55m | 4 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -71,41 +63,33 @@ Coverage: 22/22 v0.63.0 requirements mapped, 0 unmapped.
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- v0.62.0 is a small docs + infra milestone: two coarse phases. Phase 11 builds and verifies the curated pkgdown site locally (config + theme must exist and build before CI is meaningful); Phase 12 wires the r-lib CI deploy, repo linkage, network-safe article build, and the CRAN-clean 0.62.0 release.
-- Site URL is `https://sipemu.github.io/eventstudy/`; GitHub remote is `https://github.com/sipemu/eventstudy`.
-- Curated pkgdown site (grouped reference, custom homepage) over auto-generated default, matching the fdars-r reference.
-- Custom Bootstrap-5 theme, no logo — professional look without artwork; logo deferred.
-- CI deploy to gh-pages on push-to-main + releases (r-lib `pkgdown.yaml`); keeps the site out of the CRAN tarball via `.Rbuildignore`.
-- The GitHub repo "About → Website" field is a manual operator step (CI cannot set it) — flagged in Phase 12 notes, not an automated requirement.
-- [Phase 11]: pkgdown 2.2.0: all .Rd files (even non-exported) must be in reference: groups or an internal section to avoid missing-topic errors
-- [Phase 11]: has_keyword('datasets') resolves dieselgate bundled dataset inclusion without export() requirement
-- [Phase 11]: DESCRIPTION URL field for pkgdown site URL deferred to Phase 12 LINK-01 (scope guard)
-- [Phase 13]: template.math-rendering: katex must go under template: in _pkgdown.yml (pkgdown 2.2.0 config_math_rendering reads from template.math-rendering)
-- [Phase 13]: plot_event_study() returns ggplot2 in current codebase; use plotly::ggplotly() to deliver interactive plotly figures in articles
-- [Phase 14]: Live Yahoo Finance fetch used for earnings_surprises (AAPL/MSFT/GOOGL Q1 2023); 6.0 KB bzip2 — well under 27 KB cap
-- [Phase 14]: DATA-SOURCES.md provenance registry created with dieselgate + earnings_surprises rows; excluded from CRAN tarball by pre-existing ^data-raw$ .Rbuildignore rule
-- [Phase 15]: DW located at R/diagnostics.R:56-61 — carries real Formula-verified provenance, not conceptual
-- [Phase 15]: tidy.EventStudyTask(task,type=...) used directly; broom tidy generic not re-exported by EventStudy
+- One-call AI report as a new additive wrapper (`es_report()`) over `generate_report()`, not a signature change — keeps the existing renderer's NULL-advice byte-identical path intact.
+- Report always renders complete offline; LLM narrative is enrichment, rule-based advice engine is the fallback (extends the v0.60.0 offline-first advisor).
+- Grounding invariant carries into the report: narrative cites only computed diagnostics, enforced by the runtime guard extended to prose + regression tests (the report is the highest-visibility surface for an ungrounded number).
+- Word output uses plain `rmarkdown::word_document()` (NOT officedown) to keep the package CRAN-clean with zero new transitive deps — officedown / RPTX-03 deferred.
+- Multi-format (HTML/PDF/Word/Markdown) via rmarkdown output formats; PDF/Word toolchains stay optional (user-environment, not hard deps); `tinytex` added to Suggests only.
+- Sensible fixed template with arg-toggled sections, no custom templating (RPTC-01 deferred).
 
 ### Pending Todos
 
-- **Phase 11:** Enumerate all 30+ exported symbols and assign each to exactly one Reference group so `build_site()` emits zero missing-topic warnings; group the 18 vignettes under Articles.
-- **Phase 12:** Verify a real Actions run is green on the default branch before considering CI-03 met; confirm `.Rbuildignore` keeps the CRAN tarball byte-unchanged; confirm no new R CMD check NOTEs/WARNINGs vs v0.61.x baseline.
-- **Operator step (Phase 12):** After first successful deploy, set the GitHub repo "About → Website" field to the live site URL (manual GitHub UI action).
+- **Phase 17 (spike):** Validate numeric-literal regex + tolerance for the prose grounding scanner against real LLM output samples (rounding vs off-by-one vs fabricated) before locking the guard.
+- **Phase 18 (spike):** Prose sanitisation fixtures (em-dash, smart quotes, Unicode, XML entities) per output format; verify PDF/Word render without corruption.
+- **Phase 18 (spike):** Multi-format sequential render (HTML+PDF+Word) figure-directory-deletion edge case — confirm figures survive.
 
 ### Blockers/Concerns
 
-- **BUILD-02:** `data-download` (and any other network-touching) vignettes must build reproducibly in Actions — verify offline-safe/gated handling before relying on the CI docs build.
+- **GROUND-01 is the make-or-break invariant:** the existing guard only validates structured `evidence[]` arrays; the multi-section narrative adds four free-text prose fields, each a hallucination surface. Must be solid in Phase 17 before any template work.
+- **OFFLINE-01 blocker:** `es_advise()` currently `stop()`s for `task_type="report_writing"` when `provider=NULL`; must be resolved in Phase 17 so a full report renders with no API key.
 
 ### Quick Tasks Completed
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260904-er6 | Surface v0.60.0 AI advisor in README (Features bullet + Quick Start snippet + Roadmap item) | 2026-09-04 | 6e61c3b | [260904-er6-update-readme-md-to-prominently-feature-](./quick/260904-er6-update-readme-md-to-prominently-feature-/) |
-| 260904-id9 | Fix CRAN non-ASCII WARNING — escape non-ASCII in string literals of advise.R/knowledge_base.R/report.R | 2026-09-04 | 462940f | [260904-id9-fix-cran-non-ascii-warning-escape-non-as](./quick/260904-id9-fix-cran-non-ascii-warning-escape-non-as/) |
-| 260904-kxy | Fix latent dplyr::lag import bug (returns silently all-zero/NA without dplyr attached) + regression test + advisor-vignette AR/CAR plots; released 0.61.1 | 2026-09-04 | 6c47339 | [260904-kxy-fix-dplyr-lag-import-bug-causing-all-na-](./quick/260904-kxy-fix-dplyr-lag-import-bug-causing-all-na-/) |
-| 260904-len | Extend bundled dieselgate to 4 automakers / 2 groups (README flagship example); multi-group advisor vignette with CI bands + group CAAR comparison (VW Group CAAR −38.6% vs Other +1.3% n.s.) + mock AI-advisor block; released 0.61.2 | 2026-09-04 | fa87166 | [260904-len-multi-automaker-vignette-ci-groups-advisor](./quick/260904-len-multi-automaker-vignette-ci-groups-advisor/) |
-| 260904-x88 | redesign the pkgdown site to match fdars-r | 2026-09-04 | e85ffbc | [260904-x88-redesign-the-pkgdown-site-to-match-fdars](./quick/260904-x88-redesign-the-pkgdown-site-to-match-fdars/) |
+| 260904-er6 | Surface v0.60.0 AI advisor in README | 2026-09-04 | 6e61c3b | [260904-er6-...](./quick/260904-er6-update-readme-md-to-prominently-feature-/) |
+| 260904-id9 | Fix CRAN non-ASCII WARNING in advise.R/knowledge_base.R/report.R | 2026-09-04 | 462940f | [260904-id9-...](./quick/260904-id9-fix-cran-non-ascii-warning-escape-non-as/) |
+| 260904-kxy | Fix latent dplyr::lag import bug + regression test; released 0.61.1 | 2026-09-04 | 6c47339 | [260904-kxy-...](./quick/260904-kxy-fix-dplyr-lag-import-bug-causing-all-na-/) |
+| 260904-len | Extend bundled dieselgate to 4 automakers / 2 groups; released 0.61.2 | 2026-09-04 | fa87166 | [260904-len-...](./quick/260904-len-multi-automaker-vignette-ci-groups-advisor/) |
+| 260904-x88 | Redesign the pkgdown site to match fdars-r | 2026-09-04 | e85ffbc | [260904-x88-...](./quick/260904-x88-redesign-the-pkgdown-site-to-match-fdars/) |
 
 ## Deferred Items
 
@@ -116,13 +100,17 @@ Recent decisions affecting current work:
 | Advisor Pro | PRO-01..02: RAG corpus advisor + managed hosting | Deferred | v0.60.0 roadmap | future (waitlist-gated) |
 | Surfaces | SURF-01..02: MCP server + panel/intraday/synthetic diagnostics | Deferred | v0.60.0 roadmap | future |
 | Docs | Package logo / hex sticker, custom homepage cards, versioned docs | Deferred | v0.62.0 roadmap | future |
+| Reporting | RPTX-01: report support for panel/intraday/synthetic-control tasks | Deferred | v0.64.0 roadmap | future (needs SURF-01/02) |
+| Reporting | RPTX-02: bootstrap-CI reporting | Deferred | v0.64.0 roadmap | future |
+| Reporting | RPTX-03: rich Word output via officedown | Deferred | v0.64.0 roadmap | future (if demand) |
+| Reporting | RPTC-01: user-supplied custom report templates | Deferred | v0.64.0 roadmap | future |
 
 ## Session Continuity
 
-Last session: 2026-09-06T19:43:23.974Z
-Stopped at: Phase 16 complete — all phases complete
+Last session: 2026-09-07T00:00:00.000Z
+Stopped at: v0.64.0 roadmap created (Phases 17-19, 22/22 requirements mapped)
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Plan Phase 17 with `/gsd-plan-phase 17`.

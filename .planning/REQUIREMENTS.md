@@ -85,34 +85,37 @@ Which phases cover which requirements. Filled during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| REPORT-01 | TBD | Pending |
-| REPORT-02 | TBD | Pending |
-| REPORT-03 | TBD | Pending |
-| REPORT-04 | TBD | Pending |
-| NARR-01 | TBD | Pending |
-| NARR-02 | TBD | Pending |
-| NARR-03 | TBD | Pending |
-| NARR-04 | TBD | Pending |
-| NARR-05 | TBD | Pending |
-| GROUND-01 | TBD | Pending |
-| GROUND-02 | TBD | Pending |
-| GROUND-03 | TBD | Pending |
-| OFFLINE-01 | TBD | Pending |
-| OFFLINE-02 | TBD | Pending |
-| FORMAT-01 | TBD | Pending |
-| FORMAT-02 | TBD | Pending |
-| FORMAT-03 | TBD | Pending |
-| FORMAT-04 | TBD | Pending |
-| TMPL-01 | TBD | Pending |
-| TMPL-02 | TBD | Pending |
-| CRAN-01 | TBD | Pending |
-| CRAN-02 | TBD | Pending |
+| REPORT-01 | Phase 19 | Pending |
+| REPORT-02 | Phase 19 | Pending |
+| REPORT-03 | Phase 17 | Pending |
+| REPORT-04 | Phase 19 | Pending |
+| NARR-01 | Phase 18 | Pending |
+| NARR-02 | Phase 18 | Pending |
+| NARR-03 | Phase 18 | Pending |
+| NARR-04 | Phase 18 | Pending |
+| NARR-05 | Phase 18 | Pending |
+| GROUND-01 | Phase 17 | Pending |
+| GROUND-02 | Phase 17 | Pending |
+| GROUND-03 | Phase 17 | Pending |
+| OFFLINE-01 | Phase 17 | Pending |
+| OFFLINE-02 | Phase 18 | Pending |
+| FORMAT-01 | Phase 18 | Pending |
+| FORMAT-02 | Phase 18 | Pending |
+| FORMAT-03 | Phase 18 | Pending |
+| FORMAT-04 | Phase 18 | Pending |
+| TMPL-01 | Phase 18 | Pending |
+| TMPL-02 | Phase 18 | Pending |
+| CRAN-01 | Phase 19 | Pending |
+| CRAN-02 | Phase 19 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Mapped to phases: 0 (filled by roadmap)
-- Unmapped: 22 ⚠️
+- Mapped to phases: 22 ✓
+- Unmapped: 0
+
+**Notes:**
+- CRAN hygiene (CRAN-01/02) is cross-cutting: the `\dontrun{}` / `skip_on_cran()` / Suggests discipline is *established* in Phase 17 (see Phase 17 success criterion 4) and *finally verified* as the release gate in Phase 19, where the requirements are formally owned.
 
 ---
 *Requirements defined: 2026-09-07*
-*Last updated: 2026-09-07 after initial definition*
+*Last updated: 2026-09-07 after roadmap creation (Phases 17-19 mapped, 100% coverage)*
