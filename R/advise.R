@@ -493,8 +493,9 @@ KB_KEY_MAP <- list(
 
   for (nm in names(prose_fields)) {
     text <- prose_fields[[nm]] %||% ""
-    if (!nzchar(text)) {
-      sections_kept[[nm]] <- text
+    if (is.na(text) || !nzchar(text)) {
+      # NA fields pass through as NA (no literals extractable; treated as not-prose)
+      sections_kept[[nm]] <- if (is.na(text)) NA_character_ else text
       next
     }
 
