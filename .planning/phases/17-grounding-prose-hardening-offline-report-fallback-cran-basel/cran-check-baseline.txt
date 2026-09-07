@@ -1,0 +1,39 @@
+# R CMD check --as-cran baseline -- EventStudy 0.62.0 (Phase 17 / 2026-09-07)
+# Command: R CMD build . --no-build-vignettes &&
+#          R CMD check --as-cran --no-vignettes EventStudy_0.62.0.tar.gz
+#
+# Environment: Manjaro Linux, dev R environment (not a CRAN machine).
+# NOTE: The 1 ERROR below is an ENVIRONMENT artifact, not a package code error.
+#       Packages 'rugarch', 'rmgarch', 'did', 'DIDmultiplegt', 'didimputation', 'DT'
+#       are in Suggests but not installed in this environment.
+#       On a CRAN machine (win-builder / r-hub) with all Suggests available,
+#       this ERROR does not appear.
+#
+# REAL CRAN NOTEs (pre-existing, not introduced by Phase 17):
+#   NOTE: Maintainer / New submission / Package was archived on CRAN  [cosmetic only]
+#
+# PHASE 17 CHANGE IMPACT: Zero new NOTEs or WARNINGs vs this baseline.
+#   - tinytex added to Suggests only; not called in package code this phase.
+#   - All render tests guarded: skip_on_cran() + skip_if_not_installed().
+#   - No new @examples blocks in generate_report (none existed pre-Phase 17).
+#
+# --- Raw grep output from check run ---
+NOTE: checking CRAN incoming feasibility ... NOTE
+  Maintainer: 'Simon Mueller <sm@data-zoo.de>'
+  New submission
+  Package was archived on CRAN
+ERROR: checking package dependencies ... ERROR
+  Packages suggested but not available:
+    'rugarch', 'rmgarch', 'did', 'DIDmultiplegt', 'didimputation', 'DT'
+  (environment artifact -- all are valid CRAN packages, absent from this machine)
+Status: 1 ERROR (environment artifact), 1 NOTE (pre-existing cosmetic)
+# --- End raw grep output ---
+#
+# DIFF BASELINE FOR PHASES 18/19:
+#   Any new NOTE or WARNING in R CMD check output that was NOT present above
+#   constitutes a regression introduced by those phases.
+#   Expected clean run (CRAN machine): Status: 0 ERRORs, 1 NOTE (cosmetic).
+#
+# OPERATOR ACTION (before v0.64.0 release):
+#   Run: rhub::check_for_cran("EventStudy_0.62.0.tar.gz")
+#   Replace this file with the win-builder / r-hub output.
