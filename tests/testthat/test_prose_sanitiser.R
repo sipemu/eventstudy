@@ -124,6 +124,26 @@ test_that(".sanitise_for_pdf() handles backslash first to avoid double-escaping"
 })
 
 
+test_that(".sanitise_for_pdf() backslash produces exactly \\textbackslash{} (not \\textbackslash\\{\\})", {
+  # CR-01 regression test: the original code escaped { and } in the
+  # \textbackslash{} replacement string itself, yielding \textbackslash\{\}
+  # (three rendered chars), not \textbackslash{} (one rendered backslash).
+  input     <- "a\\b"
+  sanitised <- EventStudy:::.sanitise_for_pdf(input)
+
+  # Must contain the correct macro with literal braces
+  expect_true(
+    grepl("\\textbackslash{}", sanitised, fixed = TRUE),
+    info = paste("Expected '\\textbackslash{}' in output. Got:", sanitised)
+  )
+  # Must NOT contain the corrupted form with escaped braces
+  expect_false(
+    grepl("\\textbackslash\\{\\}", sanitised, fixed = TRUE),
+    info = paste("Must not contain '\\textbackslash\\{\\}' (corrupted). Got:", sanitised)
+  )
+})
+
+
 test_that(".sanitise_for_pdf() escapes percent sign", {
   input     <- "50% return"
   sanitised <- EventStudy:::.sanitise_for_pdf(input)

@@ -308,9 +308,14 @@ assemble_report_narrative <- function(
 
 .sanitise_for_pdf <- function(text) {
   if (!is.character(text)) return(text)
-  # 1. Backslash first (avoid double-escaping)
-  text <- gsub("\\\\", "\\\\textbackslash{}", text, fixed = FALSE)
-  # 2. Curly braces
+  # 1. Replace backslash with a placeholder BEFORE brace-escaping so that the
+  #    curly braces introduced in step 10 below (\textbackslash{}) are not
+  #    themselves escaped by step 2.  The placeholder must contain no LaTeX
+  #    specials (no backslash, braces, $, %, #, _, &, ~, ^).
+  #    (CR-01 fix: original code emitted \textbackslash\{\} -- three
+  #    rendered characters -- instead of the correct \textbackslash{} -- one.)
+  text <- gsub("\\\\", "BSPH7F3A", text, fixed = FALSE)
+  # 2. Curly braces (now safe: placeholder has no braces)
   text <- gsub("{", "\\{", text, fixed = TRUE)
   text <- gsub("}", "\\}", text, fixed = TRUE)
   # 3. Dollar sign
@@ -327,6 +332,9 @@ assemble_report_narrative <- function(
   text <- gsub("~", "\\textasciitilde{}", text, fixed = TRUE)
   # 9. Caret
   text <- gsub("^", "\\textasciicircum{}", text, fixed = TRUE)
+  # 10. Restore backslash placeholder as correct LaTeX macro (braces here are
+  #     safe because brace-escaping in step 2 is already done)
+  text <- gsub("BSPH7F3A", "\\textbackslash{}", text, fixed = TRUE)
   text
 }
 
