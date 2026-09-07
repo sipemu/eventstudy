@@ -123,8 +123,11 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
   3. The same template renders to HTML (default), PDF, Word (.docx), and Markdown, selectable per call (one or several), with plots switching to static ggplot2 for non-HTML formats via `knitr::is_html_output()` (interactive plotly only in HTML) and prose sanitised per format (LaTeX/XML special characters, smart quotes, em-dashes) so PDF/Word render without corruption.
   4. A missing optional toolchain degrades gracefully — PDF/Word/Markdown each skip with exactly one informative message and continue; only total inability to render the HTML baseline errors — and the rendered report visibly distinguishes AI-grounded from offline rule-based narrative (section label/heading plus a console message on the mode used).
 
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
+
+- [ ] 18-01-PLAN.md — Grounded narrative assembler: section-by-section es_advise (once per section), static significance calibration, KB references, joint-hypothesis caveat, per-format prose sanitiser (NARR-01..05, FORMAT-04, OFFLINE-02)
+- [ ] 18-02-PLAN.md — Multi-format renderer + fixed 6-section template: format-vector loop with toolchain skips, deterministic task/diagnostics auto-fill, is_html_output plot switch, AI-vs-offline mode visibility (FORMAT-01/02/03, TMPL-01/02, NARR-05, OFFLINE-02)
 
 ### Phase 19: One-Call `es_report()` Orchestrator, `run_event_study(report=)` & CRAN-Clean Release Gate
 
@@ -161,5 +164,5 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
 | 15. Methods Articles + Rendered Outputs | v0.63.0 | 1/1 | Complete | 2026-09-06 |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 1/1 | Complete | 2026-09-06 |
 | 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 3/3 | Complete    | 2026-09-07 |
-| 18. Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly | v0.64.0 | 0/TBD | Not started | - |
+| 18. Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly | v0.64.0 | 0/2 | Not started | - |
 | 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 0/TBD | Not started | - |
