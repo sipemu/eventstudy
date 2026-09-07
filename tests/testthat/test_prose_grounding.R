@@ -76,6 +76,49 @@ test_that(".extract_numeric_literals returns empty numeric on prose with no numb
   expect_length(vals, 0L)
 })
 
+# CR-01 regression: signed negatives directly after non-space chars must retain sign
+test_that(".extract_numeric_literals: 'mean CAR=-0.032' extracts -0.032 (with sign)", {
+  vals <- EventStudy:::.extract_numeric_literals("The mean CAR=-0.032 over the window.")
+  expect_true(any(abs(vals - (-0.032)) < 1e-9),
+              info = paste("extracted:", paste(vals, collapse = ", ")))
+  # Must NOT extract 0.032 (unsigned) — sign must be preserved
+  expect_false(any(abs(vals - 0.032) < 1e-9 & vals > 0),
+               info = "sign-stripped 0.032 must not appear as a separate positive literal")
+})
+
+test_that(".extract_numeric_literals: 't=-0.032' extracts -0.032 (after equals)", {
+  vals <- EventStudy:::.extract_numeric_literals("The t-statistic t=-0.032 was not significant.")
+  expect_true(any(abs(vals - (-0.032)) < 1e-9),
+              info = paste("extracted:", paste(vals, collapse = ", ")))
+})
+
+test_that(".extract_numeric_literals: fabricated negative -99.99 in '=-99.99' is extracted as -99.99", {
+  # Fabricated negative after '=' must be extracted WITH sign so the scanner
+  # correctly identifies -99.99 as absent from the registry (not confused with 99.99)
+  vals <- EventStudy:::.extract_numeric_literals("The CAR=-99.99 was fabricated.")
+  expect_true(any(abs(vals - (-99.99)) < 1e-9),
+              info = paste("extracted:", paste(vals, collapse = ", ")))
+})
+
+test_that(".scan_prose_grounding: sign-flipped literal is correctly dropped (CR-01 false-negative guard)", {
+  # Registry will have car_t mean = mean(c(2.1,1.5,3.0,0.2,2.5)) = 1.86
+  # If prose says '=-1.86' (sign-flipped), scanner must DROP, not pass through
+  diag <- .make_test_diag()
+  # Override car_t so mean = 0.045 exactly, enabling a clean sign-flip test
+  diag$event_window$car_t <- c(0.045, 0.045, 0.045, 0.045, 0.045)
+
+  prose_fields <- list(
+    results = "The mean CAR=-0.045 (sign flipped — fabricated)."
+  )
+  # -0.045 must NOT be grounded against 0.045 (different sign)
+  expect_warning(
+    result <- EventStudy:::.scan_prose_grounding(prose_fields, diag),
+    regexp = "Prose grounding guard"
+  )
+  expect_equal(result$n_dropped, 1L)
+  expect_equal(result$sections$results, "")
+})
+
 # ---------------------------------------------------------------------------
 # Task 2 GREEN block — .build_prose_value_registry()
 # ---------------------------------------------------------------------------

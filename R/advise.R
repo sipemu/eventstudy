@@ -338,13 +338,14 @@ KB_KEY_MAP <- list(
 #' @return A numeric vector (possibly empty) of extracted values. Never NA.
 #' @noRd
 .extract_numeric_literals <- function(text) {
-  if (!nzchar(text %||% "")) return(numeric(0L))
-  # Pattern: optional sign, digits (with optional thousands separators — longest
-  # alternative FIRST to avoid split on 4-digit numbers like "1997" -> "199"+"7"),
-  # optional decimal part, optional scientific exponent.
-  # Matches: -3.14  0.001  2.35e-4  95  1,234.56  2.5e-4  1997
+  if (is.null(text) || length(text) == 0L || is.na(text) || !nzchar(text)) return(numeric(0L))
+  # Pattern: optional sign anchored via lookbehind (sign only captured when NOT
+  # preceded by a word char, digit, or dot — prevents "t-statistic" hyphen being
+  # read as a sign, while still capturing "=-0.032", "( -3.14", "was -0.045").
+  # Longest alternative FIRST to avoid split on 4-digit numbers like "1997".
+  # Matches: -3.14  0.001  2.35e-4  95  1,234.56  =-0.032  (CAR=-0.045)
   # Non-numeric prefixes (<, >, ~, %) are not matched and left in the string.
-  pattern <- "-?(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?"
+  pattern <- "(?<![\\w.])(-?)(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?"
   m    <- gregexpr(pattern, text, perl = TRUE)
   raw  <- regmatches(text, m)[[1L]]
   raw  <- gsub(",", "", raw, fixed = TRUE)  # strip thousands separators
