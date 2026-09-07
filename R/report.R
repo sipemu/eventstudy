@@ -232,6 +232,16 @@ generate_report <- function(task,
     render_params <- base_params
     render_params$narrative <- render_narrative
 
+    # CR-02: pass per-format fig.path via template params so knitr actually
+    # honours it.  output_options= is silently ignored by rmarkdown::render()
+    # when output_format is a custom format object -- setting fig.path via
+    # knitr::opts_chunk$set() inside the template setup chunk is the only
+    # reliable path for per-format figure isolation.
+    render_params$fig_path <- file.path(
+      output_dir,
+      paste0(basename_no_ext, "_", fmt, "_files", "/figure-")
+    )
+
     # Build the rmarkdown output format object (or NULL when toolchain unavailable)
     out_format <- .build_output_format(fmt)
 
@@ -246,22 +256,14 @@ generate_report <- function(task,
       next
     }
 
-    # Per-format fig.path to avoid figure-directory collisions across sequential
-    # render calls on the same template (T-18-05 / Spike 1)
-    fig_dir <- file.path(
-      output_dir,
-      paste0(basename_no_ext, "_", fmt, "_files", "/figure-")
-    )
-
     rmarkdown::render(
-      input          = template_path,
-      output_format  = out_format,
-      output_file    = out_name,
-      output_dir     = output_dir,
-      params         = render_params,
-      output_options = list("fig.path" = fig_dir),
-      envir          = new.env(parent = globalenv()),
-      quiet          = TRUE,
+      input         = template_path,
+      output_format = out_format,
+      output_file   = out_name,
+      output_dir    = output_dir,
+      params        = render_params,
+      envir         = new.env(parent = globalenv()),
+      quiet         = TRUE,
       ...
     )
 

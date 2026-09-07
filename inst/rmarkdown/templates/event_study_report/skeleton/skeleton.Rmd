@@ -20,6 +20,7 @@ params:
   confidence_level: 0.95
   interactive: TRUE
   advice: NULL
+  fig_path: NULL
 ---
 
 ```{r setup, include=FALSE}
@@ -30,6 +31,14 @@ knitr::opts_chunk$set(
   fig.width = 10,
   fig.height = 6
 )
+# CR-02: per-format fig.path isolation. output_options= is ignored by
+# rmarkdown::render() when output_format is a custom format object; the
+# fig.path must be set via knitr global options inside the template so that
+# each sequential format render writes figures to a distinct directory and
+# avoids file collisions across html/pdf/word/md renders.
+if (!is.null(params$fig_path) && nzchar(params$fig_path)) {
+  knitr::opts_chunk$set(fig.path = params$fig_path)
+}
 library(EventStudy)
 library(dplyr)
 library(ggplot2)

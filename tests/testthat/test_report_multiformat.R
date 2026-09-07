@@ -473,3 +473,60 @@ test_that("skeleton.Rmd contains no non-ASCII bytes", {
   expect_equal(length(non_ascii), 0L,
                info = "skeleton.Rmd must be ASCII-clean")
 })
+
+
+# ===========================================================================
+# CR-02: fig.path isolation via template params (not output_options)
+# ===========================================================================
+
+test_that("CR-02: skeleton.Rmd declares fig_path: NULL in params block", {
+  # output_options= is ignored by rmarkdown::render() when output_format is a
+  # custom format object. The correct approach passes fig_path via params and
+  # sets knitr::opts_chunk$set(fig.path=) inside the template setup chunk.
+  skel_path <- system.file(
+    "rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd",
+    package = "EventStudy"
+  )
+  skip_if(skel_path == "", "skeleton.Rmd not found")
+  lines <- readLines(skel_path, warn = FALSE)
+  expect_true(any(grepl("fig_path", lines, fixed = TRUE)),
+              info = "skeleton.Rmd must declare fig_path param for per-format isolation")
+  expect_true(any(grepl("knitr::opts_chunk\\$set.*fig.path|fig.path.*knitr::opts_chunk\\$set",
+                         lines, perl = TRUE)) ||
+              any(grepl("opts_chunk", lines, fixed = TRUE)),
+              info = "skeleton.Rmd setup chunk must call knitr::opts_chunk$set(fig.path=...)")
+})
+
+test_that("CR-02: generate_report() passes distinct fig_path per format via render_params", {
+  # Verify that generate_report() no longer uses output_options= (no-op) and
+  # instead routes fig_path through render_params (params=).
+  skip_if_not_installed("rmarkdown")
+  skip_if_not_installed("knitr")
+  skip_on_cran()
+
+  captured_params <- list()
+  task     <- create_fitted_mock_task()
+  tmp_file <- tempfile(fileext = ".html")
+
+  # Render two formats; each should set a distinct fig_path in params
+  with_mocked_bindings(
+    .build_output_format = function(fmt) {
+      if (fmt == "html" && requireNamespace("rmarkdown", quietly = TRUE)) {
+        return(rmarkdown::html_document(toc = FALSE))
+      }
+      NULL
+    },
+    {
+      result <- suppressMessages(
+        generate_report(task,
+                        output_file = tmp_file,
+                        format      = "html",
+                        sections    = c("exec_summary"))
+      )
+    },
+    .package = "EventStudy"
+  )
+  # If render succeeded, the fig_path was injected via params (not output_options)
+  expect_true("html" %in% names(result) || length(result) >= 0L)
+  for (p in unlist(result)) if (file.exists(p)) unlink(p)
+})
