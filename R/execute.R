@@ -6,14 +6,42 @@
 #' @param task An EventStudyTask object.
 #' @param parameter_set A ParameterSet object defining the event study.
 #'   Defaults to a new ParameterSet with default settings.
+#' @param report Logical. When \code{FALSE} (default), the function behaves
+#'   exactly as before this parameter was added. When \code{TRUE}, also renders
+#'   a report via \code{\link{es_report}()} after the pipeline completes and
+#'   attaches the rendered path(s) as \code{attr(task, "report_path")}.
+#' @param report_args Named list forwarded to \code{\link{es_report}()} when
+#'   \code{report = TRUE}. May include \code{output_file}, \code{format},
+#'   \code{provider}, and any other argument accepted by \code{es_report()}.
+#'   Defaults to \code{list()} (uses \code{es_report()} defaults, which render
+#'   \code{"event_study_report.html"} in the working directory).
 #'
-#' @return The task object with all results computed.
+#' @return The task object with all results computed. When \code{report = TRUE},
+#'   the returned task additionally carries \code{attr(task, "report_path")}
+#'   with the path(s) of the rendered report file(s). The return type is always
+#'   a fitted \code{EventStudyTask} in both paths.
+#'
+#' @examples
+#' \dontrun{
+#' task <- run_event_study(my_task, ParameterSet$new(), report = TRUE)
+#' attr(task, "report_path")  # path to the rendered HTML
+#' }
 #'
 #' @export
-run_event_study = function(task, parameter_set = ParameterSet$new()) {
+run_event_study = function(task,
+                           parameter_set = ParameterSet$new(),
+                           report = FALSE,
+                           report_args = list()) {
   task = prepare_event_study(task, parameter_set)
   task = fit_model(task, parameter_set)
   task = calculate_statistics(task, parameter_set)
+
+  if (isTRUE(report)) {
+    paths <- do.call(es_report, c(list(task = task), report_args))
+    attr(task, "report_path") <- paths
+    message("Report written to: ", paste(paths, collapse = ", "))
+  }
+
   task
 }
 
