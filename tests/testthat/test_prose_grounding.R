@@ -198,8 +198,9 @@ test_that(".scan_prose_grounding: fabricated literal drops section with exactly 
     exec_summary = "The CAR was 99.99 according to the analysis.",
     data_methods = "We used 5 events in the estimation window."
   )
-  result <- expect_warning(
-    EventStudy:::.scan_prose_grounding(prose_fields, diag),
+  result <- NULL
+  expect_warning(
+    result <- EventStudy:::.scan_prose_grounding(prose_fields, diag),
     regexp = "Prose grounding guard",
     fixed  = FALSE
   )

@@ -323,6 +323,208 @@ KB_KEY_MAP <- list(
 }
 
 # ---------------------------------------------------------------------------
+# Internal: Prose grounding scanner (GROUND-01/02/03)
+# ---------------------------------------------------------------------------
+
+#' Extract all numeric literals from a prose string
+#'
+#' Extracts every number (including signed, decimal, scientific notation, and
+#' thousands-separated values) from a character string. Thousands separators
+#' are stripped before conversion. The extractor does NOT apply any exemptions
+#' (year, significance constant, structural integer) -- those are the scanner's
+#' responsibility, not the extractor's.
+#'
+#' @param text Character scalar. The prose string to scan.
+#' @return A numeric vector (possibly empty) of extracted values. Never NA.
+#' @noRd
+.extract_numeric_literals <- function(text) {
+  if (!nzchar(text %||% "")) return(numeric(0L))
+  # Pattern: optional sign, digits (with optional thousands separators — longest
+  # alternative FIRST to avoid split on 4-digit numbers like "1997" -> "199"+"7"),
+  # optional decimal part, optional scientific exponent.
+  # Matches: -3.14  0.001  2.35e-4  95  1,234.56  2.5e-4  1997
+  # Non-numeric prefixes (<, >, ~, %) are not matched and left in the string.
+  pattern <- "-?(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?"
+  m    <- gregexpr(pattern, text, perl = TRUE)
+  raw  <- regmatches(text, m)[[1L]]
+  raw  <- gsub(",", "", raw, fixed = TRUE)  # strip thousands separators
+  vals <- suppressWarnings(as.numeric(raw))
+  vals[!is.na(vals)]
+}
+
+#' Build the diagnostics value registry for prose grounding
+#'
+#' Returns a list with two components:
+#'   \itemize{
+#'     \item \code{scalars}: finite numeric vector of all scalar values extracted
+#'       from the \code{es_diagnostics} object; vector-valued fields are
+#'       summarised to \code{mean(na.rm = TRUE)} exactly as
+#'       \code{.validate_grounding()} does at advise.R:258-260.
+#'     \item \code{structural_ints}: integer vector of event-count integers that
+#'       are always exempt from prose scanning (n_events_total, n_events_shown,
+#'       n_events_summarized, cross_sectional n_events/n_valid_events/n_overlap_pairs).
+#'   }
+#'
+#' @param diag An \code{es_diagnostics} object.
+#' @return Named list with components \code{scalars} and \code{structural_ints}.
+#' @noRd
+.build_prose_value_registry <- function(diag) {
+  # Structural integers -- exempt from prose scanning (event counts)
+  structural_ints <- c(
+    diag$meta$n_events_total,
+    diag$meta$n_events_shown,
+    diag$meta$n_events_summarized,
+    diag$cross_sectional$n_events,
+    diag$cross_sectional$n_valid_events,
+    diag$cross_sectional$n_overlap_pairs
+  )
+  structural_ints <- as.integer(stats::na.omit(structural_ints))
+
+  # Scalar registry: vector-valued fields summarised to mean (matching
+  # .validate_grounding advise.R:258-260); keep only is.finite() values
+  registry <- c(
+    # estimation_window vectors -> mean
+    mean(diag$estimation_window$r2,          na.rm = TRUE),
+    mean(diag$estimation_window$sigma,        na.rm = TRUE),
+    mean(diag$estimation_window$shapiro_p,    na.rm = TRUE),
+    mean(diag$estimation_window$dw_stat,      na.rm = TRUE),
+    mean(diag$estimation_window$ljung_box_p,  na.rm = TRUE),
+    mean(diag$estimation_window$acf1,         na.rm = TRUE),
+    # event_window vectors -> mean
+    mean(diag$event_window$ar_t,      na.rm = TRUE),
+    mean(diag$event_window$ar_p,      na.rm = TRUE),
+    mean(diag$event_window$car_t,     na.rm = TRUE),
+    mean(diag$event_window$car_p,     na.rm = TRUE),
+    mean(diag$event_window$final_car, na.rm = TRUE),
+    # cross_sectional scalars -> direct
+    diag$cross_sectional$car_iqr,
+    diag$cross_sectional$car_sd
+  )
+  registry <- registry[is.finite(registry)]
+
+  list(scalars = registry, structural_ints = structural_ints)
+}
+
+#' Test whether a single numeric literal is grounded in the diagnostics registry
+#'
+#' Applies exemptions in priority order:
+#' \enumerate{
+#'   \item Structural integer (event counts) -- always exempt.
+#'   \item Year (integer in 1900-2100) -- always exempt (citation years).
+#'   \item Significance constant (0.001, 0.01, 0.05, 0.10) -- always exempt.
+#'   \item Direct tolerance match against any scalar in the registry.
+#'   \item Rounding-aware match: is the literal a correctly-rounded form of a
+#'     registry value at the literal's displayed decimal precision?
+#' }
+#'
+#' The tolerance formula \code{max(abs_tol, rel_tol * abs(v))} is reused
+#' verbatim from \code{.validate_grounding()} at advise.R:279.
+#'
+#' @param lit Numeric scalar. The extracted literal to test.
+#' @param scalars Finite numeric vector. The scalar registry from
+#'   \code{.build_prose_value_registry()}.
+#' @param structural_ints Integer vector. Event-count exemptions.
+#' @param abs_tol Numeric. Absolute tolerance (default from option).
+#' @param rel_tol Numeric. Relative tolerance (default from option).
+#' @return Logical scalar \code{TRUE} if grounded, \code{FALSE} otherwise.
+#' @noRd
+.is_grounded_literal <- function(lit, scalars, structural_ints,
+                                  abs_tol = getOption("EventStudy.guard_abs_tol", 1e-6),
+                                  rel_tol = getOption("EventStudy.guard_rel_tol", 1e-4)) {
+  # 1. Structural integer exempt?
+  if (lit == round(lit) && as.integer(lit) %in% structural_ints) return(TRUE)
+
+  # 2. Year exempt? (integer in 1900..2100 covers all citation years)
+  if (lit == round(lit) && lit >= 1900L && lit <= 2100L) return(TRUE)
+
+  # 3. Universal significance-constant exempt?
+  if (lit %in% c(0.001, 0.01, 0.05, 0.10)) return(TRUE)
+
+  # 4. Direct tolerance match against any registry scalar
+  for (v in scalars) {
+    if (!is.finite(v) || !is.finite(lit)) next
+    tol <- max(abs_tol, rel_tol * abs(v))
+    if (abs(lit - v) <= tol) return(TRUE)
+  }
+
+  # 5. Rounding-aware: is lit a correctly-rounded form of any registry value?
+  # Determine displayed decimal precision from the literal's formatted string
+  lit_str    <- format(lit, scientific = FALSE)
+  dec_places <- if (grepl("\\.", lit_str)) {
+    nchar(sub(".*\\.", "", lit_str))
+  } else {
+    0L
+  }
+  for (v in scalars) {
+    if (!is.finite(v)) next
+    if (abs(lit - round(v, dec_places)) <= abs_tol) return(TRUE)
+  }
+
+  FALSE
+}
+
+#' Scan a named list of prose fields for ungrounded numeric literals
+#'
+#' For each field: extract all numeric literals, test each with
+#' \code{.is_grounded_literal()}. If any literal is ungrounded the entire
+#' field is replaced with \code{""} and \code{n_dropped} increments.
+#' Exactly ONE warning is emitted when any sections are dropped (single-warning
+#' discipline mirroring \code{.validate_grounding()}).
+#'
+#' @param prose_fields Named list of character scalars (the free-text sections).
+#' @param diag An \code{es_diagnostics} object.
+#' @param abs_tol Numeric. Absolute tolerance.
+#' @param rel_tol Numeric. Relative tolerance.
+#' @return Named list with components:
+#'   \itemize{
+#'     \item \code{sections}: named list of character scalars (dropped -> "").
+#'     \item \code{n_dropped}: integer count of dropped sections.
+#'   }
+#' @noRd
+.scan_prose_grounding <- function(prose_fields, diag,
+                                   abs_tol = getOption("EventStudy.guard_abs_tol", 1e-6),
+                                   rel_tol = getOption("EventStudy.guard_rel_tol", 1e-4)) {
+  registry       <- .build_prose_value_registry(diag)
+  sections_kept  <- list()
+  n_drop         <- 0L
+
+  for (nm in names(prose_fields)) {
+    text <- prose_fields[[nm]] %||% ""
+    if (!nzchar(text)) {
+      sections_kept[[nm]] <- text
+      next
+    }
+
+    literals <- .extract_numeric_literals(text)
+
+    all_grounded <- length(literals) == 0L || all(vapply(literals, function(lit) {
+      .is_grounded_literal(lit, registry$scalars, registry$structural_ints,
+                           abs_tol, rel_tol)
+    }, logical(1L)))
+
+    if (all_grounded) {
+      sections_kept[[nm]] <- text
+    } else {
+      sections_kept[[nm]] <- ""
+      n_drop               <- n_drop + 1L
+    }
+  }
+
+  # Exactly ONE warning when any sections are dropped (single-warning discipline)
+  if (n_drop > 0L) {
+    warning(
+      sprintf(
+        "Prose grounding guard: %d section(s) dropped — narrative contained numeric literal(s) absent from computed diagnostics.",
+        n_drop
+      ),
+      call. = FALSE
+    )
+  }
+
+  list(sections = sections_kept, n_dropped = n_drop)
+}
+
+# ---------------------------------------------------------------------------
 # Internal: Build Advice S3 from parsed JSON
 # ---------------------------------------------------------------------------
 
