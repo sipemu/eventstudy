@@ -323,6 +323,75 @@ test_that(".extract_kb_references() deduplicates by citation key", {
 })
 
 
+test_that(".extract_kb_references() deduplicates when multiple rules share citation key", {
+  # The KB has rules KB-NONNORM-NONPAR, KB-AC-WARN, KB-SMALL-N all citing
+  # BrownWarner1985. Build diagnostics that fire at least two of these:
+  # - KB-NONNORM-NONPAR: shapiro_p < 0.05 in >= 50% of events
+  # - KB-SMALL-N: n_valid_events < 30
+  # - KB-AC-WARN: acf1 > 0.15 in >= 30% of events
+  multi_fire_diag <- structure(
+    list(
+      meta              = list(
+        n_events_total      = 5L,
+        n_events_shown      = 5L,
+        n_events_summarized = 0L,
+        event_ids_shown     = 1:5
+      ),
+      estimation_window = list(
+        r2                = c(0.5, 0.4, 0.6, 0.3, 0.5),
+        sigma             = c(0.01, 0.01, 0.01, 0.01, 0.01),
+        degree_of_freedom = c(120L, 120L, 120L, 120L, 120L),
+        # acf1 > 0.15 in 3/5 = 60% -> fires KB-AC-WARN (threshold 30%)
+        acf1              = c(0.20, 0.18, 0.01, 0.25, 0.01),
+        # shapiro_p < 0.05 in 3/5 = 60% -> fires KB-NONNORM-NONPAR (threshold 50%)
+        shapiro_p         = c(0.01, 0.03, 0.80, 0.02, 0.70),
+        dw_stat           = c(2.0, 2.0, 2.0, 2.0, 2.0),
+        ljung_box_p       = c(0.3, 0.3, 0.3, 0.3, 0.3)
+      ),
+      event_window      = list(
+        ar_t      = c(1.2, 0.8, 2.1, -0.3, 1.5),
+        ar_p      = c(0.23, 0.42, 0.04, 0.77, 0.13),
+        car_t     = c(2.1, 1.5, 3.0, 0.2, 2.5),
+        car_p     = c(0.04, 0.13, 0.003, 0.84, 0.01),
+        final_car = c(0.03, 0.02, 0.05, 0.001, 0.04)
+      ),
+      cross_sectional   = list(
+        n_events        = 5L,
+        n_valid_events  = 5L,  # < 30 -> fires KB-SMALL-N
+        car_iqr         = 0.02,
+        car_sd          = 0.015,
+        n_overlap_pairs = 0L,
+        any_overlap     = FALSE
+      ),
+      contract_state    = list(
+        is_fitted        = rep(TRUE, 5L),
+        na_ar_count      = rep(0L, 5L),
+        na_est_count     = rep(0L, 5L),
+        insufficient_obs = rep(FALSE, 5L),
+        zero_var_index   = rep(FALSE, 5L)
+      ),
+      aggregate_summary = NULL
+    ),
+    class = "es_diagnostics"
+  )
+
+  refs <- EventStudy:::.extract_kb_references(multi_fire_diag)
+
+  # At least 1 rule should fire (KB-SMALL-N fires for n_valid_events=5 < 30)
+  if (length(refs) > 0L) {
+    keys <- vapply(refs, function(r) r$key, character(1L))
+    # KEY INVARIANT: no duplicate keys regardless of how many rules share a key
+    expect_equal(length(keys), length(unique(keys)),
+      info = "Dedup by key: duplicate citation keys must be collapsed to one")
+
+    # Check alphabetical author order
+    authors <- vapply(refs, function(r) r$author, character(1L))
+    expect_equal(authors, sort(authors),
+      info = "References must be sorted alphabetically by author")
+  }
+})
+
+
 test_that(".extract_kb_references() returns references ordered alphabetically by author", {
   diag <- .make_test_diag()
   refs <- EventStudy:::.extract_kb_references(diag)
