@@ -23,10 +23,12 @@
 # ---------------------------------------------------------------------------
 
 # LLM-only types: no offline fallback; require a provider (ADV-06)
-LLM_ONLY_TYPES <- c("interpret", "recommend_model", "design_discussion", "report_writing")
+LLM_ONLY_TYPES <- c("interpret", "recommend_model", "design_discussion")
 
 # KB-grounded types: offline fallback via Phase 5 path; provider optional
-KB_TYPES <- c("recommend_stat", "flag_robustness")
+# "report_writing" moved here from LLM_ONLY_TYPES (OFFLINE-01, Phase 17):
+# provider=NULL now routes to .build_offline_narrative() instead of stop().
+KB_TYPES <- c("recommend_stat", "flag_robustness", "report_writing")
 
 # All valid types
 VALID_TASK_TYPES <- c(LLM_ONLY_TYPES, KB_TYPES)
@@ -775,6 +777,10 @@ es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL, ...
     if (task_type == "flag_robustness") {
       return(flag_robustness.es_diagnostics(diagnostics, provider = NULL))
     }
+    # OFFLINE-01 (Phase 17): report_writing offline path — no provider needed
+    if (task_type == "report_writing") {
+      return(.build_offline_narrative(diagnostics))
+    }
   }
 
   # --- Provider path (all task types) ---
@@ -784,7 +790,9 @@ es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL, ...
   kb_context <- NULL
   kb_recs    <- NULL
 
-  if (task_type %in% KB_TYPES) {
+  # report_writing provider path: Phase 18 owns the LLM narrative assembly;
+  # skip the recommend_stat/flag_robustness KB pre-build for this type.
+  if (task_type %in% KB_TYPES && task_type != "report_writing") {
     # Run offline KB match to get fired rules
     category <- if (task_type == "recommend_stat") "stat_choice" else "robustness"
     kb_context <- .kb_for_prompt(category)
