@@ -12,7 +12,7 @@ Requirements for the v0.64.0 milestone. Each maps to a roadmap phase.
 
 - [ ] **REPORT-01**: User can call a single entry point `es_report()` on a fitted `EventStudyTask` that harvests diagnostics (`es_diagnostics()`), assembles narrative (`es_advise()`), renders the report, and returns the output file path(s)
 - [ ] **REPORT-02**: User can produce a report as part of a standard run via `run_event_study(..., report = TRUE)` (additive; defaults to `FALSE`, no behavior change when omitted)
-- [ ] **REPORT-03**: `generate_report()` gains a `narrative = NULL` parameter it uses as the lower-level renderer, and its existing `narrative = NULL` / `advice = NULL` output stays byte-identical (backward compatible)
+- [x] **REPORT-03**: `generate_report()` gains a `narrative = NULL` parameter it uses as the lower-level renderer, and its existing `narrative = NULL` / `advice = NULL` output stays byte-identical (backward compatible)
 - [ ] **REPORT-04**: `es_report()` deep-clones the task before rendering so the caller's `EventStudyTask` object is never mutated
 
 ### Grounded AI Narrative (NARR)
@@ -31,7 +31,7 @@ Requirements for the v0.64.0 milestone. Each maps to a roadmap phase.
 
 ### Offline-First Fallback (OFFLINE)
 
-- [ ] **OFFLINE-01**: With no LLM provider configured, `es_report()` still renders a complete report, using the rule-based offline advice engine for the narrative (the current `report_writing`-is-LLM-only gap is resolved)
+- [x] **OFFLINE-01**: With no LLM provider configured, `es_report()` still renders a complete report, using the rule-based offline advice engine for the narrative (the current `report_writing`-is-LLM-only gap is resolved)
 - [ ] **OFFLINE-02**: The report visibly distinguishes AI-grounded from offline rule-based narrative (section label/heading + a console message on the mode used), so rule-based output is never mistaken for AI interpretation
 
 ### Multi-Format Output (FORMAT)
@@ -87,7 +87,7 @@ Which phases cover which requirements. Filled during roadmap creation.
 |-------------|-------|--------|
 | REPORT-01 | Phase 19 | Pending |
 | REPORT-02 | Phase 19 | Pending |
-| REPORT-03 | Phase 17 | Pending |
+| REPORT-03 | Phase 17 | Complete |
 | REPORT-04 | Phase 19 | Pending |
 | NARR-01 | Phase 18 | Pending |
 | NARR-02 | Phase 18 | Pending |
@@ -97,7 +97,7 @@ Which phases cover which requirements. Filled during roadmap creation.
 | GROUND-01 | Phase 17 | Pending |
 | GROUND-02 | Phase 17 | Pending |
 | GROUND-03 | Phase 17 | Pending |
-| OFFLINE-01 | Phase 17 | Pending |
+| OFFLINE-01 | Phase 17 | Complete |
 | OFFLINE-02 | Phase 18 | Pending |
 | FORMAT-01 | Phase 18 | Pending |
 | FORMAT-02 | Phase 18 | Pending |
@@ -109,11 +109,13 @@ Which phases cover which requirements. Filled during roadmap creation.
 | CRAN-02 | Phase 19 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 22 total
 - Mapped to phases: 22 ✓
 - Unmapped: 0
 
 **Notes:**
+
 - CRAN hygiene (CRAN-01/02) is cross-cutting: the `\dontrun{}` / `skip_on_cran()` / Suggests discipline is *established* in Phase 17 (see Phase 17 success criterion 4) and *finally verified* as the release gate in Phase 19, where the requirements are formally owned.
 
 ---

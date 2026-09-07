@@ -105,9 +105,9 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
   3. `generate_report()` accepts a new `narrative = NULL` parameter, and its existing `narrative = NULL` / `advice = NULL` output is byte-identical to the v0.63.x baseline (backward compatibility proven by a diff test).
   4. Every new `render()`-touching example is wrapped in `\dontrun{}` and every render/toolchain test uses `skip_on_cran()` / `skip_if_not_installed()`; `R CMD check --as-cran` triggers no network access or LaTeX toolchain and shows no new NOTEs/WARNINGs vs the current baseline with the suite green.
 
-**Plans**: 3 plans
+**Plans**: 1/3 plans executed
 
-- [ ] 17-01-PLAN.md — Tracer: offline `report_writing` narrative engine + `generate_report(narrative=)` seam, one complete offline report rendered end-to-end (OFFLINE-01, REPORT-03)
+- [x] 17-01-PLAN.md — Tracer: offline `report_writing` narrative engine + `generate_report(narrative=)` seam, one complete offline report rendered end-to-end (OFFLINE-01, REPORT-03)
 - [ ] 17-02-PLAN.md — Prose grounding scanner: extract numeric literals, check against `es_diagnostics()` registry, drop-and-keep + single warning, rounding/year/constant exemptions (GROUND-01/02/03)
 - [ ] 17-03-PLAN.md — CRAN hygiene: `tinytex` Suggests, golden-file byte-identical backward-compat test, committed `R CMD check` baseline (REPORT-03)
 
@@ -160,6 +160,6 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
 | 14. Curated Per-Domain Datasets | v0.63.0 | 1/1 | Complete | 2026-09-05 |
 | 15. Methods Articles + Rendered Outputs | v0.63.0 | 1/1 | Complete | 2026-09-06 |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 1/1 | Complete | 2026-09-06 |
-| 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 0/3 | Not started | - |
+| 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 1/3 | In Progress|  |
 | 18. Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly | v0.64.0 | 0/TBD | Not started | - |
 | 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 0/TBD | Not started | - |

@@ -5,16 +5,16 @@ milestone_name: Automated AI Reporting
 current_phase: 17
 current_phase_name: Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline
 status: executing
-stopped_at: context exhaustion at 76% (2026-09-07)
-last_updated: "2026-09-07T07:42:24.955Z"
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-09-07T07:49:50.758Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 17 execution started
-state_head: 3dfdfdeb4c73b39c85394ea1d987a8b3c43376b4
+state_head: 23310888ba35273515db0de25219a804cada852a
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-09-06)
 ## Current Position
 
 Phase: 17 (Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 17
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-09-07 — Phase 17 execution started
 
 Progress: [░░░░░░░░░░] 0%
@@ -60,6 +60,11 @@ Coverage: 22/22 v0.64.0 requirements mapped, 0 unmapped. (CRAN-01/02 established
 - Trend: n/a
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 17 P01 | 15 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -74,6 +79,8 @@ Recent decisions affecting current work:
 - Word output uses plain `rmarkdown::word_document()` (NOT officedown) to keep the package CRAN-clean with zero new transitive deps — officedown / RPTX-03 deferred.
 - Multi-format (HTML/PDF/Word/Markdown) via rmarkdown output formats; PDF/Word toolchains stay optional (user-environment, not hard deps); `tinytex` added to Suggests only.
 - Sensible fixed template with arg-toggled sections, no custom templating (RPTC-01 deferred).
+- [Phase 17]: report_writing moved from LLM_ONLY_TYPES to KB_TYPES (OFFLINE-01); offline OfflineNarrative S3 returned without provider
+- [Phase 17]: narrative=NULL seam added to generate_report() after advice=; NULL path byte-identical (REPORT-03)
 
 ### Pending Todos
 
@@ -112,8 +119,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-07T07:21:04.013Z
-Stopped at: context exhaustion at 76% (2026-09-07)
+Last session: 2026-09-07T07:49:50.743Z
+Stopped at: Completed 17-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
