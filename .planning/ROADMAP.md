@@ -87,7 +87,7 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
 
 **Milestone Goal:** Add a single one-call entry point that takes an event study from data to a polished, publication-ready report — running the pipeline, harvesting diagnostics, generating grounded AI narrative, and rendering to the researcher's chosen format(s) — while never presenting an ungrounded number and always producing a full report even with no LLM configured.
 
-- [ ] **Phase 17: Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline** — extend the grounding guard to scan free-text narrative prose for ungrounded numeric literals, resolve the `report_writing`-is-LLM-only gap so a full report narrative renders with no provider, add the backward-compatible `narrative=` seam to `generate_report()`, and establish the `\dontrun{}`/`skip_on_cran()`/Suggests CRAN hygiene discipline
+- [x] **Phase 17: Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline** — extend the grounding guard to scan free-text narrative prose for ungrounded numeric literals, resolve the `report_writing`-is-LLM-only gap so a full report narrative renders with no provider, add the backward-compatible `narrative=` seam to `generate_report()`, and establish the `\dontrun{}`/`skip_on_cran()`/Suggests CRAN hygiene discipline (completed 2026-09-07)
 - [ ] **Phase 18: Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly** — build the section-by-section grounded narrative assembler and the fixed report template (exec summary · data/methods · results · diagnostics · robustness/caveats · references) rendered to HTML/PDF/Word/Markdown with static-plot fallback, per-format prose sanitisation, graceful toolchain skips, and offline-vs-AI mode visibility
 - [ ] **Phase 19: One-Call `es_report()` Orchestrator, `run_event_study(report=)` & CRAN-Clean Release Gate** — the public `es_report()` entry point composing study → diagnostics → advise → render (returning output paths, deep-cloning the task), the additive `run_event_study(..., report=)` convenience, and the final CRAN-clean build/release gate verifying no new NOTEs/WARNINGs and a green suite
 
@@ -160,6 +160,6 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
 | 14. Curated Per-Domain Datasets | v0.63.0 | 1/1 | Complete | 2026-09-05 |
 | 15. Methods Articles + Rendered Outputs | v0.63.0 | 1/1 | Complete | 2026-09-06 |
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 1/1 | Complete | 2026-09-06 |
-| 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 3/3 | In Progress|  |
+| 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 3/3 | Complete    | 2026-09-07 |
 | 18. Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly | v0.64.0 | 0/TBD | Not started | - |
 | 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 0/TBD | Not started | - |
