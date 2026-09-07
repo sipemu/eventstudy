@@ -2,39 +2,37 @@
 gsd_state_version: 1.0
 milestone: v0.64.0
 milestone_name: Automated AI Reporting
-current_phase: 19.1
-current_phase_name: "Close gap GROUND-01/02/03: wire prose grounding guard into AI report narrative path + lock report-path invariant"
-status: planning
+status: Awaiting next milestone
 stopped_at: Phase 19 complete, ready to plan Phase 19.1
-last_updated: "2026-09-07T20:35:10.542Z"
+last_updated: "2026-09-07T20:37:29.568Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 19 complete, transitioned to Phase 19.1
-state_head: f0851f2b74e30985da59cae16f5a1dd5e9f82b74
+last_activity_desc: Milestone v0.64.0 completed and archived
+state_head: 1d35f375ca4f75cb969f49c4480a707538e28e01
 progress:
   total_phases: 4
   completed_phases: 4
   total_plans: 9
   completed_plans: 9
   percent: 100
+current_phase: 19.1
+current_phase_name: "Close gap GROUND-01/02/03: wire prose grounding guard into AI report narrative path + lock report-path invariant"
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-06)
+See: .planning/PROJECT.md (updated 2026-09-07)
 
 **Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics, never fabricating a result.
-**Current focus:** Phase 18 — Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly
+**Current focus:** Planning next milestone (v0.64.0 shipped 2026-09-07)
 
 ## Current Position
 
-Phase: 19.1 — Close gap GROUND-01/02/03: wire prose grounding guard into AI report narrative path + lock report-path invariant
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-07 — Phase 19 complete, transitioned to Phase 19.1
-
-Progress: [█████░░░░░] 50%
+Phase: Milestone v0.64.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-09-07 — Milestone v0.64.0 completed and archived
 
 ## Milestone Roadmap (v0.64.0)
 
@@ -116,16 +114,13 @@ Recent decisions affecting current work:
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260904-er6 | Surface v0.60.0 AI advisor in README | 2026-09-04 | 6e61c3b | [260904-er6-...](./quick/260904-er6-update-readme-md-to-prominently-feature-/) |
-| 260904-id9 | Fix CRAN non-ASCII WARNING in advise.R/knowledge_base.R/report.R | 2026-09-04 | 462940f | [260904-id9-...](./quick/260904-id9-fix-cran-non-ascii-warning-escape-non-as/) |
-| 260904-kxy | Fix latent dplyr::lag import bug + regression test; released 0.61.1 | 2026-09-04 | 6c47339 | [260904-kxy-...](./quick/260904-kxy-fix-dplyr-lag-import-bug-causing-all-na-/) |
-| 260904-len | Extend bundled dieselgate to 4 automakers / 2 groups; released 0.61.2 | 2026-09-04 | fa87166 | [260904-len-...](./quick/260904-len-multi-automaker-vignette-ci-groups-advisor/) |
-| 260904-x88 | Redesign the pkgdown site to match fdars-r | 2026-09-04 | e85ffbc | [260904-x88-...](./quick/260904-x88-redesign-the-pkgdown-site-to-match-fdars/) |
 
 ## Deferred Items
 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
+| verification_gaps | 12/12-VERIFICATION.md (archived v0.62.0) | human_needed | 2026-09-07 | v0.64.0 |
+| todos | phase12-code-review-carryforward.md | acknowledged (presence-only) | 2026-09-07 | v0.64.0 |
 | Independence | INDEP-01..03: native reimplementation of did/DIDmultiplegt/rugarch | Deferred | v0.50.0 init | v2 |
 | Scale | SCALE-01..03: streaming/data.table/sparse FE | Deferred | v0.50.0 init | v2 |
 | Advisor Pro | PRO-01..02: RAG corpus advisor + managed hosting | Deferred | v0.60.0 roadmap | future (waitlist-gated) |
@@ -144,4 +139,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan Phase 17 with `/gsd-plan-phase 17`.
+- Start the next milestone with /gsd-new-milestone

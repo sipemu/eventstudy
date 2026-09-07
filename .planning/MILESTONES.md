@@ -1,5 +1,25 @@
 # Milestones
 
+## v0.64.0 Automated AI Reporting (Shipped: 2026-09-07)
+
+**Phases completed:** 4 phases, 9 plans, 11 tasks
+
+**Key accomplishments:**
+
+- Section-by-section grounded narrative assembler (one LLM call per section, never per format), static significance calibrator, KB citation extractor, joint-hypothesis caveat, and per-format prose sanitiser -- the complete NARR-01..05 / FORMAT-04 / OFFLINE-02 narrative-assembly layer for Phase 18
+- Multi-format generate_report() loop (html/pdf/word/md, named-vector return), fixed 6-section skeleton.Rmd with knitr::is_html_output() plot switching, deterministic task/diagnostics tables, AI-vs-offline heading labels, and joint-hypothesis caveat
+- Public `es_report()` wrapper that deep-clones the task, delegates narrative+render to `generate_report()`, and returns path(s) visibly.
+- Additive `report=FALSE`/`report_args=list()` params on `run_event_study()` with byte-identical FALSE path guarded by `isTRUE(report)` and a `do.call(es_report, ...)` render path that attaches `attr(task, "report_path")` and emits one `message()`
+- NAMESPACE exports es_report, DESCRIPTION bumped to 0.64.0, NEWS/README updated, CRAN check 0 errors 0 warnings 1 pre-existing note -- release gate HUMAN-APPROVED, v0.64.0 signed off
+
+**Milestone audit:** PASSED (22/22 requirements). One critical gap found at audit — the free-text prose grounding guard (GROUND-01/02/03) was built in Phase 17 but never wired into the report narrative assembler — was closed by gap-closure Phase 19.1 (prose scanner wired into `assemble_report_narrative()`; report-path invariant locked by `test_prose_grounding_report_path.R`).
+
+**Closeout:** override_closeout. Known verification overrides: 2 newly acknowledged, 0 carried forward from a prior close (see STATE.md Deferred Items) — both are stale Phase 12 carryforwards from the already-shipped v0.62.0 milestone (a `12-VERIFICATION.md` human-needed gap and a low-priority code-review todo), not v0.64.0 work.
+
+**Release:** Tagged `v0.64.0` and published as a GitHub release (2026-09-07). CRAN submission not performed.
+
+---
+
 ## v0.63.0 v0.63.0 (Shipped: 2026-09-06)
 
 **Phases completed:** 4 phases, 4 plans, 3 tasks

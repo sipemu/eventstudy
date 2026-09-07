@@ -10,17 +10,24 @@ The package is mature and CRAN-published. The v0.50.0 milestone made it **never 
 
 The package must never produce a silently incorrect statistical result — and now, the AI layer must never present an ungrounded one. On degenerate input the pipeline errors clearly or returns NA with one warning; the advisor cites only diagnostics the package actually computed, and refuses to invent numbers. Trustworthy numbers, trustworthy interpretation.
 
-## Current Milestone: v0.64.0 Automated AI Reporting
+## Current State
 
-**Goal:** Add a single one-call entry point that takes an event study from data to a polished, publication-ready report — running the pipeline, harvesting diagnostics, generating grounded AI narrative, and rendering to the researcher's chosen format(s) — while never presenting an ungrounded number and always producing a full report even with no LLM configured.
+**Shipped v0.64.0 "Automated AI Reporting" (2026-09-07).** A single one-call entry
+point — `es_report()`, plus additive `run_event_study(..., report = TRUE)` — now takes
+a fitted event study from data to a polished, publication-ready report: it deep-clones
+the task (non-mutation), harvests `es_diagnostics()`, assembles a grounded section-by-section
+narrative, and renders to HTML/PDF/Word/Markdown. The report renders complete **offline**
+(rule-based advice engine) with no LLM configured; when a provider is present, LLM prose
+is grounding-guarded on the report path — a numeric literal absent from the diagnostics is
+dropped to the offline fallback with one warning and **never rendered**. Tagged and released
+on GitHub; suite green (2287 pass), `R CMD check --as-cran` clean vs baseline (1 pre-existing note).
 
-**Target features:**
-- **One-call report wrapper** — new additive entry point (e.g. `es_report()` / `run_event_study(..., report=TRUE)`) orchestrating study → `es_diagnostics()` → `es_advise()` → render; `generate_report()` stays as the lower-level renderer it calls (backward-compatible)
-- **Grounded AI narrative** — LLM drafts prose (executive summary, data/methods, results interpretation, robustness/caveats) grounded strictly in package-computed diagnostics via the existing runtime grounding guard
-- **Offline-first fallback** — with no provider configured the report still renders complete, using the existing rule-based offline advice engine for the narrative; AI enriches but is never required
-- **Multi-format output** — HTML, PDF, Word (.docx), and Markdown from the one entry point
-- **Sensible fixed template** — one well-designed report template (exec summary · data/methods · results · robustness/caveats · references); section presence toggled by args, no custom templating
-- **CRAN-/CI-clean** — AI/format dependencies stay in Suggests, `requireNamespace()`-guarded; no new `R CMD check` NOTEs/WARNINGs; existing tests stay green; grounding invariant covered by regression tests
+## Next Milestone Goals
+
+Not yet defined. Candidate directions carried forward: broader task coverage for reporting
+(panel / intraday / synthetic-control — RPTX-01, gated on deferred diagnostics surfaces),
+bootstrap-CI in the report (RPTX-02), rich Word output (RPTX-03), and user-supplied
+templates (RPTC-01). Define via `/gsd-new-milestone`.
 
 ## Business Context
 
@@ -61,17 +68,18 @@ The package must never produce a silently incorrect statistical result — and n
 - ✓ **Cross-domain worked-examples gallery** — pyfda-style gallery of complete rendered workflows across domains — v0.63.0
 - ✓ **Curated real per-domain datasets** — new bundled datasets (dieselgate-style, `data-raw/` provenance) with `DATA-SOURCES.md`, sized to keep the CRAN tarball clean — v0.63.0
 - ✓ **pkgdown-only article delivery + CRAN-/CI-clean build** — Methods articles + gallery in `vignettes/articles/` (`.Rbuildignore`d); render on site, stay out of the tarball; 18 concise vignettes untouched; no new NOTEs/WARNINGs — v0.63.0
+- ✓ **One-call `es_report()` + `run_event_study(report=TRUE)`** — additive orchestrator (deep-clone non-mutation, diagnostics → grounded narrative → render, visible path return); `generate_report()` stays the lower-level renderer, NULL-advice path byte-identical — v0.64.0
+- ✓ **Grounded AI narrative** — section-by-section assembly (one LLM call per section, never per format); static significance calibration; KB-sourced citations; fixed joint-hypothesis caveat — v0.64.0
+- ✓ **Report-path grounding guard** — free-text prose scanner wired into the assembler; an ungrounded numeric literal is dropped to the offline fallback with one warning and never rendered; locked by regression test — v0.64.0
+- ✓ **Offline-first report** — full report renders with no provider via the rule-based offline engine; AI/offline narrative visibly labelled — v0.64.0
+- ✓ **Multi-format output** — HTML/PDF/Word/Markdown from one call; missing PDF/Word/MD toolchains degrade gracefully with one message; static ggplot2 for non-HTML via `knitr::is_html_output()`; per-format prose sanitisation — v0.64.0
+- ✓ **Fixed 6-section template + CRAN hygiene** — exec summary · data/methods · results · diagnostics · robustness · references, arg-toggled; `tinytex` in Suggests, `\dontrun{}`/`skip_on_cran()`; no new `R CMD check` findings; suite green — v0.64.0
 
 ### Active
 
-<!-- This milestone (v0.64.0). Detailed, testable REQ-IDs live in REQUIREMENTS.md. -->
+<!-- Next milestone requirements are defined via /gsd-new-milestone (REQUIREMENTS.md is archived per milestone). -->
 
-- [ ] **One-call report wrapper** — new additive entry point orchestrating study → `es_diagnostics()` → `es_advise()` → render; `generate_report()` stays as the lower-level renderer (backward-compatible)
-- [ ] **Grounded AI narrative** — LLM drafts prose (executive summary, data/methods, results interpretation, robustness/caveats) grounded strictly in package-computed diagnostics via the runtime grounding guard
-- [ ] **Offline-first fallback** — with no provider configured the report still renders complete, using the rule-based offline advice engine for the narrative; AI enriches but is never required
-- [ ] **Multi-format output** — HTML, PDF, Word (.docx), and Markdown from the one entry point
-- [ ] **Sensible fixed template** — one well-designed report template (exec summary · data/methods · results · robustness/caveats · references); section presence toggled by args, no custom templating
-- [ ] **CRAN-/CI-clean** — AI/format dependencies stay in Suggests, `requireNamespace()`-guarded; no new `R CMD check` NOTEs/WARNINGs; existing tests stay green; grounding invariant covered by regression tests
+(None — v0.64.0 shipped. Next milestone's requirements will be defined via `/gsd-new-milestone`.)
 
 ### Out of Scope
 
@@ -126,11 +134,11 @@ The package must never produce a silently incorrect statistical result — and n
 | Datasets used only by site-only articles must not bloat the CRAN tarball — compressed if shipped as documented `data()` datasets, or `.Rbuildignore`d if purely site-only | Full coverage across domains risks tarball growth; per-dataset placement decided in planning | — Pending |
 | Reference standard for docs depth = pyfda site (conceptual method pages + worked-examples gallery + rendered outputs) | Same author/pattern family as the advisor's pyfda/fdars grounding; concrete, agreed bar for "thorough" | — Pending |
 | All rendered articles execute fully offline (bundled data + `set.seed`), no network at build time | Must render in the existing v0.62.0 CI pkgdown build without flakiness; extends the v0.62.0 network-safe-article decision | ✓ v0.63.0 |
-| One-call AI report as a new additive wrapper over `generate_report()`, not a signature change | Keeps the existing renderer and its NULL-advice byte-identical path intact; the wrapper composes existing pieces (study → diagnostics → advise → render) | — Pending |
-| Report always renders complete offline; LLM narrative is enrichment, rule-based advice engine is the fallback | Preserves CRAN no-dependency discipline and no-API-key usability — a direct extension of the v0.60.0 offline-first advisor | — Pending |
-| Grounding invariant carries into the report: narrative cites only computed diagnostics, enforced by the existing runtime guard + regression tests | The report is the highest-visibility surface for the advisor; an ungrounded number here is the worst failure mode | — Pending |
-| Multi-format (HTML/PDF/Word/Markdown) via rmarkdown output formats; PDF/Word toolchains kept optional | Researchers hand reports to supervisors/papers in varied formats; LaTeX/Word deps stay at the user-environment level, not hard package deps | — Pending |
-| Sensible fixed template with arg-toggled sections, no custom templating | Fastest path to a polished report; custom templating is deferred surface area, not core to the one-call value | — Pending |
+| One-call AI report as a new additive wrapper over `generate_report()`, not a signature change | Keeps the existing renderer and its NULL-advice byte-identical path intact; the wrapper composes existing pieces (study → diagnostics → advise → render) | ✓ v0.64.0 |
+| Report always renders complete offline; LLM narrative is enrichment, rule-based advice engine is the fallback | Preserves CRAN no-dependency discipline and no-API-key usability — a direct extension of the v0.60.0 offline-first advisor | ✓ v0.64.0 |
+| Grounding invariant carries into the report: narrative cites only computed diagnostics, enforced by the runtime guard + regression tests | The report is the highest-visibility surface for the advisor; an ungrounded number here is the worst failure mode. Delivered via gap-closure Phase 19.1 wiring the prose scanner into the assembler | ✓ v0.64.0 |
+| Multi-format (HTML/PDF/Word/Markdown) via rmarkdown output formats; PDF/Word toolchains kept optional | Researchers hand reports to supervisors/papers in varied formats; LaTeX/Word deps stay at the user-environment level, not hard package deps | ✓ v0.64.0 |
+| Sensible fixed template with arg-toggled sections, no custom templating | Fastest path to a polished report; custom templating is deferred surface area, not core to the one-call value | ✓ v0.64.0 |
 
 ## Evolution
 
@@ -151,4 +159,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Update Context with current state
 
 ---
-*Last updated: 2026-09-06 starting milestone v0.64.0 Automated AI Reporting*
+*Last updated: 2026-09-07 after v0.64.0 Automated AI Reporting milestone*
