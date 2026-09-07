@@ -1,3 +1,108 @@
+#' One-Call Event Study Report Orchestrator
+#'
+#' Generates a complete event study report in a single call: deep-clones the
+#' task (non-mutation guarantee, REPORT-04), harvests diagnostics via
+#' \code{\link{es_diagnostics}()}, and delegates rendering to
+#' \code{\link{generate_report}()}. Returns the output file path(s) VISIBLY
+#' so the path prints at the REPL without an explicit \code{print()}.
+#'
+#' The narrative is assembled ONCE inside \code{generate_report()} (NARR-01):
+#' \code{es_report()} does NOT call \code{assemble_report_narrative()} or
+#' \code{es_advise()} directly. A \code{provider} argument is forwarded to
+#' \code{generate_report()}, which assembles the narrative once before the
+#' format loop. When \code{provider = NULL} (default), the report is fully
+#' offline with no network or API key required.
+#'
+#' @param task A fitted \code{EventStudyTask} or \code{PanelEventStudyTask}.
+#' @param output_file Output file path (extension overridden per format).
+#'   Default \code{"event_study_report.html"}.
+#' @param format Character vector of output formats, any subset of
+#'   \code{c("html", "pdf", "word", "md")}. Default \code{"html"}.
+#'   Multiple formats render one file per format sharing a common basename.
+#' @param sections Character vector of sections to include. Default is all six
+#'   fixed sections:
+#'   \code{c("exec_summary","data_methods","results","diagnostics","robustness","references")}.
+#' @param provider Optional LLM provider forwarded to \code{generate_report()}.
+#'   When \code{NULL} (default), renders a fully offline report (no API key,
+#'   no network required).
+#' @param title Report title string.
+#' @param author Author name (optional, default \code{NULL} -> \code{""}).
+#' @param confidence_level Confidence level for plots. Default 0.95.
+#' @param interactive Logical. Use interactive plotly plots in HTML output.
+#'   Default \code{TRUE}.
+#' @param ... Additional arguments forwarded to \code{generate_report()} and
+#'   on to \code{rmarkdown::render}.
+#'
+#' @return A named character vector of output file path(s), one per rendered
+#'   format, returned \strong{visibly} (the path prints at the REPL).
+#'   Keyed by format name, e.g.
+#'   \code{c(html = "/tmp/report.html")}. A single-format call returns a
+#'   length-1 named vector; \code{result[["html"]]} and \code{result[[1L]]}
+#'   both resolve.
+#'
+#' @examples
+#' \dontrun{
+#' task <- run_event_study(my_task, ParameterSet$new())
+#' # Offline single-format (default)
+#' path <- es_report(task)
+#' # Multi-format with AI provider
+#' paths <- es_report(task, format = c("html", "md"), provider = my_provider)
+#' paths[["html"]]
+#' }
+#'
+#' @seealso \code{\link{generate_report}}, \code{\link{es_diagnostics}}
+#'
+#' @export
+es_report <- function(task,
+                      output_file      = "event_study_report.html",
+                      format           = "html",
+                      sections         = c("exec_summary", "data_methods", "results",
+                                           "diagnostics", "robustness", "references"),
+                      provider         = NULL,
+                      title            = "Event Study Report",
+                      author           = NULL,
+                      confidence_level = 0.95,
+                      interactive      = TRUE,
+                      ...) {
+
+  # ---- 1. Task-class guard (mirror generate_report wording) ----
+  if (!inherits(task, "EventStudyTask") &&
+      !inherits(task, "PanelEventStudyTask")) {
+    stop("task must be an EventStudyTask or PanelEventStudyTask.")
+  }
+
+  # ---- 2. REPORT-04: deep-clone FIRST, before any other work ----
+  cloned <- task$clone(deep = TRUE)
+
+  # ---- 3. Harvest diagnostics from the clone (pure, deterministic) ----
+  # es_report owns the diagnostics -> render composition, but delegates
+  # narrative assembly to generate_report (narrative = NULL means
+  # generate_report assembles it once, NARR-01).
+  diag <- tryCatch(es_diagnostics(cloned), error = function(e) NULL)
+
+  # ---- 4. Delegate rendering to generate_report ----
+  # Pass narrative = NULL so generate_report assembles the narrative ONCE
+  # from provider internally. This preserves the single-LLM-call budget.
+  # Do NOT call assemble_report_narrative() here.
+  paths <- generate_report(
+    cloned,
+    output_file      = output_file,
+    format           = format,
+    sections         = sections,
+    title            = title,
+    author           = author,
+    confidence_level = confidence_level,
+    interactive      = interactive,
+    provider         = provider,
+    narrative        = NULL,
+    ...
+  )
+
+  # ---- 5. Return VISIBLY (generate_report returns invisibly) ----
+  paths
+}
+
+
 #' Generate Event Study Report (Multi-Format)
 #'
 #' Renders an automated report from a completed event study task in one or more
