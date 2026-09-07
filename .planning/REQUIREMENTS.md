@@ -48,8 +48,8 @@ Requirements for the v0.64.0 milestone. Each maps to a roadmap phase.
 
 ### CRAN & Testing Hygiene (CRAN)
 
-- [ ] **CRAN-01**: New dependencies (`tinytex`) stay in `Suggests`, `requireNamespace()`-guarded; no new `R CMD check --as-cran` NOTEs/WARNINGs vs the current baseline; the existing test suite stays green
-- [ ] **CRAN-02**: All `render()` calls are `\dontrun{}` in examples and `skip_on_cran()` / `skip_if_not_installed()` in tests; `R CMD check` triggers no network access or LaTeX toolchain
+- [x] **CRAN-01**: New dependencies (`tinytex`) stay in `Suggests`, `requireNamespace()`-guarded; no new `R CMD check --as-cran` NOTEs/WARNINGs vs the current baseline; the existing test suite stays green
+- [x] **CRAN-02**: All `render()` calls are `\dontrun{}` in examples and `skip_on_cran()` / `skip_if_not_installed()` in tests; `R CMD check` triggers no network access or LaTeX toolchain
 
 ## Future Requirements
 
@@ -105,8 +105,8 @@ Which phases cover which requirements. Filled during roadmap creation.
 | FORMAT-04 | Phase 18 | Complete |
 | TMPL-01 | Phase 18 | Complete |
 | TMPL-02 | Phase 18 | Complete |
-| CRAN-01 | Phase 19 | Pending |
-| CRAN-02 | Phase 19 | Pending |
+| CRAN-01 | Phase 19 | Complete |
+| CRAN-02 | Phase 19 | Complete |
 
 **Coverage:**
 

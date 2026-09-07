@@ -141,13 +141,13 @@ Archive: `.planning/milestones/v0.63.0-ROADMAP.md`
   3. New dependencies (`tinytex`) stay in `Suggests`, `requireNamespace()`-guarded; all `render()` calls are `\dontrun{}` in examples and `skip_on_cran()` / `skip_if_not_installed()` in tests, so `R CMD check` triggers no network or LaTeX toolchain.
   4. The final `R CMD check --as-cran` shows no new NOTEs/WARNINGs versus the current baseline, the full existing test suite stays green, and the package is bumped with a NEWS.md `v0.64.0` entry recording the automated reporting feature.
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 Plans:
 
 - [x] 19-01-PLAN.md — es_report() orchestrator: one-call study -> diagnostics -> multi-format render, deep-clone non-mutation, visible return path(s) (REPORT-01, REPORT-04)
 - [x] 19-02-PLAN.md — run_event_study(report=/report_args=) additive convenience with byte-identical FALSE path and report_path attribute (REPORT-02)
-- [ ] 19-03-PLAN.md — CRAN release gate: roxygen/NAMESPACE regen, DESCRIPTION 0.64.0, NEWS + README, R CMD check --as-cran clean vs baseline + suite green (CRAN-01, CRAN-02)
+- [x] 19-03-PLAN.md — CRAN release gate: roxygen/NAMESPACE regen, DESCRIPTION 0.64.0, NEWS + README, R CMD check --as-cran clean vs baseline + suite green (CRAN-01, CRAN-02)
 
 ## Progress
 
@@ -171,4 +171,4 @@ Plans:
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 1/1 | Complete | 2026-09-06 |
 | 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 3/3 | Complete    | 2026-09-07 |
 | 18. Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly | v0.64.0 | 2/2 | Complete    | 2026-09-07 |
-| 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 2/3 | In Progress|  |
+| 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 3/3 | In Progress|  |
