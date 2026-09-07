@@ -232,11 +232,14 @@ test_that("advice=NULL with a valid narrative list does not error", {
   task     <- create_fitted_mock_task()
   tmp_file <- tempfile(fileext = ".html")
 
-  # A valid named list for narrative
+  # A valid named list for narrative (no numeric literals that would be
+  # false-dropped if the grounding scanner were applied -- WR-04).
+  # This test exercises generate_report()'s type validation and render path,
+  # not the grounding scanner (scanner is invoked upstream in es_advise()).
   narrative_list <- list(
     exec_summary = "Five events were analyzed.",
     data_methods = "Market model estimated over 120-day window.",
-    results      = "Median CAR t-statistic was 2.10.",
+    results      = "The cumulative abnormal returns were examined.",
     robustness   = "No overlapping event windows detected."
   )
 
