@@ -19,16 +19,16 @@ recommend_stat(x, provider = NULL, ...)
 \item{x}{A fitted \code{EventStudyTask} (after \code{fit_model()}) or a
 precomputed \code{es_diagnostics} object returned by \code{es_diagnostics()}.}
 
-\item{provider}{Accepted but ignored in the offline path — present only so
+\item{provider}{Accepted but ignored in the offline path -- present only so
 the Phase 7 call shape is forward-compatible. Default \code{NULL}.}
 
 \item{...}{Additional arguments (currently ignored).}
 }
 \value{
-An S3 object of class \code{"es_advice"} — a named list with:
+An S3 object of class \code{"es_advice"} -- a named list with:
 \describe{
   \item{\code{source}}{\code{"offline_kb"} (character).}
-  \item{\code{is_deterministic}}{\code{TRUE} — advice is rule-based, not LLM-generated.}
+  \item{\code{is_deterministic}}{\code{TRUE} -- advice is rule-based, not LLM-generated.}
   \item{\code{rules_matched}}{Named list of matched rule records (severity-ranked:
     \code{"error"} first, then \code{"warning"}, then \code{"info"}), each with
     fields \code{id}, \code{recommendation}, \code{citation} (list of

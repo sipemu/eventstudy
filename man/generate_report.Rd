@@ -57,13 +57,13 @@ invalid \code{advice} is silently coerced to \code{NULL} with one
 \item{narrative}{An optional named list keyed by section (e.g.
 \code{list(exec_summary = "...", data_methods = "...", results = "...",
 robustness = "...")}), typically from
-\code{\link{assemble_report_narrative}()}. When \code{NULL} (default), the
+\code{assemble_report_narrative()}. When \code{NULL} (default), the
 render output is byte-identical to the v0.63.x baseline. A supplied but
 invalid \code{narrative} is silently coerced to \code{NULL} with one
 \code{warning()}.}
 
 \item{provider}{Optional LLM provider passed to
-\code{\link{assemble_report_narrative}()} when \code{narrative} is
+\code{assemble_report_narrative()} when \code{narrative} is
 \code{NULL}. If both \code{provider} and \code{narrative} are \code{NULL},
 a fully offline narrative is assembled. Ignored when a pre-built
 \code{narrative} list is supplied by the caller.}

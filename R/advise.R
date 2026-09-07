@@ -935,6 +935,11 @@ print.Advice <- function(x, ...) {
 #'   with (see \code{\link{provider}()}), so set the model there. Accepted here
 #'   without error so calling code can pass it, but it does not override the
 #'   provider's configured model.
+#' @param section_hint Optional character scalar naming the report section to
+#'   scope the narrative to (e.g. \code{"exec_summary"}, \code{"results"},
+#'   \code{"robustness"}). \code{NULL} (default) leaves the prompt
+#'   byte-identical to its pre-Phase-18 form. Only applied for the
+#'   \code{"report_writing"} task type.
 #' @param ... Additional arguments (currently ignored; reserved for future use).
 #'
 #' @return For KB task types without a provider: an \code{es_advice} S3 object

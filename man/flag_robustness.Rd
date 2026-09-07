@@ -19,13 +19,13 @@ flag_robustness(x, provider = NULL, ...)
 \item{x}{A fitted \code{EventStudyTask} (after \code{fit_model()}) or a
 precomputed \code{es_diagnostics} object returned by \code{es_diagnostics()}.}
 
-\item{provider}{Accepted but ignored in the offline path — present only so
+\item{provider}{Accepted but ignored in the offline path -- present only so
 the Phase 7 call shape is forward-compatible. Default \code{NULL}.}
 
 \item{...}{Additional arguments (currently ignored).}
 }
 \value{
-An S3 object of class \code{"es_advice"} — see \code{\link{recommend_stat}}
+An S3 object of class \code{"es_advice"} -- see \code{\link{recommend_stat}}
   for field descriptions. Rules are filtered to \code{category == "robustness"}.
 }
 \description{

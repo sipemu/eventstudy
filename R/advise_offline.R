@@ -12,14 +12,14 @@
 #'
 #' @param x A fitted \code{EventStudyTask} (after \code{fit_model()}) or a
 #'   precomputed \code{es_diagnostics} object returned by \code{es_diagnostics()}.
-#' @param provider Accepted but ignored in the offline path — present only so
+#' @param provider Accepted but ignored in the offline path -- present only so
 #'   the Phase 7 call shape is forward-compatible. Default \code{NULL}.
 #' @param ... Additional arguments (currently ignored).
 #'
-#' @return An S3 object of class \code{"es_advice"} — a named list with:
+#' @return An S3 object of class \code{"es_advice"} -- a named list with:
 #' \describe{
 #'   \item{\code{source}}{\code{"offline_kb"} (character).}
-#'   \item{\code{is_deterministic}}{\code{TRUE} — advice is rule-based, not LLM-generated.}
+#'   \item{\code{is_deterministic}}{\code{TRUE} -- advice is rule-based, not LLM-generated.}
 #'   \item{\code{rules_matched}}{Named list of matched rule records (severity-ranked:
 #'     \code{"error"} first, then \code{"warning"}, then \code{"info"}), each with
 #'     fields \code{id}, \code{recommendation}, \code{citation} (list of
@@ -82,11 +82,11 @@ recommend_stat.es_diagnostics <- function(x, provider = NULL, ...) {
 #'
 #' @param x A fitted \code{EventStudyTask} (after \code{fit_model()}) or a
 #'   precomputed \code{es_diagnostics} object returned by \code{es_diagnostics()}.
-#' @param provider Accepted but ignored in the offline path — present only so
+#' @param provider Accepted but ignored in the offline path -- present only so
 #'   the Phase 7 call shape is forward-compatible. Default \code{NULL}.
 #' @param ... Additional arguments (currently ignored).
 #'
-#' @return An S3 object of class \code{"es_advice"} — see \code{\link{recommend_stat}}
+#' @return An S3 object of class \code{"es_advice"} -- see \code{\link{recommend_stat}}
 #'   for field descriptions. Rules are filtered to \code{category == "robustness"}.
 #'
 #' @seealso \code{\link{recommend_stat}}, \code{\link{es_diagnostics}},
@@ -404,7 +404,7 @@ print.es_advice <- function(x, ...) {
     paste0(
       "Across %d fitted event(s), the event-window analysis yielded a %s ",
       "(%s). The %s across all fitted events. ",
-      "[Offline rule-based narrative — all values sourced from package-computed diagnostics.]"
+      "[Offline rule-based narrative \u2014 all values sourced from package-computed diagnostics.]"
     ),
     n_valid, t_clause, p_clause, car_clause
   )
@@ -444,7 +444,7 @@ print.es_advice <- function(x, ...) {
       paste0(
         "No robustness concerns were flagged by the offline KB for %d fitted event(s). ",
         "%s %s",
-        "[Offline rule-based narrative — all values sourced from package-computed diagnostics.]"
+        "[Offline rule-based narrative \u2014 all values sourced from package-computed diagnostics.]"
       ),
       n_valid, overlap_clause,
       if (nzchar(dw_clause)) paste0(dw_clause, " ") else ""
@@ -460,7 +460,7 @@ print.es_advice <- function(x, ...) {
       paste0(
         "The offline KB flagged %d robustness concern(s) for %d fitted event(s): %s ",
         "%s %s",
-        "[Offline rule-based narrative — all values sourced from package-computed diagnostics.]"
+        "[Offline rule-based narrative \u2014 all values sourced from package-computed diagnostics.]"
       ),
       n_rob, n_valid, rules_str, overlap_clause,
       if (nzchar(dw_clause)) paste0(dw_clause, " ") else ""
