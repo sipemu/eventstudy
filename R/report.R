@@ -161,28 +161,32 @@ generate_report <- function(task,
     }
   }
 
+  # WR-02: compute diagnostics ONCE up front; reuse for narrative assembly,
+  # KB references, and the template render params. Previously es_diagnostics()
+  # was called up to three times on the same task (lines 168, 182, 197 in the
+  # original). Additionally, the references gate now depends on !is.null(diag)
+  # rather than !is.null(narrative): if assemble_report_narrative() throws
+  # (but diagnostics succeeded), references were silently empty even though
+  # diag was available. The new gate fixes that inversion.
+  diag <- tryCatch(es_diagnostics(task), error = function(e) NULL)
+
   # When narrative was not supplied (or was coerced to NULL), assemble it once.
   # If provider is NULL, this produces a fully offline narrative (OFFLINE-01).
-  if (is.null(narrative)) {
-    diag <- tryCatch(
-      es_diagnostics(task),
+  if (is.null(narrative) && !is.null(diag)) {
+    narrative <- tryCatch(
+      assemble_report_narrative(diagnostics = diag, provider = provider),
       error = function(e) NULL
     )
-    if (!is.null(diag)) {
-      narrative <- tryCatch(
-        assemble_report_narrative(diagnostics = diag, provider = provider),
-        error = function(e) NULL
-      )
-    }
   }
 
-  # Compute KB references once (before loop) for use in the template
-  references <- tryCatch({
-    diag_for_refs <- if (!is.null(narrative)) {
-      tryCatch(es_diagnostics(task), error = function(e) NULL)
-    } else NULL
-    if (!is.null(diag_for_refs)) .extract_kb_references(diag_for_refs) else list()
-  }, error = function(e) list())
+  # Compute KB references once (before loop) using same diag object.
+  # Gate on !is.null(diag) (not !is.null(narrative)) so that KB references
+  # are populated whenever diagnostics are available, even if narrative
+  # assembly failed (WR-02).
+  references <- tryCatch(
+    if (!is.null(diag)) .extract_kb_references(diag) else list(),
+    error = function(e) list()
+  )
 
   # ---- 8. Console mode message ONCE after assembly (OFFLINE-02) ----
   if (!is.null(narrative) && is.list(narrative)) {
@@ -194,7 +198,8 @@ generate_report <- function(task,
   }
 
   # ---- 9. Build the base render params (same for every format) ----
-  diag_for_render <- tryCatch(es_diagnostics(task), error = function(e) NULL)
+  # diag already computed once above (WR-02)
+  diag_for_render <- diag
 
   base_params <- list(
     task             = task,
