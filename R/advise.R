@@ -699,9 +699,14 @@ KB_KEY_MAP <- list(
 #' @param diagnostics An es_diagnostics object.
 #' @param kb_context Optional list of KB rule records (from .kb_for_prompt).
 #' @param kb_recs Optional list of pre-grounded recommendation lists (from KB).
+#' @param section_hint Optional character scalar naming the report section to
+#'   scope (e.g. "exec_summary", "results", "robustness"). NULL (default)
+#'   leaves the report_writing instruction byte-identical to its pre-Phase-18
+#'   form. Only applied to the report_writing task type.
 #' @return A character string prompt.
 #' @noRd
-.build_prompt <- function(task_type, diagnostics, kb_context = NULL, kb_recs = NULL) {
+.build_prompt <- function(task_type, diagnostics, kb_context = NULL, kb_recs = NULL,
+                          section_hint = NULL) {
   # 1. System context
   system_ctx <- paste0(
     "You are an event-study methodology expert. ",
@@ -791,11 +796,24 @@ KB_KEY_MAP <- list(
     "design_discussion" = paste0(
       "\n\nTask: Discuss the event study design choices appropriate given these diagnostics."
     ),
-    "report_writing" = paste0(
-      "\n\nTask: Write Methods/Results prose suitable for an academic event study paper, ",
-      "based on the provided diagnostics. Each recommendation should be a paragraph-form narrative. ",
-      "Caveats should flag statistical limitations."
-    ),
+    "report_writing" = {
+      report_base <- paste0(
+        "\n\nTask: Write Methods/Results prose suitable for an academic event study paper, ",
+        "based on the provided diagnostics. Each recommendation should be a paragraph-form narrative. ",
+        "Caveats should flag statistical limitations."
+      )
+      if (is.null(section_hint)) {
+        # NULL path: byte-identical to the pre-Phase-18 report_writing instruction
+        report_base
+      } else {
+        # section_hint path: append section-scoping sentence naming the section
+        sprintf(
+          "%s\n\nWrite ONLY the '%s' section of the report. Do not include prose for any other section.",
+          report_base,
+          section_hint
+        )
+      }
+    },
     paste0("\n\nTask: Provide advice for task type '", task_type, "' based on the diagnostics above.")
   )
 
@@ -945,7 +963,8 @@ print.Advice <- function(x, ...) {
 #' }
 #'
 #' @export
-es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL, ...) {
+es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL,
+                     section_hint = NULL, ...) {
 
   # --- Input validation ---
   if (!inherits(diagnostics, "es_diagnostics")) {
@@ -1028,8 +1047,9 @@ es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL, ...
 
   # Build prompt
   prompt <- .build_prompt(task_type, diagnostics,
-                          kb_context = kb_context,
-                          kb_recs    = kb_recs)
+                          kb_context   = kb_context,
+                          kb_recs      = kb_recs,
+                          section_hint = section_hint)
 
   # Call provider
   resp <- tryCatch(
