@@ -36,15 +36,15 @@ Requirements for the v0.64.0 milestone. Each maps to a roadmap phase.
 
 ### Multi-Format Output (FORMAT)
 
-- [ ] **FORMAT-01**: `es_report()` renders to HTML (default), PDF, Word (.docx), and Markdown, selectable per call (one format or several)
-- [ ] **FORMAT-02**: Missing optional toolchains degrade gracefully — PDF/Word/Markdown each skip with one informative message and continue; only total inability to render the HTML baseline errors
-- [ ] **FORMAT-03**: Plots switch to static ggplot2 for non-HTML formats via `knitr::is_html_output()`; interactive plotly is used only in HTML
+- [x] **FORMAT-01**: `es_report()` renders to HTML (default), PDF, Word (.docx), and Markdown, selectable per call (one format or several)
+- [x] **FORMAT-02**: Missing optional toolchains degrade gracefully — PDF/Word/Markdown each skip with one informative message and continue; only total inability to render the HTML baseline errors
+- [x] **FORMAT-03**: Plots switch to static ggplot2 for non-HTML formats via `knitr::is_html_output()`; interactive plotly is used only in HTML
 - [x] **FORMAT-04**: Narrative prose is sanitised per output format (LaTeX/XML special characters, smart quotes, em-dashes) so PDF and Word render without corruption
 
 ### Report Template (TMPL)
 
-- [ ] **TMPL-01**: One fixed report template (executive summary · data/methods · results · diagnostics · robustness/caveats · references), with section presence toggled by arguments and no custom templating
-- [ ] **TMPL-02**: Data/methods and results content (event/estimation windows, model, AR/CAR/AAR/CAAR tables, significance) is auto-filled from task metadata and `es_diagnostics()` keys, not from the LLM
+- [x] **TMPL-01**: One fixed report template (executive summary · data/methods · results · diagnostics · robustness/caveats · references), with section presence toggled by arguments and no custom templating
+- [x] **TMPL-02**: Data/methods and results content (event/estimation windows, model, AR/CAR/AAR/CAAR tables, significance) is auto-filled from task metadata and `es_diagnostics()` keys, not from the LLM
 
 ### CRAN & Testing Hygiene (CRAN)
 
@@ -99,12 +99,12 @@ Which phases cover which requirements. Filled during roadmap creation.
 | GROUND-03 | Phase 17 | Complete |
 | OFFLINE-01 | Phase 17 | Complete |
 | OFFLINE-02 | Phase 18 | Complete |
-| FORMAT-01 | Phase 18 | Pending |
-| FORMAT-02 | Phase 18 | Pending |
-| FORMAT-03 | Phase 18 | Pending |
+| FORMAT-01 | Phase 18 | Complete |
+| FORMAT-02 | Phase 18 | Complete |
+| FORMAT-03 | Phase 18 | Complete |
 | FORMAT-04 | Phase 18 | Complete |
-| TMPL-01 | Phase 18 | Pending |
-| TMPL-02 | Phase 18 | Pending |
+| TMPL-01 | Phase 18 | Complete |
+| TMPL-02 | Phase 18 | Complete |
 | CRAN-01 | Phase 19 | Pending |
 | CRAN-02 | Phase 19 | Pending |
 
