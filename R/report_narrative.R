@@ -138,8 +138,6 @@ JOINT_HYPOTHESIS_CAVEAT <- paste0(
 # @param sections_to_narrate Character vector of keys for which to request LLM
 #   prose when provider is non-NULL. data_methods is excluded by design --
 #   it is always sourced offline regardless of this argument.
-# @param significance_fn Function used to calibrate p-value labels (injected
-#   for testability; default .calibrate_significance).
 # @return A named list with keys exec_summary, data_methods, results,
 #   robustness (all character scalars), section_sources (named list of
 #   "ai"/"offline" per section), and report_mode (scalar "ai"/"offline").
@@ -149,8 +147,7 @@ JOINT_HYPOTHESIS_CAVEAT <- paste0(
 assemble_report_narrative <- function(
     diagnostics,
     provider            = NULL,
-    sections_to_narrate = c("exec_summary", "results", "robustness"),
-    significance_fn     = .calibrate_significance
+    sections_to_narrate = c("exec_summary", "results", "robustness")
 ) {
 
   # Step 1: Compute the offline baseline once (data_methods + per-section
