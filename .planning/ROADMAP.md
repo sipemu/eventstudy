@@ -171,7 +171,7 @@ Plans:
 | 16. Worked-Examples Gallery + Build & Release Integrity | v0.63.0 | 1/1 | Complete | 2026-09-06 |
 | 17. Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline | v0.64.0 | 3/3 | Complete    | 2026-09-07 |
 | 18. Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly | v0.64.0 | 2/2 | Complete    | 2026-09-07 |
-| 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 3/3 | In Progress|  |
+| 19. es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate | v0.64.0 | 3/3 | Complete    | 2026-09-07 |
 
 ### Phase 19.1: Close gap GROUND-01/02/03: wire prose grounding guard into AI report narrative path + lock report-path invariant (INSERTED)
 

@@ -2,6 +2,9 @@
 resolves_phase: 12
 source: 11-REVIEW.md
 priority: low
+audit_acknowledged:
+  milestone: v0.64.0
+  at: 2026-09-07
 ---
 
 # Phase 12 carryforward from Phase 11 code review

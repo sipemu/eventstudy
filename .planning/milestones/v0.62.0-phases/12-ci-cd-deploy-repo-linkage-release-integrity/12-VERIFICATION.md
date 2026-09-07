@@ -6,6 +6,7 @@ score: 7/9 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 backstop_items:
+
   - truth: "A push to main triggers the pkgdown workflow, which installs the package with its Suggests, builds articles, and completes green on GitHub Actions (CI-01/CI-03 live half)"
     verification: backstop
     why: "Requires a real GitHub Actions run after operator pushes to main — not verifiable from local repo"
@@ -13,6 +14,7 @@ backstop_items:
     verification: backstop
     why: "Requires operator to enable Pages (Settings -> Pages -> gh-pages branch) after first workflow run"
 human_verification:
+
   - test: "Push to main and confirm GitHub Actions pkgdown workflow run completes green"
     expected: "All steps pass — checkout, pandoc, R setup, dependency install (with Suggests), pkgdown::build_site_github_pages, JamesIves deploy to gh-pages"
     why_human: "CI execution cannot be verified from local repo state"
@@ -22,6 +24,10 @@ human_verification:
   - test: "Confirm R CMD check --as-cran on EventStudy_0.62.0.tar.gz shows no new NOTEs/WARNINGs vs v0.61.x baseline and test suite is green"
     expected: "No new findings beyond the pre-existing ERROR (missing optional Suggests on this dev machine) and pre-existing NOTEs"
     why_human: "R CMD check cannot run in this verifier environment; SUMMARY records a plausible diff but it must be confirmed on a clean CI runner or a machine with all Suggests installed"
+audit_acknowledged:
+  milestone: v0.64.0
+  at: 2026-09-07
+  status: human_needed
 ---
 
 # Phase 12: CI/CD Deploy + Repo Linkage + Release Integrity — Verification Report
@@ -94,10 +100,12 @@ No structural issues found.
 ## BUILD-02 Vignette Safety Detail
 
 `vignettes/data-download.Rmd`:
+
 - Setup chunk lines 12-18: `knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)` — globally disables evaluation.
 - Prose label at line 24 (immediately after Introduction heading): "The code in this article is shown for illustration purposes and is not executed at build time because it requires a live network connection." — satisfies the "clearly labelled" requirement.
 
 `vignettes/introduction.Rmd`:
+
 - Setup chunk lines 12-18: `knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)` — globally disables evaluation.
 - No prose label required (plan only required it for data-download.Rmd).
 
