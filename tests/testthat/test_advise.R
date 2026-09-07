@@ -165,12 +165,12 @@ test_that("es_advise with no provider + design_discussion -> stop with 'requires
   )
 })
 
-test_that("es_advise with no provider + report_writing -> stop with 'requires a provider'", {
+test_that("es_advise with no provider + report_writing -> OfflineNarrative (OFFLINE-01)", {
+  # Phase 17 OFFLINE-01: report_writing moved from LLM_ONLY_TYPES to KB_TYPES;
+  # provider=NULL now returns an OfflineNarrative instead of stop()ing.
   diag <- .make_test_diag()
-  expect_error(
-    es_advise(diag, task_type = "report_writing", provider = NULL),
-    "requires a provider"
-  )
+  result <- es_advise(diag, task_type = "report_writing", provider = NULL)
+  expect_s3_class(result, "OfflineNarrative")
 })
 
 # ==============================================================================
