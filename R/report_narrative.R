@@ -184,6 +184,21 @@ assemble_report_narrative <- function(
       NULL
     })
 
+    # Prose grounding guard (GROUND-01/02): scan the extracted LLM prose for
+    # numeric literals absent from the computed diagnostics.  If any fabricated
+    # literal is found, set llm_prose <- NULL so the existing offline fallback
+    # below engages.  .scan_prose_grounding() emits its own single warning on
+    # drop; no additional warning is needed here.
+    if (!is.null(llm_prose) && is.character(llm_prose) && nzchar(trimws(llm_prose))) {
+      scan <- tryCatch(
+        .scan_prose_grounding(setNames(list(llm_prose), key), diagnostics),
+        error = function(e) NULL
+      )
+      if (!is.null(scan) && isTRUE(scan$n_dropped > 0L)) {
+        llm_prose <- NULL   # ungrounded literal -> fall back to offline text
+      }
+    }
+
     if (!is.null(llm_prose) && is.character(llm_prose) && nzchar(trimws(llm_prose))) {
       # Accept LLM prose only if it is non-empty
       prose[[key]]   <- llm_prose
