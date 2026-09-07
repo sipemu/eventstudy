@@ -471,7 +471,7 @@ if (!is.null(refs) && length(refs) > 0L) {
 }
 ```
 
-```{r appendix, results='asis', eval="appendix" %in% sections}
+```{r appendix-section, results='asis', eval="appendix" %in% sections}
 cat("\n## Appendix\n\n")
 cat(sprintf("- **Report generated:** %s\n", Sys.time()))
 cat(sprintf("- **R version:** %s\n", R.version.string))

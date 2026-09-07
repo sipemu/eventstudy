@@ -128,6 +128,12 @@ generate_report <- function(task,
   # ---- 7. Validate / assemble narrative (NARR-01) ----
   # Narrative is assembled ONCE before the format loop; the loop never calls
   # es_advise() or assemble_report_narrative() (LLM call budget enforcer).
+  #
+  # The narrative list may contain:
+  #   - character scalar prose sections (exec_summary, data_methods, results, robustness)
+  #   - metadata fields (section_sources = named list, report_mode = character scalar)
+  # The validator only rejects elements that are non-NULL, non-character, and
+  # NOT one of the known non-prose metadata fields (section_sources, report_mode).
   if (!is.null(narrative)) {
     if (!is.list(narrative)) {
       warning(
@@ -136,14 +142,17 @@ generate_report <- function(task,
       )
       narrative <- NULL
     } else {
-      bad <- !vapply(narrative, function(v) {
+      # Metadata fields are allowed to be non-character (e.g. section_sources is a list)
+      metadata_keys <- c("section_sources", "report_mode")
+      prose_keys    <- setdiff(names(narrative), metadata_keys)
+      bad <- !vapply(narrative[prose_keys], function(v) {
         is.null(v) || (is.character(v) && length(v) == 1L)
       }, logical(1L))
       if (any(bad)) {
         warning(
           sprintf(
             "generate_report(): narrative section(s) [%s] are not character scalars -- narrative will be skipped.",
-            paste(names(narrative)[bad], collapse = ", ")
+            paste(prose_keys[bad], collapse = ", ")
           ),
           call. = FALSE
         )
