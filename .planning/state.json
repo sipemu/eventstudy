@@ -96,13 +96,13 @@
     {
       "number": "19",
       "name": "es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate",
-      "status": "complete"
+      "status": "in_progress"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step (plan phase 19)",
-    "reason": "Phase 19 of 3 — needs a plan"
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-09-07T19:30:23.602Z"
+  "updated_at": "2026-09-07T19:43:21.000Z"
 }
