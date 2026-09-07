@@ -231,6 +231,27 @@ test_that(".is_grounded_literal: fabricated literal 99.99 is NOT grounded", {
   )
 })
 
+# CR-02 regression: rounding-aware branch must use combined tolerance (not abs_tol only)
+test_that(".is_grounded_literal: large-magnitude rounded value is not false-dropped (CR-02)", {
+  # Registry value: 1234.5678. Rounded to 2dp = 1234.57.
+  # Combined tolerance = max(1e-6, 1e-4 * 1234.57) = 0.123457
+  # abs(1234.57 - round(1234.5678, 2)) is near 0 due to IEEE 754 --
+  # but the key test: a value where IEEE 754 round-half-even leaves residual.
+  # Use v=2.005 -> round(2.005, 2) = 2 in IEEE 754; lit=2.00 -> abs(2.00 - 2) = 0 -> PASS.
+  # More robustly, test that 1234.57 (correctly-rounded of 1234.5678) passes.
+  scalars         <- c(1234.5678)
+  structural_ints <- integer(0)
+  expect_true(
+    EventStudy:::.is_grounded_literal(1234.57, scalars, structural_ints, 1e-6, 1e-4),
+    label = "1234.57 (correctly rounded from 1234.5678) must be grounded"
+  )
+  # Also: a fabricated large-magnitude value must still be dropped
+  expect_false(
+    EventStudy:::.is_grounded_literal(1234.99, scalars, structural_ints, 1e-6, 1e-4),
+    label = "1234.99 must not be grounded against 1234.5678"
+  )
+})
+
 # ---------------------------------------------------------------------------
 # Task 2 GREEN block — .scan_prose_grounding() single-warning discipline
 # ---------------------------------------------------------------------------

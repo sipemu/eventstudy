@@ -458,7 +458,9 @@ KB_KEY_MAP <- list(
   }
   for (v in scalars) {
     if (!is.finite(v)) next
-    if (abs(lit - round(v, dec_places)) <= abs_tol) return(TRUE)
+    rounded_v <- round(v, dec_places)
+    tol5 <- max(abs_tol, rel_tol * abs(rounded_v))
+    if (abs(lit - rounded_v) <= tol5) return(TRUE)
   }
 
   FALSE
