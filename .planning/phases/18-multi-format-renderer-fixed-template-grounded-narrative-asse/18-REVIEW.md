@@ -16,7 +16,7 @@ findings:
   warning: 2
   info: 2
   total: 6
-status: issues_found
+status: resolved
 ---
 
 # Phase 18: Code Review Report
