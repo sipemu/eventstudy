@@ -4,17 +4,17 @@ milestone: v0.64.0
 milestone_name: Automated AI Reporting
 current_phase: 18
 current_phase_name: Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly
-status: planning
-stopped_at: Phase 17 complete, ready to plan Phase 18
-last_updated: "2026-09-07T08:20:25.566Z"
+status: executing
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-09-07T09:51:48.415Z"
 last_activity: 2026-09-07
-last_activity_desc: Phase 17 complete, transitioned to Phase 18
-state_head: 8f6e938a23a5c822f49e1a3bad649c047e281dce
+last_activity_desc: Phase 18 execution started
+state_head: b2c01df36368bdd905af511f2a8b2bb3ee74e2d0
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
   percent: 33
 ---
 
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-06)
 
 **Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics, never fabricating a result.
-**Current focus:** Phase 17 — Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline
+**Current focus:** Phase 18 — Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly
 
 ## Current Position
 
-Phase: 18 — Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-07 — Phase 17 complete, transitioned to Phase 18
+Phase: 18 (Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-07 — Phase 18 execution started
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Milestone Roadmap (v0.64.0)
 
@@ -66,6 +66,7 @@ Coverage: 22/22 v0.64.0 requirements mapped, 0 unmapped. (CRAN-01/02 established
 |------|----------|-------|-------|
 | Phase 17 P01 | 15 | 3 tasks | 6 files |
 | Phase 17 P03 | 152 | 3 tasks | 3 files |
+| Phase 18 P01 | 13 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Recent decisions affecting current work:
 - [Phase 17]: report_writing moved from LLM_ONLY_TYPES to KB_TYPES (OFFLINE-01); offline OfflineNarrative S3 returned without provider
 - [Phase 17]: narrative=NULL seam added to generate_report() after advice=; NULL path byte-identical (REPORT-03)
 - [Phase 17]: Regex alternation order longest-first prevents 4-digit year split in prose scanner
+- [Phase 18]: section_hint=NULL is additive on es_advise(); NULL path byte-identical to pre-Phase-18 report_writing (backward compat lock)
+- [Phase 18]: data_methods always sourced offline; exec_summary/results/robustness are LLM-narrated with per-section fallback on error
 
 ### Pending Todos
 
@@ -121,8 +124,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-07T08:09:56.267Z
-Stopped at: Phase 17 complete, ready to plan Phase 18
+Last session: 2026-09-07T09:51:48.384Z
+Stopped at: Completed 18-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
