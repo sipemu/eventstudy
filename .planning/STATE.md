@@ -5,16 +5,16 @@ milestone_name: Automated AI Reporting
 current_phase: 19
 current_phase_name: One-Call `es_report()` Orchestrator, `run_event_study(report=)` & CRAN-Clean Release Gate
 status: planning
-stopped_at: Completed 19-01-PLAN.md (es_report orchestrator)
-last_updated: "2026-09-07T12:03:41.348Z"
+stopped_at: Completed 19-02-PLAN.md (run_event_study report= params)
+last_updated: "2026-09-07T12:09:15.046Z"
 last_activity: 2026-09-07
 last_activity_desc: Phase 18 complete, transitioned to Phase 19
-state_head: 50c9d05364916ba241619a0db298fd127a44df18
+state_head: 98e7fac7ab798286fdfe4a6e3c453d2389673cb9
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 67
 ---
 
@@ -69,6 +69,7 @@ Coverage: 22/22 v0.64.0 requirements mapped, 0 unmapped. (CRAN-01/02 established
 | Phase 18 P01 | 13 | 3 tasks | 4 files |
 | Phase 18-multi-format-renderer-fixed-template-grounded-narrative-asse P02 | 13 | 3 tasks | 4 files |
 | Phase 19-one-call-es-report-orchestrator-run-event-study-report-cran P01 | 138 | 2 tasks | 2 files |
+| Phase 19 P02 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 18]: narrative validation allows section_sources/report_mode metadata fields as non-prose elements
 - [Phase 18]: appendix-section chunk name preserved in skeleton.Rmd for backward compat
 - [Phase 19]: es_report() is a thin visible-return wrapper over generate_report(); deep-clones task at entry for REPORT-04 non-mutation
+- [Phase 19]: Functional equality test instead of serialize() for R6 objects — R6 environments have different memory addresses between separate construction calls, making byte-level serialize() equality impossible for deep-cloned objects even when functionally identical.
+- [Phase 19]: isTRUE(report) guard wraps all report machinery in run_event_study() so FALSE/omitted path is provably unreachable — additive param pattern with zero behavior change on omission.
 
 ### Pending Todos
 
@@ -129,8 +132,8 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-07T12:03:41.299Z
-Stopped at: Completed 19-01-PLAN.md (es_report orchestrator)
+Last session: 2026-09-07T12:09:14.986Z
+Stopped at: Completed 19-02-PLAN.md (run_event_study report= params)
 Resume file: None
 
 ## Operator Next Steps
