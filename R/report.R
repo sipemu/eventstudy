@@ -103,7 +103,7 @@ generate_report <- function(task,
   # skip section) — never breaks the report (ADV-07, T-07-05).
   if (!is.null(advice) && !inherits(advice, "Advice")) {
     warning(
-      "generate_report(): 'advice' is not an Advice object \u2014 advice section will be skipped.",
+      "generate_report(): 'advice' is not an Advice object -- advice section will be skipped.",
       call. = FALSE
     )
     advice <- NULL

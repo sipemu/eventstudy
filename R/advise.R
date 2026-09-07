@@ -301,7 +301,7 @@ KB_KEY_MAP <- list(
   if (n_drop > 0L) {
     warning(
       sprintf(
-        "Grounding guard: %d recommendation(s) dropped \u2014 evidence cited absent or mismatched diagnostic values.",
+        "Grounding guard: %d recommendation(s) dropped -- evidence cited absent or mismatched diagnostic values.",
         n_drop
       ),
       call. = FALSE
@@ -517,7 +517,7 @@ KB_KEY_MAP <- list(
   if (n_drop > 0L) {
     warning(
       sprintf(
-        "Prose grounding guard: %d section(s) dropped — narrative contained numeric literal(s) absent from computed diagnostics.",
+        "Prose grounding guard: %d section(s) dropped -- narrative contained numeric literal(s) absent from computed diagnostics.",
         n_drop
       ),
       call. = FALSE
@@ -748,7 +748,7 @@ KB_KEY_MAP <- list(
     }
     if (nzchar(recs_text)) {
       kb_recs_block <- paste0(
-        "\n\nPre-grounded recommendations (evidence[] already set from KB \u2014 DO NOT modify):\n",
+        "\n\nPre-grounded recommendations (evidence[] already set from KB -- DO NOT modify):\n",
         recs_text
       )
     }
@@ -762,7 +762,7 @@ KB_KEY_MAP <- list(
         "pre-grounded recommendations above. ",
         "The recommendations array is pre-populated with evidence[] derived from peer-reviewed ",
         "event-study methodology rules. Do NOT invent new diagnostic keys, do NOT add or remove ",
-        "recommendations, and do NOT modify any existing evidence entry \u2014 fill only the rationale, ",
+        "recommendations, and do NOT modify any existing evidence entry -- fill only the rationale, ",
         "expected_effect, and top-level interpretation prose fields."
       )
     } else {
@@ -774,7 +774,7 @@ KB_KEY_MAP <- list(
         "pre-grounded robustness recommendations above. ",
         "The recommendations array is pre-populated with evidence[] derived from peer-reviewed ",
         "event-study methodology rules. Do NOT invent new diagnostic keys, do NOT add or remove ",
-        "recommendations, and do NOT modify any existing evidence entry \u2014 fill only the rationale, ",
+        "recommendations, and do NOT modify any existing evidence entry -- fill only the rationale, ",
         "expected_effect, and top-level interpretation prose fields."
       )
     } else {
