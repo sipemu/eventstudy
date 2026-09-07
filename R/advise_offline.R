@@ -285,10 +285,12 @@ print.es_advice <- function(x, ...) {
   n_valid  <- diag$cross_sectional$n_valid_events %||% diag$meta$n_events_total
   n_total  <- diag$meta$n_events_total
 
-  # Median CAR t-statistic across events
+  # Mean CAR t-statistic across events (consistent with .build_prose_value_registry
+  # which summarises vector fields to mean -- using median here would produce values
+  # absent from the registry, causing false-drops on re-scan (WR-03)).
   car_t_vals <- diag$event_window$car_t
-  med_car_t  <- if (length(car_t_vals) > 0L) {
-    median(car_t_vals, na.rm = TRUE)
+  mean_car_t  <- if (length(car_t_vals) > 0L) {
+    mean(car_t_vals, na.rm = TRUE)
   } else {
     NA_real_
   }
@@ -297,15 +299,15 @@ print.es_advice <- function(x, ...) {
   n_stat_rules <- length(stat_advice$rules_matched)
   n_rob_rules  <- length(rob_advice$rules_matched)
 
-  if (is.finite(med_car_t)) {
+  if (is.finite(mean_car_t)) {
     sprintf(
       paste0(
         "This offline rule-based event study report summarises %d events (%d fitted). ",
-        "The median cumulative abnormal return (CAR) t-statistic across fitted events ",
+        "The mean cumulative abnormal return (CAR) t-statistic across fitted events ",
         "was %.3f. The offline KB matched %d test-statistic recommendation(s) and ",
         "%d robustness concern(s) based on the computed diagnostics."
       ),
-      n_total, n_valid, med_car_t, n_stat_rules, n_rob_rules
+      n_total, n_valid, mean_car_t, n_stat_rules, n_rob_rules
     )
   } else {
     sprintf(
@@ -369,8 +371,9 @@ print.es_advice <- function(x, ...) {
   car_t_vals <- diag$event_window$car_t
   car_p_vals <- diag$event_window$car_p
 
-  med_car_t <- if (length(car_t_vals) > 0L) median(car_t_vals, na.rm = TRUE) else NA_real_
-  med_car_p <- if (length(car_p_vals) > 0L) median(car_p_vals, na.rm = TRUE) else NA_real_
+  # Use mean (consistent with .build_prose_value_registry) to avoid false-drops (WR-03)
+  mean_car_t <- if (length(car_t_vals) > 0L) mean(car_t_vals, na.rm = TRUE) else NA_real_
+  mean_car_p <- if (length(car_p_vals) > 0L) mean(car_p_vals, na.rm = TRUE) else NA_real_
 
   final_car_vals <- diag$event_window$final_car
   mean_final_car <- if (length(final_car_vals) > 0L) {
@@ -379,14 +382,14 @@ print.es_advice <- function(x, ...) {
     NA_real_
   }
 
-  t_clause <- if (is.finite(med_car_t)) {
-    sprintf("median CAR t-statistic of %.3f", med_car_t)
+  t_clause <- if (is.finite(mean_car_t)) {
+    sprintf("mean CAR t-statistic of %.3f", mean_car_t)
   } else {
     "CAR t-statistic data not available"
   }
 
-  p_clause <- if (is.finite(med_car_p)) {
-    sprintf("median CAR p-value %.4f", med_car_p)
+  p_clause <- if (is.finite(mean_car_p)) {
+    sprintf("mean CAR p-value %.4f", mean_car_p)
   } else {
     "p-value data not available"
   }
