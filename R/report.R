@@ -111,12 +111,30 @@ generate_report <- function(task,
 
   # Validate narrative param: a supplied non-list degrades gracefully (REPORT-03).
   # NULL path is byte-identical to baseline (no template change when NULL).
-  if (!is.null(narrative) && !is.list(narrative)) {
-    warning(
-      "generate_report(): 'narrative' must be a named list or NULL — narrative will be skipped.",
-      call. = FALSE
-    )
-    narrative <- NULL
+  if (!is.null(narrative)) {
+    if (!is.list(narrative)) {
+      warning(
+        "generate_report(): 'narrative' must be a named list or NULL -- narrative will be skipped.",
+        call. = FALSE
+      )
+      narrative <- NULL
+    } else {
+      # Each element must be a character scalar (or NULL) -- non-character values
+      # would either silently coerce or crash inside the knitr template (CR-03).
+      bad <- !vapply(narrative, function(v) {
+        is.null(v) || (is.character(v) && length(v) == 1L)
+      }, logical(1L))
+      if (any(bad)) {
+        warning(
+          sprintf(
+            "generate_report(): narrative section(s) [%s] are not character scalars -- narrative will be skipped.",
+            paste(names(narrative)[bad], collapse = ", ")
+          ),
+          call. = FALSE
+        )
+        narrative <- NULL
+      }
+    }
   }
 
   # Render
