@@ -63,7 +63,8 @@ Suggests:
     DT,
     zoo,
     httr2 (>= 1.0.0),
-    jsonlite
+    jsonlite,
+    tinytex
 Encoding: UTF-8
 Config/testthat/edition: 3
 VignetteBuilder: knitr
