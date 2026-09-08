@@ -549,3 +549,48 @@ pkgdown components come from the pkgdown package itself (CRAN, version pinned vi
 - [ ] Dimension 7 Inventory Provenance: PASS
 
 **Approval:** pending
+
+## UI Considerations
+
+State-coverage probe over the four home-page/site surfaces (E1 numeric-badge strip,
+E2 home card gallery, E3 ecosystem strip, E4 navbar+logo). This is a build-time-static
+pkgdown site: there is no runtime data fetch, no forms, no async. The runtime-data state
+categories (empty / loading / error / partial) are therefore **not applicable by
+construction** — all content is hardcoded HTML/SVG emitted at `pkgdown::build_site()`
+time. The genuinely applicable axes are layout/overflow, long-text/i18n reflow, count
+variation, and responsive collapse.
+
+### Not applicable (static build-time content) — dismissed with reason
+- **E1–E4 · empty / loading / error / partial:** No runtime data source. Cards, badges,
+  links, and navbar items are fixed at build time; there is nothing to be empty, in-flight,
+  failed, or partially loaded. Copy for these states is already marked "Not applicable
+  (static documentation site)" in the Copywriting Contract.
+
+### Resolved — explicit (concrete truths the executor must honour)
+- **E1 numeric-badge strip · overflow / long-text:** The three badge figures ("15+",
+  "12", "5") and their labels are short, fixed copy; the strip uses the 8-point-grid
+  flex layout (gap 24px) and wraps to a single column below the BS5 `md` breakpoint —
+  no truncation, no horizontal scroll.
+- **E1 · zero-one-many:** Exactly three badges, always. No variable count; plural copy is
+  fixed and correct.
+- **E2 home card gallery · overflow / zero-one-many:** Existing `.es-gallery-item` grid is
+  responsive (3-col → 2-col ≤991px → 1-col ≤575px) and already renders the current fixed
+  card set; card titles wrap rather than truncate. Card count is fixed at build time.
+- **E2 · long-text:** Card titles/tags are short curated copy; the grid tolerates 2-line
+  titles without breaking the row rhythm.
+- **E3 ecosystem strip · overflow / long-text:** Three inline links plus a label; wraps to
+  multiple lines on narrow viewports (flex-wrap), the current tool (R Package) rendered as
+  non-link current-item text. No truncation.
+- **E4 navbar · responsive (overflow):** Standard pkgdown/BS5 navbar — collapses to a
+  hamburger below the `lg` breakpoint; the 30px logo remains left-aligned in both states;
+  active nav-item styling uses primary `#2563eb`.
+
+### Resolved — backstop (held-out visual checks, no dedicated test wired yet)
+- **E2/E4 · responsive layout at breakpoints** — { statement: "Gallery grid and navbar
+  collapse cleanly at the 575 / 991 / lg breakpoints with no overlap or clipped logo",
+  verification: backstop } — confirmed by visual inspection of the built site, not an
+  automated DOM test.
+
+_Probe: 32 considerations proposed across 4 surfaces; 16 dismissed as not-applicable
+(static content), 12 resolved explicit, 1 resolved backstop, remainder folded into the
+explicit layout truths above. No unresolved blockers._
