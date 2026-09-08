@@ -5,16 +5,16 @@ milestone_name: Polish
 current_phase: 21
 current_phase_name: shared-theme-plot-aesthetics
 status: executing
-stopped_at: Completed 20-03-PLAN.md
-last_updated: "2026-09-08T21:36:15.298Z"
+stopped_at: Completed 21-01-PLAN.md
+last_updated: "2026-09-08T21:47:05.150Z"
 last_activity: 2026-09-08
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: b3d66d8d2d4a5f4dc82bd112ceccc3241e496e7f
+state_head: f02bed1449c812172b380ace9333ad900710abf1
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 20
 ---
 
@@ -34,7 +34,7 @@ Plan: 03 complete (3/3 plans in Phase 20)
 Status: Ready to execute
 Last activity: 2026-09-08 — Plan 20-03 complete: home/gallery numeric-badge + ecosystem strips, primary-blue section headings, README logo + stable badge, CI tarball-size + baseline-aware non-ASCII guards
 
-Progress: [██████████] 100% (Phase 20 plans)
+Progress: [██░░░░░░░░] 20% (Phase 20 plans)
 
 ## Milestone Roadmap (v0.65.0 — Phases 20–24)
 
@@ -69,6 +69,7 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 | Phase 20 P01 | 4m | 3 tasks | 7 files |
 | Phase 20 P02 | 4 min | 3 tasks | 15 files |
 | Phase 20 P03 | 3m | 3 tasks | 6 files |
+| Phase 21 P01 | 8m | 4 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase 20]: Phase 20 brand assets rendered via librsvg rsvg-convert CLI (dev-time), not the rsvg/hexSticker R packages, keeping DESCRIPTION dependency-free per CRAN-02
 - [Phase 20]: Phase 20 section-heading recolour uses clean-edit (removed 8 per-class rules), not !important
 - [Phase 20]: CI non-ASCII guard is baseline-aware (fails only on NEW non-ASCII), preserving the package's declared UTF-8
+- [Phase 21]: es_colours reference role uses brand slate #6b7280 rather than Okabe-Ito black for zero-lines
+- [Phase 21]: plot_stocks uses fixed es_colours group1 for trace colour (coarse granularity acceptable)
 
 ### v0.64.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -103,7 +106,7 @@ Research flags for planning:
 
 ### Blockers/Concerns
 
-- **Design dependency (Phase 20):** eventstudy.de brand palette hex values not yet confirmed; needed for `template.bslib` + `extra.scss`. Logo/hex sticker also need visual design input (separate stream from technical build).
+- None. (Resolved: the Phase 20 eventstudy.de palette dependency was closed during Phase 20 execution — palette #2563eb/#ffffff/#0f172a extracted from live CSS, logo/hex sticker built and verified. Phase 20 shipped and verification passed.)
 
 ## Deferred Items
 
@@ -122,8 +125,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-08T21:12:16.326Z
-Stopped at: Completed 20-03-PLAN.md
+Last session: 2026-09-08T21:46:51.958Z
+Stopped at: Completed 21-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

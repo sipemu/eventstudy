@@ -91,10 +91,10 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   3. plotly interactive visuals (hover, legend, colour) are restyled to `es_colours` for cross-plot consistency.
   4. `DESCRIPTION` adds only `tinytable`, `patchwork`, `ragg` to Suggests (each `requireNamespace()`-guarded), with no new Imports; the plot suite stays green and no colour-assertion test regresses.
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 **Wave 1**
 
-- [ ] 21-01-PLAN.md — `R/theme.R` (`theme_eventstudy()` + Okabe-Ito `es_colours`) exported/documented + `.style_plotly` helper, applied across all ggplot helpers + `plot_stocks()` plotly, DESCRIPTION Suggests (`tinytable`/`patchwork`/`ragg`), pkgdown reference (VIZ-01/02/03, CRAN-01)
+- [x] 21-01-PLAN.md — `R/theme.R` (`theme_eventstudy()` + Okabe-Ito `es_colours`) exported/documented + `.style_plotly` helper, applied across all ggplot helpers + `plot_stocks()` plotly, DESCRIPTION Suggests (`tinytable`/`patchwork`/`ragg`), pkgdown reference (VIZ-01/02/03, CRAN-01)
 
 **UI hint**: yes
 
@@ -149,7 +149,7 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 20. Brand & Visual Identity | v0.65.0 | 3/3 | In Progress|  |
-| 21. Shared Theme & Plot Aesthetics | v0.65.0 | 0/1 | Not started | - |
+| 21. Shared Theme & Plot Aesthetics | v0.65.0 | 1/1 | In Progress|  |
 | 22. Report Aesthetics | v0.65.0 | 0/TBD | Not started | - |
 | 23. API & Message Polish | v0.65.0 | 0/TBD | Not started | - |
 | 24. Docs & Site Polish | v0.65.0 | 0/TBD | Not started | - |
