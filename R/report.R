@@ -472,3 +472,60 @@ generate_report <- function(task,
     NULL  # unknown format -> NULL
   )
 }
+
+
+# ---------------------------------------------------------------------------
+# .tinytable_available() -- check if the tinytable package is installed
+#
+# Single mockable seam for the tinytable-vs-kable branch in .report_table().
+# tinytable is an optional Suggests dependency; when absent, .report_table()
+# degrades to knitr::kable().
+#
+# @return Logical scalar.
+# @noRd
+# ---------------------------------------------------------------------------
+
+.tinytable_available <- function() {
+  requireNamespace("tinytable", quietly = TRUE)
+}
+
+
+# ---------------------------------------------------------------------------
+# .report_table() -- render a data frame as a styled table in all 4 formats
+#
+# When tinytable is available (see .tinytable_available()), renders via
+# tinytable::tt() with bold header, auto-aligned columns, and optional digits.
+# Falls back to knitr::kable() when tinytable is absent -- byte-identical to
+# the current scattered knitr::kable() calls.
+#
+# @param x         data.frame to render.
+# @param caption   Character scalar caption, or NULL.
+# @param col.names Character vector of display column names, or NULL. When
+#                  supplied, x is renamed before tt()/kable() so both paths
+#                  show the display names.
+# @param digits    Integer, or NULL. Passed to tt() and knitr::kable().
+#                  Pass NULL for pre-sprintf()-formatted tables (L130, L158,
+#                  L328 call sites) to stay byte-compatible.
+# @return invisible(NULL). Side-effect: prints the table via knit_print.
+# @noRd
+# ---------------------------------------------------------------------------
+
+.report_table <- function(x, caption = NULL, col.names = NULL, digits = NULL) {
+  if (!is.null(col.names)) {
+    x <- setNames(x, col.names)
+  }
+  if (.tinytable_available()) {
+    align <- ifelse(vapply(x, is.numeric, logical(1L)), "r", "l")
+    tbl <- tinytable::tt(x, caption = caption, digits = digits)
+    tbl <- tinytable::style_tt(tbl, i = 0L, bold = TRUE)
+    for (j_idx in seq_along(align)) {
+      tbl <- tinytable::style_tt(tbl, j = j_idx, align = align[[j_idx]])
+    }
+    print(tbl)
+  } else {
+    args <- list(x = x, caption = caption)
+    if (!is.null(digits)) args$digits <- digits
+    print(do.call(knitr::kable, args))
+  }
+  invisible(NULL)
+}
