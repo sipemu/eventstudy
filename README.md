@@ -1,3 +1,5 @@
+<img src="man/figures/logo.png" align="right" height="120" alt="EventStudy logo" />
+
 # Event Study Analysis in R
 
 [![CRAN status](https://www.r-pkg.org/badges/version/EventStudy)](https://CRAN.R-project.org/package=EventStudy)
@@ -5,7 +7,7 @@
 [![CRAN monthly downloads](https://cranlogs.r-pkg.org/badges/EventStudy)](https://CRAN.R-project.org/package=EventStudy)
 [![License: AGPL-3](https://img.shields.io/badge/License-AGPL--3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![R ≥ 4.1.0](https://img.shields.io/badge/R-%E2%89%A5%204.1.0-276DC3.svg?logo=r)](https://cran.r-project.org/)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg)](https://codecov.io/gh/sipemu/eventstudy)
 [![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://sipemu.github.io/eventstudy/)

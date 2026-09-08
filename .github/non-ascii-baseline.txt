@@ -1,0 +1,106 @@
+man/figures/card-cross-sectional-analysis.svg:23:  <text x="255" y="55" font-family="sans-serif" font-size="9" fill="#dc3545">R²</text>
+man/figures/card-factor-models-bhar.svg:23:  <text x="295" y="58" font-family="sans-serif" font-size="10" fill="#198754">β</text>
+man/figures/card-time-varying-models.svg:15:  <text x="30" y="50" font-family="sans-serif" font-size="9" fill="#198754">β(t)</text>
+man/figures/card-time-varying-models.svg:9:  <text x="335" y="108" font-family="sans-serif" font-size="8" fill="#adb5bd">β̄</text>
+man/figures/card-volume-volatility-event-study.svg:24:  <text x="310" y="108" font-family="sans-serif" font-size="8" fill="#198754">σ</text>
+R/advise.R:1010:    # OFFLINE-01 (Phase 17): report_writing offline path — no provider needed
+R/advise.R:1077:  # Parse JSON (handles NA text, empty string, malformed JSON — each emits one warning)
+R/advise.R:142:#' This is NOT the warning-emitting point for the grounding guard — only for
+R/advise.R:152:  # .provider_failure() (error field set, text = NA). Degrade SILENTLY here —
+R/advise.R:19:# (Suggests discipline — package loads and tests cleanly with jsonlite uninstalled).
+R/advise.R:205:#' for guard failures — mirrors .provider_failure() discipline).
+R/advise.R:229:    # A recommendation with NO evidence is ungrounded by definition — it cites
+R/advise.R:244:      # NA handling — all(is.na()) catches an ALL-NA vector too, not just a
+R/advise.R:255:      if (actual_na && reported_na)  next                          # both NA — consistent
+R/advise.R:2:# Grounded Advise Engine — es_advise() + Advice S3 + runtime grounding guard
+R/advise.R:343:  # preceded by a word char, digit, or dot — prevents "t-statistic" hyphen being
+R/advise.R:639:      # condition OMITTED — not serializable (knowledge_base.R:420-421)
+R/advise.R:694:#' task instruction explicitly bounds the LLM to prose only — it must not invent
+R/advise.R:891:# Public: es_advise() — the grounded advise engine
+R/advise.R:898:#' running the runtime grounding guard — which drops any recommendation whose
+R/advise.R:910:#'     path — deterministic, \code{is_deterministic = TRUE}).
+R/advise.R:922:#' response degrades to one \code{warning()} + an empty \code{Advice} object —
+R/advise.R:994:      # LLM-only types require a provider (ADV-06) — stop(), not warning
+R/advisor_pro.R:25:#'   \item \code{\link{recommend_stat}()} — KB-based test-statistic recommendation
+R/advisor_pro.R:26:#'   \item \code{\link{flag_robustness}()} — KB-based robustness flags
+R/advisor_pro.R:27:#'   \item \code{\link{es_advise}()} — LLM-backed advice (requires provider)
+R/advisor_pro.R:2:# advisor_pro.R — Advisor Pro waitlist doc topic + opt-in footer helper
+R/advisor_pro.R:36:#' The footer is silent by default; enabling it appends a static URL — no
+R/advisor_pro.R:45:# Internal: .advisor_pro_footer — opt-in, static, zero-network footer
+R/advisor_pro.R:5:#' Advisor Pro — Future Retrieval-Grounded Paid Tier
+R/contract.R:44:#' is retained in the output tibble — it is never silently dropped.
+R/data-dieselgate.R:11:#' "VW Group" (VOW.DE, PAH3.DE — directly implicated firms) and "Other"
+R/data-dieselgate.R:12:#' (BMW.DE, MBG.DE — peer automakers). The bundled window layout uses a
+R/data-dieselgate.R:51:#'   \item \code{VOW.DE} — Volkswagen AG ordinary shares (Xetra), event_id = 1
+R/data-dieselgate.R:52:#'   \item \code{PAH3.DE} — Porsche Automobil Holding SE (Xetra), event_id = 2
+R/data-dieselgate.R:53:#'   \item \code{BMW.DE} — BMW AG (Xetra), event_id = 3
+R/data-dieselgate.R:54:#'   \item \code{MBG.DE} — Mercedes-Benz Group AG (Xetra), event_id = 4
+R/data-earnings-surprises.R:49:#'   \item \code{AAPL} — Apple Inc. (NASDAQ), event_id = 1
+R/data-earnings-surprises.R:50:#'   \item \code{MSFT} — Microsoft Corporation (NASDAQ), event_id = 2
+R/data-earnings-surprises.R:51:#'   \item \code{GOOGL} — Alphabet Inc. Class A (NASDAQ), event_id = 3
+R/es_diagnostics.R:258:    # Shapiro-Wilk normality test (requires 3–5000 observations)
+R/es_diagnostics.R:309:#' stats::pt() — never stores dist objects in the output list.
+R/es_diagnostics.R:486:#' the estimation-window data — the exact two guards from MarketModel$fit().
+R/es_diagnostics.R:6:#' advice layer — it recomputes nothing; all signals already exist in the
+R/EventStudy-package.R:77:#'   \item \code{\link{KolariPynnonenTest}} -- Kolari-Pynnönen adjusted BMP test
+R/execute.R:95:  # Thread contract context — models read these fields inside fit()
+R/knowledge_base.R:152:  # [ASSUMED] proportion threshold 0.70; direction [CITED: MacKinlay 1997 §4]
+R/knowledge_base.R:15:#' only — exported and serializable, ready for Phase 7 system-prompt
+R/knowledge_base.R:181:  # [ASSUMED] proportion threshold 0.50; direction Brown & Warner (1985) §3
+R/knowledge_base.R:273:  # [ASSUMED] DW bounds 1.5/2.5; direction Brown & Warner (1985) §2
+R/knowledge_base.R:305:  # Low R² inflates the standard error of abnormal returns (MacKinlay 1997 §3.1).
+R/knowledge_base.R:306:  # [ASSUMED] threshold R² < 0.05; direction [CITED: MacKinlay 1997]
+R/knowledge_base.R:38:#' \strong{[ASSUMED]} — they can be tuned without breaking the KB contract:
+R/knowledge_base.R:411:#' \strong{KB-04 note:} This function delivers the \emph{structure} only —
+R/models.R:1146:                           # Use n_valid (finite obs) not nrow — MODELS-04 FEC fix
+R/models.R:1208:                          # index perfectly yields BHAR = 0 — the correct economic answer.
+R/models.R:132:#' captures the relationship between a stock’s return and the return of a market
+R/models.R:134:#' underlying assumption of the Market Model is that a stock’s return is
+R/models.R:151:                         # degenerate_mode, event_id, firm_symbol — inherited from ModelBase.
+R/models.R:195:                             # Explicit flag — required at every call site per contract
+R/models.R:341:#' Model, as it assumes that a stock’s expected return is equal to the market
+R/models.R:383:                                   # abnormal_returns = 0 everywhere — the correct economic answer.
+R/models.R:431:                                   # and understate the correction factor — WR-03 / MODELS-04 fix.
+R/models.R:449:#' based on the assumption that a stock’s expected return during the event
+R/models.R:452:#' to control for a stock’s historical performance and do not wish to rely on
+R/models.R:542:                                                 # denominator — WR-03 / MODELS-04 fix.
+R/models.R:618:                                  # Validate required columns — plain stop(), not contract
+R/models.R:662:                                    # degenerate condition — route through contract handler
+R/models_time_varying.R:178:                                   # must match to stay consistent — WR-04 fix.
+R/models_time_varying.R:462:                               # Use n_valid (finite obs) not nrow — MODELS-04 FEC fix
+R/multi_event_test_statistics.R:561:#' Kolari-Pynnönen Adjusted BMP Test
+R/multi_event_test_statistics.R:564:#' correlation of abnormal returns using the Kolari and Pynnönen (2010)
+R/multi_event_test_statistics.R:570:#' Kolari, J. W. and Pynnönen, S. (2010). Event Study Testing with
+R/multi_event_test_statistics.R:581:                                 #' Computes the Kolari-Pynnönen adjusted BMP test.
+R/multi_event_test_statistics.R:636:                                   # --- Kolari-Pynnönen correction ---
+R/parameter_set.R:64:                               # Validate and normalise degenerate_handling — NULL means
+R/provider.R:125:#' \code{NA_character_} when unset — it NEVER stops here; a missing key surfaces
+R/provider.R:153:# at its top — so R CMD check stays clean with httr2 uninstalled.
+R/provider.R:20:# `es_provider_response` carrying text = NA_character_ — it never lets an
+R/provider.R:245:    # NEVER include the response body or key — only the status code.
+R/provider.R:263:# ProviderBase — abstract R6 contract
+R/provider.R:275:#'   NEVER read at construction — they are resolved at call time inside each
+R/provider.R:297:    #' @description Complete a prompt. Abstract on the base class — concrete
+R/provider.R:316:# CustomProvider — in-process user-function hook (NO HTTP)
+R/provider.R:328:#'   \code{text = NA_character_} — it never crashes the session.
+R/provider.R:368:      # [[1L]] would throw "subscript out of bounds" — coerce safely and guard
+R/provider.R:383:# OpenAICompatProvider — OpenAI + any OpenAI-compatible endpoint (HTTP)
+R/provider.R:390:#'   AND every OpenAI-compatible backend — Ollama, LM Studio, or any gateway —
+R/provider.R:399:#'   \code{text = NA_character_} — it never crashes the session and never returns
+R/provider.R:412:#' # Any OpenAI-compatible endpoint works via a base_url override — e.g. a local
+R/provider.R:488:# AnthropicProvider — native Anthropic Messages API (HTTP)
+R/provider.R:497:#' block's \code{$text} — so the provider never crashes when the model answers
+R/provider.R:544:#'   falling back to the first text block — so the provider never crashes when the
+R/provider.R:551:#'   \code{x-api-key} header — the redacted-headers helper is mandatory here. A
+R/provider.R:554:#'   `es_provider_response` with \code{text = NA_character_} — it never crashes the
+R/provider.R:57:#' carries `text = NA_character_` — never a fabricated completion — preserving the
+R/provider.R:651:# provider() — convenience factory (all three branches wired)
+R/provider.R:95:#' These environment variables are SELECTORS (which backend/model/URL) — distinct
+R/single_event_test_statistics.R:115:                        # Guard: sigma == 0 or NA → car_t is NA (not Inf/NaN).
+R/single_event_test_statistics.R:117:                        # is intentional and correct — do not coalesce it here.
+R/single_event_test_statistics.R:197:                          # Guard: sigma == 0 or NA → bhar_se is 0/NA → bhar_t
+R/single_event_test_statistics.R:46:#' significant impact on the security’s return at a particular point in time.
+R/single_event_test_statistics.R:69:                       # Guard: sigma == 0 or NA → ar_t is NA (not Inf/NaN).
+R/single_event_test_statistics.R:90:#' whether the event of interest has a significant impact on the security’s
+R/synthetic_control.R:100:  # Guard: empty donor pool — no amount of solver arithmetic can recover from
+R/synthetic_control.R:103:  # and att = mean(y_treated[post]) — the raw treated outcome level, which is

@@ -45,6 +45,35 @@ jobs:
         with:
           args: 'c("--no-manual", "--as-cran")'
 
+      - name: Assert tarball under 1 MB
+        if: runner.os == 'Linux'
+        run: |
+          R CMD build . --no-build-vignettes --no-manual
+          tarball=$(ls -1 *.tar.gz | head -n1)
+          tar_size=$(stat -c%s "$tarball")
+          if [ "$tar_size" -ge 1048576 ]; then
+            echo "Tarball exceeds 1 MB: $tar_size bytes ($tarball)"
+            exit 1
+          fi
+          echo "Tarball OK: $tar_size bytes ($tarball)"
+
+      - name: Assert no new non-ASCII in R/, man/figures/, inst/
+        if: runner.os == 'Linux'
+        run: |
+          # Guard against stray/injected non-ASCII (credential strings, homoglyphs)
+          # in the sources that ship in the tarball. The package declares
+          # Encoding: UTF-8, so the deliberate non-ASCII already present in
+          # roxygen docs (author names, math symbols) and SVG glyphs is legitimate
+          # and recorded in .github/non-ascii-baseline.txt. This step fails only
+          # when a NEW non-ASCII line appears outside that baseline.
+          grep -rnP '[^\x00-\x7F]' R/ man/figures/ inst/ 2>/dev/null | sort > non-ascii-current.txt || true
+          if ! diff -u .github/non-ascii-baseline.txt non-ascii-current.txt; then
+            echo "New non-ASCII characters found in R/, man/figures/, or inst/."
+            echo "If intentional (and covered by Encoding: UTF-8), update .github/non-ascii-baseline.txt."
+            exit 1
+          fi
+          echo "No new non-ASCII characters in R/, man/figures/, inst/"
+
   coverage:
     runs-on: ubuntu-latest
     name: Test coverage
