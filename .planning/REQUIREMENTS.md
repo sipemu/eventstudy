@@ -10,10 +10,10 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 ### Brand & Visual Identity
 
 - [x] **BRAND-01**: A real EventStudy logo + hex sticker exists — SVG source under `data-raw/brand/` (`.Rbuildignore`'d), optimised PNG at `man/figures/logo.png` (tarball-safe, <50 KB)
-- [ ] **BRAND-02**: Logo is wired into the README badge (`usethis::use_logo()` pattern) and the pkgdown navbar
-- [ ] **BRAND-03**: Full favicon set generated via `pkgdown::build_favicons()` and committed under `pkgdown/` (out of the CRAN tarball)
-- [ ] **BRAND-04**: Open Graph social-preview card configured so shared links render a branded thumbnail
-- [ ] **BRAND-05**: pkgdown `bslib` theme aligned to the eventstudy.de brand — palette (primary/bg/fg), typography, via `_pkgdown.yml template.bslib` + `pkgdown/extra.scss`
+- [x] **BRAND-02**: Logo is wired into the README badge (`usethis::use_logo()` pattern) and the pkgdown navbar
+- [x] **BRAND-03**: Full favicon set generated via `pkgdown::build_favicons()` and committed under `pkgdown/` (out of the CRAN tarball)
+- [x] **BRAND-04**: Open Graph social-preview card configured so shared links render a branded thumbnail
+- [x] **BRAND-05**: pkgdown `bslib` theme aligned to the eventstudy.de brand — palette (primary/bg/fg), typography, via `_pkgdown.yml template.bslib` + `pkgdown/extra.scss`
 - [ ] **BRAND-06**: pkgdown home card gallery + numeric badges ("15 Return Models", "12 Test Statistics", "6 DiD Estimators") restyled to the ecosystem look
 - [ ] **BRAND-07**: Lifecycle badge flipped `experimental` → `stable`; README badge row refreshed
 
@@ -90,10 +90,10 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | BRAND-01 | Phase 20 | Complete |
-| BRAND-02 | Phase 20 | Pending |
-| BRAND-03 | Phase 20 | Pending |
-| BRAND-04 | Phase 20 | Pending |
-| BRAND-05 | Phase 20 | Pending |
+| BRAND-02 | Phase 20 | Complete |
+| BRAND-03 | Phase 20 | Complete |
+| BRAND-04 | Phase 20 | Complete |
+| BRAND-05 | Phase 20 | Complete |
 | BRAND-06 | Phase 20 | Pending |
 | BRAND-07 | Phase 20 | Pending |
 | CRAN-02 | Phase 20 | Complete |

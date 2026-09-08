@@ -64,14 +64,14 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   4. The version reads 0.65.0 in DESCRIPTION with a matching NEWS.md v0.65.0 section (landed as the first commit of execution).
   5. `R CMD check --as-cran` is clean vs baseline (no new NOTEs/WARNINGs), the built tarball is < 1 MB (asserted in CI), and no non-ASCII appears in `R/`, `man/figures/`, or `inst/`.
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 **Wave 1**
 
 - [x] 20-01-PLAN.md — Version bump 0.65.0 + NEWS + CAR-curve logo SVG/PNG + hex sticker (CRAN-02, BRAND-01)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 20-02-PLAN.md — pkgdown bslib palette/typography + navbar logo + favicons + OG card (BRAND-02/03/04/05)
+- [x] 20-02-PLAN.md — pkgdown bslib palette/typography + navbar logo + favicons + OG card (BRAND-02/03/04/05)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -144,7 +144,7 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 20. Brand & Visual Identity | v0.65.0 | 1/3 | In Progress|  |
+| 20. Brand & Visual Identity | v0.65.0 | 2/3 | In Progress|  |
 | 21. Shared Theme & Plot Aesthetics | v0.65.0 | 0/TBD | Not started | - |
 | 22. Report Aesthetics | v0.65.0 | 0/TBD | Not started | - |
 | 23. API & Message Polish | v0.65.0 | 0/TBD | Not started | - |
