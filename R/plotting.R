@@ -253,17 +253,16 @@ plot_event_study <- function(task,
   # Only add ribbon if we have valid CIs
   if (any(!is.na(stats_data$ci_lower))) {
     p = p + ggplot2::geom_ribbon(ggplot2::aes(ymin = ci_lower, ymax = ci_upper),
-                                 fill = "steelblue", alpha = 0.2)
+                                 fill = es_colours["ci_band"], alpha = 0.2)
   }
 
   p +
-    ggplot2::geom_line(ggplot2::aes(y = value), color = "steelblue", linewidth = 0.8) +
-    ggplot2::geom_point(ggplot2::aes(y = value), color = "steelblue", size = 1.5) +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
-    ggplot2::geom_vline(xintercept = 0, linetype = "dotted", color = "red", alpha = 0.6) +
+    ggplot2::geom_line(ggplot2::aes(y = value), color = es_colours["primary"], linewidth = 0.8) +
+    ggplot2::geom_point(ggplot2::aes(y = value), color = es_colours["primary"], size = 1.5) +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = es_colours["reference"]) +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dotted", color = es_colours["event"], alpha = 0.6) +
     ggplot2::labs(title = title, x = "Event Time", y = y_label) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+    theme_eventstudy()
 }
 
 
@@ -310,23 +309,23 @@ plot_diagnostics <- function(task, event_id = NULL) {
 
   # Residuals vs index plot
   p1 = ggplot2::ggplot(resid_df, ggplot2::aes(x = index, y = residuals)) +
-    ggplot2::geom_point(alpha = 0.5, color = "steelblue") +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+    ggplot2::geom_point(alpha = 0.5, color = es_colours["primary"]) +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = es_colours["event"]) +
     ggplot2::labs(title = "Residuals", x = "Observation", y = "Residual") +
-    ggplot2::theme_minimal()
+    theme_eventstudy()
 
   # Q-Q plot
   p2 = ggplot2::ggplot(resid_df, ggplot2::aes(sample = residuals)) +
-    ggplot2::stat_qq(color = "steelblue", alpha = 0.5) +
-    ggplot2::stat_qq_line(color = "red", linetype = "dashed") +
+    ggplot2::stat_qq(color = es_colours["primary"], alpha = 0.5) +
+    ggplot2::stat_qq_line(color = es_colours["event"], linetype = "dashed") +
     ggplot2::labs(title = "Q-Q Plot", x = "Theoretical Quantiles", y = "Sample Quantiles") +
-    ggplot2::theme_minimal()
+    theme_eventstudy()
 
   # Residual histogram
   p3 = ggplot2::ggplot(resid_df, ggplot2::aes(x = residuals)) +
-    ggplot2::geom_histogram(fill = "steelblue", alpha = 0.7, bins = 30) +
+    ggplot2::geom_histogram(fill = es_colours["primary"], alpha = 0.7, bins = 30) +
     ggplot2::labs(title = "Residual Distribution", x = "Residual", y = "Count") +
-    ggplot2::theme_minimal()
+    theme_eventstudy()
 
   # ACF plot (manual since ggplot2 doesn't have native ACF)
   clean_resid <- na.omit(residuals)
@@ -339,12 +338,12 @@ plot_diagnostics <- function(task, event_id = NULL) {
   ci = stats::qnorm(0.975) / sqrt(length(clean_resid))
 
   p4 = ggplot2::ggplot(acf_df, ggplot2::aes(x = lag, y = acf)) +
-    ggplot2::geom_hline(yintercept = 0, color = "grey40") +
-    ggplot2::geom_hline(yintercept = c(-ci, ci), linetype = "dashed", color = "blue", alpha = 0.5) +
-    ggplot2::geom_segment(ggplot2::aes(xend = lag, yend = 0), color = "steelblue") +
-    ggplot2::geom_point(color = "steelblue") +
+    ggplot2::geom_hline(yintercept = 0, color = es_colours["reference"]) +
+    ggplot2::geom_hline(yintercept = c(-ci, ci), linetype = "dashed", color = es_colours["ci_band"], alpha = 0.5) +
+    ggplot2::geom_segment(ggplot2::aes(xend = lag, yend = 0), color = es_colours["primary"]) +
+    ggplot2::geom_point(color = es_colours["primary"]) +
     ggplot2::labs(title = "ACF of Residuals", x = "Lag", y = "Autocorrelation") +
-    ggplot2::theme_minimal()
+    theme_eventstudy()
 
   # Combine plots in a 2x2 grid
   gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
