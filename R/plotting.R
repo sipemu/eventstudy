@@ -175,14 +175,13 @@ plot_event_study <- function(task,
 
   ggplot2::ggplot(data, ggplot2::aes(x = relative_index)) +
     ggplot2::geom_ribbon(ggplot2::aes(ymin = ci_lower, ymax = ci_upper),
-                         fill = "steelblue", alpha = 0.2) +
-    ggplot2::geom_line(ggplot2::aes(y = value), color = "steelblue", linewidth = 0.8) +
-    ggplot2::geom_point(ggplot2::aes(y = value), color = "steelblue", size = 1.5) +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
-    ggplot2::geom_vline(xintercept = 0, linetype = "dotted", color = "red", alpha = 0.6) +
+                         fill = es_colours["ci_band"], alpha = 0.2) +
+    ggplot2::geom_line(ggplot2::aes(y = value), color = es_colours["primary"], linewidth = 0.8) +
+    ggplot2::geom_point(ggplot2::aes(y = value), color = es_colours["primary"], size = 1.5) +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = es_colours["reference"]) +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dotted", color = es_colours["event"], alpha = 0.6) +
     ggplot2::labs(title = title, x = "Event Time", y = y_label) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
+    theme_eventstudy()
 }
 
 
