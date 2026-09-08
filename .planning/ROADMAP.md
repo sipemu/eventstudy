@@ -60,7 +60,10 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   3. The pkgdown site's palette, typography, home card gallery, and numeric badges ("15 Return Models", "12 Test Statistics", "6 DiD Estimators") are restyled to the eventstudy.de look via `template.bslib` + `pkgdown/extra.scss`, and the lifecycle badge reads `stable`.
   4. The version reads 0.65.0 in DESCRIPTION with a matching NEWS.md v0.65.0 section (landed as the first commit of execution).
   5. `R CMD check --as-cran` is clean vs baseline (no new NOTEs/WARNINGs), the built tarball is < 1 MB (asserted in CI), and no non-ASCII appears in `R/`, `man/figures/`, or `inst/`.
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 20-01-PLAN.md — Version bump 0.65.0 + NEWS + CAR-curve logo SVG/PNG + hex sticker (CRAN-02, BRAND-01)
+- [ ] 20-02-PLAN.md — pkgdown bslib palette/typography + navbar logo + favicons + OG card (BRAND-02/03/04/05)
+- [ ] 20-03-PLAN.md — Numeric-badge/ecosystem strips + section-heading recolour + README logo/stable badge + CI tarball/non-ASCII guards (BRAND-06/07, CRAN-03/04)
 **UI hint**: yes
 
 ### Phase 21: Shared Theme & Plot Aesthetics
@@ -116,7 +119,7 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 20. Brand & Visual Identity | v0.65.0 | 0/TBD | Not started | - |
+| 20. Brand & Visual Identity | v0.65.0 | 0/3 | Not started | - |
 | 21. Shared Theme & Plot Aesthetics | v0.65.0 | 0/TBD | Not started | - |
 | 22. Report Aesthetics | v0.65.0 | 0/TBD | Not started | - |
 | 23. API & Message Polish | v0.65.0 | 0/TBD | Not started | - |
