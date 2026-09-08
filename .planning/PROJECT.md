@@ -22,12 +22,17 @@ is grounding-guarded on the report path — a numeric literal absent from the di
 dropped to the offline fallback with one warning and **never rendered**. Tagged and released
 on GitHub; suite green (2287 pass), `R CMD check --as-cran` clean vs baseline (1 pre-existing note).
 
-## Next Milestone Goals
+## Current Milestone: v0.65.0 Polish
 
-Not yet defined. Candidate directions carried forward: broader task coverage for reporting
-(panel / intraday / synthetic-control — RPTX-01, gated on deferred diagnostics surfaces),
-bootstrap-CI in the report (RPTX-02), rich Word output (RPTX-03), and user-supplied
-templates (RPTC-01). Define via `/gsd-new-milestone`.
+**Goal:** Visibly lift EventStudy's quality across brand, output, API feel, and docs — a ship-when-good polish pass that makes the R package look and feel like a finished product, aligned to the eventstudy.de ecosystem. Incremental minor, no 1.0 gate.
+
+**Target features:**
+- **Brand & visual identity** — design a real EventStudy logo + hex sticker (SVG assets), wire into the pkgdown site + README; align the pkgdown theme (palette, typography, card gallery, numeric badges) to the eventstudy.de look so the R package reads as part of the three-tool ecosystem (Google Sheets template · R package · WebAssembly app). eventstudy.de brand: "Event Study Analysis Made Simple" — clean neutral look, card + numeric-badge layout, and currently no logo at all.
+- **Report & plot aesthetics** — bring `es_report()` output and the ggplot2/plotly visuals to publication-grade: typography, spacing, colour, table styling, figure captions.
+- **API & message polish** — consistent signatures, print methods, error/warning wording, deprecation cleanup; back-compat preserved.
+- **Docs & site polish** — tighten vignettes/articles, fix rough edges on the pkgdown site, cross-links, README refresh; reconcile with eventstudy.de's documentation section.
+
+**Key context:** Logo/hex/site polish are pkgdown/gh-pages only (out of the CRAN tarball). Report/plot + API/message polish touch package code — behavior on valid inputs must not change, existing tests stay green, no new `R CMD check` findings, API changes stay backward-compatible.
 
 ## Business Context
 
@@ -79,7 +84,7 @@ templates (RPTC-01). Define via `/gsd-new-milestone`.
 
 <!-- Next milestone requirements are defined via /gsd-new-milestone (REQUIREMENTS.md is archived per milestone). -->
 
-(None — v0.64.0 shipped. Next milestone's requirements will be defined via `/gsd-new-milestone`.)
+Defining v0.65.0 "Polish" requirements — brand & visual identity (logo + hex sticker, eventstudy.de-aligned pkgdown theme), report & plot aesthetics, API & message polish, docs & site polish. See `.planning/REQUIREMENTS.md`.
 
 ### Out of Scope
 
@@ -159,4 +164,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Update Context with current state
 
 ---
-*Last updated: 2026-09-07 after v0.64.0 Automated AI Reporting milestone*
+*Last updated: 2026-09-08 after starting v0.65.0 Polish milestone*

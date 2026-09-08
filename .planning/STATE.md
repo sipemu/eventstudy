@@ -1,21 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.64.0
-milestone_name: Automated AI Reporting
-status: Awaiting next milestone
-stopped_at: Phase 19 complete, ready to plan Phase 19.1
-last_updated: "2026-09-07T20:37:29.568Z"
-last_activity: 2026-09-07
-last_activity_desc: Milestone v0.64.0 completed and archived
-state_head: 1d35f375ca4f75cb969f49c4480a707538e28e01
+milestone: v0.65.0
+milestone_name: Polish
+status: planning
+last_updated: "2026-09-08T19:06:46.242Z"
+last_activity: 2026-09-08
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
-current_phase: 19.1
-current_phase_name: "Close gap GROUND-01/02/03: wire prose grounding guard into AI report narrative path + lock report-path invariant"
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -29,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-07)
 
 ## Current Position
 
-Phase: Milestone v0.64.0 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-09-07 — Milestone v0.64.0 completed and archived
+Status: Defining requirements
+Last activity: 2026-09-08 — Milestone v0.65.0 started
 
 ## Milestone Roadmap (v0.64.0)
 
