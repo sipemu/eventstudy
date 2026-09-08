@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.62.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.64.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,15 @@
       <small>Source: <a href="https://github.com/sipemu/eventstudy/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.64.0" id="eventstudy-0640">EventStudy 0.64.0<a class="anchor" aria-label="anchor" href="#eventstudy-0640"></a></h2>
+<div class="section level3">
+<h3 id="one-call-reporting-es_report-and-run_event_studyreport--true-0-64-0">One-Call Reporting: es_report() and run_event_study(report = TRUE)<a class="anchor" aria-label="anchor" href="#one-call-reporting-es_report-and-run_event_studyreport--true-0-64-0"></a></h3>
+<ul><li><p><strong>New <code><a href="../reference/es_report.html">es_report()</a></code> orchestrator.</strong> A single function call converts a fitted <code>EventStudyTask</code> into a complete, publication-ready report. The function deep-clones the task (non-mutation guarantee), runs <code><a href="../reference/es_diagnostics.html">es_diagnostics()</a></code> to harvest diagnostic metadata, assembles a grounded narrative via <code><a href="../reference/generate_report.html">generate_report()</a></code> (assembled once before any format loop), and renders output to one or more formats. Returns a named character vector of output path(s) visibly, so the path prints at the REPL without an explicit <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</p></li>
+<li><p><strong>Multi-format output.</strong> <code><a href="../reference/es_report.html">es_report()</a></code> accepts <code>format = c("html", "pdf", "word", "md")</code> and renders one file per format sharing a common basename. All formats are fully offline by default (no API key, no network required); an optional <code>provider</code> argument enables LLM-grounded narrative when available.</p></li>
+<li><p><strong>Additive <code>run_event_study(report = FALSE, report_args = list())</code> convenience.</strong> The pipeline entry-point gains two new optional arguments. When <code>report = FALSE</code> (the default), behaviour is byte-identical to the previous release – no allocation overhead, no side effects. When <code>report = TRUE</code>, <code><a href="../reference/es_report.html">es_report()</a></code> is called after the pipeline completes and the rendered path(s) are attached as <code>attr(task, "report_path")</code>.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.62.0" id="eventstudy-0620">EventStudy 0.62.0<a class="anchor" aria-label="anchor" href="#eventstudy-0620"></a></h2>
 <div class="section level3">

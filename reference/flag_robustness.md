@@ -31,7 +31,7 @@ flag_robustness(x, provider = NULL, ...)
 
 - provider:
 
-  Accepted but ignored in the offline path — present only so the Phase 7
+  Accepted but ignored in the offline path – present only so the Phase 7
   call shape is forward-compatible. Default `NULL`.
 
 - ...:
@@ -40,7 +40,7 @@ flag_robustness(x, provider = NULL, ...)
 
 ## Value
 
-An S3 object of class `"es_advice"` — see
+An S3 object of class `"es_advice"` – see
 [`recommend_stat`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md)
 for field descriptions. Rules are filtered to
 `category == "robustness"`.

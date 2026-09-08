@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.62.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.64.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,6 +92,7 @@
 </h2>
 <ul>
 <li><p><strong>AI Advisor</strong> (new in 0.60.0): Grounded, LLM-agnostic advice via <code><a href="reference/es_advise.html">es_advise()</a></code> plus offline <code><a href="reference/es_diagnostics.html">es_diagnostics()</a></code>. Interprets only package-computed numbers and never fabricates results. Works fully offline with no API key required; optional LLM providers (Anthropic, OpenAI-compatible, custom) can be supplied via <code><a href="reference/provider.html">provider()</a></code>.</p></li>
+<li><p><strong>One-Call Reporting</strong> (new in 0.64.0): Generate a complete, multi-format event study report in a single call: <code>es_report(task)</code> – deep-clones the task, harvests diagnostics, and renders HTML/PDF/Word/Markdown with a grounded narrative (offline by default). Also available as <code>run_event_study(..., report = TRUE)</code>.</p></li>
 <li><p><strong>13 Return Models</strong>: Market Model, Market Adjusted, Mean Adjusted, Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.</p></li>
 <li><p><strong>11 Test Statistics</strong>: Parametric (AR T, CAR T, BHAR T, Cross-Sectional T, Patell Z, BMP) and non-parametric (Sign, Generalized Sign, Rank, Calendar-Time Portfolio).</p></li>
 <li><p><strong>Diagnostics</strong>: Shapiro-Wilk normality, Durbin-Watson, Ljung-Box autocorrelation, pre-trend testing.</p></li>

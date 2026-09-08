@@ -42,6 +42,12 @@ devtools::install_github("sipemu/eventstudy")
   (Anthropic, OpenAI-compatible, custom) can be supplied via
   [`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md).
 
+- **One-Call Reporting** (new in 0.64.0): Generate a complete,
+  multi-format event study report in a single call: `es_report(task)` –
+  deep-clones the task, harvests diagnostics, and renders
+  HTML/PDF/Word/Markdown with a grounded narrative (offline by default).
+  Also available as `run_event_study(..., report = TRUE)`.
+
 - **13 Return Models**: Market Model, Market Adjusted, Mean Adjusted,
   Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1),
   Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.

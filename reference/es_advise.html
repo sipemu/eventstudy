@@ -15,7 +15,7 @@ or a value mismatching beyond numeric tolerance."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.62.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.64.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,14 @@ or a value mismatching beyond numeric tolerance.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">es_advise</span><span class="op">(</span><span class="va">diagnostics</span>, <span class="va">task_type</span>, provider <span class="op">=</span> <span class="cn">NULL</span>, model <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">es_advise</span><span class="op">(</span></span>
+<span>  <span class="va">diagnostics</span>,</span>
+<span>  <span class="va">task_type</span>,</span>
+<span>  provider <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  section_hint <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -100,6 +107,14 @@ compatibility: the effective model is the one the provider was constructed
 with (see <code><a href="provider.html">provider()</a></code>), so set the model there. Accepted here
 without error so calling code can pass it, but it does not override the
 provider's configured model.</p></dd>
+
+
+<dt id="arg-section-hint">section_hint<a class="anchor" aria-label="anchor" href="#arg-section-hint"></a></dt>
+<dd><p>Optional character scalar naming the report section to
+scope the narrative to (e.g. <code>"exec_summary"</code>, <code>"results"</code>,
+<code>"robustness"</code>). <code>NULL</code> (default) leaves the prompt
+byte-identical to its pre-Phase-18 form. Only applied for the
+<code>"report_writing"</code> task type.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

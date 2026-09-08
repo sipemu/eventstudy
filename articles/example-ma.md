@@ -208,7 +208,7 @@ excludes.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.62.0
+    #> [1] EventStudy_0.64.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         
@@ -216,7 +216,7 @@ excludes.
     #>  [7] tidyr_1.3.2          jquerylib_0.1.4      systemfonts_1.3.2   
     #> [10] scales_1.4.0         textshaping_1.0.5    yaml_2.3.12         
     #> [13] fastmap_1.2.0        ggplot2_4.0.3        R6_2.6.1            
-    #> [16] generics_0.1.4       distributional_0.8.1 knitr_1.51          
+    #> [16] generics_0.1.4       distributional_0.8.1 knitr_1.52          
     #> [19] htmlwidgets_1.6.4    tibble_3.3.1         desc_1.4.3          
     #> [22] RColorBrewer_1.1-3   bslib_0.12.0         pillar_1.11.1       
     #> [25] rlang_1.3.0          stringi_1.8.9        cachem_1.1.0        

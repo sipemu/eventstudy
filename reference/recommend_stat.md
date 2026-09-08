@@ -31,7 +31,7 @@ recommend_stat(x, provider = NULL, ...)
 
 - provider:
 
-  Accepted but ignored in the offline path — present only so the Phase 7
+  Accepted but ignored in the offline path – present only so the Phase 7
   call shape is forward-compatible. Default `NULL`.
 
 - ...:
@@ -40,7 +40,7 @@ recommend_stat(x, provider = NULL, ...)
 
 ## Value
 
-An S3 object of class `"es_advice"` — a named list with:
+An S3 object of class `"es_advice"` – a named list with:
 
 - `source`:
 
@@ -48,7 +48,7 @@ An S3 object of class `"es_advice"` — a named list with:
 
 - `is_deterministic`:
 
-  `TRUE` — advice is rule-based, not LLM-generated.
+  `TRUE` – advice is rule-based, not LLM-generated.
 
 - `rules_matched`:
 
