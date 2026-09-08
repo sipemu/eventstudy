@@ -1,399 +1,489 @@
 # Architecture Research
 
-**Domain:** One-call AI report wrapper (v0.64.0) — R package additive orchestration layer
-**Researched:** 2026-09-06
-**Confidence:** HIGH (based on direct codebase inspection of all relevant source files)
+**Domain:** R package polish — brand/visual identity, report/plot aesthetics, API/message polish, docs/site polish on a mature CRAN package (EventStudy v0.65.0)
+**Researched:** 2026-09-08
+**Confidence:** HIGH — derived directly from live codebase inspection of all relevant files, supplemented by stable R ecosystem conventions
 
-## Standard Architecture
+---
 
-### System Overview
+## System Overview
 
-The v0.64.0 `es_report()` wrapper sits entirely above the existing pipeline. It is a pure composition of already-built pieces. No existing function signatures break.
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                    NEW: One-Call Entry Layer                          │
-│  es_report(task, ...)     run_event_study(..., report=TRUE)           │
-│  R/es_report.R            R/execute.R (additive report= param)        │
-└──────────────────────────────────┬───────────────────────────────────┘
-                                   │ orchestrates
-          ┌────────────────────────┼────────────────────────┐
-          ▼                        ▼                        ▼
-┌──────────────────┐   ┌──────────────────────┐  ┌──────────────────────┐
-│ EXISTING         │   │ EXISTING              │  │ EXISTING             │
-│ es_diagnostics() │   │ es_advise()           │  │ generate_report()    │
-│ R/es_diagnostics │   │ task_type="report_    │  │ R/report.R           │
-│ .R               │   │ writing" (LLM) or     │  │ Rendered via         │
-│                  │   │ flag_robustness/       │  │ rmarkdown::render()  │
-│ Returns          │   │ recommend_stat         │  │                      │
-│ es_diagnostics   │   │ (offline KB)          │  │ Returns file path    │
-│ S3 object        │   │ Returns Advice S3     │  │ (invisibly)          │
-└──────────────────┘   └──────────────────────┘  └──────────────────────┘
-          │                        │                        │
-          └────────────────────────┴────────────────────────┘
-                                   │
-          ┌────────────────────────┼───────────────────────────────────┐
-          ▼                        ▼                                   ▼
-┌──────────────────┐  ┌───────────────────────────────┐  ┌────────────────────┐
-│ EXISTING         │  │ NEW: Narrative Assembler       │  │ MODIFIED           │
-│ run_event_study()│  │ .assemble_report_advice()      │  │ skeleton.Rmd       │
-│ (when task not   │  │ R/es_report.R (internal)       │  │ inst/rmarkdown/    │
-│ yet fitted)      │  │                                │  │ templates/event_   │
-│                  │  │ Calls es_advise() N times for  │  │ study_report/      │
-│                  │  │ multi-section narrative;        │  │ skeleton/          │
-│                  │  │ returns named list of Advice   │  │ skeleton.Rmd       │
-└──────────────────┘  └───────────────────────────────┘  └────────────────────┘
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | File | Status |
-|-----------|----------------|------|--------|
-| `es_report()` | One-call entry point; accepts fitted or unfitted task, all format/section args; orchestrates the four-step sequence; returns named list of output paths | `R/es_report.R` (NEW) | New |
-| `.assemble_report_advice()` | Calls `es_advise()` for each narrative section (executive_summary, data_methods, results, robustness_caveats); returns named list of `Advice` objects keyed by section; handles offline-first fallback per section independently | `R/es_report.R` (internal, `@noRd`) | New |
-| `run_event_study()` | Unchanged core behavior; `es_report()` calls it when task is unfitted | `R/execute.R` | Unchanged (optional `report=` convenience added last) |
-| `es_diagnostics()` | Unchanged; `es_report()` calls it immediately after fitting | `R/es_diagnostics.R` | Unchanged |
-| `es_advise()` | Unchanged interface; called once per narrative section with `task_type="report_writing"` (LLM path) or KB types for offline path | `R/advise.R` | Unchanged |
-| `.validate_grounding()` | Unchanged; runs inside every `es_advise()` call automatically | `R/advise.R` | Unchanged |
-| `generate_report()` | Signature gains a `narrative=NULL` param (named list of Advice objects by section); backward-compatible — existing callers passing `advice=` are unaffected | `R/report.R` | Modified (additive only) |
-| `skeleton.Rmd` | Gains new parameterized narrative chunks per section (executive_summary, data_methods, results, robustness_caveats); existing chunks untouched; `output:` YAML extended for word_document and md_document | `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd` | Modified (additive only) |
-
-## Recommended Project Structure
+The existing architecture is a mature 6-layer R package. The four polish surfaces are **purely additive overlays**; none require restructuring the pipeline or changing statistical behavior.
 
 ```
-R/
-├── es_report.R                    # NEW: es_report() + .assemble_report_advice()
-├── execute.R                      # MODIFIED: optional report= param on run_event_study()
-├── report.R                       # MODIFIED: narrative= param on generate_report()
-├── advise.R                       # UNCHANGED
-├── es_diagnostics.R               # UNCHANGED
-└── ... (all other files unchanged)
-
-inst/
-└── rmarkdown/
-    └── templates/
-        └── event_study_report/
-            └── skeleton/
-                └── skeleton.Rmd   # MODIFIED: narrative params + new chunks
++--------------------------------------------------------------------------+
+|                  SURFACE A: Brand / Visual Identity                       |
+|  man/figures/ (logo.svg, logo.png, hex-sticker.png) -- CRAN-shipped      |
+|  pkgdown/ (extra.css, favicon.ico) -- .Rbuildignore'd, site only         |
+|  _pkgdown.yml template.logo / template.assets -- site only               |
++-------------------------------+------------------------------------------+
+                                |
++-------------------------------v------------------------------------------+
+|                  SURFACE B: Report & Plot Aesthetics                      |
+|  NEW: R/theme.R -- theme_eventstudy() + es_colours                       |
+|  MODIFY: R/plotting.R -- apply theme_eventstudy() as default             |
+|  MODIFY: inst/rmarkdown/skeleton.Rmd -- typography, table CSS            |
+|  MODIFY: R/report.R -- html_document() options (css=)                    |
++-------------------------------+------------------------------------------+
+                                |
++-------------------------------v------------------------------------------+
+|                  SURFACE C: API & Message Polish                          |
+|  NEW: R/conditions.R -- classed rlang conditions factory                  |
+|  MODIFY: R/task.R, R/parameter_set.R, R/models.R etc. -- print methods   |
+|  MODIFY: stop()/warning() -> rlang::abort()/rlang::warn() with class     |
+|  MODIFY: DESCRIPTION -- lifecycle in Suggests (only if deprecation used) |
++-------------------------------+------------------------------------------+
+                                |
++-------------------------------v------------------------------------------+
+|                  SURFACE D: Docs & Site Polish                            |
+|  MODIFY: _pkgdown.yml -- template.bslib palette, template.assets         |
+|  MODIFY: pkgdown/extra.css -- eventstudy.de brand colors, typography     |
+|  MODIFY: vignettes/*.Rmd and vignettes/articles/*.Rmd -- cross-links     |
+|  MODIFY: README.md -- logo badge, docs badge refresh                     |
++-------------------------------+------------------------------------------+
+                                |
++-------------------------------v------------------------------------------+
+|              Existing Architecture (unchanged behavior)                   |
+|  Pipeline: prepare -> fit -> calculate | R6 Models | Test Statistics      |
+|  Advisor: es_diagnostics -> es_advise -> generate_report / es_report      |
+|  Contract: .handle_degenerate() in contract.R -- untouched                |
+|  Grounding guard: .validate_grounding() in advise.R -- untouched         |
++--------------------------------------------------------------------------+
 ```
 
-### Structure Rationale
+---
 
-- **`R/es_report.R` is a new file** rather than appending to `execute.R` or `report.R` because it owns the orchestration concern (pipeline → diagnostics → advise → render) that spans three existing layers. Keeping it separate preserves single-responsibility and avoids tangling the execute/report files.
-- **`generate_report()` gets `narrative=` not a wholesale signature change** because the existing `advice=` single-block path stays intact for users calling `generate_report()` directly. The `narrative=` list-of-Advice is additive and only consumed by the new skeleton chunks.
-- **`skeleton.Rmd` is modified, not replaced** because the existing section chunks (summary, data, diagnostics, single_event, multi_event, cross_sectional, appendix) are correct and tested. New narrative chunks are inserted before each corresponding statistical section.
+## Surface A: Brand & Visual Identity
 
-## Architectural Patterns
+### Asset placement — the rule
 
-### Pattern 1: Four-Step Orchestration Sequence
+**man/figures/ is the CRAN-safe, README-visible location for the logo.**
+It is committed to the repo, included in the CRAN tarball, and referenced from README.md with a relative path that GitHub and pkgdown both resolve. The `pkgdown/` directory is already `.Rbuildignore`'d (confirmed in `.Rbuildignore`), which makes it the right home for site-only assets (favicon, any supplemental icon variants). The `docs/` directory is also `.Rbuildignore`'d and used for rendered output — do not put source assets there.
 
-**What:** `es_report()` executes in order: (1) optionally run pipeline, (2) harvest diagnostics, (3) assemble narrative Advice objects, (4) render for each requested format. Each step is independent and can be short-circuited (already-fitted task skips step 1; no provider skips LLM in step 3).
+Concrete asset placement:
 
-**When to use:** Always. This is the complete call sequence inside `es_report()`.
+| Asset | Path | Committed | In tarball | Visible where |
+|-------|------|-----------|------------|---------------|
+| `logo.svg` (primary vector source) | `man/figures/logo.svg` | Yes | Yes | pkgdown navbar, README |
+| `logo.png` (raster, ~240px) | `man/figures/logo.png` | Yes | Yes | pkgdown navbar fallback, README img tag |
+| `hex-sticker.png` (~240px) | `man/figures/hex-sticker.png` | Yes | Yes | README badge, pkgdown home |
+| `favicon.ico` (16/32px) | `pkgdown/favicon.ico` | Yes | No (.Rbuildignore'd) | pkgdown `<head>` only |
+| Gallery card SVGs (existing) | `pkgdown/*.svg` | Yes | No | pkgdown gallery only |
 
-**Trade-offs:** Sequential, single-threaded (matches the package's existing threading model). Each step can fail independently; steps 3 and 4 degrade gracefully (offline fallback for step 3, clear error on step 4 only if rmarkdown is not installed).
+Do NOT add `man/figures/favicon.ico` — favicon in the tarball would be a CRAN NOTE trigger for unexpected files in `man/`.
 
-**Call sequence in `es_report()`:**
-```r
-# Step 1: ensure task is fitted
-if (!"model" %in% names(task$data_tbl)) {
-  task <- run_event_study(task, parameter_set)
-}
+### Wiring logo into `_pkgdown.yml`
 
-# Step 2: harvest diagnostics (zero-dependency, always succeeds)
-diagnostics <- es_diagnostics(task)
+The existing `_pkgdown.yml` uses `template: bootstrap: 5` with no `logo:` or `template.assets` key. Add:
 
-# Step 3: assemble narrative (offline-first; LLM enriches when provider supplied)
-narrative <- .assemble_report_advice(diagnostics, provider = provider,
-                                     sections = narrative_sections)
+```yaml
+template:
+  bootstrap: 5
+  math-rendering: katex
+  assets: pkgdown/    # makes favicon.ico in pkgdown/ available at site root
 
-# Step 4: render to each requested format
-paths <- lapply(formats, function(fmt) {
-  generate_report(task,
-                  output_file = .report_output_path(output_dir, output_stem, fmt),
-                  format      = fmt,
-                  narrative   = narrative,
-                  ...)
-})
-names(paths) <- formats
+navbar:
+  logo:
+    src: man/figures/logo.svg   # relative; pkgdown resolves from package root
+    href: https://sipemu.github.io/eventstudy/
+    alt: EventStudy logo
 ```
 
-### Pattern 2: Multi-Section Narrative via Repeated es_advise() Calls
+The `template.assets` key copies everything from `pkgdown/` into the built site's root, which is how `favicon.ico` reaches `<head>` automatically (pkgdown 2.x picks up `favicon.ico` from the assets directory).
 
-**What:** Each narrative section (executive_summary, data_methods, results, robustness_caveats) maps to one `es_advise()` call. The grounding guard runs independently on each returned `Advice` object. A failure on one section produces an empty `Advice` for that section only; the other sections are unaffected.
+### Wiring logo into README.md
 
-**When to use:** LLM path (provider supplied). Each call is a separate guarded round-trip.
+Standard R package pattern — place at the top of README, before the title:
 
-**Trade-offs:** Four LLM calls per report. This is deliberate: smaller prompts fit more reliably within provider context windows, each section's guard result is isolated, and section-level failures degrade gracefully. The cost is latency (4 sequential provider calls). Given the package's single-threaded R model, parallelism via `future` is out of scope for this milestone.
-
-**Section-to-task_type mapping (fixed constant in `R/es_report.R`):**
-```r
-NARRATIVE_SECTIONS <- list(
-  executive_summary  = "report_writing",   # LLM-only; offline = empty Advice
-  data_methods       = "report_writing",   # LLM-only; offline = empty Advice
-  results            = "report_writing",   # LLM-only; offline = empty Advice
-  robustness_caveats = "flag_robustness"   # KB-backed; offline = rule-based es_advice
-)
+```markdown
+<img src="man/figures/logo.png" align="right" height="139" alt="EventStudy logo" />
 ```
 
-The `robustness_caveats` section uses `flag_robustness` so offline mode produces grounded robustness text via the KB engine. The other three sections are LLM-only and produce empty narrative offline — the statistical tables and plots still render complete.
+The `align="right"` float is the CRAN/tidyverse convention; GitHub and pkgdown homepage both honor it. `man/figures/` resolves correctly relative to the repo root in both contexts.
 
-### Pattern 3: Offline-First Fallback
+### CRAN tarball boundary check
 
-**What:** When `provider = NULL`, `es_report()` produces a complete report. The `robustness_caveats` narrative section uses the KB engine (offline, deterministic). The executive_summary, data_methods, and results narrative slots are empty `Advice` objects. The report is never blocked or errored by a missing provider.
+The `.Rbuildignore` already excludes `^pkgdown$`, `^docs$`, `^_pkgdown\.yml$`. Logo and hex in `man/figures/` are included in the tarball — this is correct and expected (they are used by `?EventStudy` help page display and by README on CRAN). The favicon in `pkgdown/` stays out of the tarball. No new `.Rbuildignore` entries are needed beyond potentially adding the hex-sticker source file if it is generated from a separate `.R` script that should not be shipped.
 
-**Critical implementation note:** `.assemble_report_advice()` must wrap `es_advise()` calls for LLM-only task types in a `tryCatch` when `provider = NULL`, because `es_advise()` calls `stop()` for LLM-only types without a provider (ADV-06 contract). The assembler catches this and returns `.empty_advice()` instead of propagating the stop.
+---
+
+## Surface B: Report & Plot Aesthetics
+
+### Integration point 1 — Shared ggplot2 theme
+
+**New file: `R/theme.R`**
+
+The cleanest pattern for a shared publication theme is a `theme_eventstudy()` function that wraps `ggplot2::theme_minimal()` with package-specific overrides, plus a named colour palette vector. This is additive — no existing function is broken, and callers that do not use it are unaffected.
 
 ```r
-.assemble_report_advice <- function(diagnostics, provider, sections) {
-  lapply(sections, function(sec) {
-    task_type <- NARRATIVE_SECTIONS[[sec]]
-    if (is.null(provider) && task_type %in% LLM_ONLY_TYPES) {
-      return(.empty_advice("offline", task_type))
-    }
-    tryCatch(
-      es_advise(diagnostics, task_type = task_type, provider = provider),
-      error   = function(e) .empty_advice("error",    task_type),
-      warning = function(w) { warning(w); invokeRestart("muffleWarning") }
+# R/theme.R  (new file)
+
+#' EventStudy ggplot2 Theme
+#'
+#' @param base_size Base font size. Default 12.
+#' @param base_family Base font family. Default "".
+#' @return A ggplot2 theme object.
+#' @export
+theme_eventstudy <- function(base_size = 12, base_family = "") {
+  ggplot2::theme_minimal(base_size = base_size, base_family = base_family) %+replace%
+    ggplot2::theme(
+      plot.title    = ggplot2::element_text(size = base_size * 1.1, hjust = 0.5, face = "bold"),
+      plot.subtitle = ggplot2::element_text(size = base_size * 0.9, hjust = 0.5, color = "#6c757d"),
+      axis.title    = ggplot2::element_text(size = base_size * 0.9),
+      legend.position = "bottom",
+      panel.grid.minor = ggplot2::element_blank(),
+      strip.text    = ggplot2::element_text(face = "bold")
     )
-  })
 }
-```
 
-Note: `.empty_advice` is an existing internal in `R/advise.R` (marked `@noRd`). `.assemble_report_advice()` lives in `R/es_report.R` which is in the same package namespace, so it can call `.empty_advice()` directly.
-
-### Pattern 4: Multi-Format Rendering via One Parameterized Template
-
-**What:** The single `skeleton.Rmd` is rendered N times (once per requested format) by calling `generate_report()` N times with different `format=` values. The `narrative` list is assembled once and passed to each `generate_report()` call — the LLM is contacted only 4 times total, regardless of how many formats are requested.
-
-**Why one template, not per-format templates:** All four formats share the same section structure, narrative injection, and statistical content. Format-specific concerns (plotly vs. ggplot2, TOC, CSS) are handled by the `output_format=` argument to `rmarkdown::render()`, not by template branching.
-
-**Format-to-rmarkdown-output mapping (new in `generate_report()`):**
-```r
-output_format_obj <- switch(format,
-  "html"     = rmarkdown::html_document(toc = TRUE, toc_float = TRUE,
-                                         theme = "flatly", code_folding = "hide"),
-  "pdf"      = rmarkdown::pdf_document(toc = TRUE),
-  "word"     = rmarkdown::word_document(toc = TRUE),
-  "markdown" = rmarkdown::md_document(variant = "gfm"),
-  stop(sprintf("generate_report(): unknown format '%s'.", format))
+#' EventStudy Colour Palette
+#'
+#' Named vector of brand colours used in event study plots.
+#' @export
+es_colours <- c(
+  primary   = "#0d6efd",   # matches existing es-tag-core in extra.css
+  secondary = "#6c757d",
+  success   = "#198754",
+  warning   = "#fd7e14",
+  danger    = "#dc3545",
+  zero_line = "#495057"
 )
 ```
 
-Currently `generate_report()` only handles `"html"` and `"pdf"` (lines 70-77 of `R/report.R`). The `"word"` and `"markdown"` branches are new. `match.arg()` on the `format` parameter must be extended to include all four values.
+**Apply in `R/plotting.R` (modify):** Replace every `ggplot2::theme_minimal()` call in `.plot_single_event()`, `.plot_multi_event()`, and `plot_diagnostics()` with `theme_eventstudy()`. The colour literals (`"steelblue"`, `"grey40"`, `"red"`) should also be replaced with `es_colours[["primary"]]` etc. This is a pure aesthetic change — existing test assertions on plot structure (not colour) remain green. The `test_plotting.R` tests do not assert on colour values, so they are safe.
 
-**Dependency discipline:** `rmarkdown` is already Suggests, already `requireNamespace()`-guarded in `generate_report()`. PDF requires LaTeX (system-level, not a package dep). Word requires pandoc (ships with RStudio; system-level otherwise). Neither becomes a hard dep. `es_report()` must wrap format-specific render failures in `tryCatch` and emit one warning per failed format rather than stopping.
+**Critical: the `knitr::is_html_output()` switch must not be disturbed.** The existing plotting functions all return ggplot2 objects (not plotly). Only `plot_stocks()` returns a plotly object. The plotly-vs-ggplot2 decision happens inside `skeleton.Rmd`, not inside `plotting.R`. The `params$interactive` flag controls whether the skeleton renders plotly (HTML) or ggplot2 static (non-HTML). `theme_eventstudy()` applies only to ggplot2 objects — it has no effect on plotly traces and does not touch the HTML/non-HTML switch.
 
-**Plotly in non-HTML formats:** `interactive = FALSE` must be forced automatically when `format != "html"`. `generate_report()` should set this before calling `rmarkdown::render()`. The template already gates plotly vs. ggplot2 on `params$interactive`.
+### Integration point 2 — Report HTML styling
 
-### Pattern 5: Grounding Guard Preservation in Multi-Section Narrative
+**The report's HTML output document** is built via `rmarkdown::html_document(theme = "flatly", ...)` in `R/report.R::.build_output_format()`. To apply custom CSS to the report (typography, table styling, figure captions) without breaking PDF/Word/MD paths:
 
-**What:** The grounding guard (`.validate_grounding()` in `R/advise.R`) runs automatically inside every `es_advise()` call — once per narrative section. There is no additional guard layer at the `es_report()` level.
+Inject a `css` argument conditionally in `html_document()`:
 
-**Critical invariant:** The `narrative` named list passed to `generate_report()` and then to `skeleton.Rmd` contains only post-guard `Advice` objects (or `.empty_advice()` objects with no recommendations). The template renders `advice$interpretation` and `advice$recommendations` without re-validating — it trusts that objects reaching it are already guard-validated. This is safe because `Advice` S3 objects are only constructed by `.build_advice_from_parsed()` (which always calls `.validate_grounding()`) or `.empty_advice()` (no recommendations).
-
-**What must NOT happen:** The template must never render raw LLM text that bypassed `es_advise()`. All prose must originate from an `Advice` object returned by `es_advise()`.
-
-**Narrative chunk guard in skeleton.Rmd:**
 ```r
-# Each narrative chunk must guard all three conditions:
-advice_sec <- params$narrative[["executive_summary"]]
-if (!is.null(advice_sec) &&
-    (inherits(advice_sec, "Advice") || inherits(advice_sec, "es_advice")) &&
-    nzchar(advice_sec$interpretation %||% "")) {
-  cat("### AI Interpretation\n\n")
-  cat(advice_sec$interpretation, "\n\n")
+# Inside .build_output_format(), html branch (R/report.R ~line 453)
+rmarkdown::html_document(
+  toc          = TRUE,
+  toc_float    = TRUE,
+  theme        = "flatly",
+  code_folding = "hide",
+  css          = system.file("rmarkdown/report.css", package = "EventStudy")
+)
+```
+
+**New file: `inst/rmarkdown/report.css`** — contains typography, table, and figure-caption overrides. This file is in `inst/`, so it is CRAN-shipped (part of the package). It does not affect PDF or Word renders (the `css=` arg applies only to `html_document`).
+
+**Modify `skeleton.Rmd`** for table styling: the skeleton's data/methods section generates deterministic tables from task metadata. These tables can be wrapped in `kableExtra::kable()` with `bootstrap_options = c("striped", "hover")` — but `kableExtra` must stay in Suggests and be guarded with `if (requireNamespace("kableExtra", quietly = TRUE))` with a plain `knitr::kable()` fallback. The fallback path preserves the byte-identical render guarantee for non-HTML.
+
+**Interaction with per-format prose sanitiser (`.sanitise_prose()` in `report_narrative.R`):** This sanitiser operates on narrative character scalars, not on table HTML or CSS. Adding CSS does not touch the sanitiser at all.
+
+**Interaction with grounding guard:** The grounding guard (`.validate_grounding()` in `advise.R`) operates on LLM-generated prose text, not on CSS or kable table output. Aesthetic additions to the skeleton template do not touch the guard.
+
+### Integration point 3 — Figure captions in skeleton.Rmd
+
+Add `fig.cap = "..."` to knitr chunk options in `skeleton.Rmd` for each plot chunk. This is skeleton-only and does not change any R function signature or behavior.
+
+---
+
+## Surface C: API & Message Polish
+
+### Current state
+
+The package uses `stop()` / `warning()` base R conditions throughout (confirmed by inspection of `task.R`, `contract.R`, `models.R`, `advise.R`). The only structured condition type is the `Advice` S3 class in `advise.R`. `rlang` is already in Imports (for `%||%` and `.data`). There are no `cli::` or `lifecycle::` calls anywhere in the current `R/` source.
+
+### Recommended approach: classed rlang conditions, no cli dependency
+
+**Use `rlang::abort()` and `rlang::warn()` with a class vector, not `cli`.** Rationale: `rlang` is already in Imports — zero new dependency. `cli` would be a new hard Imports entry (it cannot be Suggests-only if used inside all core functions). For a polish pass, adding `cli` as Imports is a larger decision than needed; `rlang` classed conditions give structured catchability with no new dep.
+
+**New file: `R/conditions.R`** — condition factory functions:
+
+```r
+# R/conditions.R  (new file)
+
+#' @noRd
+.abort_bad_input <- function(msg, class = NULL, call = rlang::caller_env(), ...) {
+  rlang::abort(
+    message = msg,
+    class   = c(class, "eventstudy_bad_input", "eventstudy_error"),
+    call    = call,
+    ...
+  )
+}
+
+#' @noRd
+.warn_degenerate <- function(msg, class = NULL, call = rlang::caller_env(), ...) {
+  rlang::warn(
+    message = msg,
+    class   = c(class, "eventstudy_degenerate", "eventstudy_warning"),
+    call    = call,
+    ...
+  )
 }
 ```
 
-## Data Flow
+**Migration strategy — additive, not big-bang.** Do not convert every `stop()` in one phase; that risks breaking tests. Instead:
 
-### Primary Request Path (es_report, fitted task, LLM provider)
+1. Add `R/conditions.R` with the factory functions.
+2. Convert the highest-visibility call sites: `task.R` validation errors, `contract.R` `.handle_degenerate()` warning emission, and `advise.R` grounding-guard warning. These are the user-visible messages that matter most for polish.
+3. Leave internal model computation errors (`models.R` lm-failure guards) as plain `stop()`/`warning()` — they are low-visibility and the conversion risk is not worth it for polish.
 
-```
-es_report(task, provider=p, formats=c("html","pdf"), ...)
-    |
-    +-- [skip: task already fitted]
-    |
-    +-- es_diagnostics(task)
-    |       -> es_diagnostics S3 (6-section named list)
-    |
-    +-- .assemble_report_advice(diagnostics, provider=p, sections=[4])
-    |       +-- es_advise(diag, "report_writing", provider=p)  -> Advice (exec summary)
-    |       |       -> .validate_grounding() runs inside
-    |       +-- es_advise(diag, "report_writing", provider=p)  -> Advice (data/methods)
-    |       +-- es_advise(diag, "report_writing", provider=p)  -> Advice (results)
-    |       +-- es_advise(diag, "flag_robustness", provider=p) -> Advice (robustness)
-    |       -> named list: $executive_summary, $data_methods, $results, $robustness_caveats
-    |
-    +-- generate_report(task, format="html", narrative=narrative_list, ...)
-    |       -> rmarkdown::render(skeleton.Rmd, params=list(narrative=narrative_list, ...))
-    |       -> event_study_report.html
-    |
-    +-- generate_report(task, format="pdf", narrative=narrative_list, ...)
-            -> rmarkdown::render(skeleton.Rmd, params=list(narrative=narrative_list, ...))
-            -> event_study_report.pdf
+**Hard constraint: `.handle_degenerate()` in `contract.R`** emits exactly one `warning()` per degenerate event. This invariant is tested. The migration from `warning()` to `rlang::warn()` preserves this because `rlang::warn()` calls `base::warning()` internally. The class vector is additive metadata — callers using `tryCatch(..., warning = ...)` still work. However, the regression tests in `test_edge_cases.R` that use `expect_warning()` may need the class added to their matchers if they check message text strictly. This is the one real integration risk in Surface C.
 
-Returns: c(html="path/report.html", pdf="path/report.pdf")
+**Hard constraint: the grounding guard** in `advise.R:.validate_grounding()` uses `warning(msg, call. = FALSE)`. This is the drop-and-keep contract: exactly one warning, never `stop()`. Migrating to `rlang::warn()` is safe as long as `call = NULL` (equivalent to `call. = FALSE`) is used.
+
+### Print method polish
+
+The existing `print` methods use raw `cat()` with no alignment or separators. The `rlang` package does not help with print formatting. The recommendation is to apply a consistent header/separator pattern using only base R `cat()` calls — no new dependency. Each print method should follow:
+
+```r
+# pattern: package-level separator constant
+.ES_SEP <- strrep("-", 40)
+
+print.EventStudyXxx <- function(x, ...) {
+  cat("EventStudy: <ClassName>\n")
+  cat(.ES_SEP, "\n")
+  # ... fields
+  invisible(x)
+}
 ```
 
-### Offline Fallback Path (provider = NULL)
+This unifies spacing across `EventStudyTask$print()`, `ParameterSet$print()`, `print.es_diagnostics()`, `print.Advice`, `print.es_advice`, `print.es_cross_sectional`, `print.es_simulation`, and `print.EventStudySummary` (8 print surfaces across 6 files).
 
-```
-es_report(task, provider=NULL, formats="html")
-    |
-    +-- es_diagnostics(task) -> diagnostics
-    |
-    +-- .assemble_report_advice(diagnostics, provider=NULL, sections=[4])
-    |       +-- "report_writing" sections: caught stop() -> .empty_advice() x3
-    |       +-- "flag_robustness": es_advise(diag, "flag_robustness", NULL)
-    |               -> offline KB path -> es_advice S3 (is_deterministic=TRUE)
-    |       -> named list: empty x3, $robustness_caveats = es_advice
-    |
-    +-- generate_report(task, format="html", narrative=narrative_list, ...)
-            -> skeleton.Rmd: narrative chunks silent for exec/data/results
-               robustness chunk renders KB text
-            -> event_study_report.html (complete statistical + KB robustness)
-```
+### Lifecycle deprecation
 
-### narrative= Injection into generate_report() and skeleton.Rmd
+**`lifecycle` is not currently in DESCRIPTION.** Only add it if at least one function needs formal `deprecate_warn()` or `deprecate_soft()` signaling. For a polish pass, the approach is:
 
-```
-generate_report(task, narrative = list(
-  executive_summary  = <Advice S3>,
-  data_methods       = <Advice S3>,
-  results            = <Advice S3>,
-  robustness_caveats = <Advice S3 or es_advice S3>
-))
-    |
-    +-- rmarkdown::render(params = list(
-          task      = task,
-          narrative = narrative,   # <-- NEW param
-          advice    = NULL,        # existing single-block param (UNCHANGED)
-          ...
-        ))
-            |
-            +-- skeleton.Rmd chunks:
-                  params$narrative$executive_summary$interpretation  -> before Summary
-                  params$narrative$data_methods$interpretation       -> before Data section
-                  params$narrative$results$interpretation            -> before Single/Multi-event
-                  params$narrative$robustness_caveats$interpretation -> inside Diagnostics
+- Functions with changed signatures (if any): add `lifecycle` to Suggests (not Imports), guard with `if (requireNamespace("lifecycle", quietly = TRUE)) lifecycle::deprecate_warn(...)` else `warning(...)`.
+- Functions removed entirely: use a stub that calls `lifecycle::deprecate_stop()` or plain `stop()`.
+- If no signatures are actually changing in v0.65.0, skip `lifecycle` entirely — it adds a Suggests entry for no user benefit.
+
+---
+
+## Surface D: Docs & Site Polish
+
+### Integration points in `_pkgdown.yml`
+
+The existing `_pkgdown.yml` uses `template: bootstrap: 5` with no colour overrides. To align to the eventstudy.de brand:
+
+```yaml
+template:
+  bootstrap: 5
+  math-rendering: katex
+  bslib:
+    primary: "#0d6efd"
+    link-color: "#0d6efd"
+    font-size-base: "0.95rem"
+    # Keep secondary, success, warning, danger aligned to
+    # existing es-tag-* classes in pkgdown/extra.css
+  assets: pkgdown/
+
+navbar:
+  logo:
+    src: man/figures/logo.svg
+    href: https://sipemu.github.io/eventstudy/
+    alt: EventStudy logo
+  bg: light
 ```
 
-### Backward Compatibility Contract for generate_report()
+The `template.bslib` keys are CSS custom property overrides passed to Bootstrap 5's Sass compilation inside pkgdown. They are site-only and do not touch the CRAN tarball. These keys do not conflict with existing `extra.css` rules — the bslib overrides apply at the Sass level (affecting all generated Bootstrap utilities), while `extra.css` applies additional custom rules on top.
 
-The existing `advice=` parameter (single `Advice` block, renders the "AI Advisor Interpretation" section at the bottom of the report) continues to work exactly as before. The new `narrative=` parameter defaults to `NULL`. When both are supplied, both sections render independently. The existing advice chunk in skeleton.Rmd is not moved or modified.
+### Integration points in `pkgdown/extra.css`
 
-## Integration Points
+The existing `pkgdown/extra.css` (confirmed present) already contains gallery, section-heading, and tag styles. Additions for v0.65.0:
 
-### Internal Boundaries
+- Typography polish: `body { font-size: 0.95rem; }` and heading-level fine-tuning.
+- Navbar logo sizing: `.navbar-brand img { height: 32px; }`.
+- Home page hero section: a `.es-hero` block class for the README's top section when rendered as pkgdown home.
+- Numeric badge style: `.es-badge` — pill-shaped badge for key counts ("13+ models", "8+ test statistics") aligned to the eventstudy.de card layout.
 
-| Boundary | Communication | Critical constraint |
-|----------|---------------|---------------------|
-| `es_report()` -> `run_event_study()` | Direct function call; task passed by reference (R6 object mutated in place) | Only called when `!"model" %in% names(task$data_tbl)`. Users who pre-fit must not trigger re-fitting. |
-| `es_report()` -> `es_diagnostics()` | Direct call; returns `es_diagnostics` S3 | Will `stop()` if task not fitted — `es_report()` must guarantee fit before this call |
-| `.assemble_report_advice()` -> `es_advise()` | Direct call, wrapped in `tryCatch` | Must catch `stop()` for LLM-only types with `provider=NULL` (ADV-06 contract); individual section failures must not propagate |
-| `es_report()` -> `generate_report()` | Direct call N times, one per format | `generate_report()` already `requireNamespace("rmarkdown")`-guards; `es_report()` catches render errors per format |
-| `generate_report()` -> `skeleton.Rmd` | `rmarkdown::render(params=list(...))` | `narrative=` is a new `params` entry; `advice=` param unchanged; template must handle `NULL` narrative gracefully |
-| `skeleton.Rmd` -> narrative Advice objects | `params$narrative[[section]]$interpretation` character access | Must guard `is.null(params$narrative)`, `is.null(params$narrative[[sec]])`, and `!nzchar(interpretation)` before `cat()`-ing |
+None of these additions conflict with the existing gallery or tag CSS.
 
-### External Dependencies (format rendering)
+### Cross-link and vignette polish
 
-| Format | Tool | Dependency type | Notes |
-|--------|------|-----------------|-------|
-| HTML | `rmarkdown::html_document` | Suggests (already guarded) | Works everywhere |
-| PDF | LaTeX (TinyTeX or TeX Live) | System-level — never a package dep | User must install; `es_report()` catches render error and warns |
-| Word (.docx) | pandoc (via rmarkdown) | System-level — ships with RStudio | `rmarkdown::word_document()` — no new R package dep |
-| Markdown | `rmarkdown::md_document` | Suggests (already guarded) | GFM variant; works without LaTeX/Word toolchain |
+The `vignettes/articles/` directory is already `.Rbuildignore`'d. The existing `_pkgdown.yml` `articles:` section already routes all 18 CRAN vignettes and pkgdown-only articles correctly. Polish work is limited to:
 
-## Build Order
+- Adding cross-reference links between related vignettes (`\code{\link{es_report}}` in `automated-reports.Rmd`; `\code{\link{es_advise}}` cross-links in the AI Advisor article).
+- README.md refresh: add logo badge, update badges section, confirm all links resolve.
+- No changes to the `articles:` or `reference:` blocks in `_pkgdown.yml` unless new articles are added.
 
-The following order respects all dependency edges. Each step is independently testable before the next begins.
+---
 
-**Step 1: extend `generate_report()` and `skeleton.Rmd`** (lowest risk, most self-contained)
-- Add `narrative = NULL` to `generate_report()` signature in `R/report.R`
-- Pass `narrative` into `rmarkdown::render(params = list(..., narrative = narrative))`
-- Extend `match.arg(format, ...)` to include `"word"` and `"markdown"`
-- Add `word_document` and `md_document` branches to the format dispatch block (lines 70-77 of `R/report.R`)
-- Auto-enforce `interactive = FALSE` for non-HTML formats
-- Add `narrative: NULL` to `skeleton.Rmd` `params:` YAML block
-- Add four new narrative knitr chunks in `skeleton.Rmd` (one per section), each triply-guarded
-- Add `word_document` and `md_document` to the `skeleton.Rmd` `output:` YAML block
-- **Test gate:** all existing `generate_report()` callers (passing `advice=`, not `narrative=`) must produce byte-identical output; new `generate_report(narrative=list(...))` call renders narrative prose in correct positions
+## Component Responsibilities (Polish Surfaces)
 
-**Step 2: implement `.assemble_report_advice()`** (internal, no user-visible surface)
-- New `@noRd` function in `R/es_report.R`
-- Define `NARRATIVE_SECTIONS` constant mapping section names to task types
-- Implement the `tryCatch`-wrapped `es_advise()` loop
-- Handle `provider=NULL` + LLM-only type by returning `.empty_advice()` (calling existing internal)
-- **Test gate:** with `provider=NULL`: robustness section returns KB advice, others return empty Advice; with mock provider: all four sections return post-guard Advice objects
+| Component | File(s) | New vs Modified | Notes |
+|-----------|---------|-----------------|-------|
+| ggplot2 shared theme | `R/theme.R` | NEW | Exports `theme_eventstudy()`, `es_colours` |
+| Colour application in plots | `R/plotting.R` | MODIFY | Replace hardcoded colour strings in 3 private helpers |
+| Report HTML CSS | `inst/rmarkdown/report.css` | NEW | Injected via `html_document(css=)` only |
+| Report format builder | `R/report.R:.build_output_format()` | MODIFY | Add `css=` arg to html branch only |
+| Report skeleton template | `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd` | MODIFY | Typography, kable table styling, figure captions |
+| Classed conditions factory | `R/conditions.R` | NEW | `.abort_bad_input()`, `.warn_degenerate()` |
+| Task print method | `R/task.R` | MODIFY | Consistent separator/header formatting |
+| ParameterSet print | `R/parameter_set.R` | MODIFY | Same pattern |
+| Other print methods | `R/es_diagnostics.R`, `R/advise.R`, `R/advise_offline.R`, `R/simulation.R`, `R/cross_sectional.R`, `R/task.R` (EventStudySummary) | MODIFY | 6 files, formatting-only changes |
+| High-visibility stop/warning | `R/task.R`, `R/contract.R`, `R/advise.R` | MODIFY | Selected conversions to `rlang::abort()`/`rlang::warn()` with class |
+| pkgdown config | `_pkgdown.yml` | MODIFY | Add `template.bslib`, `template.assets`, `navbar.logo` |
+| pkgdown CSS | `pkgdown/extra.css` | MODIFY | Add hero, badge, typography, logo-size rules |
+| Logo/hex assets | `man/figures/logo.svg`, `man/figures/logo.png`, `man/figures/hex-sticker.png` | NEW | CRAN-shipped via man/figures/ |
+| Favicon | `pkgdown/favicon.ico` | NEW | Site-only via pkgdown/; excluded from tarball |
+| README | `README.md` | MODIFY | Logo img tag, badge refresh |
+| Vignette cross-links | `vignettes/*.Rmd`, `vignettes/articles/*.Rmd` | MODIFY | Cross-reference links only |
 
-**Step 3: implement `es_report()`** (public API, depends on steps 1 and 2)
-- New `@export`-ed function in `R/es_report.R`
-- Signature: `es_report(task, parameter_set = ParameterSet$new(), provider = NULL, formats = "html", output_dir = ".", output_stem = "event_study_report", sections = <default>, narrative_sections = names(NARRATIVE_SECTIONS), title = "Event Study Report", author = NULL, confidence_level = 0.95, ...)`
-- Implement the four-step sequence
-- Return named character vector of output paths (names = format labels)
-- **Test gate:** integration test with mock provider and mock `rmarkdown::render`; offline test produces valid HTML path; grounding invariant test (mock provider returns ungrounded rec; verify it is dropped before reaching template)
+---
 
-**Step 4: add `report=FALSE` convenience to `run_event_study()`** (optional, lowest priority)
-- Add `report = FALSE` parameter to `run_event_study()` in `R/execute.R`
-- When `report = TRUE`: call `es_report(task, ...)` after `calculate_statistics()`
-- Return task invisibly (side effect: report on disk), or return list with task + paths
-- **Test gate:** existing callers with no `report=` produce identical output
+## Data Flow Changes
 
-**Step 5: regression tests for grounding invariant** (completes the milestone)
-- Mock provider test: provider returns a recommendation with a fabricated diagnostic key; verify that `Advice$recommendations` is empty (dropped by guard) before the `narrative` list reaches `skeleton.Rmd`
-- Offline test: `es_report(task, provider=NULL)` produces a valid HTML file with non-empty robustness section and empty exec/data/results narrative
-- Backward-compat test: `generate_report(task, advice=existing_advice)` with `narrative=NULL` matches pre-v0.64.0 output exactly
+The four surfaces are **all post-computation**: no data-flow changes in the statistical pipeline.
 
-## Anti-Patterns
+### Plotting data flow (Surface B)
 
-### Anti-Pattern 1: One es_advise() call for the entire report narrative
+```
+plot_event_study(task) or .plot_single_event() / .plot_multi_event()
+    |
+    v  (unchanged: extract abnormal_returns, compute CI bounds)
+    |
+    v  CHANGE: ggplot2::theme_minimal() -> theme_eventstudy()
+    |          colour literals -> es_colours[[...]]
+    v
+ggplot2 object returned  (no behavior change)
+```
 
-**What people do:** Pass `task_type = "report_writing"` once and ask the LLM for all four sections in one JSON blob.
+### Report render data flow (Surface B)
 
-**Why it's wrong:** The current `Advice` schema has a single `interpretation` string and a flat `recommendations` list — it is not structured for multi-section narrative. A mega-prompt also risks provider context limits, and a guard drop on one section would empty the entire report narrative.
+```
+generate_report(task, format="html", ...)
+    |
+    +-- .build_output_format("html")
+    |       CHANGE: adds css = system.file("rmarkdown/report.css", ...)
+    |
+    +-- assemble_report_narrative()    <- grounding guard: UNTOUCHED
+    |
+    +-- rmarkdown::render(skeleton.Rmd, params = ...)
+            CHANGE: skeleton adds kable styling, figure captions
+            knitr::is_html_output() switch: UNTOUCHED
+```
 
-**Do this instead:** Call `es_advise()` once per section. Section isolation means a guard drop in the results section does not affect the executive summary.
+### Condition data flow (Surface C)
 
-### Anti-Pattern 2: Injecting narrative text that bypassed es_advise()
+```
+Before:  stop("task must be ...")                               -> base condition
+After:   rlang::abort("task must be ...", class = "eventstudy_bad_input")
 
-**What people do:** Build a prompt directly, get raw LLM text, and `cat()` it into the template via a new `params` slot that skips the `Advice` S3 and the grounding guard.
+Before:  warning(msg, call. = FALSE)  <- in .handle_degenerate()
+After:   rlang::warn(msg, class = "eventstudy_degenerate", call = NULL)
+```
 
-**Why it's wrong:** This breaks the grounding invariant. Fabricated numbers can appear in the highest-visibility surface (the rendered report). This is the worst failure mode in the project's "never silently wrong" contract.
+The `tryCatch()` wrappers in `report.R` and `es_report.R` that catch `error` do not need modification — `rlang::abort()` conditions are still caught by `tryCatch(..., error = function(e) ...)`.
 
-**Do this instead:** All narrative text must flow through `es_advise()`, which always runs `.validate_grounding()`. The template renders only `advice$interpretation` and `advice$recommendations` — never raw character text from an unguarded source.
+---
 
-### Anti-Pattern 3: Calling es_advise() once per section per format
+## Dependency-Ordered Build Sequence
 
-**What people do:** Rebuild narrative inside each `generate_report()` call (once per format), because the assembled narrative is not passed in.
+This order respects all data-flow dependencies and CRAN boundaries:
 
-**Why it's wrong:** `es_advise()` calls the LLM provider. Calling it N*4 times (N formats, 4 sections) multiplies API cost by N and introduces the possibility that the HTML and PDF reports disagree on which recommendations were dropped (different guard results per call).
+**Phase 1 — Brand/Asset Foundation (no code deps)**
+- Create `man/figures/logo.svg`, `man/figures/logo.png`, `man/figures/hex-sticker.png`
+- Create `pkgdown/favicon.ico`
+- Modify `README.md`: add logo img tag
+- Modify `_pkgdown.yml`: add `navbar.logo`, `template.assets: pkgdown/`
+- Modify `pkgdown/extra.css`: add logo-size, hero, badge rules
+- Verify: `pkgdown::build_site()` locally; confirm favicon appears, logo in navbar; confirm `.Rbuildignore` excludes favicon; `R CMD check --as-cran` clean
 
-**Do this instead:** Call `.assemble_report_advice()` once. Pass the same `narrative` list to every `generate_report()` call. The provider is contacted exactly 4 times total.
+**Phase 2 — Shared Theme (must precede plot application)**
+- Create `R/theme.R`: `theme_eventstudy()` + `es_colours`
+- Add `@export` + roxygen docs; run `roxygen2::roxygenise()`
+- Add to `_pkgdown.yml` reference section under "Plotting"
+- Run `devtools::test()`: no test touches colour values, all green
+- Verify: `theme_eventstudy()` available; colour palette consistent with `extra.css` es-tag-* colours
 
-### Anti-Pattern 4: Repurposing the existing `advice=` parameter in generate_report()
+**Phase 3 — Plot Aesthetics (depends on Phase 2)**
+- Modify `R/plotting.R`: apply `theme_eventstudy()` and `es_colours` in `.plot_single_event()`, `.plot_multi_event()`, `plot_diagnostics()`
+- Do NOT modify `plot_stocks()` — it returns a plotly object; `theme_eventstudy()` does not apply
+- Run `devtools::test()`: `test_plotting.R` tests check plot object class/structure, not colours — all green
+- Verify: sample plots render with publication aesthetics
 
-**What people do:** Change `advice=` to accept the new multi-section `narrative` list, breaking existing callers who pass a single `Advice` object.
+**Phase 4 — Report Aesthetics (depends on Phase 2 for colour consistency)**
+- Create `inst/rmarkdown/report.css`
+- Modify `R/report.R:.build_output_format()`: add `css=` to html branch
+- Modify `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd`: kable table styling (with `kableExtra` Suggests guard), figure captions
+- Run `devtools::test()`: `test_report.R` tests render reports; confirm HTML output contains CSS; confirm PDF/Word paths unaffected
+- Verify: `knitr::is_html_output()` behavior unchanged; per-format prose sanitiser path unchanged; grounding guard path unchanged
 
-**Why it's wrong:** Signature-breaking change; existing vignette and user code calling `generate_report(advice = my_advice)` would silently misbehave.
+**Phase 5 — API/Message Polish (independent of Phases 2-4)**
+- Create `R/conditions.R`
+- Modify `R/task.R`, `R/contract.R`, `R/advise.R`: migrate selected `stop()`/`warning()` to classed rlang conditions
+- Modify all 8 print method files: apply consistent header/separator pattern
+- Run `devtools::test()`: check that `expect_warning()` tests still match (adjust class matchers if needed in `test_edge_cases.R`)
+- Verify: `inherits(tryCatch(bad_call, error = identity), "eventstudy_bad_input")` is TRUE; no behavioral change on valid inputs
 
-**Do this instead:** Add `narrative = NULL` as a distinct new parameter. Keep `advice = NULL` unchanged. Both can be supplied simultaneously and render independently.
+**Phase 6 — Docs & Site Polish (depends on Phase 1 for logo; can overlap with 5)**
+- Modify `_pkgdown.yml`: add `template.bslib` colour overrides
+- Modify `pkgdown/extra.css`: typography, badge, hero additions
+- Modify vignettes for cross-links
+- Modify README.md: badge refresh, docs link update
+- Run `pkgdown::build_site()` locally; confirm all articles render, no broken links
+- CI: push to main triggers `pkgdown.yaml` workflow; confirm gh-pages deploy
 
-### Anti-Pattern 5: Hard-coding a single output format in skeleton.Rmd YAML
+---
 
-**What people do:** Leave `output: html_document:` as the only output declaration in the template YAML front matter.
+## Architecture Anti-Patterns to Avoid
 
-**Why it's wrong:** While `rmarkdown::render(output_format=)` overrides the YAML setting, a template that only declares HTML confuses users who open it directly in RStudio and try to knit to Word or PDF.
+### Anti-Pattern 1: Applying theme_eventstudy() inside plot_stocks()
 
-**Do this instead:** The `skeleton.Rmd` `output:` YAML block should list `html_document`, `pdf_document`, `word_document`, and `md_document` as alternatives. The `generate_report()` `output_format=` argument selects which one is used at render time.
+**What people do:** Call `theme_eventstudy()` on a plotly object or pass it to plotly layout.
+**Why it's wrong:** plotly objects are not ggplot2 objects; the `+` operator will throw an error at runtime. The existing tests for `plot_stocks()` would fail.
+**Do this instead:** Apply `theme_eventstudy()` only in the ggplot2-returning functions (`.plot_single_event`, `.plot_multi_event`, `plot_diagnostics`). Leave `plot_stocks()` as plotly-only and style it separately via plotly's `layout()` if desired.
+
+### Anti-Pattern 2: Putting report.css inside the skeleton/ directory with a relative path
+
+**What people do:** Save `report.css` next to `skeleton.Rmd` and reference it with a relative path.
+**Why it's wrong:** `rmarkdown::render()` is called with `input = template_path` but `output_dir` varies. Relative CSS references resolve against `input` directory only during render's intermediate step; the final HTML may not find the CSS if moved to a different output dir.
+**Do this instead:** Use `system.file("rmarkdown/report.css", package = "EventStudy")` to obtain the absolute path at render time and pass it as the `css` argument to `html_document()`.
+
+### Anti-Pattern 3: Adding cli to Imports for print method polish
+
+**What people do:** Take a hard dependency on `cli` for pretty-printing in `print.*` methods.
+**Why it's wrong:** `cli` is a substantial transitive dependency (rlang, fansi, etc.). Adding it to Imports makes every user pull it in at install time. The existing print methods are adequate; the gap is formatting consistency, not rich semantics.
+**Do this instead:** Use `rlang` (already Imports) for classed conditions. Use plain `cat()` with a package-internal separator constant for formatting. Reserve `cli` consideration for a dedicated messaging overhaul milestone, not a polish pass.
+
+### Anti-Pattern 4: Modifying the grounding guard or report_narrative.R for aesthetics
+
+**What people do:** Edit `.validate_grounding()` or `JOINT_HYPOTHESIS_CAVEAT` to inject HTML styling or change wording.
+**Why it's wrong:** The grounding guard is a correctness invariant locked by regression tests (Phase 19 hardening). Any edit risks breaking the "never render ungrounded literal" guarantee or the single-warning discipline.
+**Do this instead:** All HTML styling goes into `report.css` and the skeleton template. The narrative assembler and grounding guard remain completely untouched.
+
+### Anti-Pattern 5: Placing logo in pkgdown/ only (not man/figures/)
+
+**What people do:** Save `logo.svg` only in `pkgdown/` and reference it from `_pkgdown.yml`.
+**Why it's wrong:** `pkgdown/` is `.Rbuildignore`'d, so the logo is absent from the CRAN tarball. The `README.md` on CRAN's web interface (which does not run pkgdown) would show a broken image.
+**Do this instead:** Logo in `man/figures/` (CRAN-shipped, README-accessible). Favicon and site-only overlays in `pkgdown/`.
+
+---
+
+## Integration Boundaries: Grounding Guard & Degenerate-Input Contract
+
+These two invariants must not be touched by any polish surface:
+
+| Invariant | Location | What must not change |
+|-----------|----------|----------------------|
+| Grounding guard | `R/advise.R:.validate_grounding()` | Drop-and-keep logic, single warning emission, never-stop contract |
+| Degenerate-input contract | `R/contract.R:.handle_degenerate()` | Exactly-one-warning discipline, NA propagation, lenient/strict routing |
+| JOINT_HYPOTHESIS_CAVEAT | `R/report_narrative.R:30-35` | Fixed text constant -- wording is a correctness invariant, not aesthetics |
+| Narrative LLM-call budget | `R/report.R:280-285` | NARR-01: `assemble_report_narrative()` called once before format loop |
+| `knitr::is_html_output()` | `skeleton.Rmd` | Controls static/interactive switch -- CSS or caption additions must not move this flag |
+
+The condition-class migration in Surface C modifies the *form* of warnings and errors from `contract.R` and `advise.R`, but the *count* (exactly one per event), *receiver* (same `tryCatch` callers), and *behavior* (NA propagation vs stop) are entirely unchanged.
+
+---
 
 ## Sources
 
-- Direct codebase inspection: `R/report.R`, `R/advise.R`, `R/es_diagnostics.R`, `R/execute.R`, `R/es_diagnostics.R`, `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd` (2026-09-06)
-- `.planning/PROJECT.md` — v0.64.0 milestone requirements and key decisions
-- `.planning/codebase/ARCHITECTURE.md` — existing layer and component map
+- Live codebase inspection: `R/plotting.R`, `R/report.R`, `R/report_narrative.R`, `R/advise.R`, `R/contract.R`, `R/task.R`, `R/parameter_set.R`, `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd`, `_pkgdown.yml`, `pkgdown/extra.css`, `.Rbuildignore`, `DESCRIPTION` (HIGH confidence -- direct file read)
+- pkgdown 2.x logo/favicon conventions: `template.assets`, `navbar.logo`, `man/figures/` pattern -- widely used by tidyverse packages; usethis::use_logo places assets in man/figures/ (MEDIUM confidence -- stable ecosystem convention)
+- ggplot2 `%+replace%` theme extension pattern -- standard since ggplot2 2.x, documented in `vignette("extending-ggplot2")` (MEDIUM confidence -- stable)
+- rlang classed conditions pattern -- `rlang::abort()` / `rlang::warn()` with class vector, used by tidyverse packages; rlang already in Imports (MEDIUM confidence -- stable)
 
 ---
-*Architecture research for: EventStudy v0.64.0 one-call AI report wrapper integration*
-*Researched: 2026-09-06*
+
+*Architecture research for: EventStudy v0.65.0 Polish milestone*
+*Researched: 2026-09-08*
