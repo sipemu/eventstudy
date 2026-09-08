@@ -9,13 +9,30 @@ description: >
 template:
   bootstrap: 5
   math-rendering: katex
+  bslib:
+    bg: "#ffffff"
+    fg: "#0f172a"
+    primary: "#2563eb"
+    link-color: "#2563eb"
+    link-hover-color: "#1d4ed8"
+    font-scale: 1.0
+    base-font:
+      google: "Inter"
+    heading-font:
+      google: "Plus Jakarta Sans"
+    code-font:
+      google: "JetBrains Mono"
 
 home:
   sidebar: false
 
 navbar:
+  logo:
+    image: logo.png
+    href: https://sipemu.github.io/eventstudy/
+    alt: EventStudy
   structure:
-    left: [get-started, reference, articles, methods, gallery, examples]
+    left: [logo, get-started, reference, articles, methods, gallery, examples]
     right: [search, github]
   components:
     get-started:
