@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- EventStudy Open Graph social card, 1200x630. Rendered to
+       man/figures/og-card.png via rsvg-convert (see make_og_card.R).
+       Left ~40% zone: the CAR-curve logo mark, 200x200, centred.
+       Right ~60% zone: headline, subheading, footer. ASCII copy only. -->
+
+  <!-- White canvas -->
+  <rect x="0" y="0" width="1200" height="630" fill="#ffffff"/>
+  <!-- 8px top border strip, primary brand blue -->
+  <rect x="0" y="0" width="1200" height="8" fill="#2563eb"/>
+
+  <!-- Left zone (0..480): logo mark centred at (240,315), 200x200 box.
+       Box spans x 140..340, y 215..415. The motif is the CAR curve crossing
+       the vertical event line at t=0, scaled 2x from the 100x100 source. -->
+  <g transform="translate(140,215) scale(2)">
+    <!-- Neutral dashed baseline (zero abnormal-return reference) -->
+    <line x1="10" y1="70" x2="90" y2="70" stroke="#94a3b8" stroke-width="1"
+          stroke-dasharray="4 3" opacity="0.6"/>
+    <!-- Vertical event line at t=0 (x=50) -->
+    <line x1="50" y1="10" x2="50" y2="90" stroke="#2563eb" stroke-width="1.5"
+          opacity="0.4"/>
+    <!-- CAR curve: below baseline pre-event, crossing at (50,30), rising after -->
+    <path d="M 10 68 C 24 65, 40 52, 50 30 C 58 20, 78 17, 92 16"
+          stroke="#2563eb" stroke-width="3" fill="none" stroke-linecap="round"
+          stroke-linejoin="round"/>
+    <!-- t=0 marker on the crossing point -->
+    <circle cx="50" cy="30" r="4" fill="#2563eb"/>
+  </g>
+
+  <!-- Right zone (480..1160): headline / subheading / footer, left-aligned at x=520 -->
+  <text x="520" y="300" font-family="'Plus Jakarta Sans', sans-serif"
+        font-size="64" font-weight="700" fill="#0f172a">EventStudy</text>
+  <text x="520" y="352" font-family="'Inter', sans-serif"
+        font-size="28" font-weight="400" fill="#64748b">Financial Event Study Analysis in R</text>
+  <text x="520" y="404" font-family="'Inter', sans-serif"
+        font-size="20" font-weight="500" fill="#2563eb">eventstudy.de</text>
+</svg>
