@@ -9,7 +9,7 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 
 ### Brand & Visual Identity
 
-- [ ] **BRAND-01**: A real EventStudy logo + hex sticker exists — SVG source under `data-raw/brand/` (`.Rbuildignore`'d), optimised PNG at `man/figures/logo.png` (tarball-safe, <50 KB)
+- [x] **BRAND-01**: A real EventStudy logo + hex sticker exists — SVG source under `data-raw/brand/` (`.Rbuildignore`'d), optimised PNG at `man/figures/logo.png` (tarball-safe, <50 KB)
 - [ ] **BRAND-02**: Logo is wired into the README badge (`usethis::use_logo()` pattern) and the pkgdown navbar
 - [ ] **BRAND-03**: Full favicon set generated via `pkgdown::build_favicons()` and committed under `pkgdown/` (out of the CRAN tarball)
 - [ ] **BRAND-04**: Open Graph social-preview card configured so shared links render a branded thumbnail
@@ -46,7 +46,7 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 ### Release Hygiene & Guardrails (cross-cutting)
 
 - [ ] **CRAN-01**: DESCRIPTION adds only `tinytable`, `patchwork`, `ragg` to Suggests (`requireNamespace()`-guarded); no new Imports
-- [ ] **CRAN-02**: Version bumped to 0.65.0; NEWS.md v0.65.0 section written; DESCRIPTION/NEWS consistent (bump lands as the first commit of execution)
+- [x] **CRAN-02**: Version bumped to 0.65.0; NEWS.md v0.65.0 section written; DESCRIPTION/NEWS consistent (bump lands as the first commit of execution)
 - [ ] **CRAN-03**: CRAN tarball stays lean (assert < 1 MB in CI); brand sources in `.Rbuildignore`'d dirs; `man/figures/` assets optimised
 - [ ] **CRAN-04**: No non-ASCII in `R/`, `man/figures/`, `inst/` (CI grep guard); no new `R CMD check --as-cran` NOTEs/WARNINGs vs baseline
 - [ ] **CRAN-05**: All four report formats (HTML/PDF/Word/Markdown) render; PDF contains no `<script>` tags; the `knitr::is_html_output()` static/interactive switch stays intact — locked by regression test
@@ -89,14 +89,14 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BRAND-01 | Phase 20 | Pending |
+| BRAND-01 | Phase 20 | Complete |
 | BRAND-02 | Phase 20 | Pending |
 | BRAND-03 | Phase 20 | Pending |
 | BRAND-04 | Phase 20 | Pending |
 | BRAND-05 | Phase 20 | Pending |
 | BRAND-06 | Phase 20 | Pending |
 | BRAND-07 | Phase 20 | Pending |
-| CRAN-02 | Phase 20 | Pending |
+| CRAN-02 | Phase 20 | Complete |
 | CRAN-03 | Phase 20 | Pending |
 | CRAN-04 | Phase 20 | Pending |
 | VIZ-01 | Phase 21 | Pending |
@@ -121,6 +121,7 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 | DOCS-04 | Phase 24 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 30 total (BRAND 7, VIZ 7, API 6, DOCS 4, CRAN 6)
 - Mapped to phases: 30 (Phase 20: 10 · Phase 21: 4 · Phase 22: 5 · Phase 23: 7 · Phase 24: 4)
 - Unmapped: 0 ✓
