@@ -170,6 +170,7 @@ reference:
       automated RMarkdown report generation.
     contents:
       - export_results
+      - es_report
       - generate_report
       - tidy.EventStudyTask
 
