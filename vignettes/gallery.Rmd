@@ -8,6 +8,30 @@ vignette: >
 ---
 
 ```{=html}
+<div class="es-stat-strip">
+  <div class="es-stat-badge">
+    <span class="stat-number">15+</span>
+    <span class="stat-label">Return Models</span>
+  </div>
+  <div class="es-stat-badge">
+    <span class="stat-number">12</span>
+    <span class="stat-label">Test Statistics</span>
+  </div>
+  <div class="es-stat-badge">
+    <span class="stat-number">5</span>
+    <span class="stat-label">DiD Estimators</span>
+  </div>
+</div>
+
+<div class="es-ecosystem-strip">
+  <span class="es-ecosystem-label">Part of the EventStudy ecosystem:</span>
+  <a href="https://eventstudy.de/products/gsheet-template" class="es-ecosystem-link">Google Sheets Template</a>
+  <span class="es-ecosystem-sep">.</span>
+  <a href="https://sipemu.github.io/eventstudy/" class="es-ecosystem-link es-ecosystem-current">R Package</a>
+  <span class="es-ecosystem-sep">.</span>
+  <a href="https://eventstudy.de/products/eventstudy-app" class="es-ecosystem-link">WebAssembly App</a>
+</div>
+
 <h2 class="es-section-heading es-core">Core Workflow</h2>
 
 <div class="es-gallery">
