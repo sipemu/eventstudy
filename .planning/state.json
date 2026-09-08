@@ -1,108 +1,38 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v0.64.0 — Automated AI Reporting",
+  "milestone": "v0.65.0 — Polish",
   "phases": [
     {
-      "number": "1",
-      "name": "Contract Foundation",
-      "status": "complete"
+      "number": "20",
+      "name": "Brand & Visual Identity",
+      "status": "pending"
     },
     {
-      "number": "2",
-      "name": "Model and Stats Sweep",
-      "status": "complete"
+      "number": "21",
+      "name": "Shared Theme & Plot Aesthetics",
+      "status": "pending"
     },
     {
-      "number": "3",
-      "name": "Pipeline and External Hardening",
-      "status": "complete"
+      "number": "22",
+      "name": "Report Aesthetics",
+      "status": "pending"
     },
     {
-      "number": "4",
-      "name": "Regression Net and Check Gate",
-      "status": "complete"
+      "number": "23",
+      "name": "API & Message Polish",
+      "status": "pending"
     },
     {
-      "number": "5",
-      "name": "Offline Diagnostics + Grounding KB",
-      "status": "complete"
-    },
-    {
-      "number": "6",
-      "name": "Provider Abstraction + HTTP Harness",
-      "status": "complete"
-    },
-    {
-      "number": "7",
-      "name": "Grounded Advise Layer + Guard",
-      "status": "complete"
-    },
-    {
-      "number": "8",
-      "name": "Agent Skill + Waitlist + Check Gate",
-      "status": "complete"
-    },
-    {
-      "number": "9",
-      "name": "Bundled Dieselgate Dataset + Provenance",
-      "status": "complete"
-    },
-    {
-      "number": "10",
-      "name": "Advisor Vignette + Offline-Safe Build + Docs + Release",
-      "status": "complete"
-    },
-    {
-      "number": "11",
-      "name": "Curated pkgdown Site + Custom Theme (local build)",
-      "status": "complete"
-    },
-    {
-      "number": "12",
-      "name": "CI/CD Deploy + Repo Linkage + Release Integrity",
-      "status": "complete"
-    },
-    {
-      "number": "13",
-      "name": "Article Infrastructure & Conventions Gate",
-      "status": "complete"
-    },
-    {
-      "number": "14",
-      "name": "Curated Per-Domain Datasets",
-      "status": "complete"
-    },
-    {
-      "number": "15",
-      "name": "Methods Articles + Rendered Outputs",
-      "status": "complete"
-    },
-    {
-      "number": "16",
-      "name": "Worked-Examples Gallery + Build & Release Integrity",
-      "status": "complete"
-    },
-    {
-      "number": "17",
-      "name": "Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline",
-      "status": "complete"
-    },
-    {
-      "number": "18",
-      "name": "Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly",
-      "status": "complete"
-    },
-    {
-      "number": "19",
-      "name": "es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate",
-      "status": "complete"
+      "number": "24",
+      "name": "Docs & Site Polish",
+      "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:progress",
-    "label": "Show progress",
-    "reason": "Unsure of state — showing progress"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 20 of 5 · 0% · executing"
   },
-  "updated_at": "2026-09-07T20:37:29.588Z"
+  "updated_at": "2026-09-08T20:50:55.464Z"
 }
