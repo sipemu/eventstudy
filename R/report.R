@@ -450,11 +450,17 @@ generate_report <- function(task,
     fmt,
     html = {
       if (!requireNamespace("rmarkdown", quietly = TRUE)) return(NULL)
+      # VIZ-06: inject the HTML-only brand stylesheet. system.file() returns ""
+      # when the asset is absent; the nzchar() guard keeps that safe. This css=
+      # is html-only -- the pdf/word/md branches never reference report.css, so
+      # the stylesheet can never reach non-HTML output.
+      css_path <- system.file("rmarkdown/report.css", package = "EventStudy")
       rmarkdown::html_document(
         toc       = TRUE,
         toc_float = TRUE,
         theme     = "flatly",
-        code_folding = "hide"
+        code_folding = "hide",
+        css = if (nzchar(css_path)) css_path else NULL
       )
     },
     pdf = {

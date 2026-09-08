@@ -563,3 +563,39 @@ test_that("VIZ-04: .report_table col.names rename reaches kable output", {
   expect_true(grepl("Firm", txt, fixed = TRUE))
   expect_true(grepl("Return", txt, fixed = TRUE))
 })
+
+test_that("VIZ-06: report.css injected on HTML branch only", {
+  skip_if_not_installed("rmarkdown")
+
+  # The shipped asset must be resolvable after load_all/install.
+  css_path <- system.file("rmarkdown/report.css", package = "EventStudy")
+  expect_true(nzchar(css_path))
+
+  # HTML branch returns a real format object (which carries the css=).
+  html_fmt <- EventStudy:::.build_output_format("html")
+  expect_false(is.null(html_fmt))
+  expect_true(inherits(html_fmt, "rmarkdown_output_format"))
+
+  # Non-HTML branches must never reference report.css. Force each branch's
+  # toolchain available so the format object is built, then confirm no pandoc
+  # argument mentions report.css.
+  fmt_refs_css <- function(fmt) {
+    obj <- switch(
+      fmt,
+      pdf  = with_mocked_bindings(
+        .pdf_toolchain_available = function() TRUE,
+        EventStudy:::.build_output_format("pdf"), .package = "EventStudy"),
+      word = with_mocked_bindings(
+        .word_toolchain_available = function() TRUE,
+        EventStudy:::.build_output_format("word"), .package = "EventStudy"),
+      md   = with_mocked_bindings(
+        .word_toolchain_available = function() TRUE,
+        EventStudy:::.build_output_format("md"), .package = "EventStudy")
+    )
+    if (is.null(obj)) return(FALSE)
+    any(grepl("report.css", unlist(obj), fixed = TRUE))
+  }
+  expect_false(fmt_refs_css("pdf"))
+  expect_false(fmt_refs_css("word"))
+  expect_false(fmt_refs_css("md"))
+})
