@@ -103,6 +103,7 @@ Research flags for planning:
 - **Phase 20:** Design input — confirm eventstudy.de colour codes (bslib primary/bg/fg) with brand owner before wiring `template.bslib`.
 - **Phase 22:** Multi-format rendering edge cases — CI integration tests for HTML/PDF/Word/MD render coverage.
 - **Phase 24 (from Phase 20 verify):** README prose is stale — lines ~32/34 still say "13 Return Models" / "11 Test Statistics", contradicting the new gallery badges (15+ Return Models / 12 Test Statistics). Reconcile README prose with the honest counts during docs polish.
+- **Pre-existing tech debt (from Phase 21 review, out of scope):** `gridExtra::grid.arrange` used unguarded in R/plotting.R (~L351) and a stale `@return` "patchwork-style" doc. Not introduced by v0.65.0. Candidate for a future hardening ticket or Phase 23 guard pass — verify gridExtra is guarded/declared before CRAN submission.
 
 ### Blockers/Concerns
 
