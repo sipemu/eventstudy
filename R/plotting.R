@@ -31,7 +31,7 @@ plot_stocks <- function(task,
   }
 
   # Helper function for event date line
-  vline <- function(x = 0, color = "grey") {
+  vline <- function(x = 0, color = es_colours["reference"]) {
     list(
       type = "line",
       y0 = 0,
@@ -70,13 +70,12 @@ plot_stocks <- function(task,
                 y    = ~get(target_variable),
                 type = 'scatter',
                 mode = 'lines',
-                name = symbol) %>%
+                name = symbol,
+                line = list(color = es_colours["group1"])) %>%
       layout(shapes = v_shape,
              xaxis  = list(title = "Date"),
-             yaxis  = list(title = target_variable),
-             legend = list(orientation = "h",
-                           xanchor = "center",
-                           x = 0.5))
+             yaxis  = list(title = target_variable)) %>%
+      .style_plotly()
 
     plots_list[[symbol]] <- plot
   }
