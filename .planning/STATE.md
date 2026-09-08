@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v0.65.0
 milestone_name: Polish
 status: planning
-last_updated: "2026-09-08T19:06:46.242Z"
+last_updated: "2026-09-08T20:00:00.000Z"
 last_activity: 2026-09-08
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,27 +17,31 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-07)
+See: .planning/PROJECT.md (updated 2026-09-08)
 
-**Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics, never fabricating a result.
-**Current focus:** Planning next milestone (v0.64.0 shipped 2026-09-07)
+**Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics. This milestone lifts the *felt* quality (brand, output, API, docs) to match that substance, without touching statistical correctness.
+**Current focus:** Phase 20 — Brand & Visual Identity (roadmap created, ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-09-08 — Milestone v0.65.0 started
+Phase: 20 of 24 (Brand & Visual Identity) — first phase of v0.65.0
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-09-08 — Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
 
-## Milestone Roadmap (v0.64.0)
+Progress: [░░░░░░░░░░] 0%
 
-- **Phase 17: Grounding-Prose Hardening, Offline Report Fallback & CRAN Baseline** — GROUND-01..03, OFFLINE-01, REPORT-03. Extend the grounding guard to scan free-text narrative prose for numeric literals absent from `es_diagnostics()` (the milestone's core-value gate, lands first); resolve the `report_writing`-is-LLM-only `stop()` so narrative renders offline via the rule-based engine; add backward-compatible `narrative=NULL` seam to `generate_report()` (NULL path byte-identical); establish `\dontrun{}` / `skip_on_cran()` / Suggests CRAN hygiene.
-- **Phase 18: Multi-Format Renderer, Fixed Template & Grounded Narrative Assembly** — NARR-01..05, FORMAT-01..04, TMPL-01/02, OFFLINE-02. Section-by-section grounded narrative assembler (one LLM call per section, independent of format count); references from KB citations; static significance calibration; fixed joint-hypothesis caveat. Fixed template (exec summary · data/methods · results · diagnostics · robustness/caveats · references), arg-toggled sections, data/methods+results auto-filled from task+diagnostics. Renders HTML/PDF/Word/Markdown; ggplot2 static for non-HTML via `knitr::is_html_output()`; per-format prose sanitiser; graceful toolchain skips; visible AI-vs-offline mode distinction.
-- **Phase 19: es_report() Orchestrator, run_event_study(report=) & CRAN-Clean Release Gate** — REPORT-01/02/04, CRAN-01/02. Public `es_report()` composing study → diagnostics → advise → render, returning output path(s), deep-cloning the task (no caller mutation); additive `run_event_study(..., report=TRUE)` (defaults FALSE, byte-identical when omitted); final `R CMD check --as-cran` gate (tinytex Suggests-only, no new NOTEs/WARNINGs, suite green, NEWS v0.64.0).
+## Milestone Roadmap (v0.65.0 — Phases 20–24)
 
-Dependency order: Phase 17 (grounding + offline + CRAN discipline, blocking) → Phase 18 (renderer/template/multi-format, needs the `narrative=` seam + offline fallback + prose guard) → Phase 19 (orchestrator + convenience param + final release gate, needs the renderer).
+- **Phase 20: Brand & Visual Identity** — BRAND-01..07, CRAN-02/03/04. Logo + hex sticker (`man/figures/logo.png` <50 KB, SVG sources in `.Rbuildignore`'d `data-raw/brand/`), README badge + navbar wiring, favicon set + Open Graph card under `pkgdown/`, eventstudy.de-aligned `template.bslib` palette/typography + home card gallery/numeric badges, lifecycle `experimental`→`stable`. Owns the version bump to 0.65.0 (first commit), tarball < 1 MB assertion, and non-ASCII / no-new-check-findings guardrails.
+- **Phase 21: Shared Theme & Plot Aesthetics** — VIZ-01/02/03, CRAN-01. New `R/theme.R` exporting `theme_eventstudy()` + Okabe-Ito `es_colours`; applied across ggplot2 helpers (`.plot_single_event`, `.plot_multi_event`, `plot_diagnostics`) removing hardcoded colours; plotly visuals restyled to `es_colours`; `plot_stocks()` left structurally intact. Lands the only Suggests additions (`tinytable`, `patchwork`, `ragg`, all `requireNamespace()`-guarded, no new Imports).
+- **Phase 22: Report Aesthetics** — VIZ-04/05/06/07, CRAN-05. `es_report()` tables via `tinytable` (kable fallback) styled across all four formats; figure captions on every plot chunk; HTML-only `inst/rmarkdown/report.css`; per-format figure sizing (replacing global `fig.width = 10`) with `ragg`. Locks four-format render, PDF no `<script>`, and the `knitr::is_html_output()` switch by regression test. Prose sanitiser + grounding guard untouched.
+- **Phase 23: API & Message Polish** — API-01..06, CRAN-06. Print methods return `invisible(x)`; `format.*` added where missing; selected `stop()`/`warning()` → classed `rlang::abort()`/`rlang::warn()`; messages name offending argument + value; `verbose=` quiet mode (byte-identical default); deprecation audit (shim-or-verified-no-op, no `lifecycle` dep). Valid-input behavior unchanged; snapshot tests cover print methods + prose sanitiser; exactly-one-warning discipline preserved.
+- **Phase 24: Docs & Site Polish** — DOCS-01..04. `@family`/`@seealso` cross-links; README ecosystem section + home markers; `pkgdown::check_pkgdown()` in CI; tightened vignettes/articles (getting-started flow + cross-links), rich content stays pkgdown-only.
 
-Coverage: 22/22 v0.64.0 requirements mapped, 0 unmapped. (CRAN-01/02 established in Phase 17, formally owned + verified in Phase 19.)
+Dependency order: Phase 20 (brand/asset foundation + version/guardrails, blocking for site work) → Phase 21 (shared theme foundation + Suggests) → Phase 22 (report aesthetics, needs Phase 21 palette). Phase 23 (API/message) is independent — may overlap. Phase 24 (docs/site) needs Phase 20's logo — may overlap Phase 23.
+
+Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed to their natural verification phases (CRAN-02/03/04→20, CRAN-01→21, CRAN-05→22, CRAN-06→23).
 
 ## Performance Metrics
 
@@ -53,18 +57,6 @@ Coverage: 22/22 v0.64.0 requirements mapped, 0 unmapped. (CRAN-01/02 established
 - Trend: n/a
 
 *Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 17 P01 | 15 | 3 tasks | 6 files |
-| Phase 17 P03 | 152 | 3 tasks | 3 files |
-| Phase 18 P01 | 13 | 3 tasks | 4 files |
-| Phase 18-multi-format-renderer-fixed-template-grounded-narrative-asse P02 | 13 | 3 tasks | 4 files |
-| Phase 19-one-call-es-report-orchestrator-run-event-study-report-cran P01 | 138 | 2 tasks | 2 files |
-| Phase 19 P02 | 4min | 2 tasks | 2 files |
-| Phase 19-one-call-es-report-orchestrator-run-event-study-report-cran P03 | 45min | 2 tasks | 13 files |
-| Phase 19.1-close-gap-ground-01-02-03-wire-prose-grounding-guard-into-ai P01 | 173 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -73,42 +65,28 @@ Coverage: 22/22 v0.64.0 requirements mapped, 0 unmapped. (CRAN-01/02 established
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- One-call AI report as a new additive wrapper (`es_report()`) over `generate_report()`, not a signature change — keeps the existing renderer's NULL-advice byte-identical path intact.
-- Report always renders complete offline; LLM narrative is enrichment, rule-based advice engine is the fallback (extends the v0.60.0 offline-first advisor).
-- Grounding invariant carries into the report: narrative cites only computed diagnostics, enforced by the runtime guard extended to prose + regression tests (the report is the highest-visibility surface for an ungrounded number).
-- Word output uses plain `rmarkdown::word_document()` (NOT officedown) to keep the package CRAN-clean with zero new transitive deps — officedown / RPTX-03 deferred.
-- Multi-format (HTML/PDF/Word/Markdown) via rmarkdown output formats; PDF/Word toolchains stay optional (user-environment, not hard deps); `tinytex` added to Suggests only.
-- Sensible fixed template with arg-toggled sections, no custom templating (RPTC-01 deferred).
-- [Phase 17]: report_writing moved from LLM_ONLY_TYPES to KB_TYPES (OFFLINE-01); offline OfflineNarrative S3 returned without provider
-- [Phase 17]: narrative=NULL seam added to generate_report() after advice=; NULL path byte-identical (REPORT-03)
-- [Phase 17]: Regex alternation order longest-first prevents 4-digit year split in prose scanner
-- [Phase 18]: section_hint=NULL is additive on es_advise(); NULL path byte-identical to pre-Phase-18 report_writing (backward compat lock)
-- [Phase 18]: data_methods always sourced offline; exec_summary/results/robustness are LLM-narrated with per-section fallback on error
-- [Phase 18]: narrative validation allows section_sources/report_mode metadata fields as non-prose elements
-- [Phase 18]: appendix-section chunk name preserved in skeleton.Rmd for backward compat
-- [Phase 19]: es_report() is a thin visible-return wrapper over generate_report(); deep-clones task at entry for REPORT-04 non-mutation
-- [Phase 19]: Functional equality test instead of serialize() for R6 objects — R6 environments have different memory addresses between separate construction calls, making byte-level serialize() equality impossible for deep-cloned objects even when functionally identical.
-- [Phase 19]: isTRUE(report) guard wraps all report machinery in run_event_study() so FALSE/omitted path is provably unreachable — additive param pattern with zero behavior change on omission.
-- [Phase 19]: Field-level R6 mutation assertions instead of binary serialize() for REPORT-04 test -- R6 clone() mutates parent env serialization even with no user-visible field changes
-- [Phase 19]: em-dash U+2014 replaced with -- in roxygen comments and \u2014 escape in string literals to clear CRAN non-ASCII WARNING in advise_offline.R
-- [Phase 19]: Change \link{assemble_report_narrative} to plain \code{} in generate_report roxygen since that function is unexported/internal
-- [Phase 19]: Wire .scan_prose_grounding() into assemble_report_narrative() at section level; fabricated numeric literals in LLM prose dropped to offline fallback with warning (GROUND-01/02/03)
+- All four v0.65.0 polish surfaces are purely additive overlays — zero restructuring of the pipeline, advisor, or reporting backend; behavior on valid inputs must not change.
+- Dependency-light stack: add only `tinytable`, `patchwork`, `ragg` to Suggests (all `requireNamespace()`-guarded); explicitly NOT adding `gt`/`kableExtra`/`flextable`/`cli`/`lifecycle`.
+- Brand/site assets split by CRAN boundary: logo/hex PNG in `man/figures/` (tarball-safe, README-visible); SVG sources, favicon, OG card in `.Rbuildignore`'d `data-raw/brand/` and `pkgdown/`.
+- API polish uses classed `rlang` conditions (already imported), not `cli`; `verbose=` default is byte-identical; `lifecycle` added only if a real rename appears (else API-06 is a verified no-op).
+
+### v0.64.0 invariants that MUST NOT regress (carried into every phase)
+
+- `.validate_grounding()` (advise.R) — drop-and-keep, single warning, never-stop; extended to report prose in Phase 19.1.
+- `.handle_degenerate()` (contract.R) — exactly-one-warning per degenerate event, NA propagation, strict/lenient routing.
+- `knitr::is_html_output()` switch in `skeleton.Rmd` — static/interactive selection must not move.
+- `JOINT_HYPOTHESIS_CAVEAT` wording (report_narrative.R) — fixed correctness constant.
+- `.sanitise_prose()` ordering (ampersand-first) — hardened; CSS/table additions must not touch it.
 
 ### Pending Todos
 
-- **Phase 17 (spike):** Validate numeric-literal regex + tolerance for the prose grounding scanner against real LLM output samples (rounding vs off-by-one vs fabricated) before locking the guard.
-- **Phase 18 (spike):** Prose sanitisation fixtures (em-dash, smart quotes, Unicode, XML entities) per output format; verify PDF/Word render without corruption.
-- **Phase 18 (spike):** Multi-format sequential render (HTML+PDF+Word) figure-directory-deletion edge case — confirm figures survive.
+Research flags for planning:
+- **Phase 20:** Design input — confirm eventstudy.de colour codes (bslib primary/bg/fg) with brand owner before wiring `template.bslib`.
+- **Phase 22:** Multi-format rendering edge cases — CI integration tests for HTML/PDF/Word/MD render coverage.
 
 ### Blockers/Concerns
 
-- **GROUND-01 is the make-or-break invariant:** the existing guard only validates structured `evidence[]` arrays; the multi-section narrative adds four free-text prose fields, each a hallucination surface. Must be solid in Phase 17 before any template work.
-- **OFFLINE-01 blocker:** `es_advise()` currently `stop()`s for `task_type="report_writing"` when `provider=NULL`; must be resolved in Phase 17 so a full report renders with no API key.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
+- **Design dependency (Phase 20):** eventstudy.de brand palette hex values not yet confirmed; needed for `template.bslib` + `extra.scss`. Logo/hex sticker also need visual design input (separate stream from technical build).
 
 ## Deferred Items
 
@@ -120,7 +98,6 @@ Recent decisions affecting current work:
 | Scale | SCALE-01..03: streaming/data.table/sparse FE | Deferred | v0.50.0 init | v2 |
 | Advisor Pro | PRO-01..02: RAG corpus advisor + managed hosting | Deferred | v0.60.0 roadmap | future (waitlist-gated) |
 | Surfaces | SURF-01..02: MCP server + panel/intraday/synthetic diagnostics | Deferred | v0.60.0 roadmap | future |
-| Docs | Package logo / hex sticker, custom homepage cards, versioned docs | Deferred | v0.62.0 roadmap | future |
 | Reporting | RPTX-01: report support for panel/intraday/synthetic-control tasks | Deferred | v0.64.0 roadmap | future (needs SURF-01/02) |
 | Reporting | RPTX-02: bootstrap-CI reporting | Deferred | v0.64.0 roadmap | future |
 | Reporting | RPTX-03: rich Word output via officedown | Deferred | v0.64.0 roadmap | future (if demand) |
@@ -128,10 +105,10 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-09-07T19:36:57.413Z
-Stopped at: Phase 19 complete, ready to plan Phase 19.1
+Last session: 2026-09-08 20:00
+Stopped at: v0.65.0 roadmap created (Phases 20–24), STATE + REQUIREMENTS traceability written
 Resume file: None
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd-new-milestone
+- Review the roadmap, then plan the first phase with `/gsd-plan-phase 20`.

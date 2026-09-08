@@ -85,21 +85,46 @@ Explicitly excluded for v0.65.0. Documented to prevent scope creep.
 
 ## Traceability
 
-Filled during roadmap creation.
+Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADMAP.md`.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BRAND-01..07 | TBD | Pending |
-| VIZ-01..07 | TBD | Pending |
-| API-01..06 | TBD | Pending |
-| DOCS-01..04 | TBD | Pending |
-| CRAN-01..06 | TBD | Pending |
+| BRAND-01 | Phase 20 | Pending |
+| BRAND-02 | Phase 20 | Pending |
+| BRAND-03 | Phase 20 | Pending |
+| BRAND-04 | Phase 20 | Pending |
+| BRAND-05 | Phase 20 | Pending |
+| BRAND-06 | Phase 20 | Pending |
+| BRAND-07 | Phase 20 | Pending |
+| CRAN-02 | Phase 20 | Pending |
+| CRAN-03 | Phase 20 | Pending |
+| CRAN-04 | Phase 20 | Pending |
+| VIZ-01 | Phase 21 | Pending |
+| VIZ-02 | Phase 21 | Pending |
+| VIZ-03 | Phase 21 | Pending |
+| CRAN-01 | Phase 21 | Pending |
+| VIZ-04 | Phase 22 | Pending |
+| VIZ-05 | Phase 22 | Pending |
+| VIZ-06 | Phase 22 | Pending |
+| VIZ-07 | Phase 22 | Pending |
+| CRAN-05 | Phase 22 | Pending |
+| API-01 | Phase 23 | Pending |
+| API-02 | Phase 23 | Pending |
+| API-03 | Phase 23 | Pending |
+| API-04 | Phase 23 | Pending |
+| API-05 | Phase 23 | Pending |
+| API-06 | Phase 23 | Pending |
+| CRAN-06 | Phase 23 | Pending |
+| DOCS-01 | Phase 24 | Pending |
+| DOCS-02 | Phase 24 | Pending |
+| DOCS-03 | Phase 24 | Pending |
+| DOCS-04 | Phase 24 | Pending |
 
 **Coverage:**
 - v1 requirements: 30 total (BRAND 7, VIZ 7, API 6, DOCS 4, CRAN 6)
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 30 ⚠️
+- Mapped to phases: 30 (Phase 20: 10 · Phase 21: 4 · Phase 22: 5 · Phase 23: 7 · Phase 24: 4)
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-08*
-*Last updated: 2026-09-08 after initial definition*
+*Last updated: 2026-09-08 after roadmap creation (Phases 20–24 mapped, 30/30 coverage)*
