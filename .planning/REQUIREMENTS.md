@@ -14,8 +14,8 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 - [x] **BRAND-03**: Full favicon set generated via `pkgdown::build_favicons()` and committed under `pkgdown/` (out of the CRAN tarball)
 - [x] **BRAND-04**: Open Graph social-preview card configured so shared links render a branded thumbnail
 - [x] **BRAND-05**: pkgdown `bslib` theme aligned to the eventstudy.de brand — palette (primary/bg/fg), typography, via `_pkgdown.yml template.bslib` + `pkgdown/extra.scss`
-- [ ] **BRAND-06**: pkgdown home card gallery + numeric badges ("15 Return Models", "12 Test Statistics", "6 DiD Estimators") restyled to the ecosystem look
-- [ ] **BRAND-07**: Lifecycle badge flipped `experimental` → `stable`; README badge row refreshed
+- [x] **BRAND-06**: pkgdown home card gallery + numeric badges ("15 Return Models", "12 Test Statistics", "6 DiD Estimators") restyled to the ecosystem look
+- [x] **BRAND-07**: Lifecycle badge flipped `experimental` → `stable`; README badge row refreshed
 
 ### Report & Plot Aesthetics
 
@@ -47,8 +47,8 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 
 - [ ] **CRAN-01**: DESCRIPTION adds only `tinytable`, `patchwork`, `ragg` to Suggests (`requireNamespace()`-guarded); no new Imports
 - [x] **CRAN-02**: Version bumped to 0.65.0; NEWS.md v0.65.0 section written; DESCRIPTION/NEWS consistent (bump lands as the first commit of execution)
-- [ ] **CRAN-03**: CRAN tarball stays lean (assert < 1 MB in CI); brand sources in `.Rbuildignore`'d dirs; `man/figures/` assets optimised
-- [ ] **CRAN-04**: No non-ASCII in `R/`, `man/figures/`, `inst/` (CI grep guard); no new `R CMD check --as-cran` NOTEs/WARNINGs vs baseline
+- [x] **CRAN-03**: CRAN tarball stays lean (assert < 1 MB in CI); brand sources in `.Rbuildignore`'d dirs; `man/figures/` assets optimised
+- [x] **CRAN-04**: No non-ASCII in `R/`, `man/figures/`, `inst/` (CI grep guard); no new `R CMD check --as-cran` NOTEs/WARNINGs vs baseline
 - [ ] **CRAN-05**: All four report formats (HTML/PDF/Word/Markdown) render; PDF contains no `<script>` tags; the `knitr::is_html_output()` static/interactive switch stays intact — locked by regression test
 - [ ] **CRAN-06**: Behavior on valid inputs unchanged; full test suite green; snapshot tests cover print methods + the prose sanitiser
 
@@ -94,11 +94,11 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 | BRAND-03 | Phase 20 | Complete |
 | BRAND-04 | Phase 20 | Complete |
 | BRAND-05 | Phase 20 | Complete |
-| BRAND-06 | Phase 20 | Pending |
-| BRAND-07 | Phase 20 | Pending |
+| BRAND-06 | Phase 20 | Complete |
+| BRAND-07 | Phase 20 | Complete |
 | CRAN-02 | Phase 20 | Complete |
-| CRAN-03 | Phase 20 | Pending |
-| CRAN-04 | Phase 20 | Pending |
+| CRAN-03 | Phase 20 | Complete |
+| CRAN-04 | Phase 20 | Complete |
 | VIZ-01 | Phase 21 | Pending |
 | VIZ-02 | Phase 21 | Pending |
 | VIZ-03 | Phase 21 | Pending |
