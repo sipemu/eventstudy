@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <!-- EventStudy logo: a cumulative-abnormal-return (CAR) curve crossing the
+       vertical event line at t=0. Negative pre-event drift, crosses zero at the
+       event, rises to a positive post-event effect. Source artwork; rendered to
+       man/figures/logo.png via rsvg-convert (see make_logo.R). -->
+  <rect x="0" y="0" width="100" height="100" rx="8" ry="8" fill="#ffffff"/>
+  <!-- Neutral dashed baseline (zero abnormal-return reference) -->
+  <line x1="10" y1="70" x2="90" y2="70" stroke="#94a3b8" stroke-width="1"
+        stroke-dasharray="4 3" opacity="0.6"/>
+  <!-- Vertical event line at t=0 (x=50) -->
+  <line x1="50" y1="10" x2="50" y2="90" stroke="#2563eb" stroke-width="1.5"
+        opacity="0.4"/>
+  <!-- CAR curve: below baseline pre-event, crossing the event line at (50,30),
+       rising to a positive post-event effect -->
+  <path d="M 10 68 C 24 65, 40 52, 50 30 C 58 20, 78 17, 92 16"
+        stroke="#2563eb" stroke-width="3" fill="none" stroke-linecap="round"
+        stroke-linejoin="round"/>
+  <!-- t=0 marker on the crossing point -->
+  <circle cx="50" cy="30" r="4" fill="#2563eb"/>
+</svg>
