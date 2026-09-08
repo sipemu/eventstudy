@@ -1,3 +1,22 @@
+# EventStudy 0.65.0
+
+## Brand & Visual Identity
+
+* New EventStudy logo (CAR-curve motif) at `man/figures/logo.png` and hex sticker
+  at `man/figures/logo-hex.png` (#BRAND-01).
+* Logo wired into README badge row and pkgdown navbar (#BRAND-02).
+* Full favicon set generated via `pkgdown::build_favicons()` (#BRAND-03).
+* Open Graph social-preview card configured for shared link thumbnails (#BRAND-04).
+* pkgdown site palette and typography aligned to the eventstudy.de ecosystem
+  brand via `template.bslib` and `pkgdown/extra.scss` (#BRAND-05).
+* Home card gallery and numeric-badge strip restyled to ecosystem look (#BRAND-06).
+* Lifecycle badge updated from `experimental` to `stable` (#BRAND-07).
+
+## CRAN Hygiene
+
+* Version bumped to 0.65.0 (#CRAN-02).
+* CI tarball-size assertion (< 1 MB) and non-ASCII grep guard added (#CRAN-03, #CRAN-04).
+
 # EventStudy 0.64.0
 
 ## One-Call Reporting: es_report() and run_event_study(report = TRUE)
