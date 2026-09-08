@@ -45,6 +45,8 @@ Could not enumerate: This project has no JS component library or shadcn. The "co
 HTML structures (navbar, home page, card gallery, reference index) styled via BS5 + bslib + hand-written
 `extra.css`/`extra.scss`. The table below documents the site-layer constructs the executor must produce.
 
+The 10 site constructs below are a non-exhaustive known-good set, not a closed allowlist. The executor may need other pkgdown/bslib constructs not listed here; checking for them is the expected path, not an exception.
+
 | Construct | File / Location | Notes |
 |-----------|-----------------|-------|
 | Navbar logo | `_pkgdown.yml` → `navbar.logo` | `<img src="logo.png">` linking to site root; height 30px |
@@ -157,7 +159,7 @@ Favicon sizes are 16×16, 32×32, 180×180, 192×192 (browser/platform standards
 
 **Micro labels** (gallery tags `.es-tag`): Inter, 11px (0.687rem), weight 700, letter-spacing 0.03em, uppercase.
 
-No decorative fonts. No italic headings. Maximum 4 sizes in active use at any one time.
+No decorative fonts. No italic headings. Type scale: 6 roles — micro tag (11px), label/small (14px), body (16px), heading (20–28px, one token spanning h2–h4), display/hero (36px+), numeric-badge figure (48px). This is the full scale; a typical single page renders 3–4 of these at once (e.g. home page = display + body + badge figure + tag).
 
 ---
 
