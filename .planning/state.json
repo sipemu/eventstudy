@@ -11,7 +11,7 @@
     {
       "number": "21",
       "name": "Shared Theme & Plot Aesthetics",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "number": "22",
@@ -32,7 +32,7 @@
   "next": {
     "command": "/gsd:progress --next",
     "label": "Advance to the next step",
-    "reason": "Phase 21 of 5 · 20% · executing"
+    "reason": "Phase 22 of 5 · 40% · executing"
   },
-  "updated_at": "2026-09-08T21:36:15.310Z"
+  "updated_at": "2026-09-08T22:29:32.068Z"
 }
