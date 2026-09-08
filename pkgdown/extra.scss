@@ -1,0 +1,73 @@
+// Brand palette tokens and raw-HTML block styling for the pkgdown home/gallery
+// page. Compiled automatically by pkgdown 2.0+ (must live at pkgdown/extra.scss).
+// Colours from the eventstudy.de token set (see 20-UI-SPEC.md).
+
+// -- Numeric-badge strip --
+.es-stat-strip {
+  display: flex;
+  gap: 24px;           /* lg spacing */
+  margin: 32px 0;      /* xl top/bottom */
+  flex-wrap: wrap;
+}
+
+.es-stat-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 24px;  /* md/lg */
+  border: 2px solid #c45a10;   /* accent-500 */
+  border-radius: 8px;          /* radius-lg equivalent */
+  background: #fff0e5;         /* accent-50 */
+  min-width: 120px;
+}
+
+.es-stat-badge .stat-number {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 3rem;     /* 48px */
+  font-weight: 700;
+  line-height: 1;
+  color: #c45a10;      /* accent-500 */
+}
+
+.es-stat-badge .stat-label {
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  color: #703b0c;      /* accent-700 */
+  margin-top: 4px;
+  text-align: center;
+}
+
+// -- Ecosystem strip --
+.es-ecosystem-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #64748b;      /* neutral-500 */
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.es-ecosystem-label {
+  font-weight: 500;
+  color: #334155;      /* neutral-700 */
+}
+
+.es-ecosystem-sep {
+  color: #cbd5e1;      /* neutral-300 */
+}
+
+.es-ecosystem-link {
+  color: #2563eb;      /* primary-600 */
+  text-decoration: none;
+  font-weight: 500;
+  &:hover { text-decoration: underline; }
+}
+
+.es-ecosystem-link.es-ecosystem-current {
+  color: #0f172a;      /* fg */
+  font-weight: 600;
+  cursor: default;
+  pointer-events: none;
+}
