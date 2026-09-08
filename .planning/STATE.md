@@ -5,17 +5,17 @@ milestone_name: Polish
 current_phase: 22
 current_phase_name: report-aesthetics
 status: executing
-stopped_at: Completed 21-01-PLAN.md
-last_updated: "2026-09-08T22:29:32.048Z"
-last_activity: 2026-09-08
+stopped_at: Completed 22-01-PLAN.md
+last_updated: "2026-09-08T22:47:39.044Z"
+last_activity: 2026-09-09
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: 52f2d92e149f82e42844b3316cf22ce108806825
+state_head: 8f43c6898a4f77f48313b8ab1e938118a386999b
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 5
-  completed_plans: 4
-  percent: 40
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
+  percent: 60
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 22 (report-aesthetics) — READY TO EXECUTE
-Plan: 03 complete (3/3 plans in Phase 20)
-Status: Ready to execute
-Last activity: 2026-09-08 — Plan 20-03 complete: home/gallery numeric-badge + ecosystem strips, primary-blue section headings, README logo + stable badge, CI tarball-size + baseline-aware non-ASCII guards
+Phase: 22 (report-aesthetics) — COMPLETE
+Plan: 01 complete (1/1 plans in Phase 22)
+Status: Phase 22 complete; ready for verification / next phase
+Last activity: 2026-09-09 — Plan 22-01 complete: .report_table() tinytable/kable helper, per-format figure sizing + ragg + fig.cap, HTML-only report.css injected on the html branch only, regression net (no-script PDF, is_html_output>=3, four-format render). Suite 2311 green; R CMD check 1 baseline NOTE.
 
-Progress: [██░░░░░░░░] 20% (Phase 20 plans)
+Progress: [██████░░░░] 60% (v0.65.0 phases)
 
 ## Milestone Roadmap (v0.65.0 — Phases 20–24)
 
@@ -70,6 +70,7 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 | Phase 20 P02 | 4 min | 3 tasks | 15 files |
 | Phase 20 P03 | 3m | 3 tasks | 6 files |
 | Phase 21 P01 | 8m | 4 tasks | 6 files |
+| Phase 22 P01 | 18min | 4 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,8 @@ Recent decisions affecting current work:
 - [Phase 20]: CI non-ASCII guard is baseline-aware (fails only on NEW non-ASCII), preserving the package's declared UTF-8
 - [Phase 21]: es_colours reference role uses brand slate #6b7280 rather than Okabe-Ito black for zero-lines
 - [Phase 21]: plot_stocks uses fixed es_colours group1 for trace colour (coarse granularity acceptable)
+- [Phase 22]: Report tables route through .report_table() with a byte-compatible knitr::kable fallback when tinytable is absent (.tinytable_available seam)
+- [Phase 22]: report.css is injected only on the html branch of .build_output_format via system.file+nzchar; pdf/word/md never reference it
 
 ### v0.64.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -126,8 +129,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-08T21:46:51.958Z
-Stopped at: Completed 21-01-PLAN.md
+Last session: 2026-09-08T22:47:09.659Z
+Stopped at: Completed 22-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

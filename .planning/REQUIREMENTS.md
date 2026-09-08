@@ -22,10 +22,10 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 - [x] **VIZ-01**: New `R/theme.R` provides `theme_eventstudy()` + an `es_colours` Okabe-Ito colorblind-safe palette (exported, documented)
 - [x] **VIZ-02**: `theme_eventstudy()` + `es_colours` applied across all ggplot2 plot helpers (`.plot_single_event`, `.plot_multi_event`, `plot_diagnostics`); hardcoded `steelblue`/`red`/`grey40` removed; `plot_stocks()` (plotly) left structurally intact
 - [x] **VIZ-03**: plotly interactive visuals restyled to `es_colours` (hover, legend, colour consistency)
-- [ ] **VIZ-04**: `es_report()` tables rendered via `tinytable` with a `knitr::kable()` fallback, styled, across HTML/PDF/Word/Markdown
-- [ ] **VIZ-05**: Figure captions (`fig.cap`) present on every plot chunk in `skeleton.Rmd`
-- [ ] **VIZ-06**: `inst/rmarkdown/report.css` typography + table styling injected on the HTML branch only (does not touch the prose sanitiser or grounding guard)
-- [ ] **VIZ-07**: Per-format figure sizing so PDF/Word figures fit page margins (replaces the global `fig.width = 10` that overflows PDF); `ragg` device used for anti-aliased raster output
+- [x] **VIZ-04**: `es_report()` tables rendered via `tinytable` with a `knitr::kable()` fallback, styled, across HTML/PDF/Word/Markdown
+- [x] **VIZ-05**: Figure captions (`fig.cap`) present on every plot chunk in `skeleton.Rmd`
+- [x] **VIZ-06**: `inst/rmarkdown/report.css` typography + table styling injected on the HTML branch only (does not touch the prose sanitiser or grounding guard)
+- [x] **VIZ-07**: Per-format figure sizing so PDF/Word figures fit page margins (replaces the global `fig.width = 10` that overflows PDF); `ragg` device used for anti-aliased raster output
 
 ### API & Message Polish
 
@@ -49,7 +49,7 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 - [x] **CRAN-02**: Version bumped to 0.65.0; NEWS.md v0.65.0 section written; DESCRIPTION/NEWS consistent (bump lands as the first commit of execution)
 - [x] **CRAN-03**: CRAN tarball stays lean (assert < 1 MB in CI); brand sources in `.Rbuildignore`'d dirs; `man/figures/` assets optimised
 - [x] **CRAN-04**: No non-ASCII in `R/`, `man/figures/`, `inst/` (CI grep guard); no new `R CMD check --as-cran` NOTEs/WARNINGs vs baseline
-- [ ] **CRAN-05**: All four report formats (HTML/PDF/Word/Markdown) render; PDF contains no `<script>` tags; the `knitr::is_html_output()` static/interactive switch stays intact — locked by regression test
+- [x] **CRAN-05**: All four report formats (HTML/PDF/Word/Markdown) render; PDF contains no `<script>` tags; the `knitr::is_html_output()` static/interactive switch stays intact — locked by regression test
 - [ ] **CRAN-06**: Behavior on valid inputs unchanged; full test suite green; snapshot tests cover print methods + the prose sanitiser
 
 ## Future Requirements
@@ -103,11 +103,11 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 | VIZ-02 | Phase 21 | Complete |
 | VIZ-03 | Phase 21 | Complete |
 | CRAN-01 | Phase 21 | Complete |
-| VIZ-04 | Phase 22 | Pending |
-| VIZ-05 | Phase 22 | Pending |
-| VIZ-06 | Phase 22 | Pending |
-| VIZ-07 | Phase 22 | Pending |
-| CRAN-05 | Phase 22 | Pending |
+| VIZ-04 | Phase 22 | Complete |
+| VIZ-05 | Phase 22 | Complete |
+| VIZ-06 | Phase 22 | Complete |
+| VIZ-07 | Phase 22 | Complete |
+| CRAN-05 | Phase 22 | Complete |
 | API-01 | Phase 23 | Pending |
 | API-02 | Phase 23 | Pending |
 | API-03 | Phase 23 | Pending |

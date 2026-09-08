@@ -110,10 +110,10 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   3. HTML report typography and table styling come from an injected `inst/rmarkdown/report.css` on the HTML branch only, leaving the prose sanitiser and grounding guard untouched.
   4. All four report formats render; the PDF contains no `<script>` tags; and the `knitr::is_html_output()` static/interactive switch stays intact — locked by a regression test.
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 **Wave 1**
 
-- [ ] 22-01-PLAN.md — `.report_table()`/`.tinytable_available()` helper (tinytable + kable fallback) routed through all 8 skeleton.Rmd tables; per-format figure sizing + ragg + fig.cap; HTML-only `inst/rmarkdown/report.css`; steelblue→es_colours; four-format render + no-script-PDF + is_html_output regression net (VIZ-04/05/06/07, CRAN-05)
+- [x] 22-01-PLAN.md — `.report_table()`/`.tinytable_available()` helper (tinytable + kable fallback) routed through all 8 skeleton.Rmd tables; per-format figure sizing + ragg + fig.cap; HTML-only `inst/rmarkdown/report.css`; steelblue→es_colours; four-format render + no-script-PDF + is_html_output regression net (VIZ-04/05/06/07, CRAN-05)
 
 **UI hint**: yes
 
@@ -154,6 +154,6 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 |-------|-----------|----------------|--------|-----------|
 | 20. Brand & Visual Identity | v0.65.0 | 3/3 | In Progress|  |
 | 21. Shared Theme & Plot Aesthetics | v0.65.0 | 1/1 | In Progress|  |
-| 22. Report Aesthetics | v0.65.0 | 0/1 | Not started | - |
+| 22. Report Aesthetics | v0.65.0 | 1/1 | In Progress|  |
 | 23. API & Message Polish | v0.65.0 | 0/TBD | Not started | - |
 | 24. Docs & Site Polish | v0.65.0 | 0/TBD | Not started | - |
