@@ -200,9 +200,11 @@ reference:
 
   - title: "Plotting"
     desc: >
-      Interactive Plotly-based visualization functions for event study results,
+      Visualization theme, palette, and functions for event study results,
       stock prices, diagnostics, and specialized designs.
     contents:
+      - theme_eventstudy
+      - es_colours
       - plot_event_study
       - plot_stocks
       - plot_diagnostics
