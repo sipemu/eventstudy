@@ -27,9 +27,7 @@ params:
 knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
-  warning = FALSE,
-  fig.width = 10,
-  fig.height = 6
+  warning = FALSE
 )
 # CR-02: per-format fig.path isolation. output_options= is ignored by
 # rmarkdown::render() when output_format is a custom format object; the
@@ -38,6 +36,26 @@ knitr::opts_chunk$set(
 # avoids file collisions across html/pdf/word/md renders.
 if (!is.null(params$fig_path) && nzchar(params$fig_path)) {
   knitr::opts_chunk$set(fig.path = params$fig_path)
+}
+# VIZ-05/VIZ-07: per-format figure sizing. The single global fig.width=10 /
+# fig.height=6 is replaced with dimensions tuned to each output format's page
+# geometry. Keyed on the pandoc target so PDF/Word figures fit the printed
+# page while HTML stays large. startsWith() is robust to the pandoc suffix
+# (e.g. "gfm-yaml_metadata_block").
+pandoc_to <- knitr::opts_knit$get("rmarkdown.pandoc.to") %||% "html"
+if (startsWith(pandoc_to, "latex")) {
+  knitr::opts_chunk$set(fig.width = 6.5, fig.height = 4, dpi = 300)
+} else if (startsWith(pandoc_to, "docx")) {
+  knitr::opts_chunk$set(fig.width = 6, fig.height = 3.7, dpi = 300)
+} else if (startsWith(pandoc_to, "gfm")) {
+  knitr::opts_chunk$set(fig.width = 8, fig.height = 5, dpi = 150)
+} else {
+  knitr::opts_chunk$set(fig.width = 10, fig.height = 6, dpi = 96)
+}
+# VIZ-07: use the ragg raster device for crisper PNG output when available;
+# degrade silently to the default device when the optional package is absent.
+if (requireNamespace("ragg", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "ragg_png")
 }
 library(EventStudy)
 library(dplyr)
@@ -127,8 +145,8 @@ if (!is_panel && !is.null(task$data_tbl)) {
       stringsAsFactors = FALSE
     ))
   }
-  print(knitr::kable(overview_tbl, col.names = c("Parameter", "Value"),
-                     caption = "Study design parameters"))
+  .report_table(overview_tbl, caption = "Study design parameters",
+                col.names = c("Parameter", "Value"))
   cat("\n")
 
   # Deterministic model diagnostics table from diag (TMPL-02)
@@ -155,7 +173,7 @@ if (!is_panel && !is.null(task$data_tbl)) {
       ),
       stringsAsFactors = FALSE
     )
-    print(knitr::kable(diag_tbl, caption = "Estimation window model fit"))
+    .report_table(diag_tbl, caption = "Estimation window model fit")
     cat("\n")
   }
 }
@@ -215,15 +233,21 @@ if (!is_panel && !is.null(task$data_tbl)) {
       )
     }
     res_tbl <- do.call(rbind, rows)
-    print(knitr::kable(res_tbl,
-                       col.names = c("Event", "Firm", "AR t-stat",
-                                     "CAR t-stat", "Final CAR"),
-                       caption = "Abnormal and cumulative abnormal returns"))
+    .report_table(res_tbl,
+                  caption = "Abnormal and cumulative abnormal returns",
+                  col.names = c("Event", "Firm", "AR t-stat",
+                                "CAR t-stat", "Final CAR"))
     cat("\n")
   }
 
-  # AR/CAR plot with HTML/non-HTML switch (FORMAT-03)
   cat("### Abnormal Returns Plot\n\n")
+}
+```
+
+```{r results-plot, fig.cap="Abnormal and cumulative abnormal returns around the event date.", eval="results" %in% sections && !is_panel}
+# AR/CAR plot with HTML/non-HTML switch (FORMAT-03)
+if (!is.null(task$data_tbl) && ("ART" %in% names(task$data_tbl) ||
+                                "CART" %in% names(task$data_tbl))) {
   tryCatch({
     p <- EventStudy::plot_event_study(task)
     if (knitr::is_html_output()) {
@@ -236,18 +260,25 @@ if (!is_panel && !is.null(task$data_tbl)) {
       print(p)
     }
   }, error = function(e) {
-    cat("*Could not generate AR plot.*\n\n")
+    message("Could not generate AR plot.")
   })
 }
+```
 
-if (is_panel && !is.null(task$results)) {
+```{r panel-results, results='asis', eval="results" %in% sections && is_panel}
+if (!is.null(task$results)) {
   cat("### Panel Event Study Results\n\n")
   cat(sprintf("**Method:** %s\n\n", task$results$method))
   if (!is.null(task$results$coefficients)) {
-    print(knitr::kable(task$results$coefficients, digits = 4,
-                       caption = "Event-Time Coefficients"))
+    .report_table(task$results$coefficients,
+                  caption = "Event-Time Coefficients", digits = 4L)
   }
   cat("\n### Event Study Plot\n\n")
+}
+```
+
+```{r panel-plot, fig.cap="Event-time coefficients with confidence bands.", eval="results" %in% sections && is_panel}
+if (!is.null(task$results)) {
   tryCatch({
     p <- plot_panel_event_study(task, confidence_level = params$confidence_level)
     if (knitr::is_html_output()) {
@@ -260,10 +291,12 @@ if (is_panel && !is.null(task$results)) {
       print(p)
     }
   }, error = function(e) {
-    cat("*Could not generate panel event study plot.*\n\n")
+    message("Could not generate panel event study plot.")
   })
 }
+```
 
+```{r aar-caar, results='asis', eval="results" %in% sections && !is_panel}
 # AAR/CAAR multi-event tables
 if (!is_panel && !is.null(task$aar_caar_tbl)) {
   cat("### Multi-Event Test Statistics (AAR/CAAR)\n\n")
@@ -274,7 +307,7 @@ if (!is_panel && !is.null(task$aar_caar_tbl)) {
       grp      <- task$aar_caar_tbl$group[i]
       stat_tbl <- task$aar_caar_tbl[[sn]][[i]]
       cat(sprintf("**Group: %s**\n\n", grp))
-      print(knitr::kable(stat_tbl, digits = 4))
+      .report_table(stat_tbl, digits = 4L)
       cat("\n")
     }
   }
@@ -302,11 +335,11 @@ if (!is.null(diag)) {
     LjungBox_p = round(ew$ljung_box_p, 4),
     stringsAsFactors = FALSE
   )
-  print(knitr::kable(diag_tbl,
-                     col.names = c("Event", "R-sq", "Sigma", "DoF",
-                                   "Shapiro p", "DW stat", "LjungBox p"),
-                     caption = "Per-event estimation-window diagnostics",
-                     digits  = 4))
+  .report_table(diag_tbl,
+                caption = "Per-event estimation-window diagnostics",
+                col.names = c("Event", "R-sq", "Sigma", "DoF",
+                              "Shapiro p", "DW stat", "LjungBox p"),
+                digits = 4L)
   cat("\n")
 
   # Cross-sectional diagnostics
@@ -325,33 +358,11 @@ if (!is.null(diag)) {
     ),
     stringsAsFactors = FALSE
   )
-  print(knitr::kable(cs_tbl, col.names = c("Diagnostic", "Value"),
-                     caption = "Cross-sectional diagnostics"))
+  .report_table(cs_tbl, caption = "Cross-sectional diagnostics",
+                col.names = c("Diagnostic", "Value"))
   cat("\n")
 
-  # Residual sigma distribution (plot with HTML/non-HTML switch)
   cat("### Residual Sigma Distribution\n\n")
-  tryCatch({
-    sigma_df <- data.frame(sigma = ew$sigma[!is.na(ew$sigma)])
-    if (nrow(sigma_df) > 0) {
-      p <- ggplot(sigma_df, aes(x = sigma)) +
-        geom_histogram(bins = 15, fill = "steelblue", alpha = 0.7) +
-        labs(x = "Residual Sigma", y = "Count",
-             title = "Distribution of Residual Sigma") +
-        theme_minimal()
-      if (knitr::is_html_output()) {
-        if (requireNamespace("plotly", quietly = TRUE)) {
-          print(plotly::ggplotly(p))
-        } else {
-          print(p)
-        }
-      } else {
-        print(p)
-      }
-    }
-  }, error = function(e) {
-    cat("*Could not generate sigma distribution plot.*\n\n")
-  })
 } else if ("model" %in% names(task$data_tbl)) {
   # Fallback if diag was not pre-computed (backward compat)
   cat("### Model Diagnostics\n\n")
@@ -376,8 +387,36 @@ if (!is.null(diag)) {
     ) %>%
     select(event_id, firm_symbol, sigma, r2, dof, autocorr)
 
-  knitr::kable(diag_data, digits = 4,
-               caption = "Model Diagnostics by Event")
+  .report_table(diag_data, caption = "Model Diagnostics by Event",
+                digits = 4L)
+}
+```
+
+```{r sigma-hist, fig.cap="Distribution of estimation-window residual sigma across events.", eval="diagnostics" %in% sections && !is_panel}
+# Residual sigma distribution (plot with HTML/non-HTML switch)
+if (!is.null(diag)) {
+  tryCatch({
+    ew <- diag$estimation_window
+    sigma_df <- data.frame(sigma = ew$sigma[!is.na(ew$sigma)])
+    if (nrow(sigma_df) > 0) {
+      p <- ggplot(sigma_df, aes(x = sigma)) +
+        geom_histogram(bins = 15, fill = es_colours[["primary"]], alpha = 0.7) +
+        labs(x = "Residual Sigma", y = "Count",
+             title = "Distribution of Residual Sigma") +
+        theme_minimal()
+      if (knitr::is_html_output()) {
+        if (requireNamespace("plotly", quietly = TRUE)) {
+          print(plotly::ggplotly(p))
+        } else {
+          print(p)
+        }
+      } else {
+        print(p)
+      }
+    }
+  }, error = function(e) {
+    message("Could not generate sigma distribution plot.")
+  })
 }
 ```
 
