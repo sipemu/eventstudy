@@ -13,7 +13,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE
+  eval = TRUE
 )
 ```
 
@@ -27,7 +27,8 @@ This vignette walks through the core flow: define a task, run the study, inspect
 
 If you already have firm data, index data, and a request table (all defined below), the entire pipeline runs in a single call:
 
-```{r quick-start}
+```{r quick-start, eval = FALSE}
+# Preview of the full pipeline — data objects are loaded and unpacked step-by-step below.
 library(EventStudy)
 
 # One-call shortcut: prepare -> fit -> calculate, in one step
@@ -57,37 +58,17 @@ The following code will guide you through the steps of performing an event study
 The first step is to load necessary packages and data. This includes market data for the companies of interest and the index during the event study period.
 
 ```{r, warning=FALSE, message=FALSE}
-#' warnings: false
-library(tidyquant)
-library(dplyr)
-library(purrr)
-library(readr)
-library(DT)
-
 library(EventStudy)
 
-index_symbol = c("^GDAXI")
-firm_symbols = c("VOW.DE", "PAH3.DE", "BMW.DE", "MBG.DE")
+# Load the bundled frozen Dieselgate dataset (replaces a live network download via
+# tidyquant so this vignette builds fully offline and reproducibly on CRAN/pkgdown).
+data(dieselgate)
 
-group <- c(rep("VW Group", 2), rep("Other", 2))
-request_tbl <- cbind(c(1:4), firm_symbols, rep(index_symbol, 4), 
-                     rep("18.09.2015", 4), 
-                     group, rep(-10, 4), rep(10, 4), rep(-11, 4), rep(250, 4)) %>% 
-  as_tibble()
-
-names(request_tbl) <- c("event_id", "firm_symbol", "index_symbol", "event_date", 
-                        "group", "event_window_start", "event_window_end", 
-                        "shift_estimation_window", "estimation_window_length")
-
-firm_symbols %>%
-  tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
-  dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
-  dplyr::select(symbol, date, adjusted) -> firm_tbl
-
-index_symbol %>%
-  tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
-  dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
-  dplyr::select(symbol, date, adjusted) -> index_tbl
+firm_tbl    <- dieselgate$firm     # symbol / date / adjusted (4 firms, DD-MM-YYYY dates)
+index_tbl   <- dieselgate$index    # symbol / date / adjusted (^GDAXI)
+request_tbl <- dieselgate$request  # event_id / firm_symbol / index_symbol / event_date /
+                                   # group / event_window_start / event_window_end /
+                                   # shift_estimation_window / estimation_window_length
 ```
 
 Both, the firm data as the index data should have the following structure:
@@ -97,7 +78,7 @@ Both, the firm data as the index data should have the following structure:
 3.  **adjusted**: The price of the stock at given date. The price column can be parametrized according to your needs when the task is defined. The default is `adjusted`.
 
 ```{r}
-DT::datatable(firm_tbl)
+head(firm_tbl)
 ```
 
 ## Define the Event Study
@@ -125,7 +106,7 @@ Your Event Study is then defined in a parameter set:
 
 ```{r}
 # Setup parameter set
-param_set = ParameterSet$new(return_calculation      = log_return, 
+param_set = ParameterSet$new(return_calculation      = log_return,
                              return_model            = market_model,
                              single_event_statistics = single_event_tests,
                              multi_event_statistics  = multiple_event_tests)
@@ -142,15 +123,15 @@ est_task = EventStudyTask$new(firm_tbl, index_tbl, request_tbl)
 Internally, firm and index data symbol and price column names are renamed. Afterwards a join is applied and the data is collected in a data frame with one event per row. Let's have a look at the internal data frame:
 
 ```{r}
-DT::datatable(est_task$data_tbl)
+head(est_task$data_tbl)
 ```
 
 ```{r}
-DT::datatable(est_task$data_tbl$data[[1]])
+head(est_task$data_tbl$data[[1]])
 ```
 
 ```{r}
-DT::datatable(est_task$data_tbl$request[[1]])
+est_task$data_tbl$request[[1]]
 ```
 
 The internal data structure is important for you if you plan to develop your own statistical or econometric model or test statistic.
@@ -160,7 +141,7 @@ est_task = prepare_event_study(est_task, param_set)
 ```
 
 ```{r}
-est_task$data_tbl$data[[1]]
+head(est_task$data_tbl$data[[1]])
 ```
 
 ```{r}
@@ -168,7 +149,7 @@ est_task = fit_model(est_task, param_set)
 ```
 
 ```{r}
-est_task$data_tbl
+head(est_task$data_tbl)
 ```
 
 ```{r}
@@ -180,7 +161,7 @@ est_task = calculate_statistics(est_task, param_set)
 ```
 
 ```{r}
-est_task$data_tbl
+head(est_task$data_tbl)
 ```
 
 ```{r}
