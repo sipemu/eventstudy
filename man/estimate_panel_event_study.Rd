@@ -12,6 +12,7 @@ estimate_panel_event_study(
   lags = 5,
   base_period = -1,
   cluster = NULL,
+  verbose = getOption("eventstudy.verbose", TRUE),
   ...
 )
 }
@@ -30,6 +31,9 @@ Default -1 (the period just before treatment).}
 
 \item{cluster}{Name of the clustering variable for standard errors.
 Defaults to the unit ID.}
+
+\item{verbose}{Logical; if FALSE, suppress informational messages. Default
+\code{getOption("eventstudy.verbose", TRUE)}.}
 
 \item{...}{Additional arguments passed to the underlying estimator
 (used by \code{callaway_santanna}, \code{dechaisemartin_dhaultfoeuille},

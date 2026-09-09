@@ -8,7 +8,8 @@ run_event_study(
   task,
   parameter_set = ParameterSet$new(),
   report = FALSE,
-  report_args = list()
+  report_args = list(),
+  verbose = getOption("eventstudy.verbose", TRUE)
 )
 }
 \arguments{
@@ -27,6 +28,9 @@ attaches the rendered path(s) as \code{attr(task, "report_path")}.}
 \code{provider}, and any other argument accepted by \code{es_report()}.
 Defaults to \code{list()} (uses \code{es_report()} defaults, which render
 \code{"event_study_report.html"} in the working directory).}
+
+\item{verbose}{Logical; if FALSE, suppress informational messages. Default
+\code{getOption("eventstudy.verbose", TRUE)}.}
 }
 \value{
 The task object with all results computed. When \code{report = TRUE},

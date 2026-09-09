@@ -15,6 +15,7 @@ es_report(
   author = NULL,
   confidence_level = 0.95,
   interactive = TRUE,
+  verbose = getOption("eventstudy.verbose", TRUE),
   ...
 )
 }
@@ -44,6 +45,9 @@ no network required).}
 
 \item{interactive}{Logical. Use interactive plotly plots in HTML output.
 Default \code{TRUE}.}
+
+\item{verbose}{Logical; if FALSE, suppress informational messages. Default
+\code{getOption("eventstudy.verbose", TRUE)}.}
 
 \item{...}{Additional arguments forwarded to \code{generate_report()} and
 on to \code{rmarkdown::render}.}

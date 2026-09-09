@@ -4,7 +4,12 @@
 \alias{validate_task}
 \title{Validate an Event Study experiment}
 \usage{
-validate_task(task, parameter_set = NULL, min_estimation_obs = 30)
+validate_task(
+  task,
+  parameter_set = NULL,
+  min_estimation_obs = 30,
+  verbose = getOption("eventstudy.verbose", TRUE)
+)
 }
 \arguments{
 \item{task}{The event study task.}
@@ -13,6 +18,9 @@ validate_task(task, parameter_set = NULL, min_estimation_obs = 30)
 
 \item{min_estimation_obs}{Minimum number of observations required in the
 estimation window. Default is 30.}
+
+\item{verbose}{Logical; if FALSE, suppress informational messages. Default
+\code{getOption("eventstudy.verbose", TRUE)}. Warnings are never gated.}
 }
 \value{
 The task object (invisibly). Warnings are issued for each problem found.

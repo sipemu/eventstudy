@@ -18,6 +18,7 @@ generate_report(
   advice = NULL,
   narrative = NULL,
   provider = NULL,
+  verbose = getOption("eventstudy.verbose", TRUE),
   ...
 )
 }
@@ -67,6 +68,9 @@ invalid \code{narrative} is silently coerced to \code{NULL} with one
 \code{NULL}. If both \code{provider} and \code{narrative} are \code{NULL},
 a fully offline narrative is assembled. Ignored when a pre-built
 \code{narrative} list is supplied by the caller.}
+
+\item{verbose}{Logical; if FALSE, suppress informational messages. Default
+\code{getOption("eventstudy.verbose", TRUE)}.}
 
 \item{...}{Additional arguments passed to \code{rmarkdown::render}.}
 }

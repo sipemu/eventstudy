@@ -7,7 +7,8 @@
 estimate_synthetic_control(
   task,
   method = c("quadprog", "optim"),
-  covariates = NULL
+  covariates = NULL,
+  verbose = getOption("eventstudy.verbose", TRUE)
 )
 }
 \arguments{
@@ -18,6 +19,9 @@ estimate_synthetic_control(
 
 \item{covariates}{Optional character vector of covariate column names
 in both treated and donor data to include in the matching.}
+
+\item{verbose}{Logical; if FALSE, suppress informational messages. Default
+\code{getOption("eventstudy.verbose", TRUE)}.}
 }
 \value{
 The task with \code{results} populated.
