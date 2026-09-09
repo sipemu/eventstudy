@@ -93,7 +93,7 @@ optional package is installed:
 | 10   | 3.2637  | 3.739     | -0.47523 |
 
 Treated vs synthetic trajectory with the estimated gap (first 10
-periods). {#tinytable_qlccz69wpvbonnfnr3wz .table .tinytable
+periods). {#tinytable_x5r2yxrls1m9f1zoxfwh .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

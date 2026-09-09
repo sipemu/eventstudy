@@ -90,7 +90,7 @@ and residual checks the advisor reasons over:
 | 0.8483 | 0.00688  | 248               | 0.14675  | 0.000006053 | 1.691   | 0.1447      |
 
 Per-event estimation-window diagnostics feeding the advisor (offline).
-{#tinytable_2uuhuynekar6wo7rs75b .table .tinytable
+{#tinytable_284edcropvyd2me6h3nw .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

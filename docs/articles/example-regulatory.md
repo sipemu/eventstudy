@@ -64,13 +64,10 @@ per-firm CARs by group with
 
 `caar_tbl`` ``<-`` ``EventStudy``::`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``result``, type ``=`` ``"aar"``)`` `` ``caar_tbl`` ``|>`` `` ``dplyr``::`[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``group``)`` ``|>`` `` ``dplyr``::`[`slice_tail`](https://dplyr.tidyverse.org/reference/slice.html)`(``n ``=`` ``1``)`` ``|>`` `` ``dplyr``::`[`ungroup`](https://dplyr.tidyverse.org/reference/group_by.html)`(``)`` ``|>`` `` ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``group``, ``term``, ``caar``, ``caar_statistic``, ``caar_p.value``)`` ``|>`` `` ``es_tt``(`` `` digits ``=`` ``4``,`` `` caption ``=`` ``"CAAR by group at the end of the event window: VW-Group vs Peers"`` `` ``)`
 
-| group    | term | caar     | caar_statistic | caar_p.value |
-|----------|------|----------|----------------|--------------|
-| Other    | 10   | 0.01324  | 0.3377         | 0.79268      |
-| VW Group | 10   | -0.38576 | -12.6016       | 0.05041      |
+[TABLE]
 
 CAAR by group at the end of the event window: VW-Group vs Peers
-{#tinytable_inbu3ibog6smtanhm5bh .table .tinytable
+{#tinytable_98gy9ui06661xfua3kjm .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -81,7 +78,7 @@ quarto-disable-processing="true"}
 | Other    | 2   | 0.01324  | 0.05546 | 0.01324    | -0.02597 | 0.05246  |
 | VW Group | 2   | -0.38576 | 0.04329 | -0.38576   | -0.41637 | -0.35515 |
 
-Per-firm CAR summary by group {#tinytable_ygjnxbjpjarabcvjf5vj .table
+Per-firm CAR summary by group {#tinytable_wgumah7qbaec34wlqrxr .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
