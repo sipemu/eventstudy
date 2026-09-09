@@ -129,7 +129,7 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   3. A `verbose=` argument quiets informational messages for scripted use, with the default byte-identical to current behavior when omitted; the deprecation audit either ships a back-compatible shim + warning for any rename or is documented as a verified no-op (no `lifecycle` dep).
   4. Behavior on valid inputs is unchanged, the full test suite is green, and snapshot tests cover the print methods plus the prose sanitiser.
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 **Wave 1**
 
@@ -141,7 +141,7 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 
 **Wave 3** *(blocked on Wave 2)*
 
-- [ ] 23-03-PLAN.md — verbose=/.inform() quiet mode + gridExtra guard + deprecation-audit verified no-op (API-05, API-06, CRAN-06)
+- [x] 23-03-PLAN.md — verbose=/.inform() quiet mode + gridExtra guard + deprecation-audit verified no-op (API-05, API-06, CRAN-06)
 
 ### Phase 24: Docs & Site Polish
 
@@ -167,5 +167,5 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 | 20. Brand & Visual Identity | v0.65.0 | 3/3 | In Progress|  |
 | 21. Shared Theme & Plot Aesthetics | v0.65.0 | 1/1 | In Progress|  |
 | 22. Report Aesthetics | v0.65.0 | 1/1 | In Progress|  |
-| 23. API & Message Polish | v0.65.0 | 2/3 | In Progress|  |
+| 23. API & Message Polish | v0.65.0 | 3/3 | In Progress|  |
 | 24. Docs & Site Polish | v0.65.0 | 0/TBD | Not started | - |

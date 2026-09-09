@@ -5,16 +5,16 @@ milestone_name: Polish
 current_phase: 23
 current_phase_name: api-message-polish
 status: executing
-stopped_at: Completed 23-02-PLAN.md
-last_updated: "2026-09-09T06:01:25.119Z"
+stopped_at: Completed 23-03-PLAN.md
+last_updated: "2026-09-09T06:10:36.438Z"
 last_activity: 2026-09-09
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: 2215351faeb8d53b1b914ccb0e082e9f06069fa7
+state_head: 75d7554e3434eeea1ecac4c098b1e70d11cc7489
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 40
 ---
 
@@ -30,9 +30,9 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 ## Current Position
 
 Phase: 23 (api-message-polish) — IN PROGRESS
-Plan: 02 complete (2/3 plans in Phase 23); 23-03 next (Wave 3)
-Status: Wave 2 of 3 done; ready for 23-03
-Last activity: 2026-09-09 — Plan 23-02 complete (API-03/04): migrated ~28 argument/column-validation + not_fitted state-guard stop() sites to classed rlang::abort(class=c("eventstudy_error_<kind>","eventstudy_error")) across task/models/export/report/cross_sectional; 6 kinds; API-04 backtick-arg + quoted-value + first-5-then-ellipsis truncation; new test_classed_conditions.R asserts class + substring per family. All prior expect_error substrings preserved (extend-not-replace, zero test edits); "missing columns" kept not reworded. Invariants byte-untouched (.handle_degenerate/.validate_grounding, 23-01 snapshots); DESCRIPTION unchanged (no cli/lifecycle, no new Imports); suite FAIL 0 (PASS 2214). Commits 9027f94, 2215351.
+Plan: 03 complete (3/3 plans in Phase 23); Phase 23 done
+Status: All 3 waves done; Phase 23 (API & Message Polish) complete
+Last activity: 2026-09-09 — Plan 23-03 complete (API-05/06, CRAN-06): new R/inform.R .inform(msg, verbose=getOption("eventstudy.verbose",TRUE)) gates 8 informational message() sites (execute/report x3/task_validation x2/panel single-cohort fallback/synthetic quadprog fallback); verbose= plumbed onto run_event_study, es_report, generate_report, validate_task, estimate_panel_event_study, estimate_synthetic_control. Default output byte-identical; warnings/errors/degenerate one-warning NEVER gated (test_verbose.R asserts zero-variance MarketModel$fit() still fires one warning under verbose=FALSE). gridExtra::grid.arrange requireNamespace-guarded in plotting.R (closes Phase-21 carry-in). 23-DEPRECATION-AUDIT.md records grep-verified NO-OP (no lifecycle dep, no shim). DESCRIPTION unchanged (no cli/lifecycle, no new Imports); NAMESPACE unchanged; 23-01 snapshots byte-identical; suite FAIL 0 (PASS 2222). Commits a8d1404, 368fbca, 75d7554.
 
 Progress: [████░░░░░░] 40% (v0.65.0 phases)
 
@@ -73,6 +73,7 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 | Phase 22 P01 | 18min | 4 tasks | 4 files |
 | Phase 23 P01 | 8min | 3 tasks | 19 files |
 | Phase 23 P02 | 15m | 3 tasks | 6 files |
+| Phase 23 P03 | 35m | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -135,8 +136,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-09T06:00:53.595Z
-Stopped at: Completed 23-02-PLAN.md
+Last session: 2026-09-09T06:10:36.381Z
+Stopped at: Completed 23-03-PLAN.md
 Resume file: None
 
 ## Operator Next Steps

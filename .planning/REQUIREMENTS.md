@@ -33,8 +33,8 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 - [x] **API-02**: `format.*` methods added where a class has `print()` but no `format()`
 - [x] **API-03**: Selective `stop()`/`warning()` calls migrated to classed `rlang::abort()`/`rlang::warn()` (rlang already imported, zero new dep); the degenerate-input contract's exactly-one-warning discipline preserved
 - [x] **API-04**: Error/warning messages name the offending argument and its value
-- [ ] **API-05**: A `verbose=` argument quiets informational messages for batch/scripted use; default preserves current behavior (byte-identical when omitted)
-- [ ] **API-06**: Deprecation audit — if any argument is renamed, ship a back-compatible shim with a deprecation warning; if nothing is renamed, documented as a verified no-op (no `lifecycle` dep added)
+- [x] **API-05**: A `verbose=` argument quiets informational messages for batch/scripted use; default preserves current behavior (byte-identical when omitted)
+- [x] **API-06**: Deprecation audit — if any argument is renamed, ship a back-compatible shim with a deprecation warning; if nothing is renamed, documented as a verified no-op (no `lifecycle` dep added)
 
 ### Docs & Site Polish
 
@@ -50,7 +50,7 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 - [x] **CRAN-03**: CRAN tarball stays lean (assert < 1 MB in CI); brand sources in `.Rbuildignore`'d dirs; `man/figures/` assets optimised
 - [x] **CRAN-04**: No non-ASCII in `R/`, `man/figures/`, `inst/` (CI grep guard); no new `R CMD check --as-cran` NOTEs/WARNINGs vs baseline
 - [x] **CRAN-05**: All four report formats (HTML/PDF/Word/Markdown) render; PDF contains no `<script>` tags; the `knitr::is_html_output()` static/interactive switch stays intact — locked by regression test
-- [ ] **CRAN-06**: Behavior on valid inputs unchanged; full test suite green; snapshot tests cover print methods + the prose sanitiser
+- [x] **CRAN-06**: Behavior on valid inputs unchanged; full test suite green; snapshot tests cover print methods + the prose sanitiser
 
 ## Future Requirements
 
@@ -112,9 +112,9 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 | API-02 | Phase 23 | Complete |
 | API-03 | Phase 23 | Complete |
 | API-04 | Phase 23 | Complete |
-| API-05 | Phase 23 | Pending |
-| API-06 | Phase 23 | Pending |
-| CRAN-06 | Phase 23 | Pending |
+| API-05 | Phase 23 | Complete |
+| API-06 | Phase 23 | Complete |
+| CRAN-06 | Phase 23 | Complete |
 | DOCS-01 | Phase 24 | Pending |
 | DOCS-02 | Phase 24 | Pending |
 | DOCS-03 | Phase 24 | Pending |
