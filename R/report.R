@@ -68,7 +68,10 @@ es_report <- function(task,
   # ---- 1. Task-class guard (mirror generate_report wording) ----
   if (!inherits(task, "EventStudyTask") &&
       !inherits(task, "PanelEventStudyTask")) {
-    stop("task must be an EventStudyTask or PanelEventStudyTask.")
+    rlang::abort(
+      paste0("`task` must be an EventStudyTask or PanelEventStudyTask, not <",
+             class(task)[1], ">."),
+      class = c("eventstudy_error_bad_argument", "eventstudy_error"))
   }
 
   # ---- 2. REPORT-04: deep-clone FIRST, before any other work ----
@@ -191,7 +194,10 @@ generate_report <- function(task,
   # ---- 2. Task type guard ----
   if (!inherits(task, "EventStudyTask") &&
       !inherits(task, "PanelEventStudyTask")) {
-    stop("task must be an EventStudyTask or PanelEventStudyTask.")
+    rlang::abort(
+      paste0("`task` must be an EventStudyTask or PanelEventStudyTask, not <",
+             class(task)[1], ">."),
+      class = c("eventstudy_error_bad_argument", "eventstudy_error"))
   }
 
   # ---- 3. Format vector validation (FORMAT-01) ----
@@ -199,8 +205,10 @@ generate_report <- function(task,
   valid_formats <- c("html", "pdf", "word", "md")
   formats <- intersect(format, valid_formats)
   if (length(formats) == 0L) {
-    stop("No valid format specified. 'format' must be one or more of: ",
-         paste(valid_formats, collapse = ", "))
+    rlang::abort(
+      paste0("No valid format specified. `format` must be one or more of: `",
+             paste(valid_formats, collapse = "`, `"), "`."),
+      class = c("eventstudy_error_bad_argument", "eventstudy_error"))
   }
 
   # ---- 4. Locate bundled template ----

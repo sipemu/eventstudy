@@ -29,13 +29,19 @@ cross_sectional_regression <- function(task, formula, data,
                                         car_window = NULL,
                                         robust = TRUE) {
   if (!inherits(task, "EventStudyTask")) {
-    stop("task must be an EventStudyTask object.")
+    rlang::abort(
+      paste0("`task` must be an EventStudyTask object, not <", class(task)[1], ">."),
+      class = c("eventstudy_error_bad_argument", "eventstudy_error"))
   }
   if (!"model" %in% names(task$data_tbl)) {
-    stop("Abnormal returns not computed. Run fit_model() first.")
+    rlang::abort(
+      "Abnormal returns not computed. Run fit_model() first.",
+      class = c("eventstudy_error_not_fitted", "eventstudy_error"))
   }
   if (!"event_id" %in% names(data)) {
-    stop("data must contain an 'event_id' column for merging.")
+    rlang::abort(
+      "`data` must contain an `event_id` column for merging.",
+      class = c("eventstudy_error_missing_column", "eventstudy_error"))
   }
 
   # Extract CARs for each event
@@ -226,7 +232,9 @@ car_by_group <- function(task, group_var = "group", car_window = NULL) {
   cars <- .extract_cars(task, car_window)
 
   if (!group_var %in% names(cars)) {
-    stop("Group variable '", group_var, "' not found.")
+    rlang::abort(
+      paste0("`group_var` = \"", group_var, "\" not found."),
+      class = c("eventstudy_error_unknown_column", "eventstudy_error"))
   }
 
   groups <- unique(cars[[group_var]])

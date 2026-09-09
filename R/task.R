@@ -161,7 +161,9 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                get_ar = function(event_id = NULL) {
                                  data = private$get_event_data(event_id)
                                  if (!"abnormal_returns" %in% names(data)) {
-                                   stop("Abnormal returns have not been calculated yet. Run fit_model() first.")
+                                   rlang::abort(
+                                     "Abnormal returns have not been calculated yet. Run fit_model() first.",
+                                     class = c("eventstudy_error_not_fitted", "eventstudy_error"))
                                  }
                                  data %>%
                                    dplyr::filter(event_window == 1) %>%
@@ -190,7 +192,9 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                #' @return A tibble with AAR/CAAR results.
                                get_aar = function(group = NULL, stat_name = "CSectT") {
                                  if (is.null(self$aar_caar_tbl)) {
-                                   stop("AAR/CAAR have not been calculated yet. Run calculate_statistics() first.")
+                                   rlang::abort(
+                                     "AAR/CAAR have not been calculated yet. Run calculate_statistics() first.",
+                                     class = c("eventstudy_error_not_fitted", "eventstudy_error"))
                                  }
                                  tbl = self$aar_caar_tbl
                                  if (!is.null(group)) {
@@ -199,8 +203,12 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                  if (stat_name %in% names(tbl)) {
                                    tbl[[stat_name]]
                                  } else {
-                                   stop("Statistic '", stat_name, "' not found. Available: ",
-                                        paste(setdiff(names(tbl), c("group", "data", "model")), collapse = ", "))
+                                   available <- setdiff(names(tbl), c("group", "data", "model"))
+                                   rlang::abort(
+                                     paste0("`stat_name` = \"", stat_name, "\" not found. Available: ",
+                                            paste(utils::head(available, 5), collapse = ", "),
+                                            if (length(available) > 5) " ..."),
+                                     class = c("eventstudy_error_unknown_statistic", "eventstudy_error"))
                                  }
                                },
 
@@ -212,7 +220,9 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                #' @return A list with model statistics.
                                get_model_stats = function(event_id = NULL) {
                                  if (!"model" %in% names(self$data_tbl)) {
-                                   stop("Models have not been fitted yet. Run fit_model() first.")
+                                   rlang::abort(
+                                     "Models have not been fitted yet. Run fit_model() first.",
+                                     class = c("eventstudy_error_not_fitted", "eventstudy_error"))
                                  }
                                  if (is.null(event_id)) {
                                    event_id = self$data_tbl$event_id[1]
@@ -220,7 +230,9 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                  row = self$data_tbl %>%
                                    dplyr::filter(event_id == !!event_id)
                                  if (nrow(row) == 0) {
-                                   stop("Event ID '", event_id, "' not found.")
+                                   rlang::abort(
+                                     paste0("`event_id` = \"", event_id, "\" not found."),
+                                     class = c("eventstudy_error_unknown_event_id", "eventstudy_error"))
                                  }
                                  row$model[[1]]$statistics
                                }
@@ -263,26 +275,38 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                  row = self$data_tbl %>%
                                    dplyr::filter(event_id == !!event_id)
                                  if (nrow(row) == 0) {
-                                   stop("Event ID '", event_id, "' not found.")
+                                   rlang::abort(
+                                     paste0("`event_id` = \"", event_id, "\" not found."),
+                                     class = c("eventstudy_error_unknown_event_id", "eventstudy_error"))
                                  }
                                  row$data[[1]]
                                },
                                check_request_input = function(tbl) {
                                  if (any(! self$.request_file_columns %in% names(tbl))) {
                                    missing_cols = self$.request_file_columns[!self$.request_file_columns %in% names(tbl)]
-                                   stop("Request file missing columns: ", paste(missing_cols, collapse = ", "))
+                                   rlang::abort(
+                                     paste0("Request file missing columns: `",
+                                            paste(utils::head(missing_cols, 5), collapse = "`, `"), "`",
+                                            if (length(missing_cols) > 5) " ..."),
+                                     class = c("eventstudy_error_missing_column", "eventstudy_error"))
                                  }
                                },
                                check_data_input = function(tbl, tbl_name="firm data") {
                                  col_names = names(tbl)
                                  if (! "symbol" %in% col_names) {
-                                   stop(stringr::str_c(tbl_name, ": Input dataframe does not contain the stock identifier 'symbol' column."))
+                                   rlang::abort(
+                                     paste0(tbl_name, ": Input dataframe does not contain the stock identifier `symbol` column."),
+                                     class = c("eventstudy_error_missing_column", "eventstudy_error"))
                                  }
                                  if (! self$.index %in% col_names) {
-                                   stop(stringr::str_c(tbl_name, ": Input dataframe does not contain the date '", self$.index, "' column."))
+                                   rlang::abort(
+                                     paste0(tbl_name, ": Input dataframe does not contain the date `", self$.index, "` column."),
+                                     class = c("eventstudy_error_missing_column", "eventstudy_error"))
                                  }
                                  if (! self$.target %in% col_names) {
-                                   stop(stringr::str_c(tbl_name, ": Input dataframe does not contain the price '", self$.target, "' column."))
+                                   rlang::abort(
+                                     paste0(tbl_name, ": Input dataframe does not contain the price `", self$.target, "` column."),
+                                     class = c("eventstudy_error_missing_column", "eventstudy_error"))
                                  }
                                },
                                rename_columns = function(tbl, id="firm") {

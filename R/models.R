@@ -165,7 +165,9 @@ MarketModel <- R6Class("MarketModel",
                          #' @param formula A formula.
                          set_formula = function(formula) {
                            if (!inherits(formula, "formula")) {
-                             stop("Input must be a formula")
+                             rlang::abort(
+                               "Input must be a formula: `formula` is not a <formula> object.",
+                               class = c("eventstudy_error_bad_argument", "eventstudy_error"))
                            }
                            self$formula = formula
                          },
@@ -619,8 +621,11 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                   # (missing columns = programmer error, not degenerate data)
                                   missing_cols <- setdiff(self$required_columns, names(data_tbl))
                                   if (length(missing_cols) > 0) {
-                                    stop(self$model_name, " requires columns: ",
-                                         paste(missing_cols, collapse = ", "))
+                                    rlang::abort(
+                                      paste0(self$model_name, " requires columns: `",
+                                             paste(utils::head(missing_cols, 5), collapse = "`, `"), "`",
+                                             if (length(missing_cols) > 5) " ..."),
+                                      class = c("eventstudy_error_missing_column", "eventstudy_error"))
                                   }
 
                                   estimation_tbl <- data_tbl %>%
@@ -1314,7 +1319,9 @@ VolumeModel <- R6Class("VolumeModel",
                           #' @param data_tbl Data frame or tibble with firm_volume column.
                           fit = function(data_tbl) {
                             if (!"firm_volume" %in% names(data_tbl)) {
-                              stop("VolumeModel requires a 'firm_volume' column.")
+                              rlang::abort(
+                                "VolumeModel requires a `firm_volume` column.",
+                                class = c("eventstudy_error_missing_column", "eventstudy_error"))
                             }
 
                             estimation_tbl <- data_tbl %>%

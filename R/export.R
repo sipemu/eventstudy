@@ -23,7 +23,9 @@ export_results <- function(task,
                            stat_name = "CSectT",
                            ...) {
   if (!inherits(task, "EventStudyTask")) {
-    stop("task must be an EventStudyTask object.")
+    rlang::abort(
+      paste0("`task` must be an EventStudyTask object, not <", class(task)[1], ">."),
+      class = c("eventstudy_error_bad_argument", "eventstudy_error"))
   }
 
   # Infer format from file extension if not specified
@@ -33,8 +35,10 @@ export_results <- function(task,
       csv  = "csv",
       xlsx = "xlsx",
       tex  = "latex",
-      stop("Cannot infer format from extension '.", ext,
-           "'. Specify format explicitly.")
+      rlang::abort(
+        paste0("Cannot infer format from extension `.", ext,
+               "`. Specify `format` explicitly."),
+        class = c("eventstudy_error_bad_argument", "eventstudy_error"))
     )
   }
   format <- match.arg(format, c("csv", "xlsx", "latex"))
@@ -125,7 +129,9 @@ export_results <- function(task,
   }
 
   if (length(tables) == 0) {
-    stop("No results available to export. Run the event study pipeline first.")
+    rlang::abort(
+      "No results available to export. Run the event study pipeline first.",
+      class = c("eventstudy_error_not_fitted", "eventstudy_error"))
   }
 
   tables
@@ -260,7 +266,9 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
 #' @noRd
 .tidy_ar <- function(task) {
   if (!"model" %in% names(task$data_tbl)) {
-    stop("Abnormal returns not computed. Run fit_model() first.")
+    rlang::abort(
+      "Abnormal returns not computed. Run fit_model() first.",
+      class = c("eventstudy_error_not_fitted", "eventstudy_error"))
   }
 
   task$data_tbl %>%
@@ -290,7 +298,9 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
 #' @noRd
 .tidy_car <- function(task) {
   if (!"model" %in% names(task$data_tbl)) {
-    stop("Abnormal returns not computed. Run fit_model() first.")
+    rlang::abort(
+      "Abnormal returns not computed. Run fit_model() first.",
+      class = c("eventstudy_error_not_fitted", "eventstudy_error"))
   }
 
   task$data_tbl %>%
@@ -322,11 +332,15 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
 #' @noRd
 .tidy_aar <- function(task, stat_name) {
   if (is.null(task$aar_caar_tbl)) {
-    stop("AAR/CAAR not computed. Run calculate_statistics() first.")
+    rlang::abort(
+      "AAR/CAAR not computed. Run calculate_statistics() first.",
+      class = c("eventstudy_error_not_fitted", "eventstudy_error"))
   }
 
   if (!stat_name %in% names(task$aar_caar_tbl)) {
-    stop("Statistic '", stat_name, "' not found.")
+    rlang::abort(
+      paste0("`stat_name` = \"", stat_name, "\" not found."),
+      class = c("eventstudy_error_unknown_statistic", "eventstudy_error"))
   }
 
   purrr::map2_dfr(
@@ -380,7 +394,9 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
 #' @noRd
 .tidy_model <- function(task) {
   if (!"model" %in% names(task$data_tbl)) {
-    stop("Models not fitted. Run fit_model() first.")
+    rlang::abort(
+      "Models not fitted. Run fit_model() first.",
+      class = c("eventstudy_error_not_fitted", "eventstudy_error"))
   }
 
   purrr::pmap_dfr(
