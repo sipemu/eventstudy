@@ -9,6 +9,24 @@ The Market Adjusted Model is particularly useful in situations where the
 estimation of individual stock parameters (such as alpha and beta) is
 not feasible or desired, and a basic benchmark for comparison is needed.
 
+## See also
+
+Other eventstudy-models:
+[`BHARModel`](https://sipemu.github.io/eventstudy/reference/BHARModel.md),
+[`Carhart4FactorModel`](https://sipemu.github.io/eventstudy/reference/Carhart4FactorModel.md),
+[`ComparisonPeriodMeanAdjustedModel`](https://sipemu.github.io/eventstudy/reference/ComparisonPeriodMeanAdjustedModel.md),
+[`DCCGARCHModel`](https://sipemu.github.io/eventstudy/reference/DCCGARCHModel.md),
+[`FamaFrench3FactorModel`](https://sipemu.github.io/eventstudy/reference/FamaFrench3FactorModel.md),
+[`FamaFrench5FactorModel`](https://sipemu.github.io/eventstudy/reference/FamaFrench5FactorModel.md),
+[`GARCHModel`](https://sipemu.github.io/eventstudy/reference/GARCHModel.md),
+[`LinearFactorModel`](https://sipemu.github.io/eventstudy/reference/LinearFactorModel.md),
+[`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md),
+[`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md),
+[`RollingWindowModel`](https://sipemu.github.io/eventstudy/reference/RollingWindowModel.md),
+[`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md),
+[`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md),
+[`VolumeModel`](https://sipemu.github.io/eventstudy/reference/VolumeModel.md)
+
 ## Super class
 
 [`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md)

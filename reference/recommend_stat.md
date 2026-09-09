@@ -75,6 +75,17 @@ contract, flagged `is_deterministic = TRUE` and `source = "offline_kb"`.
 [`es_diagnostics`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
 [`es_kb`](https://sipemu.github.io/eventstudy/reference/es_kb.md)
 
+Other eventstudy-advisor:
+[`AnthropicProvider`](https://sipemu.github.io/eventstudy/reference/AnthropicProvider.md),
+[`CustomProvider`](https://sipemu.github.io/eventstudy/reference/CustomProvider.md),
+[`OpenAICompatProvider`](https://sipemu.github.io/eventstudy/reference/OpenAICompatProvider.md),
+[`ProviderBase`](https://sipemu.github.io/eventstudy/reference/ProviderBase.md),
+[`es_advise()`](https://sipemu.github.io/eventstudy/reference/es_advise.md),
+[`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`es_kb()`](https://sipemu.github.io/eventstudy/reference/es_kb.md),
+[`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
+[`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md)
+
 ## Examples
 
 ``` r

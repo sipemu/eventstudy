@@ -22,6 +22,7 @@ generate_report(
   advice = NULL,
   narrative = NULL,
   provider = NULL,
+  verbose = getOption("eventstudy.verbose", TRUE),
   ...
 )
 ```
@@ -97,6 +98,11 @@ generate_report(
   a fully offline narrative is assembled. Ignored when a pre-built
   `narrative` list is supplied by the caller.
 
+- verbose:
+
+  Logical; if FALSE, suppress informational messages. Default
+  `getOption("eventstudy.verbose", TRUE)`.
+
 - ...:
 
   Additional arguments passed to
@@ -110,6 +116,13 @@ format name (e.g.
 single-format call returns a length-1 named vector: `result[["html"]]`
 and `result[[1L]]` both resolve (backward-compatible with prior
 single-path callers).
+
+## See also
+
+Other eventstudy-export:
+[`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md),
+[`export_results()`](https://sipemu.github.io/eventstudy/reference/export_results.md),
+[`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)
 
 ## Examples
 

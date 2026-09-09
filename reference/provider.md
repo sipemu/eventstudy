@@ -51,6 +51,19 @@ The `"custom"` branch needs no network and neither `httr2` nor
 `jsonlite`. Keys are never read here; the HTTP providers resolve them at
 call time inside their own `complete()`.
 
+## See also
+
+Other eventstudy-advisor:
+[`AnthropicProvider`](https://sipemu.github.io/eventstudy/reference/AnthropicProvider.md),
+[`CustomProvider`](https://sipemu.github.io/eventstudy/reference/CustomProvider.md),
+[`OpenAICompatProvider`](https://sipemu.github.io/eventstudy/reference/OpenAICompatProvider.md),
+[`ProviderBase`](https://sipemu.github.io/eventstudy/reference/ProviderBase.md),
+[`es_advise()`](https://sipemu.github.io/eventstudy/reference/es_advise.md),
+[`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`es_kb()`](https://sipemu.github.io/eventstudy/reference/es_kb.md),
+[`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
+[`recommend_stat()`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md)
+
 ## Examples
 
 ``` r

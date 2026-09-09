@@ -22,6 +22,7 @@ es_report(
   author = NULL,
   confidence_level = 0.95,
   interactive = TRUE,
+  verbose = getOption("eventstudy.verbose", TRUE),
   ...
 )
 ```
@@ -72,6 +73,11 @@ es_report(
 
   Logical. Use interactive plotly plots in HTML output. Default `TRUE`.
 
+- verbose:
+
+  Logical; if FALSE, suppress informational messages. Default
+  `getOption("eventstudy.verbose", TRUE)`.
+
 - ...:
 
   Additional arguments forwarded to
@@ -102,7 +108,13 @@ or API key required.
 ## See also
 
 [`generate_report`](https://sipemu.github.io/eventstudy/reference/generate_report.md),
-[`es_diagnostics`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md)
+[`es_diagnostics`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`run_event_study`](https://sipemu.github.io/eventstudy/reference/run_event_study.md)
+
+Other eventstudy-export:
+[`export_results()`](https://sipemu.github.io/eventstudy/reference/export_results.md),
+[`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md),
+[`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)
 
 ## Examples
 

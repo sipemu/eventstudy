@@ -11,15 +11,29 @@ AGPL-3](https://img.shields.io/badge/License-AGPL--3-blue.svg)](https://www.gnu.
 [![R ≥
 4.1.0](https://img.shields.io/badge/R-%E2%89%A5%204.1.0-276DC3.svg?logo=r)](https://cran.r-project.org/)
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg)](https://codecov.io/gh/sipemu/eventstudy)
 [![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://sipemu.github.io/eventstudy/)
+
+![EventStudy logo](reference/figures/logo.png)
 
 A comprehensive, modular R package for financial event study analysis.
 Implements the classical methodology (MacKinlay 1997) and extends it
 with modern multi-factor models, long-horizon methods, panel (DiD) event
 studies, and more.
+
+## Ecosystem
+
+EventStudy is part of the [eventstudy.de](https://eventstudy.de) toolkit
+– “Event Study Analysis Made Simple”:
+
+- **Google Sheets Template** – quick, no-code event study for small
+  samples
+- **R Package (this package)** – full programmatic pipeline with 15+
+  models, 12 test statistics, AI advisor, and publication-ready export
+- **WebAssembly App** – browser-based analysis with no installation
+  required
 
 ## Installation
 
@@ -48,13 +62,14 @@ devtools::install_github("sipemu/eventstudy")
   HTML/PDF/Word/Markdown with a grounded narrative (offline by default).
   Also available as `run_event_study(..., report = TRUE)`.
 
-- **13 Return Models**: Market Model, Market Adjusted, Mean Adjusted,
-  Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1),
-  Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.
+- **15+ Return Models**: Market Model, Market Adjusted, Mean Adjusted,
+  Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), DCC-GARCH,
+  Rolling-Window, Buy-and-Hold Abnormal Returns (BHAR), Volume, and
+  Volatility models.
 
-- **11 Test Statistics**: Parametric (AR T, CAR T, BHAR T,
-  Cross-Sectional T, Patell Z, BMP) and non-parametric (Sign,
-  Generalized Sign, Rank, Calendar-Time Portfolio).
+- **12 Test Statistics**: Parametric (AR T, CAR T, BHAR T,
+  Cross-Sectional T, Patell Z, BMP, Kolari-Pynnonen) and non-parametric
+  (Sign, Generalized Sign, Rank, Calendar-Time Portfolio).
 
 - **Diagnostics**: Shapiro-Wilk normality, Durbin-Watson, Ljung-Box
   autocorrelation, pre-trend testing.
@@ -505,47 +520,6 @@ options(eventstudy.advisor_pro_footer = TRUE)
 See
 [`?advisor_pro`](https://sipemu.github.io/eventstudy/reference/advisor_pro.md)
 for details.
-
-## Roadmap
-
-Return models (Market, Market Adjusted, Mean Adjusted)
-
-Parametric test statistics (AR T, CAR T, CSect T, Patell Z, BMP)
-
-Non-parametric test statistics (Sign, Generalized Sign, Rank)
-
-Diagnostics and pre-trend testing
-
-Event study visualization (AR, CAR, AAR, CAAR)
-
-Task validation
-
-Export to CSV, Excel, LaTeX
-
-Broom-compatible tidy() method
-
-Fama-French 3-factor, 5-factor, Carhart 4-factor models
-
-GARCH(1,1) model
-
-Buy-and-hold abnormal returns (BHAR)
-
-Calendar-time portfolio test
-
-Volume and volatility event studies
-
-Cross-sectional regression analysis
-
-Intraday event study support
-
-Panel event study module (static/dynamic TWFE, Sun & Abraham 2021)
-
-Vignettes for custom models, test statistics, result extraction, panel
-
-Grounded AI advisor (es_advise, es_diagnostics, provider abstraction) —
-new in 0.60.0
-
-CRAN submission
 
 ## References
 

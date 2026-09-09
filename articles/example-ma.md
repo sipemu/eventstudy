@@ -189,7 +189,7 @@ excludes.
 
     #> R version 4.6.1 (2026-06-24)
     #> Platform: x86_64-pc-linux-gnu
-    #> Running under: Ubuntu 24.04.4 LTS
+    #> Running under: Ubuntu 24.04.5 LTS
     #> 
     #> Matrix products: default
     #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
@@ -208,7 +208,7 @@ excludes.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.64.0
+    #> [1] EventStudy_0.65.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         

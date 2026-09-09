@@ -10,7 +10,8 @@ run_event_study(
   task,
   parameter_set = ParameterSet$new(),
   report = FALSE,
-  report_args = list()
+  report_args = list(),
+  verbose = getOption("eventstudy.verbose", TRUE)
 )
 ```
 
@@ -46,12 +47,32 @@ run_event_study(
   defaults, which render `"event_study_report.html"` in the working
   directory).
 
+- verbose:
+
+  Logical; if FALSE, suppress informational messages. Default
+  `getOption("eventstudy.verbose", TRUE)`.
+
 ## Value
 
 The task object with all results computed. When `report = TRUE`, the
 returned task additionally carries `attr(task, "report_path")` with the
 path(s) of the rendered report file(s). The return type is always a
 fitted `EventStudyTask` in both paths.
+
+## See also
+
+[`prepare_event_study`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md),
+[`fit_model`](https://sipemu.github.io/eventstudy/reference/fit_model.md),
+[`calculate_statistics`](https://sipemu.github.io/eventstudy/reference/calculate_statistics.md),
+[`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md),
+[`ARTTest`](https://sipemu.github.io/eventstudy/reference/ARTTest.md)
+
+Other eventstudy-pipeline:
+[`EventStudyTask`](https://sipemu.github.io/eventstudy/reference/EventStudyTask.md),
+[`ParameterSet`](https://sipemu.github.io/eventstudy/reference/ParameterSet.md),
+[`calculate_statistics()`](https://sipemu.github.io/eventstudy/reference/calculate_statistics.md),
+[`fit_model()`](https://sipemu.github.io/eventstudy/reference/fit_model.md),
+[`prepare_event_study()`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md)
 
 ## Examples
 

@@ -100,7 +100,19 @@ object — never a crash, never a fabricated result (mirrors
 [`es_diagnostics`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
 [`recommend_stat`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md),
 [`flag_robustness`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
-[`provider`](https://sipemu.github.io/eventstudy/reference/provider.md)
+[`provider`](https://sipemu.github.io/eventstudy/reference/provider.md),
+[`run_event_study`](https://sipemu.github.io/eventstudy/reference/run_event_study.md)
+
+Other eventstudy-advisor:
+[`AnthropicProvider`](https://sipemu.github.io/eventstudy/reference/AnthropicProvider.md),
+[`CustomProvider`](https://sipemu.github.io/eventstudy/reference/CustomProvider.md),
+[`OpenAICompatProvider`](https://sipemu.github.io/eventstudy/reference/OpenAICompatProvider.md),
+[`ProviderBase`](https://sipemu.github.io/eventstudy/reference/ProviderBase.md),
+[`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`es_kb()`](https://sipemu.github.io/eventstudy/reference/es_kb.md),
+[`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
+[`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md),
+[`recommend_stat()`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md)
 
 ## Examples
 
