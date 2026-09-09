@@ -28,6 +28,7 @@
 #'     \item{params}{List of simulation parameters}
 #'   }
 #'
+#' @family eventstudy-statistics
 #' @export
 simulate_event_study <- function(n_events = 20,
                                   event_window = c(-5, 5),

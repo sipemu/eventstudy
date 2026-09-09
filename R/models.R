@@ -135,6 +135,7 @@ ModelBase <- R6Class("ModelBase",
 #' primarily influenced by market movements, along with a stock-specific
 #' idiosyncratic component.
 #'
+#' @family eventstudy-models
 #' @export
 MarketModel <- R6Class("MarketModel",
                        inherit = ModelBase,
@@ -346,6 +347,7 @@ MarketModel <- R6Class("MarketModel",
 #' individual stock parameters (such as alpha and beta) is not feasible or
 #' desired, and a basic benchmark for comparison is needed.
 #'
+#' @family eventstudy-models
 #' @export
 MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                inherit = ModelBase,
@@ -454,6 +456,7 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
 #' to control for a stock’s historical performance and do not wish to rely on
 #' market return data.
 #'
+#' @family eventstudy-models
 #' @export
 ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel",
                                              inherit = ModelBase,
@@ -589,6 +592,7 @@ CustomModel <- R6Class("CustomModel",
 #' approach: OLS regression of excess returns on factor returns during the
 #' estimation window.
 #'
+#' @family eventstudy-models
 #' @export
 LinearFactorModel <- R6Class("LinearFactorModel",
                               inherit = ModelBase,
@@ -820,6 +824,7 @@ LinearFactorModel <- R6Class("LinearFactorModel",
 #' \code{market_excess} (market return minus risk-free), \code{smb}, and \code{hml}.
 #' These can be joined via a factor table in \code{EventStudyTask}.
 #'
+#' @family eventstudy-models
 #' @export
 FamaFrench3FactorModel <- R6Class("FamaFrench3FactorModel",
                                    inherit = LinearFactorModel,
@@ -873,6 +878,7 @@ FamaFrench3FactorModel <- R6Class("FamaFrench3FactorModel",
 #' Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
 #' \code{hml}, \code{rmw}, \code{cma}.
 #'
+#' @family eventstudy-models
 #' @export
 FamaFrench5FactorModel <- R6Class("FamaFrench5FactorModel",
                                    inherit = LinearFactorModel,
@@ -927,6 +933,7 @@ FamaFrench5FactorModel <- R6Class("FamaFrench5FactorModel",
 #' Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
 #' \code{hml}, \code{mom}.
 #'
+#' @family eventstudy-models
 #' @export
 Carhart4FactorModel <- R6Class("Carhart4FactorModel",
                                 inherit = LinearFactorModel,
@@ -981,6 +988,7 @@ Carhart4FactorModel <- R6Class("Carhart4FactorModel",
 #' and the GARCH conditional mean. The time-varying sigma from GARCH can
 #' be used for standardized test statistics.
 #'
+#' @family eventstudy-models
 #' @export
 GARCHModel <- R6Class("GARCHModel",
                        inherit = ModelBase,
@@ -1174,6 +1182,7 @@ GARCHModel <- R6Class("GARCHModel",
 #' appropriate for long-horizon studies (months/years) where compounding
 #' effects matter.
 #'
+#' @family eventstudy-models
 #' @export
 BHARModel <- R6Class("BHARModel",
                       inherit = ModelBase,
@@ -1298,6 +1307,7 @@ BHARModel <- R6Class("BHARModel",
 #' \code{abnormal_returns} column, so this model writes abnormal volume
 #' to that same column for compatibility.
 #'
+#' @family eventstudy-models
 #' @export
 VolumeModel <- R6Class("VolumeModel",
                         inherit = ModelBase,
@@ -1429,6 +1439,7 @@ VolumeModel <- R6Class("VolumeModel",
 #' The abnormal measure is written to the \code{abnormal_returns} column
 #' for compatibility with existing test statistics.
 #'
+#' @family eventstudy-models
 #' @export
 VolatilityModel <- R6Class("VolatilityModel",
                             inherit = ModelBase,

@@ -432,6 +432,7 @@ EVENTSTUDY_KB <- list(
 #' kb[[1]]$id             # id of first rule
 #' kb[[1]]$citation       # citation list
 #'
+#' @family eventstudy-advisor
 #' @export
 es_kb <- function() {
   EVENTSTUDY_KB

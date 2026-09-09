@@ -15,6 +15,7 @@
 #'
 #' @return The task object (invisibly). Warnings are issued for each problem found.
 #'
+#' @family eventstudy-statistics
 #' @export
 validate_task <- function(task, parameter_set = NULL, min_estimation_obs = 30,
                           verbose = getOption("eventstudy.verbose", TRUE)) {

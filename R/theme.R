@@ -15,6 +15,7 @@
 #' @format A named character vector of length 12. Every value is a six-digit
 #'   hex colour (\code{^#[0-9A-Fa-f]\{6\}$}).
 #' @seealso \code{\link{theme_eventstudy}}, \code{\link{plot_event_study}}
+#' @family eventstudy-plots
 #' @export
 es_colours <- c(
   primary   = "#2563eb",
@@ -49,6 +50,7 @@ es_colours <- c(
 #'
 #' @seealso \code{\link{es_colours}}, \code{\link{plot_event_study}}
 #'
+#' @family eventstudy-plots
 #' @export
 theme_eventstudy <- function(base_size = 11, base_family = "") {
   ggplot2::theme_minimal(base_size = base_size, base_family = base_family) +

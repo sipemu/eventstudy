@@ -5,6 +5,7 @@
 #' parameters are used for event-window prediction. This captures parameter
 #' instability that is common in financial return data.
 #'
+#' @family eventstudy-models
 #' @export
 RollingWindowModel <- R6Class("RollingWindowModel",
                                inherit = ModelBase,
@@ -214,6 +215,7 @@ RollingWindowModel <- R6Class("RollingWindowModel",
 #' and time-varying correlation between firm and market returns, yielding
 #' a time-varying beta: \eqn{\beta_t = Cov(R_{firm}, R_{market})_t / Var(R_{market})_t}.
 #'
+#' @family eventstudy-models
 #' @export
 DCCGARCHModel <- R6Class("DCCGARCHModel",
                            inherit = ModelBase,

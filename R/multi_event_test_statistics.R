@@ -7,6 +7,7 @@
 #'
 #' See also \url{https://eventstudy.de/statistics/aar_caar_statistics.html}
 #'
+#' @family eventstudy-statistics
 #' @export
 CSectTTest <- R6Class("CSectTTest",
                    inherit = TestStatisticBase,
@@ -71,6 +72,7 @@ CSectTTest <- R6Class("CSectTTest",
 #'
 #' See also \url{https://eventstudy.de/statistics/aar_caar_statistics.html}
 #'
+#' @family eventstudy-statistics
 #' @export
 PatellZTest <- R6Class("PatellZTest",
                       inherit = TestStatisticBase,
@@ -195,6 +197,7 @@ PatellZTest <- R6Class("PatellZTest",
 #' significantly from 0.5 under the null hypothesis. The test statistic
 #' is approximately distributed as N(0, 1).
 #'
+#' @family eventstudy-statistics
 #' @export
 SignTest <- R6Class("SignTest",
                     inherit = TestStatisticBase,
@@ -266,6 +269,7 @@ SignTest <- R6Class("SignTest",
 #' returns estimated from the estimation window, rather than assuming 0.5.
 #' This accounts for asymmetry in the return distribution.
 #'
+#' @family eventstudy-statistics
 #' @export
 GeneralizedSignTest <- R6Class("GeneralizedSignTest",
                                inherit = TestStatisticBase,
@@ -348,6 +352,7 @@ GeneralizedSignTest <- R6Class("GeneralizedSignTest",
 #' across the combined estimation and event windows, which is robust
 #' to non-normality of abnormal returns.
 #'
+#' @family eventstudy-statistics
 #' @export
 RankTest <- R6Class("RankTest",
                     inherit = TestStatisticBase,
@@ -416,6 +421,7 @@ RankTest <- R6Class("RankTest",
 #' error corrected standard deviation, then applies a cross-sectional
 #' t-test to these standardized residuals.
 #'
+#' @family eventstudy-statistics
 #' @export
 BMPTest <- R6Class("BMPTest",
                    inherit = TestStatisticBase,
@@ -501,6 +507,7 @@ BMPTest <- R6Class("BMPTest",
 #' of all event firms' abnormal returns and computes a t-statistic of the
 #' mean portfolio return.
 #'
+#' @family eventstudy-statistics
 #' @export
 CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
                                       inherit = TestStatisticBase,
@@ -571,6 +578,7 @@ CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
 #' Cross-sectional Correlation of Abnormal Returns.
 #' \emph{The Review of Financial Studies}, 23(11), 3996--4025.
 #'
+#' @family eventstudy-statistics
 #' @export
 KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                inherit = TestStatisticBase,

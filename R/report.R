@@ -54,6 +54,7 @@
 #'
 #' @seealso \code{\link{generate_report}}, \code{\link{es_diagnostics}}
 #'
+#' @family eventstudy-export
 #' @export
 es_report <- function(task,
                       output_file      = "event_study_report.html",
@@ -171,6 +172,7 @@ es_report <- function(task,
 #' paths[["html"]]
 #' }
 #'
+#' @family eventstudy-export
 #' @export
 generate_report <- function(task,
                             output_file = "event_study_report.html",

@@ -47,6 +47,7 @@
 #' @seealso \code{\link{model_diagnostics}}, \code{\link{recommend_stat}},
 #'   \code{\link{flag_robustness}}
 #'
+#' @family eventstudy-advisor
 #' @export
 es_diagnostics <- function(task, max_events = 20L) {
   if (!inherits(task, "EventStudyTask")) {

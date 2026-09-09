@@ -4,6 +4,7 @@
 #' study. Furthermore, all calculations are saved in the internal dataframe
 #' named data_tbl.
 #'
+#' @family eventstudy-pipeline
 #' @export
 EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                              public = list(

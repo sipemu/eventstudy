@@ -13,6 +13,7 @@
 #'   symbols if the number exceeds max_symbols. Default is TRUE.
 #'
 #' @return A plotly plot object.
+#' @family eventstudy-plots
 #' @export
 plot_stocks <- function(task,
                         target_variable="firm_adjusted",
@@ -102,6 +103,7 @@ plot_stocks <- function(task,
 #'
 #' @return A ggplot2 plot object.
 #'
+#' @family eventstudy-plots
 #' @export
 plot_event_study <- function(task,
                              type = "car",
@@ -275,6 +277,7 @@ plot_event_study <- function(task,
 #'
 #' @return A ggplot2 plot arranged with patchwork-style layout.
 #'
+#' @family eventstudy-plots
 #' @export
 plot_diagnostics <- function(task, event_id = NULL) {
   if (!"model" %in% names(task$data_tbl)) {

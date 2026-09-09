@@ -9,6 +9,7 @@
 #'
 #' @return A tibble with diagnostic test results for each event.
 #'
+#' @family eventstudy-statistics
 #' @export
 model_diagnostics = function(task, event_id = NULL) {
   if (!"model" %in% names(task$data_tbl)) {
@@ -100,6 +101,7 @@ model_diagnostics = function(task, event_id = NULL) {
 #'
 #' @return A tibble with pre-trend test results for each group.
 #'
+#' @family eventstudy-statistics
 #' @export
 pretrend_test = function(task, group = NULL) {
   if (!"model" %in% names(task$data_tbl)) {

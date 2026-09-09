@@ -4,6 +4,7 @@
 #' calculation, the event study model, the AR, CAR, AAR, and CAAR test
 #' statistics that should be applied.
 #'
+#' @family eventstudy-pipeline
 #' @export
 ParameterSet = R6::R6Class(classname = "ParameterSet",
                            lock_objects = FALSE,

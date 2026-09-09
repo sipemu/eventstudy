@@ -24,6 +24,7 @@
 #'     \item{car_data}{The merged CAR + characteristics data}
 #'   }
 #'
+#' @family eventstudy-statistics
 #' @export
 cross_sectional_regression <- function(task, formula, data,
                                         car_window = NULL,
@@ -227,6 +228,7 @@ print.es_cross_sectional <- function(x, ...) {
 #'
 #' @return A list with test results and group-level summary statistics.
 #'
+#' @family eventstudy-statistics
 #' @export
 car_by_group <- function(task, group_var = "group", car_window = NULL) {
   cars <- .extract_cars(task, car_window)
@@ -288,6 +290,7 @@ car_by_group <- function(task, group_var = "group", car_window = NULL) {
 #'
 #' @return A named numeric vector of quantiles.
 #'
+#' @family eventstudy-statistics
 #' @export
 car_quantiles <- function(task, probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
                            car_window = NULL) {
@@ -308,6 +311,7 @@ car_quantiles <- function(task, probs = c(0.05, 0.25, 0.5, 0.75, 0.95),
 #'
 #' @return A ggplot2 object.
 #'
+#' @family eventstudy-plots
 #' @export
 plot_car_distribution <- function(task, car_window = NULL,
                                    bins = 30, by_group = FALSE,

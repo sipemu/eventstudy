@@ -11,6 +11,7 @@
 #'   \item{\code{print()}}{Print summary.}
 #' }
 #'
+#' @family eventstudy-tasks
 #' @export
 PanelEventStudyTask <- R6::R6Class(
   classname = "PanelEventStudyTask",
@@ -115,6 +116,7 @@ PanelEventStudyTask <- R6::R6Class(
 #'     \item{method}{The estimation method used}
 #'   }
 #'
+#' @family eventstudy-tasks
 #' @export
 estimate_panel_event_study <- function(task,
                                         method = c("static_twfe",
@@ -674,6 +676,7 @@ estimate_panel_event_study <- function(task,
 #'
 #' @return A ggplot2 object.
 #'
+#' @family eventstudy-tasks
 #' @export
 plot_panel_event_study <- function(task, confidence_level = 0.95,
                                     title = NULL) {

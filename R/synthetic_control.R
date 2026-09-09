@@ -3,6 +3,7 @@
 #' Task container for synthetic control analysis. Holds treated unit data,
 #' donor pool data, treatment time, and results after estimation.
 #'
+#' @family eventstudy-tasks
 #' @export
 SyntheticControlTask <- R6::R6Class(
   classname = "SyntheticControlTask",
@@ -78,6 +79,7 @@ SyntheticControlTask <- R6::R6Class(
 #'
 #' @return The task with \code{results} populated.
 #'
+#' @family eventstudy-tasks
 #' @export
 estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
                                         covariates = NULL,
@@ -277,6 +279,7 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
 #' @return The task with \code{results$placebo} populated, a list containing
 #'   \code{rmspe_ratios}, \code{p_value}, and \code{placebo_gaps}.
 #'
+#' @family eventstudy-tasks
 #' @export
 sc_placebo_test <- function(task, n_placebo = NULL) {
   if (!inherits(task, "SyntheticControlTask")) {
@@ -365,6 +368,7 @@ sc_placebo_test <- function(task, n_placebo = NULL) {
 #'
 #' @return A ggplot2 object.
 #'
+#' @family eventstudy-tasks
 #' @export
 plot_synthetic_control <- function(task, type = c("trajectory", "gap", "placebo")) {
   if (!inherits(task, "SyntheticControlTask")) {

@@ -987,6 +987,7 @@ print.Advice <- function(x, ...) {
 #' print(advice)      # Advice S3 with grounding guarantee
 #' }
 #'
+#' @family eventstudy-advisor
 #' @export
 es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL,
                      section_hint = NULL, ...) {

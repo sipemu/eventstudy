@@ -39,6 +39,7 @@
 #' print(advice)
 #' }
 #'
+#' @family eventstudy-advisor
 #' @export
 recommend_stat <- function(x, provider = NULL, ...) {
   UseMethod("recommend_stat")
@@ -99,6 +100,7 @@ recommend_stat.es_diagnostics <- function(x, provider = NULL, ...) {
 #' print(advice)
 #' }
 #'
+#' @family eventstudy-advisor
 #' @export
 flag_robustness <- function(x, provider = NULL, ...) {
   UseMethod("flag_robustness")

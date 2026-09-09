@@ -274,6 +274,7 @@
 #'   stores only non-secret configuration (`model`, `base_url`); API keys are
 #'   NEVER read at construction — they are resolved at call time inside each
 #'   concrete provider's `complete()`.
+#' @family eventstudy-advisor
 #' @export
 ProviderBase <- R6::R6Class(
   "ProviderBase",
@@ -326,6 +327,7 @@ ProviderBase <- R6::R6Class(
 #'   The user function is run inside \code{tryCatch}: if it errors, the provider
 #'   degrades to exactly one \code{warning()} plus an `es_provider_response` with
 #'   \code{text = NA_character_} — it never crashes the session.
+#' @family eventstudy-advisor
 #' @export
 #' @examples
 #' # In-process, no network: the user function supplies the completion text.
@@ -402,6 +404,7 @@ CustomProvider <- R6::R6Class(
 #'   \code{httr2} is required only for this provider and is guarded by
 #'   \code{requireNamespace()} at the top of \code{complete()}, so the package
 #'   installs and \code{R CMD check}s cleanly with \code{httr2} absent.
+#' @family eventstudy-advisor
 #' @export
 #' @examples
 #' \dontrun{
@@ -557,6 +560,7 @@ OpenAICompatProvider <- R6::R6Class(
 #'   \code{httr2} is required only for this provider and is guarded by
 #'   \code{requireNamespace()} at the top of \code{complete()}, so the package
 #'   installs and \code{R CMD check}s cleanly with \code{httr2} absent.
+#' @family eventstudy-advisor
 #' @export
 #' @examples
 #' \dontrun{
@@ -676,6 +680,7 @@ AnthropicProvider <- R6::R6Class(
 #'   \code{EVENTSTUDY_ADVISOR_BASE_URL} when \code{NULL}).
 #' @param ... Additional arguments forwarded to the provider constructor.
 #' @return A \code{ProviderBase} subclass instance.
+#' @family eventstudy-advisor
 #' @export
 #' @examples
 #' # Custom provider runs in-process, no network:

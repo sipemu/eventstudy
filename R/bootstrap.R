@@ -18,6 +18,7 @@
 #' @return A tibble with columns: \code{relative_index}, \code{observed_aar},
 #'   \code{observed_caar}, \code{boot_p_aar}, \code{boot_p_caar}.
 #'
+#' @family eventstudy-statistics
 #' @export
 bootstrap_test <- function(task, n_boot = 999L, weight_type = "rademacher",
                             statistic = "both", group = NULL, seed = NULL) {

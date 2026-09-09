@@ -47,6 +47,7 @@ TestStatisticBase <- R6Class("TestStatisticBase",
 #'
 #' See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
 #'
+#' @family eventstudy-statistics
 #' @export
 ARTTest <- R6Class("ARTTest",
                    inherit = TestStatisticBase,
@@ -93,6 +94,7 @@ ARTTest <- R6Class("ARTTest",
 #'
 #' See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
 #'
+#' @family eventstudy-statistics
 #' @export
 CARTTest <- R6Class("CARTTest",
                     inherit = TestStatisticBase,
@@ -166,6 +168,7 @@ PermutationTest <- R6Class("PermutationTest",
 #' zero. The BHAR is the difference between compounded firm returns and
 #' compounded benchmark returns over the event window.
 #'
+#' @family eventstudy-statistics
 #' @export
 BHARTTest <- R6Class("BHARTTest",
                       inherit = TestStatisticBase,

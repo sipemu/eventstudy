@@ -11,6 +11,7 @@
 #'   \item Handles trading session boundaries
 #' }
 #'
+#' @family eventstudy-tasks
 #' @export
 IntradayEventStudyTask <- R6::R6Class(
   classname = "IntradayEventStudyTask",
@@ -134,6 +135,7 @@ IntradayEventStudyTask <- R6::R6Class(
 #'
 #' @return The task with returns and windows appended.
 #'
+#' @family eventstudy-tasks
 #' @export
 prepare_intraday_event_study <- function(task, parameter_set) {
   if (!inherits(task, "IntradayEventStudyTask")) {
@@ -328,6 +330,7 @@ prepare_intraday_event_study <- function(task, parameter_set) {
 #' )
 #' }
 #'
+#' @family eventstudy-tasks
 #' @export
 nonparametric_intraday_test <- function(estimation_window, event_window,
                                         event_times, p = 0.05,

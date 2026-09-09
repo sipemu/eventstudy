@@ -15,6 +15,7 @@
 #'
 #' @return The file path (invisibly).
 #'
+#' @family eventstudy-export
 #' @export
 export_results <- function(task,
                            file,
@@ -249,6 +250,7 @@ export_results <- function(task,
 #'     \item{p.value}{p-value where available}
 #'   }
 #'
+#' @family eventstudy-export
 #' @export
 tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
                                 stat_name = "CSectT", ...) {

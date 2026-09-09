@@ -20,6 +20,7 @@ ReturnCalculation <- R6Class("ReturnCalculation",
 
 #' R6 class for log return calculation
 #'
+#' @family eventstudy-models
 #' @export
 LogReturn <- R6Class("LogReturn",
                      inherit = ReturnCalculation,
@@ -50,6 +51,7 @@ LogReturn <- R6Class("LogReturn",
 
 #' R6 class for simple return calculation
 #'
+#' @family eventstudy-models
 #' @export
 SimpleReturn <- R6Class("SimpleReturn",
                         inherit = ReturnCalculation,

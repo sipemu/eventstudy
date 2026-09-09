@@ -1,5 +1,6 @@
 #' Base class for test statistic container
 #'
+#' @family eventstudy-statistics
 #' @export
 StatisticsSetBase <- R6Class("StatisticsSetBase",
                              public = list(
@@ -52,6 +53,7 @@ StatisticsSetBase <- R6Class("StatisticsSetBase",
 #' Contains a set of single event test statistics as, e.g., AR and CAR t test.
 #' These are the default test statistics.
 #'
+#' @family eventstudy-statistics
 #' @export
 SingleEventStatisticsSet <- R6Class("SingleEventStatisticsSet",
                                     inherit = StatisticsSetBase,
@@ -70,6 +72,7 @@ SingleEventStatisticsSet <- R6Class("SingleEventStatisticsSet",
 #' Contains a set of multi event test statistics as, e.g., AAR and CAAR
 #' cross-sectional t test. These are the default test statistics.
 #'
+#' @family eventstudy-statistics
 #' @export
 MultiEventStatisticsSet <- R6Class("MultiEventStatisticsSet",
                                    inherit = StatisticsSetBase,

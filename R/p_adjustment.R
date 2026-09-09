@@ -15,6 +15,7 @@
 #' @return A tibble with columns from the original test statistic result plus
 #'   \code{p_raw_aar}, \code{p_adj_aar}, \code{p_raw_caar}, \code{p_adj_caar}.
 #'
+#' @family eventstudy-statistics
 #' @export
 adjust_p_values <- function(task, method = "BH", stat_name = "CSectT",
                              group = NULL) {
