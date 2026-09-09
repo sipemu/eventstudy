@@ -16,11 +16,11 @@ template:
     link-color: "#2563eb"
     link-hover-color: "#1d4ed8"
     font-scale: 1.0
-    base-font:
+    base_font:
       google: "Inter"
-    heading-font:
+    heading_font:
       google: "Plus Jakarta Sans"
-    code-font:
+    code_font:
       google: "JetBrains Mono"
   opengraph:
     image:

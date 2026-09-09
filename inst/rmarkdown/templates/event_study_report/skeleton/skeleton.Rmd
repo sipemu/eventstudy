@@ -145,7 +145,7 @@ if (!is_panel && !is.null(task$data_tbl)) {
       stringsAsFactors = FALSE
     ))
   }
-  .report_table(overview_tbl, caption = "Study design parameters",
+  EventStudy:::.report_table(overview_tbl, caption = "Study design parameters",
                 col.names = c("Parameter", "Value"))
   cat("\n")
 
@@ -173,7 +173,7 @@ if (!is_panel && !is.null(task$data_tbl)) {
       ),
       stringsAsFactors = FALSE
     )
-    .report_table(diag_tbl, caption = "Estimation window model fit")
+    EventStudy:::.report_table(diag_tbl, caption = "Estimation window model fit")
     cat("\n")
   }
 }
@@ -233,7 +233,7 @@ if (!is_panel && !is.null(task$data_tbl)) {
       )
     }
     res_tbl <- do.call(rbind, rows)
-    .report_table(res_tbl,
+    EventStudy:::.report_table(res_tbl,
                   caption = "Abnormal and cumulative abnormal returns",
                   col.names = c("Event", "Firm", "AR t-stat",
                                 "CAR t-stat", "Final CAR"))
@@ -270,7 +270,7 @@ if (!is.null(task$results)) {
   cat("### Panel Event Study Results\n\n")
   cat(sprintf("**Method:** %s\n\n", task$results$method))
   if (!is.null(task$results$coefficients)) {
-    .report_table(task$results$coefficients,
+    EventStudy:::.report_table(task$results$coefficients,
                   caption = "Event-Time Coefficients", digits = 4L)
   }
   cat("\n### Event Study Plot\n\n")
@@ -307,7 +307,7 @@ if (!is_panel && !is.null(task$aar_caar_tbl)) {
       grp      <- task$aar_caar_tbl$group[i]
       stat_tbl <- task$aar_caar_tbl[[sn]][[i]]
       cat(sprintf("**Group: %s**\n\n", grp))
-      .report_table(stat_tbl, digits = 4L)
+      EventStudy:::.report_table(stat_tbl, digits = 4L)
       cat("\n")
     }
   }
@@ -335,7 +335,7 @@ if (!is.null(diag)) {
     LjungBox_p = round(ew$ljung_box_p, 4),
     stringsAsFactors = FALSE
   )
-  .report_table(diag_tbl,
+  EventStudy:::.report_table(diag_tbl,
                 caption = "Per-event estimation-window diagnostics",
                 col.names = c("Event", "R-sq", "Sigma", "DoF",
                               "Shapiro p", "DW stat", "LjungBox p"),
@@ -358,7 +358,7 @@ if (!is.null(diag)) {
     ),
     stringsAsFactors = FALSE
   )
-  .report_table(cs_tbl, caption = "Cross-sectional diagnostics",
+  EventStudy:::.report_table(cs_tbl, caption = "Cross-sectional diagnostics",
                 col.names = c("Diagnostic", "Value"))
   cat("\n")
 
@@ -387,7 +387,7 @@ if (!is.null(diag)) {
     ) %>%
     select(event_id, firm_symbol, sigma, r2, dof, autocorr)
 
-  .report_table(diag_data, caption = "Model Diagnostics by Event",
+  EventStudy:::.report_table(diag_data, caption = "Model Diagnostics by Event",
                 digits = 4L)
 }
 ```
