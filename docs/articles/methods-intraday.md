@@ -61,23 +61,25 @@ request carries `event_id`, `group`, `firm_symbol`, `index_symbol`,
 
 ## 7. Rendered Table
 
-`knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` `[`head`](https://rdrr.io/r/utils/head.html)`(`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``task``, type ``=`` ``"car"``)``, ``10``)``,`` `` caption ``=`` ``"Intraday cumulative abnormal returns around the event minute (first 10 offsets)."`` ``)`
+`es_tt``(`` `` `[`head`](https://rdrr.io/r/utils/head.html)`(`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``task``, type ``=`` ``"car"``)``, ``10``)``,`` `` caption ``=`` ``"Intraday cumulative abnormal returns around the event minute (first 10 offsets)."`` ``)`
 
-| event_id | group    | firm_symbol | term        | estimate | std.error | statistic | p.value |
-|---------:|:---------|:------------|:------------|---------:|----------:|----------:|--------:|
-|        1 | Intraday | FIRM_A      | \[-30,-30\] |   0.0001 |    0.0009 |    0.0821 |  0.9347 |
-|        1 | Intraday | FIRM_A      | \[-30,-29\] |  -0.0014 |    0.0013 |   -1.0600 |  0.2913 |
-|        1 | Intraday | FIRM_A      | \[-30,-28\] |  -0.0002 |    0.0016 |   -0.1220 |  0.9031 |
-|        1 | Intraday | FIRM_A      | \[-30,-27\] |  -0.0004 |    0.0019 |   -0.2126 |  0.8320 |
-|        1 | Intraday | FIRM_A      | \[-30,-26\] |  -0.0008 |    0.0021 |   -0.3904 |  0.6970 |
-|        1 | Intraday | FIRM_A      | \[-30,-25\] |  -0.0020 |    0.0023 |   -0.8643 |  0.3892 |
-|        1 | Intraday | FIRM_A      | \[-30,-24\] |  -0.0020 |    0.0025 |   -0.8151 |  0.4166 |
-|        1 | Intraday | FIRM_A      | \[-30,-23\] |  -0.0028 |    0.0027 |   -1.0573 |  0.2925 |
-|        1 | Intraday | FIRM_A      | \[-30,-22\] |  -0.0034 |    0.0028 |   -1.2204 |  0.2247 |
-|        1 | Intraday | FIRM_A      | \[-30,-21\] |  -0.0021 |    0.0030 |   -0.6937 |  0.4892 |
+| event_id | group | firm_symbol | term | estimate | std.error | statistic | p.value |
+|----|----|----|----|----|----|----|----|
+| 1 | Intraday | FIRM_A | \[-30,-30\] | 0.00007718 | 0.0009403 | 0.08208 | 0.9347 |
+| 1 | Intraday | FIRM_A | \[-30,-29\] | -0.00140952 | 0.0013298 | -1.05996 | 0.2913 |
+| 1 | Intraday | FIRM_A | \[-30,-28\] | -0.00019876 | 0.0016287 | -0.12204 | 0.9031 |
+| 1 | Intraday | FIRM_A | \[-30,-27\] | -0.00039988 | 0.0018806 | -0.21264 | 0.832 |
+| 1 | Intraday | FIRM_A | \[-30,-26\] | -0.0008208 | 0.0021026 | -0.39038 | 0.697 |
+| 1 | Intraday | FIRM_A | \[-30,-25\] | -0.00199079 | 0.0023033 | -0.86433 | 0.3892 |
+| 1 | Intraday | FIRM_A | \[-30,-24\] | -0.00202787 | 0.0024878 | -0.81512 | 0.4166 |
+| 1 | Intraday | FIRM_A | \[-30,-23\] | -0.00281193 | 0.0026596 | -1.05728 | 0.2925 |
+| 1 | Intraday | FIRM_A | \[-30,-22\] | -0.00344262 | 0.0028209 | -1.22039 | 0.2247 |
+| 1 | Intraday | FIRM_A | \[-30,-21\] | -0.00206269 | 0.0029735 | -0.69369 | 0.4892 |
 
 Intraday cumulative abnormal returns around the event minute (first 10
-offsets). {.table}
+offsets). {#tinytable_5qnmkssvfqzhj28rtlre .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 

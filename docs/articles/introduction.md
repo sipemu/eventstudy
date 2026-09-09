@@ -55,7 +55,16 @@ structure:
     can be parametrized according to your needs when the task is
     defined. The default is `adjusted`.
 
-[`head`](https://rdrr.io/r/utils/head.html)`(``firm_tbl``)`` ``#> ``# A tibble: 6 × 3`` ``#> symbol date adjusted`` ``#> ``<chr>`` ``<chr>`` ``<dbl>`` ``#> ``1`` VOW.DE 02.06.2014 113.`` ``#> ``2`` VOW.DE 03.06.2014 112.`` ``#> ``3`` VOW.DE 04.06.2014 109.`` ``#> ``4`` VOW.DE 05.06.2014 112.`` ``#> ``5`` VOW.DE 06.06.2014 112.`` ``#> ``6`` VOW.DE 09.06.2014 112.`
+`es_tt``(`[`head`](https://rdrr.io/r/utils/head.html)`(``firm_tbl``)``)`
+
+| symbol | date       | adjusted |
+|--------|------------|----------|
+| VOW.DE | 02.06.2014 | 112.5    |
+| VOW.DE | 03.06.2014 | 112.4    |
+| VOW.DE | 04.06.2014 | 109.5    |
+| VOW.DE | 05.06.2014 | 111.6    |
+| VOW.DE | 06.06.2014 | 111.9    |
+| VOW.DE | 09.06.2014 | 112.4    |
 
 ### Define the Event Study
 
@@ -97,16 +106,38 @@ data frame:
 
 [`head`](https://rdrr.io/r/utils/head.html)`(``est_task``$``data_tbl``)`` ``#> ``# A tibble: 4 × 5`` ``#> ``# Groups: event_id, group, firm_symbol [4]`` ``#> firm_symbol event_id group data request `` ``#> ``<chr>`` ``<int>`` ``<chr>`` ``<list>`` ``<list>`` `` ``#> ``1`` VOW.DE 1 VW Group ``<tibble [360 × 4]>`` ``<tibble [1 × 6]>`` ``#> ``2`` PAH3.DE 2 VW Group ``<tibble [360 × 4]>`` ``<tibble [1 × 6]>`` ``#> ``3`` BMW.DE 3 Other ``<tibble [360 × 4]>`` ``<tibble [1 × 6]>`` ``#> ``4`` MBG.DE 4 Other ``<tibble [360 × 4]>`` ``<tibble [1 × 6]>`
 
-[`head`](https://rdrr.io/r/utils/head.html)`(``est_task``$``data_tbl``$``data``[[``1``]``]``)`` ``#> ``# A tibble: 6 × 4`` ``#> date firm_adjusted index_symbol index_adjusted`` ``#> ``<chr>`` ``<dbl>`` ``<chr>`` ``<dbl>`` ``#> ``1`` 02.06.2014 113. ^GDAXI ``9``950.`` ``#> ``2`` 03.06.2014 112. ^GDAXI ``9``920.`` ``#> ``3`` 04.06.2014 109. ^GDAXI ``9``927.`` ``#> ``4`` 05.06.2014 112. ^GDAXI ``9``948.`` ``#> ``5`` 06.06.2014 112. ^GDAXI ``9``987.`` ``#> ``6`` 09.06.2014 112. ^GDAXI ``10``009.`
+`es_tt``(`[`head`](https://rdrr.io/r/utils/head.html)`(``est_task``$``data_tbl``$``data``[[``1``]``]``)``)`
 
-`est_task``$``data_tbl``$``request``[[``1``]``]`` ``#> ``# A tibble: 1 × 6`` ``#> index_symbol event_date event_window_start event_window_end`` ``#> ``<chr>`` ``<chr>`` ``<int>`` ``<int>`` ``#> ``1`` ^GDAXI 18.09.2015 -``10`` 10`` ``#> ``# ℹ 2 more variables: shift_estimation_window <int>,`` ``#> ``# estimation_window_length <int>`
+| date       | firm_adjusted | index_symbol | index_adjusted |
+|------------|---------------|--------------|----------------|
+| 02.06.2014 | 112.5         | ^GDAXI       | 9950           |
+| 03.06.2014 | 112.4         | ^GDAXI       | 9920           |
+| 04.06.2014 | 109.5         | ^GDAXI       | 9927           |
+| 05.06.2014 | 111.6         | ^GDAXI       | 9948           |
+| 06.06.2014 | 111.9         | ^GDAXI       | 9987           |
+| 09.06.2014 | 112.4         | ^GDAXI       | 10009          |
+
+`es_tt``(``est_task``$``data_tbl``$``request``[[``1``]``]``)`
+
+| index_symbol | event_date | event_window_start | event_window_end | shift_estimation_window | estimation_window_length |
+|----|----|----|----|----|----|
+| ^GDAXI | 18.09.2015 | -10 | 10 | -11 | 250 |
 
 The internal data structure is important for you if you plan to develop
 your own statistical or econometric model or test statistic.
 
 `est_task`` ``=`` `[`prepare_event_study`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md)`(``est_task``, ``param_set``)`
 
-[`head`](https://rdrr.io/r/utils/head.html)`(``est_task``$``data_tbl``$``data``[[``1``]``]``)`` ``#> ``# A tibble: 6 × 10`` ``#> date firm_adjusted index_symbol index_adjusted firm_returns index_returns`` ``#> ``<chr>`` ``<dbl>`` ``<chr>`` ``<dbl>`` ``<dbl>`` ``<dbl>`` ``#> ``1`` 02.06.20… 113. ^GDAXI ``9``950. ``NA`` ``NA`` `` ``#> ``2`` 03.06.20… 112. ^GDAXI ``9``920. -``0.001``28`` -``0.003``06`` `` ``#> ``3`` 04.06.20… 109. ^GDAXI ``9``927. -``0.026``3`` 0.000``698`` ``#> ``4`` 05.06.20… 112. ^GDAXI ``9``948. 0.019``6`` 0.002``13`` `` ``#> ``5`` 06.06.20… 112. ^GDAXI ``9``987. 0.002``84`` 0.003``95`` `` ``#> ``6`` 09.06.20… 112. ^GDAXI ``10``009. 0.003``86`` 0.002``14`` `` ``#> ``# ℹ 4 more variables: event_date <dbl>, relative_index <int>,`` ``#> ``# event_window <dbl>, estimation_window <dbl>`
+`es_tt``(`[`head`](https://rdrr.io/r/utils/head.html)`(``est_task``$``data_tbl``$``data``[[``1``]``]``)``)`
+
+| date | firm_adjusted | index_symbol | index_adjusted | firm_returns | index_returns | event_date | relative_index | event_window | estimation_window |
+|----|----|----|----|----|----|----|----|----|----|
+| 02.06.2014 | 112.5 | ^GDAXI | 9950 | NA | NA | 0 | -329 | 0 | 0 |
+| 03.06.2014 | 112.4 | ^GDAXI | 9920 | -0.001284 | -0.0030579 | 0 | -328 | 0 | 0 |
+| 04.06.2014 | 109.5 | ^GDAXI | 9927 | -0.026287 | 0.0006983 | 0 | -327 | 0 | 0 |
+| 05.06.2014 | 111.6 | ^GDAXI | 9948 | 0.019586 | 0.0021294 | 0 | -326 | 0 | 0 |
+| 06.06.2014 | 111.9 | ^GDAXI | 9987 | 0.00284 | 0.0039489 | 0 | -325 | 0 | 0 |
+| 09.06.2014 | 112.4 | ^GDAXI | 10009 | 0.003861 | 0.0021444 | 0 | -324 | 0 | 0 |
 
 `est_task`` ``=`` `[`fit_model`](https://sipemu.github.io/eventstudy/reference/fit_model.md)`(``est_task``, ``param_set``)`
 
@@ -118,13 +149,107 @@ your own statistical or econometric model or test statistic.
 
 [`head`](https://rdrr.io/r/utils/head.html)`(``est_task``$``data_tbl``)`` ``#> ``# A tibble: 4 × 8`` ``#> ``# Groups: event_id, group, firm_symbol [4]`` ``#> firm_symbol event_id group data request model ART CART `` ``#> ``<chr>`` ``<int>`` ``<chr>`` ``<list>`` ``<list>`` ``<list>`` ``<list>`` ``<list>`` `` ``#> ``1`` VOW.DE 1 VW Group ``<tibble>`` ``<tibble>`` ``<MarktMdl>`` ``<tibble>`` ``<tibble>`` ``#> ``2`` PAH3.DE 2 VW Group ``<tibble>`` ``<tibble>`` ``<MarktMdl>`` ``<tibble>`` ``<tibble>`` ``#> ``3`` BMW.DE 3 Other ``<tibble>`` ``<tibble>`` ``<MarktMdl>`` ``<tibble>`` ``<tibble>`` ``#> ``4`` MBG.DE 4 Other ``<tibble>`` ``<tibble>`` ``<MarktMdl>`` ``<tibble>`` ``<tibble>`
 
-`est_task``$``data_tbl``$``ART``[[``1``]``]`` ``#> ``# A tibble: 21 × 4`` ``#> relative_index abnormal_returns ar_t`` ``#> ``<int>`` ``<dbl>`` ``<dbl>`` ``#> `` 1`` -``10`` 0.002``82`` 0.281 `` ``#> `` 2`` -``9`` 0.000``357`` 0.035``6`` ``#> `` 3`` -``8`` 0.009``20`` 0.918 `` ``#> `` 4`` -``7`` 0.022``2`` 2.21 `` ``#> `` 5`` -``6`` -``0.005``79`` -``0.577`` `` ``#> `` 6`` -``5`` 0.005``83`` 0.581 `` ``#> `` 7`` -``4`` -``0.004``92`` -``0.491`` `` ``#> `` 8`` -``3`` 0.002``58`` 0.258 `` ``#> `` 9`` -``2`` 0.000``213`` 0.021``3`` ``#> ``10`` -``1`` -``0.000``376`` -``0.037``5`` ``#> ``# ℹ 11 more rows`` ``#> ``# ℹ 1 more variable: ar_t_dist <dist>`
+`es_tt``(``est_task``$``data_tbl``$``ART``[[``1``]``]``)`` ``` #> Warning in `[<-.data.frame`(`*tmp*`, idx, col, value = ``` ``#> structure(list(structure(list(: provided 21 variables to replace 1 variables`
 
-`est_task``$``data_tbl``$``CART``[[``1``]``]`` ``#> ``# A tibble: 21 × 8`` ``#> relative_index abnormal_returns event_window_length car_window car`` ``#> ``<int>`` ``<dbl>`` ``<int>`` ``<chr>`` ``<dbl>`` ``#> `` 1`` -``10`` 0.002``82`` 1 [-10, -10] 0.002``82`` ``#> `` 2`` -``9`` 0.000``357`` 2 [-10, -9] 0.003``17`` ``#> `` 3`` -``8`` 0.009``20`` 3 [-10, -8] 0.012``4`` `` ``#> `` 4`` -``7`` 0.022``2`` 4 [-10, -7] 0.034``6`` `` ``#> `` 5`` -``6`` -``0.005``79`` 5 [-10, -6] 0.028``8`` `` ``#> `` 6`` -``5`` 0.005``83`` 6 [-10, -5] 0.034``6`` `` ``#> `` 7`` -``4`` -``0.004``92`` 7 [-10, -4] 0.029``7`` `` ``#> `` 8`` -``3`` 0.002``58`` 8 [-10, -3] 0.032``3`` `` ``#> `` 9`` -``2`` 0.000``213`` 9 [-10, -2] 0.032``5`` `` ``#> ``10`` -``1`` -``0.000``376`` 10 [-10, -1] 0.032``1`` `` ``#> ``# ℹ 11 more rows`` ``#> ``# ℹ 3 more variables: corrected_car <dbl>, car_t <dbl>, car_t_dist <dist>`
+| relative_index | abnormal_returns | ar_t      | ar_t_dist |
+|----------------|------------------|-----------|-----------|
+| -10            | 0.0028169        | 0.28098   | 248       |
+| -9             | 0.0003573        | 0.03564   | 0         |
+| -8             | 0.0091997        | 0.91765   | 1         |
+| -7             | 0.0222041        | 2.21482   | NA        |
+| -6             | -0.0057857       | -0.57712  | 248       |
+| -5             | 0.0058288        | 0.58141   | 0         |
+| -4             | -0.0049238       | -0.49114  | 1         |
+| -3             | 0.0025836        | 0.2577    | NA        |
+| -2             | 0.0002132        | 0.02127   | 248       |
+| -1             | -0.0003757       | -0.03748  | 0         |
+| 0              | -0.0026243       | -0.26177  | 1         |
+| 1              | -0.1910336       | -19.05523 | NA        |
+| 2              | -0.1418452       | -14.14879 | 248       |
+| 3              | 0.0626856        | 6.25277   | 0         |
+| 4              | 0.0215244        | 2.14702   | 1         |
+| 5              | -0.0576803       | -5.7535   | NA        |
+| 6              | -0.0523001       | -5.21684  | 248       |
+| 7              | -0.0318594       | -3.17791  | 0         |
+| 8              | -0.0074962       | -0.74773  | 1         |
+| 9              | 0.0185153        | 1.84686   | NA        |
+| 10             | -0.0423404       | -4.22337  | 248       |
+
+`es_tt``(``est_task``$``data_tbl``$``CART``[[``1``]``]``)`` ``` #> Warning in `[<-.data.frame`(`*tmp*`, idx, col, value = ``` ``#> structure(list(structure(list(: provided 21 variables to replace 1 variables`
+
+| relative_index | abnormal_returns | event_window_length | car_window | car | corrected_car | car_t | car_t_dist |
+|----|----|----|----|----|----|----|----|
+| -10 | 0.0028169 | 1 | \[-10, -10\] | 0.002817 | 0.281 | 0.281 | 248 |
+| -9 | 0.0003573 | 2 | \[-10, -9\] | 0.003174 | 0.3166 | 0.2239 | 0.002816886 |
+| -8 | 0.0091997 | 3 | \[-10, -8\] | 0.012374 | 1.2343 | 0.7126 | 0.01002526 |
+| -7 | 0.0222041 | 4 | \[-10, -7\] | 0.034578 | 3.4491 | 1.7245 | NA |
+| -6 | -0.0057857 | 5 | \[-10, -6\] | 0.028792 | 2.872 | 1.2844 | 248 |
+| -5 | 0.0058288 | 6 | \[-10, -5\] | 0.034621 | 3.4534 | 1.4098 | 0.002816886 |
+| -4 | -0.0049238 | 7 | \[-10, -4\] | 0.029697 | 2.9622 | 1.1196 | 0.01002526 |
+| -3 | 0.0025836 | 8 | \[-10, -3\] | 0.032281 | 3.2199 | 1.1384 | NA |
+| -2 | 0.0002132 | 9 | \[-10, -2\] | 0.032494 | 3.2412 | 1.0804 | 248 |
+| -1 | -0.0003757 | 10 | \[-10, -1\] | 0.032118 | 3.2037 | 1.0131 | 0.002816886 |
+| 0 | -0.0026243 | 11 | \[-10, 0\] | 0.029494 | 2.942 | 0.887 | 0.01002526 |
+| 1 | -0.1910336 | 12 | \[-10, 1\] | -0.16154 | -16.1133 | -4.6515 | NA |
+| 2 | -0.1418452 | 13 | \[-10, 2\] | -0.303385 | -30.2621 | -8.3932 | 248 |
+| 3 | 0.0626856 | 14 | \[-10, 3\] | -0.240699 | -24.0093 | -6.4168 | 0.002816886 |
+| 4 | 0.0215244 | 15 | \[-10, 4\] | -0.219175 | -21.8623 | -5.6448 | 0.01002526 |
+| 5 | -0.0576803 | 16 | \[-10, 5\] | -0.276855 | -27.6158 | -6.9039 | NA |
+| 6 | -0.0523001 | 17 | \[-10, 6\] | -0.329155 | -32.8326 | -7.9631 | 248 |
+| 7 | -0.0318594 | 18 | \[-10, 7\] | -0.361015 | -36.0105 | -8.4878 | 0.002816886 |
+| 8 | -0.0074962 | 19 | \[-10, 8\] | -0.368511 | -36.7583 | -8.4329 | 0.01002526 |
+| 9 | 0.0185153 | 20 | \[-10, 9\] | -0.349996 | -34.9114 | -7.8064 | NA |
+| 10 | -0.0423404 | 21 | \[-10, 10\] | -0.392336 | -39.1348 | -8.5399 | 248 |
 
 `est_task``$``aar_caar_tbl`` ``#> ``# A tibble: 2 × 4`` ``#> ``# Groups: group [2]`` ``#> group data model CSectT `` ``#> ``<chr>`` ``<list>`` ``<list>`` ``<list>`` `` ``#> ``1`` VW Group ``<tibble [720 × 13]>`` ``<tibble [2 × 3]>`` ``<tibble [21 × 10]>`` ``#> ``2`` Other ``<tibble [720 × 13]>`` ``<tibble [2 × 3]>`` ``<tibble [21 × 10]>`
 
-`est_task``$``aar_caar_tbl``$``CSectT``[[``1``]``]`` ``#> ``# A tibble: 21 × 10`` ``#> relative_index aar n_events n_valid_events n_pos n_neg aar_t caar`` ``#> ``<int>`` ``<dbl>`` ``<int>`` ``<int>`` ``<int>`` ``<int>`` ``<dbl>`` ``<dbl>`` ``#> `` 1`` -``10`` 0.004``18`` 2 2 2 0 3.07 0.004``18`` ``#> `` 2`` -``9`` -``0.001``22`` 2 2 1 1 -``0.774`` 0.002``95`` ``#> `` 3`` -``8`` 0.006``69`` 2 2 2 0 2.66 0.009``64`` ``#> `` 4`` -``7`` 0.015``8`` 2 2 2 0 2.46 0.025``4`` `` ``#> `` 5`` -``6`` -``0.002``61`` 2 2 1 1 -``0.819`` 0.022``8`` `` ``#> `` 6`` -``5`` 0.004``55`` 2 2 2 0 3.55 0.027``4`` `` ``#> `` 7`` -``4`` -``0.004``16`` 2 2 0 2 -``5.48`` 0.023``2`` `` ``#> `` 8`` -``3`` 0.004``71`` 2 2 2 0 2.21 0.027``9`` `` ``#> `` 9`` -``2`` 0.007``96`` 2 2 2 0 1.03 0.035``9`` `` ``#> ``10`` -``1`` -``0.004``83`` 2 2 0 2 -``1.08`` 0.031``0`` `` ``#> ``# ℹ 11 more rows`` ``#> ``# ℹ 2 more variables: caar_t <dbl>, car_window <chr>`
+`es_tt``(``est_task``$``aar_caar_tbl``$``CSectT``[[``1``]``]``)`
+
+| relative_index | aar | n_events | n_valid_events | n_pos | n_neg | aar_t | caar | caar_t | car_window |
+|----|----|----|----|----|----|----|----|----|----|
+| -10 | 0.004175 | 2 | 2 | 2 | 0 | 3.0734 | 0.004175 | 3.073 | \[-10, -10\] |
+| -9 | -0.001221 | 2 | 2 | 1 | 1 | -0.7737 | 0.002954 | 13.431 | \[-10, -9\] |
+| -8 | 0.006685 | 2 | 2 | 2 | 0 | 2.6587 | 0.009639 | 3.525 | \[-10, -8\] |
+| -7 | 0.015783 | 2 | 2 | 2 | 0 | 2.458 | 0.025422 | 2.777 | \[-10, -7\] |
+| -6 | -0.002606 | 2 | 2 | 1 | 1 | -0.8193 | 0.022817 | 3.819 | \[-10, -6\] |
+| -5 | 0.004547 | 2 | 2 | 2 | 0 | 3.5468 | 0.027364 | 3.771 | \[-10, -5\] |
+| -4 | -0.004164 | 2 | 2 | 0 | 2 | -5.4838 | 0.023199 | 3.57 | \[-10, -4\] |
+| -3 | 0.004712 | 2 | 2 | 2 | 0 | 2.2139 | 0.027911 | 6.388 | \[-10, -3\] |
+| -2 | 0.007963 | 2 | 2 | 2 | 0 | 1.0275 | 0.035874 | 10.612 | \[-10, -2\] |
+| -1 | -0.004826 | 2 | 2 | 0 | 2 | -1.0844 | 0.031048 | 29.015 | \[-10, -1\] |
+| 0 | -0.001426 | 2 | 2 | 0 | 2 | -1.1908 | 0.029622 | 231.743 | \[-10, 0\] |
+| 1 | -0.191271 | 2 | 2 | 0 | 2 | -804.3893 | -0.16165 | -1470.036 | \[-10, 1\] |
+| 2 | -0.145951 | 2 | 2 | 0 | 2 | -35.5468 | -0.307601 | -72.963 | \[-10, 2\] |
+| 3 | 0.038745 | 2 | 2 | 2 | 0 | 1.6183 | -0.268856 | -9.549 | \[-10, 3\] |
+| 4 | 0.017674 | 2 | 2 | 2 | 0 | 4.59 | -0.251182 | -7.848 | \[-10, 4\] |
+| 5 | -0.058071 | 2 | 2 | 0 | 2 | -148.579 | -0.309253 | -9.545 | \[-10, 5\] |
+| 6 | -0.051179 | 2 | 2 | 0 | 2 | -45.6437 | -0.360432 | -11.524 | \[-10, 6\] |
+| 7 | -0.018909 | 2 | 2 | 0 | 2 | -1.46 | -0.379341 | -20.7 | \[-10, 7\] |
+| 8 | -0.006953 | 2 | 2 | 0 | 2 | -12.8002 | -0.386294 | -21.723 | \[-10, 8\] |
+| 9 | 0.009911 | 2 | 2 | 2 | 0 | 1.1519 | -0.376382 | -14.264 | \[-10, 9\] |
+| 10 | -0.045807 | 2 | 2 | 0 | 2 | -13.2138 | -0.422189 | -14.142 | \[-10, 10\] |
+
+### Visualize the Results
+
+The
+[`plot_event_study()`](https://sipemu.github.io/eventstudy/reference/plot_event_study.md)
+function returns a ggplot2 object; wrapping it in
+[`plotly::ggplotly()`](https://rdrr.io/pkg/plotly/man/ggplotly.html)
+converts it to an interactive widget – hover over data points to inspect
+exact values, zoom into the announcement window, or click legend entries
+to toggle series.
+
+The chart below shows the cumulative abnormal return (CAR) path with
+confidence band for the first event in the study (VW, September 2015
+announcement):
+
+`plotly``::`[`ggplotly`](https://rdrr.io/pkg/plotly/man/ggplotly.html)`(`[`plot_event_study`](https://sipemu.github.io/eventstudy/reference/plot_event_study.md)`(``est_task``, type ``=`` ``"car"``)``)`
+
+The next chart shows the average CAAR (Cumulative Average Abnormal
+Return) aggregated across all events – it summarises the mean market
+reaction and its uncertainty over the event window:
+
+`plotly``::`[`ggplotly`](https://rdrr.io/pkg/plotly/man/ggplotly.html)`(`[`plot_event_study`](https://sipemu.github.io/eventstudy/reference/plot_event_study.md)`(``est_task``, type ``=`` ``"caar"``)``)`
 
 ### Next Steps
 

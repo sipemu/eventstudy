@@ -82,20 +82,22 @@ they require optional packages and are gated `eval=FALSE`. Note the
 
 ## 7. Rendered Table
 
-`knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` ``res``$``results``$``coefficients``,`` `` caption ``=`` ``"Dynamic TWFE event-time coefficients (base period k = -1) on the synthetic staggered panel."`` ``)`
+`es_tt``(`` `` ``res``$``results``$``coefficients``,`` `` caption ``=`` ``"Dynamic TWFE event-time coefficients (base period k = -1) on the synthetic staggered panel."`` ``)`
 
-| relative_time | estimate | std.error | statistic | p.value |
-|--------------:|---------:|----------:|----------:|--------:|
-|            -3 |  -0.7182 |    0.3181 |    -2.258 |  0.0240 |
-|            -2 |  -0.5610 |    0.2615 |    -2.146 |  0.0319 |
-|            -1 |   0.0000 |    0.0000 |        NA |      NA |
-|             0 |   2.0085 |    0.3333 |     6.026 |  0.0000 |
-|             1 |   2.2249 |    0.4618 |     4.818 |  0.0000 |
-|             2 |   2.8218 |    0.4236 |     6.661 |  0.0000 |
-|             3 |       NA |        NA |        NA |      NA |
+| relative_time | estimate | std.error | statistic | p.value          |
+|---------------|----------|-----------|-----------|------------------|
+| -3            | -0.7182  | 0.3181    | -2.258    | 0.02395869066429 |
+| -2            | -0.561   | 0.2615    | -2.146    | 0.03190555093362 |
+| -1            | 0        | 0         | NA        | NA               |
+| 0             | 2.0085   | 0.3333    | 6.026     | 0.0000000016834  |
+| 1             | 2.2249   | 0.4618    | 4.818     | 0.00000145136014 |
+| 2             | 2.8218   | 0.4236    | 6.661     | 0.00000000002721 |
+| 3             | NA       | NA        | NA        | NA               |
 
 Dynamic TWFE event-time coefficients (base period k = -1) on the
-synthetic staggered panel. {.table}
+synthetic staggered panel. {#tinytable_nycmr1fqbyb702klk5ne .table
+.tinytable style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 

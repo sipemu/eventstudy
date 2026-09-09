@@ -83,16 +83,19 @@ with an explicit `seed = 42` for byte-stability.
 
 ## 7. Rendered Table
 
-`knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` ``diag``,`` `` caption ``=`` ``"Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson (dw_stat), Ljung-Box (ljung_box_p)."`` ``)`
+`es_tt``(`` `` ``diag``,`` `` caption ``=`` ``"Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson (dw_stat), Ljung-Box (ljung_box_p)."`` ``)`
 
 | event_id | firm_symbol | is_fitted | shapiro_p | dw_stat | ljung_box_p | acf1 | sigma | r2 |
-|---:|:---|:---|---:|---:|---:|---:|---:|---:|
-| 1 | AAPL | TRUE | 0 | 1.766 | 0.8511 | 0.1090 | 0.0107 | 0.7165 |
-| 2 | MSFT | TRUE | 0 | 1.843 | 0.6812 | 0.0781 | 0.0117 | 0.6901 |
-| 3 | GOOGL | TRUE | 0 | 1.792 | 0.7391 | 0.0928 | 0.0156 | 0.5945 |
+|----|----|----|----|----|----|----|----|----|
+| 1 | AAPL | TRUE | 0.000028141128 | 1.766 | 0.8511 | 0.109 | 0.01065 | 0.7165 |
+| 2 | MSFT | TRUE | 0.000000000352 | 1.843 | 0.6812 | 0.07807 | 0.01173 | 0.6901 |
+| 3 | GOOGL | TRUE | 0.000000378554 | 1.792 | 0.7391 | 0.09284 | 0.01559 | 0.5945 |
 
 Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson
-(dw_stat), Ljung-Box (ljung_box_p). {.table style="width:100%;"}
+(dw_stat), Ljung-Box (ljung_box_p). {#tinytable_926fgkargupx20bggu2v
+.table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 

@@ -77,23 +77,25 @@ optional package is installed:
 
 ## 7. Rendered Table
 
-`knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` `[`head`](https://rdrr.io/r/utils/head.html)`(``res``$``results``$``trajectory``, ``10``)``,`` `` caption ``=`` ``"Treated vs synthetic trajectory with the estimated gap (first 10 periods)."`` ``)`
+`es_tt``(`` `` `[`head`](https://rdrr.io/r/utils/head.html)`(``res``$``results``$``trajectory``, ``10``)``,`` `` caption ``=`` ``"Treated vs synthetic trajectory with the estimated gap (first 10 periods)."`` ``)`
 
-| time | treated | synthetic |     gap |
-|-----:|--------:|----------:|--------:|
-|    1 |  0.7993 |    0.3574 |  0.4419 |
-|    2 |  0.1998 |    0.3995 | -0.1996 |
-|    3 |  0.9621 |    0.8875 |  0.0746 |
-|    4 |  1.3397 |    1.2460 |  0.0937 |
-|    5 |  1.2972 |    1.3703 | -0.0731 |
-|    6 |  1.9037 |    2.1786 | -0.2748 |
-|    7 |  2.7954 |    2.6887 |  0.1068 |
-|    8 |  3.1292 |    2.8430 |  0.2862 |
-|    9 |  4.0566 |    3.4895 |  0.5672 |
-|   10 |  3.2637 |    3.7390 | -0.4752 |
+| time | treated | synthetic | gap      |
+|------|---------|-----------|----------|
+| 1    | 0.7993  | 0.3574    | 0.44193  |
+| 2    | 0.1998  | 0.3995    | -0.19964 |
+| 3    | 0.9621  | 0.8875    | 0.07457  |
+| 4    | 1.3397  | 1.246     | 0.09375  |
+| 5    | 1.2972  | 1.3703    | -0.07308 |
+| 6    | 1.9037  | 2.1786    | -0.27483 |
+| 7    | 2.7954  | 2.6887    | 0.10676  |
+| 8    | 3.1292  | 2.843     | 0.28618  |
+| 9    | 4.0566  | 3.4895    | 0.56717  |
+| 10   | 3.2637  | 3.739     | -0.47523 |
 
 Treated vs synthetic trajectory with the estimated gap (first 10
-periods). {.table}
+periods). {#tinytable_yzuzdooarb503gc2ujdt .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 

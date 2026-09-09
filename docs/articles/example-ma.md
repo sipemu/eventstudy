@@ -48,18 +48,20 @@ For each value we simulate afresh (fixed seed for reproducibility) and
 record the empirical `power` – the fraction of the `n_simulations` runs
 in which the test correctly rejected the null on the event day.
 
-`` # Extraction approach: simulate_event_study() returns an `es_simulation` ``` ``` # object whose `$power` field is exactly the detection rate we want. We map ``` ``# over a grid of true effects and read $power from each run.`` ``ar_grid`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(``0.001``, ``0.002``, ``0.004``, ``0.006``, ``0.010``)`` `` ``power_tbl`` ``<-`` ``purrr``::`[`map_dfr`](https://purrr.tidyverse.org/reference/map_dfr.html)`(``ar_grid``, ``function``(``ar``)`` ``{`` `` ``sim`` ``<-`` `[`simulate_event_study`](https://sipemu.github.io/eventstudy/reference/simulate_event_study.md)`(`` `` n_events ``=`` ``15``,`` `` event_window ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``-``5``, ``5``)``,`` `` abnormal_return ``=`` ``ar``,`` `` n_simulations ``=`` ``200``,`` `` seed ``=`` ``42`` `` ``)`` `` ``tibble``::`[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(``true_abnormal_return ``=`` ``ar``, power ``=`` ``sim``$``power``)`` ``}``)`` `` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` ``power_tbl``, digits ``=`` ``4``,`` `` caption ``=`` ``"Detection power by true abnormal return (N = 15, cross-sectional test, alpha = 0.05)"`` ``)`
+`` # Extraction approach: simulate_event_study() returns an `es_simulation` ``` ``` # object whose `$power` field is exactly the detection rate we want. We map ``` ``# over a grid of true effects and read $power from each run.`` ``ar_grid`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(``0.001``, ``0.002``, ``0.004``, ``0.006``, ``0.010``)`` `` ``power_tbl`` ``<-`` ``purrr``::`[`map_dfr`](https://purrr.tidyverse.org/reference/map_dfr.html)`(``ar_grid``, ``function``(``ar``)`` ``{`` `` ``sim`` ``<-`` `[`simulate_event_study`](https://sipemu.github.io/eventstudy/reference/simulate_event_study.md)`(`` `` n_events ``=`` ``15``,`` `` event_window ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``-``5``, ``5``)``,`` `` abnormal_return ``=`` ``ar``,`` `` n_simulations ``=`` ``200``,`` `` seed ``=`` ``42`` `` ``)`` `` ``tibble``::`[`tibble`](https://tibble.tidyverse.org/reference/tibble.html)`(``true_abnormal_return ``=`` ``ar``, power ``=`` ``sim``$``power``)`` ``}``)`` `` ``es_tt``(`` `` ``power_tbl``, digits ``=`` ``4``,`` `` caption ``=`` ``"Detection power by true abnormal return (N = 15, cross-sectional test, alpha = 0.05)"`` ``)`
 
 | true_abnormal_return | power |
-|---------------------:|------:|
-|                0.001 | 0.035 |
-|                0.002 | 0.100 |
-|                0.004 | 0.270 |
-|                0.006 | 0.570 |
-|                0.010 | 0.960 |
+|----------------------|-------|
+| 0.001                | 0.035 |
+| 0.002                | 0.1   |
+| 0.004                | 0.27  |
+| 0.006                | 0.57  |
+| 0.01                 | 0.96  |
 
 Detection power by true abnormal return (N = 15, cross-sectional test,
-alpha = 0.05) {.table}
+alpha = 0.05) {#tinytable_r4snv3k6cdkhfbpjctsw .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## Results plot
 
@@ -151,25 +153,25 @@ excludes.
     #> [1] EventStudy_0.65.0
     #> 
     #> loaded via a namespace (and not attached):
-    #>  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         
-    #>  [4] compiler_4.6.1       tidyselect_1.2.1     stringr_1.6.0       
-    #>  [7] tidyr_1.3.2          jquerylib_0.1.4      systemfonts_1.3.2   
-    #> [10] scales_1.4.0         textshaping_1.0.5    yaml_2.3.12         
-    #> [13] fastmap_1.2.0        ggplot2_4.0.3        R6_2.6.1            
-    #> [16] generics_0.1.4       distributional_0.8.0 knitr_1.51          
-    #> [19] htmlwidgets_1.6.4    tibble_3.3.1         desc_1.4.3          
-    #> [22] RColorBrewer_1.1-3   bslib_0.11.0         pillar_1.11.1       
-    #> [25] rlang_1.2.0          stringi_1.8.7        cachem_1.1.0        
-    #> [28] xfun_0.59            S7_0.2.2             fs_2.1.0            
-    #> [31] sass_0.4.10          lazyeval_0.2.3       otel_0.2.0          
-    #> [34] viridisLite_0.4.3    plotly_4.12.0        cli_3.6.6           
-    #> [37] withr_3.0.3          pkgdown_2.2.0        magrittr_2.0.5      
-    #> [40] crosstalk_1.2.2      digest_0.6.39        grid_4.6.1          
-    #> [43] lifecycle_1.0.5      vctrs_0.7.3          data.table_1.18.4   
-    #> [46] evaluate_1.0.5       glue_1.8.1           farver_2.1.2        
-    #> [49] ragg_1.5.2           purrr_1.2.2          httr_1.4.8          
-    #> [52] rmarkdown_2.31       tools_4.6.1          pkgconfig_2.0.3     
-    #> [55] htmltools_0.5.9
+    #>  [1] plotly_4.12.0        sass_0.4.10          generics_0.1.4      
+    #>  [4] tidyr_1.3.2          stringi_1.8.7        digest_0.6.39       
+    #>  [7] magrittr_2.0.5       evaluate_1.0.5       grid_4.6.1          
+    #> [10] RColorBrewer_1.1-3   fastmap_1.2.0        jsonlite_2.0.0      
+    #> [13] httr_1.4.8           purrr_1.2.2          crosstalk_1.2.2     
+    #> [16] viridisLite_0.4.3    scales_1.4.0         lazyeval_0.2.3      
+    #> [19] textshaping_1.0.5    jquerylib_0.1.4      cli_3.6.6           
+    #> [22] rlang_1.2.0          withr_3.0.3          cachem_1.1.0        
+    #> [25] yaml_2.3.12          tinytable_0.18.0     otel_0.2.0          
+    #> [28] tools_4.6.1          dplyr_1.2.1          ggplot2_4.0.3       
+    #> [31] vctrs_0.7.3          R6_2.6.1             lifecycle_1.0.5     
+    #> [34] stringr_1.6.0        fs_2.1.0             htmlwidgets_1.6.4   
+    #> [37] ragg_1.5.2           pkgconfig_2.0.3      desc_1.4.3          
+    #> [40] pkgdown_2.2.0        pillar_1.11.1        bslib_0.11.0        
+    #> [43] gtable_0.3.6         glue_1.8.1           data.table_1.18.4   
+    #> [46] systemfonts_1.3.2    xfun_0.59            tibble_3.3.1        
+    #> [49] tidyselect_1.2.1     knitr_1.51           farver_2.1.2        
+    #> [52] htmltools_0.5.9      rmarkdown_2.31       compiler_4.6.1      
+    #> [55] S7_0.2.2             distributional_0.8.0
 
 MacKinlay, A. Craig. 1997. “Event Studies in Economics and Finance.”
 *Journal of Economic Literature* 35 (1): 13–39.

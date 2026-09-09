@@ -66,15 +66,18 @@ tidy tibble. We call the S3 method explicitly
 ([`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)),
 since the `broom` generic is not re-exported by the package.
 
-`car_tbl`` ``<-`` ``EventStudy``::`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``result``, type ``=`` ``"car"``)`` `` ``# Show the last (widest) CAR window per firm.`` ``car_tbl`` ``|>`` `` ``dplyr``::`[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``firm_symbol``)`` ``|>`` `` ``dplyr``::`[`slice_tail`](https://dplyr.tidyverse.org/reference/slice.html)`(``n ``=`` ``1``)`` ``|>`` `` ``dplyr``::`[`ungroup`](https://dplyr.tidyverse.org/reference/group_by.html)`(``)`` ``|>`` `` ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``firm_symbol``, ``term``, ``estimate``, ``std.error``, ``statistic``, ``p.value``)`` ``|>`` `` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` digits ``=`` ``4``,`` `` caption ``=`` ``"Cumulative Abnormal Returns by firm (widest event window)"`` `` ``)`
+`car_tbl`` ``<-`` ``EventStudy``::`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``result``, type ``=`` ``"car"``)`` `` ``# Show the last (widest) CAR window per firm.`` ``car_tbl`` ``|>`` `` ``dplyr``::`[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``firm_symbol``)`` ``|>`` `` ``dplyr``::`[`slice_tail`](https://dplyr.tidyverse.org/reference/slice.html)`(``n ``=`` ``1``)`` ``|>`` `` ``dplyr``::`[`ungroup`](https://dplyr.tidyverse.org/reference/group_by.html)`(``)`` ``|>`` `` ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``firm_symbol``, ``term``, ``estimate``, ``std.error``, ``statistic``, ``p.value``)`` ``|>`` `` ``es_tt``(`` `` digits ``=`` ``4``,`` `` caption ``=`` ``"Cumulative Abnormal Returns by firm (widest event window)"`` `` ``)`
 
 | firm_symbol | term     | estimate | std.error | statistic | p.value |
-|:------------|:---------|---------:|----------:|----------:|--------:|
-| AAPL        | \[-5,5\] |   0.0323 |    0.0353 |    0.9150 |  0.3613 |
-| GOOGL       | \[-5,5\] |   0.0130 |    0.0517 |    0.2518 |  0.8014 |
-| MSFT        | \[-5,5\] |   0.0678 |    0.0389 |    1.7436 |  0.0828 |
+|-------------|----------|----------|-----------|-----------|---------|
+| AAPL        | \[-5,5\] | 0.03232  | 0.03533   | 0.915     | 0.36133 |
+| GOOGL       | \[-5,5\] | 0.01302  | 0.05171   | 0.2518    | 0.80143 |
+| MSFT        | \[-5,5\] | 0.06781  | 0.03889   | 1.7436    | 0.08278 |
 
-Cumulative Abnormal Returns by firm (widest event window) {.table}
+Cumulative Abnormal Returns by firm (widest event window)
+{#tinytable_z1dgg2j6bu9akoy16vxv .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## Plot
 
@@ -160,17 +163,18 @@ for the full battery.
     #> [16] crosstalk_1.2.2      viridisLite_0.4.3    scales_1.4.0        
     #> [19] lazyeval_0.2.3       textshaping_1.0.5    jquerylib_0.1.4     
     #> [22] cli_3.6.6            rlang_1.2.0          withr_3.0.3         
-    #> [25] cachem_1.1.0         yaml_2.3.12          otel_0.2.0          
-    #> [28] tools_4.6.1          dplyr_1.2.1          ggplot2_4.0.3       
-    #> [31] vctrs_0.7.3          R6_2.6.1             lifecycle_1.0.5     
-    #> [34] stringr_1.6.0        fs_2.1.0             htmlwidgets_1.6.4   
-    #> [37] ragg_1.5.2           pkgconfig_2.0.3      desc_1.4.3          
-    #> [40] pkgdown_2.2.0        pillar_1.11.1        bslib_0.11.0        
-    #> [43] gtable_0.3.6         glue_1.8.1           data.table_1.18.4   
-    #> [46] systemfonts_1.3.2    xfun_0.59            tibble_3.3.1        
-    #> [49] tidyselect_1.2.1     knitr_1.51           farver_2.1.2        
-    #> [52] htmltools_0.5.9      rmarkdown_2.31       labeling_0.4.3      
-    #> [55] compiler_4.6.1       S7_0.2.2             distributional_0.8.0
+    #> [25] cachem_1.1.0         yaml_2.3.12          tinytable_0.18.0    
+    #> [28] otel_0.2.0           tools_4.6.1          dplyr_1.2.1         
+    #> [31] ggplot2_4.0.3        vctrs_0.7.3          R6_2.6.1            
+    #> [34] lifecycle_1.0.5      stringr_1.6.0        fs_2.1.0            
+    #> [37] htmlwidgets_1.6.4    ragg_1.5.2           pkgconfig_2.0.3     
+    #> [40] desc_1.4.3           pkgdown_2.2.0        pillar_1.11.1       
+    #> [43] bslib_0.11.0         gtable_0.3.6         glue_1.8.1          
+    #> [46] data.table_1.18.4    systemfonts_1.3.2    xfun_0.59           
+    #> [49] tibble_3.3.1         tidyselect_1.2.1     knitr_1.51          
+    #> [52] farver_2.1.2         htmltools_0.5.9      labeling_0.4.3      
+    #> [55] rmarkdown_2.31       compiler_4.6.1       S7_0.2.2            
+    #> [58] distributional_0.8.0
 
 Boehmer, Ekkehart, Jim Musumeci, and Annette B. Poulsen. 1991.
 “Event-Study Methodology Under Conditions of Event-Induced Variance.”

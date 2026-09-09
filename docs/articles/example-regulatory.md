@@ -62,23 +62,28 @@ result. We pull it from the tidy AAR/CAAR output, and summarise the raw
 per-firm CARs by group with
 [car_by_group()](https://sipemu.github.io/eventstudy/reference/car_by_group.md).
 
-`caar_tbl`` ``<-`` ``EventStudy``::`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``result``, type ``=`` ``"aar"``)`` `` ``caar_tbl`` ``|>`` `` ``dplyr``::`[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``group``)`` ``|>`` `` ``dplyr``::`[`slice_tail`](https://dplyr.tidyverse.org/reference/slice.html)`(``n ``=`` ``1``)`` ``|>`` `` ``dplyr``::`[`ungroup`](https://dplyr.tidyverse.org/reference/group_by.html)`(``)`` ``|>`` `` ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``group``, ``term``, ``caar``, ``caar_statistic``, ``caar_p.value``)`` ``|>`` `` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` digits ``=`` ``4``,`` `` caption ``=`` ``"CAAR by group at the end of the event window: VW-Group vs Peers"`` `` ``)`
+`caar_tbl`` ``<-`` ``EventStudy``::`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``result``, type ``=`` ``"aar"``)`` `` ``caar_tbl`` ``|>`` `` ``dplyr``::`[`group_by`](https://dplyr.tidyverse.org/reference/group_by.html)`(``group``)`` ``|>`` `` ``dplyr``::`[`slice_tail`](https://dplyr.tidyverse.org/reference/slice.html)`(``n ``=`` ``1``)`` ``|>`` `` ``dplyr``::`[`ungroup`](https://dplyr.tidyverse.org/reference/group_by.html)`(``)`` ``|>`` `` ``dplyr``::`[`select`](https://dplyr.tidyverse.org/reference/select.html)`(``group``, ``term``, ``caar``, ``caar_statistic``, ``caar_p.value``)`` ``|>`` `` ``es_tt``(`` `` digits ``=`` ``4``,`` `` caption ``=`` ``"CAAR by group at the end of the event window: VW-Group vs Peers"`` `` ``)`
 
-| group    | term |    caar | caar_statistic | caar_p.value |
-|:---------|:-----|--------:|---------------:|-------------:|
-| Other    | 10   |  0.0132 |         0.3377 |       0.7927 |
-| VW Group | 10   | -0.3858 |       -12.6016 |       0.0504 |
+| group    | term | caar     | caar_statistic | caar_p.value |
+|----------|------|----------|----------------|--------------|
+| Other    | 10   | 0.01324  | 0.3377         | 0.79268      |
+| VW Group | 10   | -0.38576 | -12.6016       | 0.05041      |
 
-CAAR by group at the end of the event window: VW-Group vs Peers {.table}
+CAAR by group at the end of the event window: VW-Group vs Peers
+{#tinytable_w3m5zd2qvon4oqz0rivg .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
-` ``# Group-level CAR summary and a between-group difference test.`` ``grp`` ``<-`` `[`car_by_group`](https://sipemu.github.io/eventstudy/reference/car_by_group.md)`(``result``)`` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(``grp``$``summary``, digits ``=`` ``4``,`` `` caption ``=`` ``"Per-firm CAR summary by group"``)`
+` ``# Group-level CAR summary and a between-group difference test.`` ``grp`` ``<-`` `[`car_by_group`](https://sipemu.github.io/eventstudy/reference/car_by_group.md)`(``result``)`` ``es_tt``(``grp``$``summary``, digits ``=`` ``4``,`` `` caption ``=`` ``"Per-firm CAR summary by group"``)`
 
-| group    |   n | mean_car | sd_car | median_car | min_car | max_car |
-|:---------|----:|---------:|-------:|-----------:|--------:|--------:|
-| Other    |   2 |   0.0132 | 0.0555 |     0.0132 | -0.0260 |  0.0525 |
-| VW Group |   2 |  -0.3858 | 0.0433 |    -0.3858 | -0.4164 | -0.3551 |
+| group    | n   | mean_car | sd_car  | median_car | min_car  | max_car  |
+|----------|-----|----------|---------|------------|----------|----------|
+| Other    | 2   | 0.01324  | 0.05546 | 0.01324    | -0.02597 | 0.05246  |
+| VW Group | 2   | -0.38576 | 0.04329 | -0.38576   | -0.41637 | -0.35515 |
 
-Per-firm CAR summary by group {.table}
+Per-firm CAR summary by group {#tinytable_1p7jjphgiwykotm0gysz .table
+.tinytable style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## Plot
 
@@ -160,17 +165,18 @@ before trusting the parametric *p*-values.
     #> [16] crosstalk_1.2.2      viridisLite_0.4.3    scales_1.4.0        
     #> [19] lazyeval_0.2.3       textshaping_1.0.5    jquerylib_0.1.4     
     #> [22] cli_3.6.6            rlang_1.2.0          withr_3.0.3         
-    #> [25] cachem_1.1.0         yaml_2.3.12          otel_0.2.0          
-    #> [28] tools_4.6.1          dplyr_1.2.1          ggplot2_4.0.3       
-    #> [31] vctrs_0.7.3          R6_2.6.1             lifecycle_1.0.5     
-    #> [34] stringr_1.6.0        fs_2.1.0             htmlwidgets_1.6.4   
-    #> [37] ragg_1.5.2           pkgconfig_2.0.3      desc_1.4.3          
-    #> [40] pkgdown_2.2.0        pillar_1.11.1        bslib_0.11.0        
-    #> [43] gtable_0.3.6         glue_1.8.1           data.table_1.18.4   
-    #> [46] systemfonts_1.3.2    xfun_0.59            tibble_3.3.1        
-    #> [49] tidyselect_1.2.1     knitr_1.51           farver_2.1.2        
-    #> [52] htmltools_0.5.9      rmarkdown_2.31       labeling_0.4.3      
-    #> [55] compiler_4.6.1       S7_0.2.2             distributional_0.8.0
+    #> [25] cachem_1.1.0         yaml_2.3.12          tinytable_0.18.0    
+    #> [28] otel_0.2.0           tools_4.6.1          dplyr_1.2.1         
+    #> [31] ggplot2_4.0.3        vctrs_0.7.3          R6_2.6.1            
+    #> [34] lifecycle_1.0.5      stringr_1.6.0        fs_2.1.0            
+    #> [37] htmlwidgets_1.6.4    ragg_1.5.2           pkgconfig_2.0.3     
+    #> [40] desc_1.4.3           pkgdown_2.2.0        pillar_1.11.1       
+    #> [43] bslib_0.11.0         gtable_0.3.6         glue_1.8.1          
+    #> [46] data.table_1.18.4    systemfonts_1.3.2    xfun_0.59           
+    #> [49] tibble_3.3.1         tidyselect_1.2.1     knitr_1.51          
+    #> [52] farver_2.1.2         htmltools_0.5.9      labeling_0.4.3      
+    #> [55] rmarkdown_2.31       compiler_4.6.1       S7_0.2.2            
+    #> [58] distributional_0.8.0
 
 Brown, Stephen J., and Jerold B. Warner. 1985. “Using Daily Stock
 Returns: The Case of Event Studies.” *Journal of Financial Economics* 14

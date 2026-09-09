@@ -139,6 +139,16 @@
 .es-tag-data     { background: #6c757d; }
 .es-tag-examples { background: #20c997; }
 
+/* Widen article and reference content containers while keeping the col-md-3
+   right-hand "On this page" ToC intact. Both the ToC and the main content
+   column live inside .container.template-article, so raising max-width
+   proportionally widens both without going full-bleed. 1400px is chosen as a
+   readable ceiling above the Bootstrap 5 xxl default of 1320px. */
+.container.template-article,
+.container.template-reference {
+  max-width: 1400px;
+}
+
 /* Suppress the auto-injected header logo on content pages.
    pkgdown 2.2.0 data_template() calls has_logo() and, when man/figures/logo.png
    exists, injects <img class="logo"> into <div class="page-header"> on every

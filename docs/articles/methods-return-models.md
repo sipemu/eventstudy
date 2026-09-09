@@ -92,23 +92,25 @@ are selected by passing an **R6 model object** into
 
 ## 7. Rendered Table
 
-`knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`` `` `[`head`](https://rdrr.io/r/utils/head.html)`(`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``task``, type ``=`` ``"car"``)``, ``10``)``,`` `` caption ``=`` ``"Market-model CAR t-statistics on the dieselgate event (first 10 rows)."`` ``)`
+`es_tt``(`` `` `[`head`](https://rdrr.io/r/utils/head.html)`(`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``task``, type ``=`` ``"car"``)``, ``10``)``,`` `` caption ``=`` ``"Market-model CAR t-statistics on the dieselgate event (first 10 rows)."`` ``)`
 
 | event_id | group    | firm_symbol | term        | estimate | std.error | statistic | p.value |
-|---------:|:---------|:------------|:------------|---------:|----------:|----------:|--------:|
-|        1 | VW Group | VOW.DE      | \[-10,-10\] |   0.0028 |    0.0100 |    0.2796 |  0.7800 |
-|        1 | VW Group | VOW.DE      | \[-10,-9\]  |   0.0031 |    0.0142 |    0.2175 |  0.8280 |
-|        1 | VW Group | VOW.DE      | \[-10,-8\]  |   0.0124 |    0.0174 |    0.7134 |  0.4762 |
-|        1 | VW Group | VOW.DE      | \[-10,-7\]  |   0.0348 |    0.0200 |    1.7381 |  0.0834 |
-|        1 | VW Group | VOW.DE      | \[-10,-6\]  |   0.0291 |    0.0224 |    1.2986 |  0.1953 |
-|        1 | VW Group | VOW.DE      | \[-10,-5\]  |   0.0349 |    0.0245 |    1.4203 |  0.1568 |
-|        1 | VW Group | VOW.DE      | \[-10,-4\]  |   0.0299 |    0.0265 |    1.1273 |  0.2607 |
-|        1 | VW Group | VOW.DE      | \[-10,-3\]  |   0.0324 |    0.0283 |    1.1436 |  0.2539 |
-|        1 | VW Group | VOW.DE      | \[-10,-2\]  |   0.0326 |    0.0301 |    1.0830 |  0.2799 |
-|        1 | VW Group | VOW.DE      | \[-10,-1\]  |   0.0321 |    0.0317 |    1.0137 |  0.3117 |
+|----------|----------|-------------|-------------|----------|-----------|-----------|---------|
+| 1        | VW Group | VOW.DE      | \[-10,-10\] | 0.002802 | 0.01002   | 0.2796    | 0.78    |
+| 1        | VW Group | VOW.DE      | \[-10,-9\]  | 0.003083 | 0.01417   | 0.2175    | 0.82796 |
+| 1        | VW Group | VOW.DE      | \[-10,-8\]  | 0.012382 | 0.01736   | 0.7134    | 0.47624 |
+| 1        | VW Group | VOW.DE      | \[-10,-7\]  | 0.034831 | 0.02004   | 1.7381    | 0.08344 |
+| 1        | VW Group | VOW.DE      | \[-10,-6\]  | 0.029097 | 0.02241   | 1.2986    | 0.19528 |
+| 1        | VW Group | VOW.DE      | \[-10,-5\]  | 0.034859 | 0.02454   | 1.4203    | 0.15679 |
+| 1        | VW Group | VOW.DE      | \[-10,-4\]  | 0.029885 | 0.02651   | 1.1273    | 0.26072 |
+| 1        | VW Group | VOW.DE      | \[-10,-3\]  | 0.032411 | 0.02834   | 1.1436    | 0.25389 |
+| 1        | VW Group | VOW.DE      | \[-10,-2\]  | 0.032555 | 0.03006   | 1.083     | 0.27987 |
+| 1        | VW Group | VOW.DE      | \[-10,-1\]  | 0.032121 | 0.03169   | 1.0137    | 0.31171 |
 
 Market-model CAR t-statistics on the dieselgate event (first 10 rows).
-{.table}
+{#tinytable_kc0mo93mn15h5v04vvla .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 
@@ -139,7 +141,7 @@ a size/value/momentum tilt is mislabelled as abnormal performance.
 which matters when volatility clusters around the event. It is gated on
 `rugarch`:
 
-`params_g`` ``<-`` `[`ParameterSet`](https://sipemu.github.io/eventstudy/reference/ParameterSet.md)`$``new``(``return_model ``=`` `[`GARCHModel`](https://sipemu.github.io/eventstudy/reference/GARCHModel.md)`$``new``(``)``)`` ``task_g`` ``<-`` `[`prepare_event_study`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md)`(`` `` `[`EventStudyTask`](https://sipemu.github.io/eventstudy/reference/EventStudyTask.md)`$``new``(``dieselgate``$``firm``, ``dieselgate``$``index``, ``dieselgate``$``request``)``,`` `` ``params_g`` ``)`` ``task_g`` ``<-`` `[`fit_model`](https://sipemu.github.io/eventstudy/reference/fit_model.md)`(``task_g``, ``params_g``)`` ``task_g`` ``<-`` `[`calculate_statistics`](https://sipemu.github.io/eventstudy/reference/calculate_statistics.md)`(``task_g``, ``params_g``)`` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`[`head`](https://rdrr.io/r/utils/head.html)`(`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``task_g``, type ``=`` ``"car"``)``, ``5``)``,`` `` caption ``=`` ``"GARCH-based CAR t-statistics."``)`
+`params_g`` ``<-`` `[`ParameterSet`](https://sipemu.github.io/eventstudy/reference/ParameterSet.md)`$``new``(``return_model ``=`` `[`GARCHModel`](https://sipemu.github.io/eventstudy/reference/GARCHModel.md)`$``new``(``)``)`` ``task_g`` ``<-`` `[`prepare_event_study`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md)`(`` `` `[`EventStudyTask`](https://sipemu.github.io/eventstudy/reference/EventStudyTask.md)`$``new``(``dieselgate``$``firm``, ``dieselgate``$``index``, ``dieselgate``$``request``)``,`` `` ``params_g`` ``)`` ``task_g`` ``<-`` `[`fit_model`](https://sipemu.github.io/eventstudy/reference/fit_model.md)`(``task_g``, ``params_g``)`` ``task_g`` ``<-`` `[`calculate_statistics`](https://sipemu.github.io/eventstudy/reference/calculate_statistics.md)`(``task_g``, ``params_g``)`` ``es_tt``(`[`head`](https://rdrr.io/r/utils/head.html)`(`[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)`(``task_g``, type ``=`` ``"car"``)``, ``5``)``,`` `` caption ``=`` ``"GARCH-based CAR t-statistics."``)`
 
 If `rugarch` is not installed the chunk above is skipped. Conceptually,
 the GARCH model replaces the constant OLS residual variance \sigma^2
