@@ -1,2 +1,8 @@
 .Rproj.user
 tests/testthat/Rplots.pdf
+
+# R CMD check build artifacts (never version these)
+EventStudy.Rcheck/
+*.Rcheck/
+# transient rmarkdown render logs from report-template tests
+inst/rmarkdown/templates/event_study_report/skeleton/*.log
