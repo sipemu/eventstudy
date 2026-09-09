@@ -207,16 +207,54 @@ The `plot_event_study()` function returns a ggplot2 object; wrapping it in
 points to inspect exact values, zoom into the announcement window, or click
 legend entries to toggle series.
 
+### Cumulative Abnormal Return (CAR)
+
 The chart below shows the cumulative abnormal return (CAR) path with confidence
-band for the first event in the study (VW, September 2015 announcement):
+band for the first event in the study (VW, September 2015 announcement).
+
+The CAR is the running sum of abnormal returns from the start of the event
+window to each day t. Abnormal returns are the firm's actual returns minus what
+the market model predicted -- in other words, the return in excess of what you
+would have expected given the index movement that day. At day 0 (the event
+date) the cumulative sum resets conceptually: positive values above the band
+reflect unexpectedly good news; negative values below the band reflect
+unexpectedly bad news.
+
+The shaded region is the confidence band. When the CAR path moves outside the
+band the abnormal performance is statistically distinguishable from zero --
+the market is responding to the event beyond chance variation. When the path
+stays inside the band the evidence of abnormal performance is not strong enough
+to rule out noise. For the VW Dieselgate event you will notice a pronounced drop
+right around the announcement window: the CAR falls sharply below the lower
+bound of the confidence band, confirming a statistically significant negative
+market reaction to the emissions disclosure.
+
+Use the hover tooltip to read off the exact CAR value and confidence-band limits
+at any relative day. The zoom and legend-toggle controls let you focus on the
+announcement window or isolate individual series.
 
 ```{r plot-car}
 plotly::ggplotly(plot_event_study(est_task, type = "car"))
 ```
 
-The next chart shows the average CAAR (Cumulative Average Abnormal Return)
-aggregated across all events -- it summarises the mean market reaction and its
-uncertainty over the event window:
+### Cumulative Average Abnormal Return (CAAR)
+
+The next chart shows the cumulative average abnormal return (CAAR) aggregated
+across all events in the study.
+
+Where the single-event CAR reflects one firm's reaction, the CAAR averages
+abnormal returns across all events at each relative day. Averaging smooths
+out firm-specific noise -- idiosyncratic movements that happen to coincide with
+the event window for a particular firm but are unrelated to the event itself.
+When a clean CAAR signal emerges (a sustained move outside the confidence band)
+it reflects a systematic market reaction shared across firms, not just one
+company's idiosyncratic move. A narrow confidence band signals that the
+individual event reactions were consistent with each other; a wide band suggests
+heterogeneous reactions across the sample.
+
+For the Dieselgate study the CAAR chart summarises the mean market reaction
+across all four affected automotive companies, providing a portfolio-level view
+of how the scandal reverberated through the sector.
 
 ```{r plot-caar}
 plotly::ggplotly(plot_event_study(est_task, type = "caar"))
