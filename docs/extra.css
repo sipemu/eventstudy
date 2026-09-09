@@ -25,7 +25,7 @@
 }
 
 
-/* ── Gallery grid (sphinx-gallery style) ─────────────────── */
+/* == Gallery grid (sphinx-gallery style) ===================== */
 
 .es-gallery {
   display: grid;
@@ -109,7 +109,7 @@
   margin-bottom: 0.75rem;
 }
 
-/* ── Method tags inside gallery items ─────────────────── */
+/* == Method tags inside gallery items ===================== */
 
 .es-gallery-tags {
   display: flex;
@@ -139,15 +139,63 @@
 .es-tag-data     { background: #6c757d; }
 .es-tag-examples { background: #20c997; }
 
-/* Widen article and reference content containers while keeping the col-md-3
-   right-hand "On this page" ToC intact. Both the ToC and the main content
-   column live inside .container.template-article, so raising max-width
-   proportionally widens both without going full-bleed. 1560px is chosen as a
-   readable ceiling above the Bootstrap 5 xxl default of 1320px, giving the
-   interactive plotly charts and wide result tables more horizontal room. */
+/* Article and reference-topic containers: generous max-width, centered.
+   The navbar and BS5 header stay at the default ~1320px chrome width; if the
+   body ran wider the reading column would appear off-center under the navbar.
+   Centering is handled by Bootstrap's .container margin:auto -- do NOT add
+   float or margin overrides here.  1600px gives plotly charts and wide result
+   tables plenty of room while the inner 900px reading column (set by the grid
+   block below) stays legible.
+   NOTE: reference topic pages render as .container.template-reference-topic,
+   NOT .container.template-reference (which is the function-index page). */
 .container.template-article,
+.container.template-reference-topic,
 .container.template-reference {
-  max-width: 1560px;
+  max-width: 1600px;
+}
+
+/* == Centered reading column + sticky right-margin ToC (wide screens) === */
+/* Below 1200px this block does not apply; pkgdown's default Bootstrap flex
+   row (col-md-9 / col-md-3) remains the fallback with no overlap. */
+@media (min-width: 1200px) {
+  .template-article .row,
+  .template-reference-topic .row {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 900px) 1fr;
+    column-gap: 2rem;
+    align-items: start;
+  }
+
+  .template-article .row #main,
+  .template-reference-topic .row #main {
+    grid-column: 2;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .template-article .row .col-md-3,
+  .template-reference-topic .row .col-md-3 {
+    grid-column: 3;
+    width: 18rem;
+    max-width: 18rem;
+    justify-self: start;
+  }
+
+  .template-article #toc,
+  .template-reference-topic #toc {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+/* == Wide tinytable tables: scroll inside their own box ================ */
+/* Applied unconditionally (not gated on width) so narrow screens also
+   benefit -- the table scrolls in-box rather than forcing page-level scroll. */
+#main .table.tinytable,
+#main table.tinytable {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 /* Suppress the auto-injected header logo on content pages.

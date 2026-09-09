@@ -67,7 +67,7 @@ per-firm CARs by group with
 [TABLE]
 
 CAAR by group at the end of the event window: VW-Group vs Peers
-{#tinytable_98gy9ui06661xfua3kjm .table .tinytable
+{#tinytable_ogc59huwyk8pey51nq6b .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -78,7 +78,7 @@ quarto-disable-processing="true"}
 | Other    | 2   | 0.01324  | 0.05546 | 0.01324    | -0.02597 | 0.05246  |
 | VW Group | 2   | -0.38576 | 0.04329 | -0.38576   | -0.41637 | -0.35515 |
 
-Per-firm CAR summary by group {#tinytable_wgumah7qbaec34wlqrxr .table
+Per-firm CAR summary by group {#tinytable_7li7krvamoc074i3fdol .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

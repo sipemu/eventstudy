@@ -99,7 +99,7 @@ also includes `GeneralizedSignTest`, the Corrado `RankTest`, and the
 [TABLE]
 
 AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP
-statistics. {#tinytable_m7gx31fprhifv4ucamca .table .tinytable
+statistics. {#tinytable_i5euicsrbjqdrnftj263 .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
