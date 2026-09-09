@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v0.65.0
 milestone_name: Polish
-current_phase: 22
-current_phase_name: report-aesthetics
+current_phase: 23
+current_phase_name: api-message-polish
 status: executing
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-09-08T22:47:39.044Z"
+stopped_at: Completed 23-01-PLAN.md
+last_updated: "2026-09-09T05:41:29.908Z"
 last_activity: 2026-09-09
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: 8f43c6898a4f77f48313b8ab1e938118a386999b
+state_head: a05d4411a16609c09364270e2b7bfdfebd756de7
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 60
+  completed_phases: 2
+  total_plans: 8
+  completed_plans: 7
+  percent: 40
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 22 (report-aesthetics) — COMPLETE
-Plan: 01 complete (1/1 plans in Phase 22)
-Status: Phase 22 complete; ready for verification / next phase
-Last activity: 2026-09-09 — Plan 22-01 complete: .report_table() tinytable/kable helper, per-format figure sizing + ragg + fig.cap, HTML-only report.css injected on the html branch only, regression net (no-script PDF, is_html_output>=3, four-format render). Suite 2311 green; R CMD check 1 baseline NOTE.
+Phase: 23 (api-message-polish) — IN PROGRESS
+Plan: 01 complete (1/3 plans in Phase 23); 23-02 next (Wave 2)
+Status: Wave 1 of 3 done; ready for 23-02
+Last activity: 2026-09-09 — Plan 23-01 complete: snapshot baseline for 6 print methods + 4 prose-sanitiser variants committed against unmodified code, then split each print.* into an exported format.* (char vector via capture.output) + thin delegating print.*; NAMESPACE registers 6 S3method(format,*). Byte-identical snapshots (git diff --quiet); suite 2324 green; DESCRIPTION unchanged (no new deps).
 
-Progress: [██████░░░░] 60% (v0.65.0 phases)
+Progress: [████░░░░░░] 40% (v0.65.0 phases)
 
 ## Milestone Roadmap (v0.65.0 — Phases 20–24)
 
@@ -71,6 +71,7 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 | Phase 20 P03 | 3m | 3 tasks | 6 files |
 | Phase 21 P01 | 8m | 4 tasks | 6 files |
 | Phase 22 P01 | 18min | 4 tasks | 4 files |
+| Phase 23 P01 | 8min | 3 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Recent decisions affecting current work:
 - [Phase 21]: plot_stocks uses fixed es_colours group1 for trace colour (coarse granularity acceptable)
 - [Phase 22]: Report tables route through .report_table() with a byte-compatible knitr::kable fallback when tinytable is absent (.tinytable_available seam)
 - [Phase 22]: report.css is injected only on the html branch of .build_output_format via system.file+nzchar; pdf/word/md never reference it
+- [Phase 23]: 23-01: print/format split via utils::capture.output of the original cat() body — byte-exact by construction, zero snapshot updates
+- [Phase 23]: 23-01: Advisor Pro footer emission moved into format.Advice/format.es_advice (captured, silent by default), not re-called in print.* (no double-emit)
 
 ### v0.64.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -129,8 +132,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-08T22:47:09.659Z
-Stopped at: Completed 22-01-PLAN.md
+Last session: 2026-09-09T05:41:29.836Z
+Stopped at: Completed 23-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
