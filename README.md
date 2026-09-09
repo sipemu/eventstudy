@@ -1,5 +1,3 @@
-<img src="man/figures/logo.png" align="right" height="120" alt="EventStudy logo" />
-
 # Event Study Analysis in R
 
 [![CRAN status](https://www.r-pkg.org/badges/version/EventStudy)](https://CRAN.R-project.org/package=EventStudy)
@@ -11,6 +9,10 @@
 [![R-CMD-check](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg)](https://codecov.io/gh/sipemu/eventstudy)
 [![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://sipemu.github.io/eventstudy/)
+
+<p align="center">
+  <img src="man/figures/logo.png" height="160" alt="EventStudy logo" />
+</p>
 
 A comprehensive, modular R package for financial event study analysis. Implements the classical methodology (MacKinlay 1997) and extends it with modern multi-factor models, long-horizon methods, panel (DiD) event studies, and more.
 
@@ -431,28 +433,6 @@ options(eventstudy.advisor_pro_footer = TRUE)
 ```
 
 See `?advisor_pro` for details.
-
-## Roadmap
-
-- [x] Return models (Market, Market Adjusted, Mean Adjusted)
-- [x] Parametric test statistics (AR T, CAR T, CSect T, Patell Z, BMP)
-- [x] Non-parametric test statistics (Sign, Generalized Sign, Rank)
-- [x] Diagnostics and pre-trend testing
-- [x] Event study visualization (AR, CAR, AAR, CAAR)
-- [x] Task validation
-- [x] Export to CSV, Excel, LaTeX
-- [x] Broom-compatible tidy() method
-- [x] Fama-French 3-factor, 5-factor, Carhart 4-factor models
-- [x] GARCH(1,1) model
-- [x] Buy-and-hold abnormal returns (BHAR)
-- [x] Calendar-time portfolio test
-- [x] Volume and volatility event studies
-- [x] Cross-sectional regression analysis
-- [x] Intraday event study support
-- [x] Panel event study module (static/dynamic TWFE, Sun & Abraham 2021)
-- [x] Vignettes for custom models, test statistics, result extraction, panel
-- [x] Grounded AI advisor (es_advise, es_diagnostics, provider abstraction) — new in 0.60.0
-- [ ] CRAN submission
 
 ## References
 
