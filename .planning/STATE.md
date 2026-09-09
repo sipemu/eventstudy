@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
 Phase: 24 (docs-site-polish) — final phase, complete
 Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
-Last activity: 2026-09-09 — Completed quick task 260909-mf1: made the vignette es_tt() helper bar-aware — aar/caar columns now render diverging in-cell data bars (green right for positive, red left for negative, scaled to column max-abs, numeric value retained), auto-applied to every tinytable with those columns across introduction.Rmd + method/example articles, then rebuilt docs/. Both es_tt() copies kept body-identical; helper additions ASCII-clean. Docs/site + vignette-source only, no R/ behavior change.
+Last activity: 2026-09-10 — Completed quick task 260910-0f8: redesigned the article/reference ToC layout in pkgdown/extra.css to fix the off-center body + page-wide horizontal table scroll caused by the earlier 1560px widen. On screens >=1200px the row is now a CSS grid (1fr | minmax(0,900px) centered reading column | 1fr) with the "On this page" ToC sticky in the right gutter; wide tinytable tables get overflow-x:auto so they scroll in-box, not page-wide. Container 1600px and template-reference-topic now covered; narrow screens keep pkgdown's default flow. CSS-only, ASCII-clean, docs/ rebuilt. Final centered/sticky/in-box VISUAL confirmation is a pending human/browser check.
 
 Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
 
@@ -134,6 +134,7 @@ Research flags for planning:
 | 260909-l6h | Add interactive plotly event-study plots (ggplotly-wrapped CAR + CAAR) to introduction.Rmd; widen pkgdown article container to 1400px in extra.css (ToC kept) | 2026-09-09 | 5d93a81 | [260909-l6h-add-interactive-plotly-event-study-plots](./quick/260909-l6h-add-interactive-plotly-event-study-plots/) |
 | 260909-ll1 | Extend introduction.Rmd prose (CAR/CAAR interpretation of the plotly charts); widen pkgdown article container from 1400px to 1560px in extra.css (ToC kept); rebuild docs/ | 2026-09-09 | ed5e971 | [260909-ll1-extend-the-explanation-prose-in-the-pkgd](./quick/260909-ll1-extend-the-explanation-prose-in-the-pkgd/) |
 | 260909-mf1 | Make es_tt() bar-aware: diverging in-cell data bars for aar/caar columns (green right/pos, red left/neg, proportional to max-abs) auto-applied across introduction.Rmd + method/example article tables; rebuild docs/ | 2026-09-09 | 4d0a442 | [260909-mf1-add-diverging-in-cell-data-bars-to-the-a](./quick/260909-mf1-add-diverging-in-cell-data-bars-to-the-a/) |
+| 260910-0f8 | Redesign article/reference ToC layout (extra.css): centered minmax(0,900px) reading column with sticky "On this page" ToC in the right margin (@media >=1200px grid), tinytable overflow-x:auto so wide tables scroll in-box not page-wide; container 1600px + template-reference-topic covered; rebuild docs/. VISUAL confirm still pending (human/browser) | 2026-09-10 | 619ef12 | [260910-0f8-redesign-article-reference-toc-layout-in](./quick/260910-0f8-redesign-article-reference-toc-layout-in/) |
 
 ## Deferred Items
 
