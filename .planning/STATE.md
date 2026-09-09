@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v0.65.0
 milestone_name: Polish
-current_phase: 23
-current_phase_name: api-message-polish
+current_phase: 24
+current_phase_name: docs-site-polish
 status: executing
 stopped_at: Completed 23-03-PLAN.md
-last_updated: "2026-09-09T06:10:36.438Z"
+last_updated: "2026-09-09T06:56:17.970Z"
 last_activity: 2026-09-09
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: 75d7554e3434eeea1ecac4c098b1e70d11cc7489
+state_head: d33cabac3f3b53fbc32ed878d2b841acfba6e7a9
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 8
+  total_plans: 10
   completed_plans: 8
-  percent: 40
+  percent: 60
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 23 (api-message-polish) — IN PROGRESS
+Phase: 24 (docs-site-polish) — READY TO EXECUTE
 Plan: 03 complete (3/3 plans in Phase 23); Phase 23 done
 Status: All 3 waves done; Phase 23 (API & Message Polish) complete
 Last activity: 2026-09-09 — Plan 23-03 complete (API-05/06, CRAN-06): new R/inform.R .inform(msg, verbose=getOption("eventstudy.verbose",TRUE)) gates 8 informational message() sites (execute/report x3/task_validation x2/panel single-cohort fallback/synthetic quadprog fallback); verbose= plumbed onto run_event_study, es_report, generate_report, validate_task, estimate_panel_event_study, estimate_synthetic_control. Default output byte-identical; warnings/errors/degenerate one-warning NEVER gated (test_verbose.R asserts zero-variance MarketModel$fit() still fires one warning under verbose=FALSE). gridExtra::grid.arrange requireNamespace-guarded in plotting.R (closes Phase-21 carry-in). 23-DEPRECATION-AUDIT.md records grep-verified NO-OP (no lifecycle dep, no shim). DESCRIPTION unchanged (no cli/lifecycle, no new Imports); NAMESPACE unchanged; 23-01 snapshots byte-identical; suite FAIL 0 (PASS 2222). Commits a8d1404, 368fbca, 75d7554.

@@ -156,8 +156,14 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   4. Existing vignettes/articles are tightened — getting-started flow and cross-links improved — with no new CRAN vignettes (rich content stays in `vignettes/articles/`).
 
 **Plans**: 2 plans
+**Wave 1**
+
 - [ ] 24-01-PLAN.md — @family + @seealso roxygen cross-links across all exported functions; single devtools::document() regenerates man/+NAMESPACE (DOCS-01)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 24-02-PLAN.md — README Ecosystem section + honest counts + home markers; _pkgdown.yml format.* fix + check_pkgdown in CI; tightened introduction.Rmd (DOCS-02/03/04)
+
 **UI hint**: yes
 
 ## Progress
