@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
 Phase: 24 (docs-site-polish) — final phase, complete
 Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
-Last activity: 2026-09-09 — Completed quick task 260909-l6h: added interactive plotly event-study plots (plotly::ggplotly-wrapped plot_event_study CAR + CAAR) to introduction.Rmd and widened the pkgdown article content container to 1400px via pkgdown/extra.css (ToC kept). Docs/site + vignette-source only, no R/ behavior change.
+Last activity: 2026-09-09 — Completed quick task 260909-ll1: extended introduction.Rmd prose with CAR/CAAR interpretation of the plotly charts (confidence-band reading, day-0 anchor, CAAR averaging) and widened the pkgdown article content container from 1400px to 1560px via pkgdown/extra.css (ToC kept), then rebuilt docs/. Docs/site + vignette-source only, no R/ behavior change.
 
 Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
 
@@ -132,6 +132,7 @@ Research flags for planning:
 | 260909-jls | Fix pkgdown site: hide auto-injected page-header logo via scoped extra.css; make introduction.Rmd render offline with executed outputs (bundled dieselgate data) | 2026-09-09 | ef4eca7 | [260909-jls-fix-pkgdown-site-remove-logo-from-navbar](./quick/260909-jls-fix-pkgdown-site-remove-logo-from-navbar/) |
 | 260909-kft | Render flat result tibbles as styled tinytable HTML tables (kable fallback) across introduction.Rmd + 10 articles/*.Rmd via es_tt() helper | 2026-09-09 | b1ce106 | [260909-kft-render-result-tibbles-as-styled-html-tab](./quick/260909-kft-render-result-tibbles-as-styled-html-tab/) |
 | 260909-l6h | Add interactive plotly event-study plots (ggplotly-wrapped CAR + CAAR) to introduction.Rmd; widen pkgdown article container to 1400px in extra.css (ToC kept) | 2026-09-09 | 5d93a81 | [260909-l6h-add-interactive-plotly-event-study-plots](./quick/260909-l6h-add-interactive-plotly-event-study-plots/) |
+| 260909-ll1 | Extend introduction.Rmd prose (CAR/CAAR interpretation of the plotly charts); widen pkgdown article container from 1400px to 1560px in extra.css (ToC kept); rebuild docs/ | 2026-09-09 | ed5e971 | [260909-ll1-extend-the-explanation-prose-in-the-pkgd](./quick/260909-ll1-extend-the-explanation-prose-in-the-pkgd/) |
 
 ## Deferred Items
 
