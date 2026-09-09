@@ -5,16 +5,16 @@ milestone_name: Polish
 current_phase: 24
 current_phase_name: docs-site-polish
 status: executing
-stopped_at: Completed 24-01-PLAN.md
-last_updated: "2026-09-09T07:07:04.676Z"
+stopped_at: Completed 24-02-PLAN.md
+last_updated: "2026-09-09T07:17:04.724Z"
 last_activity: 2026-09-09
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: 775dc7622b55eb62e5d042804f45ddce23398713
+state_head: 0587806ab9f19e6d06462e73d930210aa4d6aa22
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 60
 ---
 
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Phase: 24 (docs-site-polish) — READY TO EXECUTE
-Plan: 03 complete (3/3 plans in Phase 23); Phase 23 done
-Status: All 3 waves done; Phase 23 (API & Message Polish) complete
-Last activity: 2026-09-09 — Plan 23-03 complete (API-05/06, CRAN-06): new R/inform.R .inform(msg, verbose=getOption("eventstudy.verbose",TRUE)) gates 8 informational message() sites (execute/report x3/task_validation x2/panel single-cohort fallback/synthetic quadprog fallback); verbose= plumbed onto run_event_study, es_report, generate_report, validate_task, estimate_panel_event_study, estimate_synthetic_control. Default output byte-identical; warnings/errors/degenerate one-warning NEVER gated (test_verbose.R asserts zero-variance MarketModel$fit() still fires one warning under verbose=FALSE). gridExtra::grid.arrange requireNamespace-guarded in plotting.R (closes Phase-21 carry-in). 23-DEPRECATION-AUDIT.md records grep-verified NO-OP (no lifecycle dep, no shim). DESCRIPTION unchanged (no cli/lifecycle, no new Imports); NAMESPACE unchanged; 23-01 snapshots byte-identical; suite FAIL 0 (PASS 2222). Commits a8d1404, 368fbca, 75d7554.
+Phase: 24 (docs-site-polish) — Wave 2 complete (2/2 plans); Phase 24 done (FINAL phase)
+Plan: 02 complete (2/2 plans in Phase 24)
+Status: Both waves done; Phase 24 (Docs & Site Polish) complete
+Last activity: 2026-09-09 — Plan 24-02 complete (DOCS-02/03/04, docs-only): (1) _pkgdown.yml internal section now catches starts_with("format.") — clears the pre-existing check_pkgdown ERROR (6 Phase-23 format.* topics missing from index); check_pkgdown() now "No problems found". (2) README: ASCII-only Ecosystem section (Google Sheets / R package / WebAssembly App) linking eventstudy.de with anchor "Event Study Analysis Made Simple", wrapped in pkgdown-home markers near the top; honest counts 15+ Return Models / 12 Test Statistics (added DCC-GARCH, Rolling-Window, Kolari-Pynnonen). (3) introduction.Rmd retitled "Getting Started with EventStudy", added Quick Start with one-call run_event_study(), removed stale "More a coming soon.", replaced Roadmap with ## Next Steps vignette cross-links; check_pkgdown() wired into pkgdown.yaml CI before Build site (safe, format.* fix landed first). DESCRIPTION 0-line diff; no R/*.R touched; suite FAIL 0 (PASS 2359). Commits 5ac8a29, 1a5eb6c, 0587806.
 
 Progress: [██████░░░░] 60% (v0.65.0 phases)
 
@@ -75,6 +75,7 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 | Phase 23 P02 | 15m | 3 tasks | 6 files |
 | Phase 23 P03 | 35m | 3 tasks | 13 files |
 | Phase 24 P01 | 18m | 3 tasks | 28 files |
+| Phase 24 P02 | 12m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Recent decisions affecting current work:
 - [Phase 23]: [Phase 23]: 23-02: kept "missing columns" substring (not reworded to "missing required columns") — API-04 backtick/truncation improvement appended after preserved prefix, so all existing expect_error substrings survive with zero test edits
 - [Phase 23]: [Phase 23]: 23-02: classed conditions via rlang::abort(class=c("eventstudy_error_<kind>","eventstudy_error")) — rlang already an Import, no cli/lifecycle, no new dependency
 - [Phase 24]: 24-01: 74 exported functions grouped into 7 eventstudy- @family clusters; single document() regen; DESCRIPTION unchanged; suite 2222/0
+- [Phase 24]: 24-02: New README content kept ASCII-only; pre-existing non-ASCII badge/prose bytes left untouched (README not covered by the R/man/inst CI ASCII guard)
+- [Phase 24]: 24-02: _pkgdown.yml format.* index fix committed before the CI check_pkgdown step so the pkgdown job stays green
 
 ### v0.64.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -138,8 +141,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-09T07:07:04.549Z
-Stopped at: Completed 24-01-PLAN.md
+Last session: 2026-09-09T07:16:35.828Z
+Stopped at: Completed 24-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
