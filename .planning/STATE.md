@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
 Phase: 24 (docs-site-polish) — final phase, complete
 Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
-Last activity: 2026-09-09 — Completed quick task 260909-ll1: extended introduction.Rmd prose with CAR/CAAR interpretation of the plotly charts (confidence-band reading, day-0 anchor, CAAR averaging) and widened the pkgdown article content container from 1400px to 1560px via pkgdown/extra.css (ToC kept), then rebuilt docs/. Docs/site + vignette-source only, no R/ behavior change.
+Last activity: 2026-09-09 — Completed quick task 260909-mf1: made the vignette es_tt() helper bar-aware — aar/caar columns now render diverging in-cell data bars (green right for positive, red left for negative, scaled to column max-abs, numeric value retained), auto-applied to every tinytable with those columns across introduction.Rmd + method/example articles, then rebuilt docs/. Both es_tt() copies kept body-identical; helper additions ASCII-clean. Docs/site + vignette-source only, no R/ behavior change.
 
 Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
 
@@ -133,6 +133,7 @@ Research flags for planning:
 | 260909-kft | Render flat result tibbles as styled tinytable HTML tables (kable fallback) across introduction.Rmd + 10 articles/*.Rmd via es_tt() helper | 2026-09-09 | b1ce106 | [260909-kft-render-result-tibbles-as-styled-html-tab](./quick/260909-kft-render-result-tibbles-as-styled-html-tab/) |
 | 260909-l6h | Add interactive plotly event-study plots (ggplotly-wrapped CAR + CAAR) to introduction.Rmd; widen pkgdown article container to 1400px in extra.css (ToC kept) | 2026-09-09 | 5d93a81 | [260909-l6h-add-interactive-plotly-event-study-plots](./quick/260909-l6h-add-interactive-plotly-event-study-plots/) |
 | 260909-ll1 | Extend introduction.Rmd prose (CAR/CAAR interpretation of the plotly charts); widen pkgdown article container from 1400px to 1560px in extra.css (ToC kept); rebuild docs/ | 2026-09-09 | ed5e971 | [260909-ll1-extend-the-explanation-prose-in-the-pkgd](./quick/260909-ll1-extend-the-explanation-prose-in-the-pkgd/) |
+| 260909-mf1 | Make es_tt() bar-aware: diverging in-cell data bars for aar/caar columns (green right/pos, red left/neg, proportional to max-abs) auto-applied across introduction.Rmd + method/example article tables; rebuild docs/ | 2026-09-09 | 4d0a442 | [260909-mf1-add-diverging-in-cell-data-bars-to-the-a](./quick/260909-mf1-add-diverging-in-cell-data-bars-to-the-a/) |
 
 ## Deferred Items
 
