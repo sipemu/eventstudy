@@ -102,7 +102,7 @@ car_tbl |>
   dplyr::slice_tail(n = 1) |>
   dplyr::ungroup() |>
   dplyr::select(firm_symbol, term, estimate, std.error, statistic, p.value) |>
-  knitr::kable(
+  es_tt(
     digits  = 4,
     caption = "Cumulative Abnormal Returns by firm (widest event window)"
   )
