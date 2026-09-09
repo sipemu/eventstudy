@@ -4,14 +4,22 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Introducing EventStudy: A Powerful Tool for Event Study Analysis in R • EventStudy</title>
+<title>Getting Started with EventStudy • EventStudy</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/Plus_Jakarta_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Introducing EventStudy: A Powerful Tool for Event Study Analysis in R">
+<meta property="og:title" content="Getting Started with EventStudy">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -21,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.62.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,12 +81,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Introducing EventStudy: A Powerful Tool for Event Study Analysis in R</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Getting Started with EventStudy</h1>
                         <h4 data-toc-skip class="author">Simon
 Mueller</h4>
             
-            <h4 data-toc-skip class="date">2026-09-06</h4>
+            <h4 data-toc-skip class="date">2026-09-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sipemu/eventstudy/blob/HEAD/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="d-none name"><code>introduction.Rmd</code></div>
@@ -89,61 +96,39 @@ Mueller</h4>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Event Study is a statistical method used to assess the impact of an
-event on the value of a firm. This method has been widely adopted in
-empirical finance and has been used to investigate the effects of
-corporate events like mergers, earnings announcements, and macroeconomic
-news on the value of firms.</p>
-<p>While Event Study Analysis is a powerful tool, conducting these
-analyses in R can often be complicated and time-consuming. Until now.
-I’m excited to introduce EventStudy, a comprehensive and flexible R
-package designed to streamline the process of conducting Event Study
-Analyses.</p>
+<p>An event study measures the impact of an event – a merger, earnings
+announcement, or macroeconomic shock – on the value of a firm.
+<code>EventStudy</code> offers a modular pipeline for conducting these
+analyses in R: apply common return models, run diagnostic and test
+statistics, and extract publication-ready results, all in a workflow
+that composes cleanly with the tidyverse.</p>
+<p>This vignette walks through the core flow: define a task, run the
+study, inspect the results, and extract or plot them. It uses the
+Dieselgate scandal as a running example.</p>
 </div>
 <div class="section level2">
-<h2 id="why-event-study">Why Event Study?<a class="anchor" aria-label="anchor" href="#why-event-study"></a>
+<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p>Event Study is designed to offer a modular approach to conducting
-event studies in R. It allows you to apply common models, perform
-diagnostic tests, and extract results for further analysis. The package
-is designed to work seamlessly with your existing R workflow and offers
-a range of features that make conducting event studies in R a
-breeze.</p>
-</div>
-<div class="section level2">
-<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
-</h2>
-<div class="section level3">
-<h3 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
-</h3>
-<p>The <code>EventStudy</code> package includes several features that
-make it a versatile tool for performing event study analyses:</p>
-<ul>
-<li><p><strong>Flexible Models and Diagnostic Tests</strong>: You can
-apply common models and perform diagnostic tests on them. The package is
-designed to be modular and adaptable, which means you can easily extend
-it with your own models and tests.</p></li>
-<li><p><strong>Custom Models</strong>: With EventStudy, you have the
-ability to apply your own market model. This means you can include
-external factors in your model that are specific to your study or
-industry.</p></li>
-<li><p><strong>Custom Test Statistics</strong>: You can apply your own
-test statistics for abnormal returns (AR), average abnormal returns
-(AAR), cumulative abnormal returns (CAR), and cumulative average
-abnormal returns (CAAR). This gives you full control over how you want
-to measure the impact of the event.</p></li>
-<li><p><strong>Result Extraction</strong>: You can extract the results
-of the event study for further analysis. For example, you might want to
-perform <a href="https://eventstudy.de/features/cross_sectional_regression.html" class="external-link">Cross-Sectional
-regression analysis</a>. The package provides convenient functions for
-extracting confidence bands at each level and for each CAR and CAAR
-window.</p></li>
-<li><p><strong>Parallel Execution</strong>: If you are dealing with a
-large number of events, the package supports parallel execution. This
-allows you to take full advantage of your computer’s processing power to
-speed up the calculations.</p></li>
-</ul>
-</div>
+<p>If you already have firm data, index data, and a request table (all
+defined below), the entire pipeline runs in a single call:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Preview of the full pipeline — data objects are loaded and unpacked step-by-step below.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># One-call shortcut: prepare -&gt; fit -&gt; calculate, in one step</span></span>
+<span><span class="va">est_task</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_event_study.html">run_event_study</a></span><span class="op">(</span></span>
+<span>  <span class="va"><a href="../reference/EventStudyTask.html">EventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">firm_tbl</span>, <span class="va">index_tbl</span>, <span class="va">request_tbl</span><span class="op">)</span>,</span>
+<span>  <span class="va"><a href="../reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<span>    return_calculation      <span class="op">=</span> <span class="va"><a href="../reference/LogReturn.html">LogReturn</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    return_model            <span class="op">=</span> <span class="va"><a href="../reference/MarketModel.html">MarketModel</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    single_event_statistics <span class="op">=</span> <span class="va"><a href="../reference/SingleEventStatisticsSet.html">SingleEventStatisticsSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    multi_event_statistics  <span class="op">=</span> <span class="va"><a href="../reference/MultiEventStatisticsSet.html">MultiEventStatisticsSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span></span></code></pre></div>
+<p>The rest of this vignette unpacks the same pipeline step by step, so
+you can see – and customize – each stage.</p>
 </div>
 <div class="section level2">
 <h2 id="example-dieselgate">Example: Dieselgate<a class="anchor" aria-label="anchor" href="#example-dieselgate"></a>
@@ -165,38 +150,18 @@ results.</p>
 <p>The first step is to load necessary packages and data. This includes
 market data for the companies of interest and the index during the event
 study period.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#' warnings: false</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://business-science.github.io/tidyquant/" class="external-link">tidyquant</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org" class="external-link">readr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rstudio/DT" class="external-link">DT</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
+<span><span class="co"># Load the bundled frozen Dieselgate dataset (replaces a live network download via</span></span>
+<span><span class="co"># tidyquant so this vignette builds fully offline and reproducibly on CRAN/pkgdown).</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">dieselgate</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">index_symbol</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"^GDAXI"</span><span class="op">)</span></span>
-<span><span class="va">firm_symbols</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"VOW.DE"</span>, <span class="st">"PAH3.DE"</span>, <span class="st">"BMW.DE"</span>, <span class="st">"MBG.DE"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"VW Group"</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Other"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">request_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span>, <span class="va">firm_symbols</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">index_symbol</span>, <span class="fl">4</span><span class="op">)</span>, </span>
-<span>                     <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"18.09.2015"</span>, <span class="fl">4</span><span class="op">)</span>, </span>
-<span>                     <span class="va">group</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="op">-</span><span class="fl">11</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">request_tbl</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"event_id"</span>, <span class="st">"firm_symbol"</span>, <span class="st">"index_symbol"</span>, <span class="st">"event_date"</span>, </span>
-<span>                        <span class="st">"group"</span>, <span class="st">"event_window_start"</span>, <span class="st">"event_window_end"</span>, </span>
-<span>                        <span class="st">"shift_estimation_window"</span>, <span class="st">"estimation_window_length"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">firm_symbols</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">tidyquant</span><span class="fu">::</span><span class="fu"><a href="https://business-science.github.io/tidyquant/reference/tq_get.html" class="external-link">tq_get</a></span><span class="op">(</span>from <span class="op">=</span> <span class="st">"2014-06-01"</span>, to <span class="op">=</span> <span class="st">"2015-11-01"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">"%d.%m.%Y"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">symbol</span>, <span class="va">date</span>, <span class="va">adjusted</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">firm_tbl</span></span>
-<span></span>
-<span><span class="va">index_symbol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">tidyquant</span><span class="fu">::</span><span class="fu"><a href="https://business-science.github.io/tidyquant/reference/tq_get.html" class="external-link">tq_get</a></span><span class="op">(</span>from <span class="op">=</span> <span class="st">"2014-06-01"</span>, to <span class="op">=</span> <span class="st">"2015-11-01"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">"%d.%m.%Y"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">symbol</span>, <span class="va">date</span>, <span class="va">adjusted</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">index_tbl</span></span></code></pre></div>
+<span><span class="va">firm_tbl</span>    <span class="op">&lt;-</span> <span class="va">dieselgate</span><span class="op">$</span><span class="va">firm</span>     <span class="co"># symbol / date / adjusted (4 firms, DD-MM-YYYY dates)</span></span>
+<span><span class="va">index_tbl</span>   <span class="op">&lt;-</span> <span class="va">dieselgate</span><span class="op">$</span><span class="va">index</span>    <span class="co"># symbol / date / adjusted (^GDAXI)</span></span>
+<span><span class="va">request_tbl</span> <span class="op">&lt;-</span> <span class="va">dieselgate</span><span class="op">$</span><span class="va">request</span>  <span class="co"># event_id / firm_symbol / index_symbol / event_date /</span></span>
+<span>                                   <span class="co"># group / event_window_start / event_window_end /</span></span>
+<span>                                   <span class="co"># shift_estimation_window / estimation_window_length</span></span></code></pre></div>
 <p>Both, the firm data as the index data should have the following
 structure:</p>
 <ol style="list-style-type: decimal">
@@ -209,8 +174,17 @@ structure:</p>
 price column can be parametrized according to your needs when the task
 is defined. The default is <code>adjusted</code>.</li>
 </ol>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu">datatable</span><span class="op">(</span><span class="va">firm_tbl</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">firm_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
+<span><span class="co">#&gt;   symbol date       adjusted</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VOW.DE 02.06.2014     113.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> VOW.DE 03.06.2014     112.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> VOW.DE 04.06.2014     109.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> VOW.DE 05.06.2014     112.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> VOW.DE 06.06.2014     112.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> VOW.DE 09.06.2014     112.</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="define-the-event-study">Define the Event Study<a class="anchor" aria-label="anchor" href="#define-the-event-study"></a>
@@ -221,15 +195,15 @@ used. In this example, we use logarithmic returns, the market model, and
 the default AR and CAR T-Tests. Descriptions of the available models can
 be found on our website: <a href="https://eventstudy.de/models/expected_return.html" title="Choosing the Right Approach: A Comprehensive Guide to Estimating Expected Returns." class="external-link">Expected
 Return Models</a>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parametrization of the Event Study</span></span>
 <span><span class="va">log_return</span> <span class="op">=</span> <span class="va"><a href="../reference/LogReturn.html">LogReturn</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">market_model</span> <span class="op">=</span> <span class="va"><a href="../reference/MarketModel.html">MarketModel</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>For single events the standard <a href="https://eventstudy.de/statistics/ar_car_statistics.html" title="A Comprehensive Guide to Analyzing Abnormal Returns in Event Studies." class="external-link">AR
 and CAR T test</a> are applied. For performing an Event Study on
-multiple events, currently the Cross-Sectional T Test (AAR and CAAR) is
-available. More a coming soon.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+multiple events, the Cross-Sectional T Test (AAR and CAAR) is applied by
+default, alongside Patell Z, BMP, sign, and rank tests.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define single event test statistics</span></span>
 <span><span class="co"># Per default AR and CAR T-Tests are applied</span></span>
 <span><span class="va">single_event_tests</span> <span class="op">=</span> <span class="va"><a href="../reference/SingleEventStatisticsSet.html">SingleEventStatisticsSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span>
@@ -237,9 +211,9 @@ available. More a coming soon.</p>
 <span><span class="co"># Per default CSEct T Test is applied (AAR &amp; CAAR)</span></span>
 <span><span class="va">multiple_event_tests</span> <span class="op">=</span> <span class="va"><a href="../reference/MultiEventStatisticsSet.html">MultiEventStatisticsSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Your Event Study is then defined in a parameter set:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Setup parameter set</span></span>
-<span><span class="va">param_set</span> <span class="op">=</span> <span class="va"><a href="../reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>return_calculation      <span class="op">=</span> <span class="va">log_return</span>, </span>
+<span><span class="va">param_set</span> <span class="op">=</span> <span class="va"><a href="../reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>return_calculation      <span class="op">=</span> <span class="va">log_return</span>,</span>
 <span>                             return_model            <span class="op">=</span> <span class="va">market_model</span>,</span>
 <span>                             single_event_statistics <span class="op">=</span> <span class="va">single_event_tests</span>,</span>
 <span>                             multi_event_statistics  <span class="op">=</span> <span class="va">multiple_event_tests</span><span class="op">)</span></span></code></pre></div>
@@ -252,52 +226,198 @@ involves preparing the event study, fitting the model, and calculating
 the statistics. In the first step the task is defined. The firm and the
 index data gathered before as also the request data is necessary for
 performing the study.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="va"><a href="../reference/EventStudyTask.html">EventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">firm_tbl</span>, <span class="va">index_tbl</span>, <span class="va">request_tbl</span><span class="op">)</span></span></code></pre></div>
 <p>Internally, firm and index data symbol and price column names are
 renamed. Afterwards a join is applied and the data is collected in a
 data frame with one event per row. Let’s have a look at the internal
 data frame:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu">datatable</span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu">datatable</span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   event_id, group, firm_symbol [4]</span></span></span>
+<span><span class="co">#&gt;   firm_symbol event_id group    data               request         </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VOW.DE             1 VW Group <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> PAH3.DE            2 VW Group <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BMW.DE             3 Other    <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> MBG.DE             4 Other    <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu">datatable</span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">request</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">#&gt;   date       firm_adjusted index_symbol index_adjusted</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 02.06.2014          113. ^GDAXI                <span style="text-decoration: underline;">9</span>950.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 03.06.2014          112. ^GDAXI                <span style="text-decoration: underline;">9</span>920.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 04.06.2014          109. ^GDAXI                <span style="text-decoration: underline;">9</span>927.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 05.06.2014          112. ^GDAXI                <span style="text-decoration: underline;">9</span>948.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 06.06.2014          112. ^GDAXI                <span style="text-decoration: underline;">9</span>987.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 09.06.2014          112. ^GDAXI               <span style="text-decoration: underline;">10</span>009.</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">request</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 6</span></span></span>
+<span><span class="co">#&gt;   index_symbol event_date event_window_start event_window_end</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ^GDAXI       18.09.2015                -<span style="color: #BB0000;">10</span>               10</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: shift_estimation_window &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   estimation_window_length &lt;int&gt;</span></span></span></code></pre></div>
 <p>The internal data structure is important for you if you plan to
 develop your own statistical or econometric model or test statistic.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/prepare_event_study.html">prepare_event_study</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/prepare_event_study.html">prepare_event_study</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_model.html">fit_model</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 10</span></span></span>
+<span><span class="co">#&gt;   date      firm_adjusted index_symbol index_adjusted firm_returns index_returns</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 02.06.20…          113. ^GDAXI                <span style="text-decoration: underline;">9</span>950.     <span style="color: #BB0000;">NA</span>           <span style="color: #BB0000;">NA</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 03.06.20…          112. ^GDAXI                <span style="text-decoration: underline;">9</span>920.     -<span style="color: #BB0000;">0.001</span><span style="color: #BB0000; text-decoration: underline;">28</span>     -<span style="color: #BB0000;">0.003</span><span style="color: #BB0000; text-decoration: underline;">06</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 04.06.20…          109. ^GDAXI                <span style="text-decoration: underline;">9</span>927.     -<span style="color: #BB0000;">0.026</span><span style="color: #BB0000; text-decoration: underline;">3</span>       0.000<span style="text-decoration: underline;">698</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 05.06.20…          112. ^GDAXI                <span style="text-decoration: underline;">9</span>948.      0.019<span style="text-decoration: underline;">6</span>       0.002<span style="text-decoration: underline;">13</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 06.06.20…          112. ^GDAXI                <span style="text-decoration: underline;">9</span>987.      0.002<span style="text-decoration: underline;">84</span>      0.003<span style="text-decoration: underline;">95</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 09.06.20…          112. ^GDAXI               <span style="text-decoration: underline;">10</span>009.      0.003<span style="text-decoration: underline;">86</span>      0.002<span style="text-decoration: underline;">14</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: event_date &lt;dbl&gt;, relative_index &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   event_window &lt;dbl&gt;, estimation_window &lt;dbl&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_model.html">fit_model</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">model</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   event_id, group, firm_symbol [4]</span></span></span>
+<span><span class="co">#&gt;   firm_symbol event_id group    data                request          model     </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VOW.DE             1 VW Group <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> PAH3.DE            2 VW Group <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BMW.DE             3 Other    <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> MBG.DE             4 Other    <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/calculate_statistics.html">calculate_statistics</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">model</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; &lt;MarketModel&gt;</span></span>
+<span><span class="co">#&gt;   Inherits from: &lt;ModelBase&gt;</span></span>
+<span><span class="co">#&gt;   Public:</span></span>
+<span><span class="co">#&gt;     abnormal_returns: function (data_tbl) </span></span>
+<span><span class="co">#&gt;     clone: function (deep = FALSE) </span></span>
+<span><span class="co">#&gt;     degenerate_mode: lenient</span></span>
+<span><span class="co">#&gt;     event_id: 1</span></span>
+<span><span class="co">#&gt;     firm_symbol: VOW.DE</span></span>
+<span><span class="co">#&gt;     fit: function (data_tbl) </span></span>
+<span><span class="co">#&gt;     formula: formula</span></span>
+<span><span class="co">#&gt;     hac_lag: NULL</span></span>
+<span><span class="co">#&gt;     initialize: function (use_hac = FALSE, hac_lag = NULL) </span></span>
+<span><span class="co">#&gt;     is_fitted: active binding</span></span>
+<span><span class="co">#&gt;     model: active binding</span></span>
+<span><span class="co">#&gt;     model_name: MarketModel</span></span>
+<span><span class="co">#&gt;     set_formula: function (formula) </span></span>
+<span><span class="co">#&gt;     statistics: active binding</span></span>
+<span><span class="co">#&gt;     use_hac: FALSE</span></span>
+<span><span class="co">#&gt;   Private:</span></span>
+<span><span class="co">#&gt;     .degenerate_handled: FALSE</span></span>
+<span><span class="co">#&gt;     .error: NULL</span></span>
+<span><span class="co">#&gt;     .fitted_model: lm</span></span>
+<span><span class="co">#&gt;     .is_fitted: TRUE</span></span>
+<span><span class="co">#&gt;     .statistics: list</span></span>
+<span><span class="co">#&gt;     add_residuals: function (residuals) </span></span>
+<span><span class="co">#&gt;     calculate_forecast_error_correction: function (sigma, estimation_window_length, estimation_market_returns, </span></span>
+<span><span class="co">#&gt;     calculate_statistics: function (data_tbl) </span></span>
+<span><span class="co">#&gt;     first_order_autocorrelation: function (residuals)</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/calculate_statistics.html">calculate_statistics</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">ART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   event_id, group, firm_symbol [4]</span></span></span>
+<span><span class="co">#&gt;   firm_symbol event_id group    data     request  model      ART      CART    </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VOW.DE             1 VW Group <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> PAH3.DE            2 VW Group <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BMW.DE             3 Other    <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> MBG.DE             4 Other    <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">CART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">ART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 4</span></span></span>
+<span><span class="co">#&gt;    relative_index abnormal_returns    ar_t</span></span>
+<span><span class="co">#&gt;             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>            -<span style="color: #BB0000;">10</span>         0.002<span style="text-decoration: underline;">82</span>   0.281 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>             -<span style="color: #BB0000;">9</span>         0.000<span style="text-decoration: underline;">357</span>  0.035<span style="text-decoration: underline;">6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>             -<span style="color: #BB0000;">8</span>         0.009<span style="text-decoration: underline;">20</span>   0.918 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>             -<span style="color: #BB0000;">7</span>         0.022<span style="text-decoration: underline;">2</span>    2.21  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>             -<span style="color: #BB0000;">6</span>        -<span style="color: #BB0000;">0.005</span><span style="color: #BB0000; text-decoration: underline;">79</span>  -<span style="color: #BB0000;">0.577</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>             -<span style="color: #BB0000;">5</span>         0.005<span style="text-decoration: underline;">83</span>   0.581 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>             -<span style="color: #BB0000;">4</span>        -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">92</span>  -<span style="color: #BB0000;">0.491</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>             -<span style="color: #BB0000;">3</span>         0.002<span style="text-decoration: underline;">58</span>   0.258 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>             -<span style="color: #BB0000;">2</span>         0.000<span style="text-decoration: underline;">213</span>  0.021<span style="text-decoration: underline;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>             -<span style="color: #BB0000;">1</span>        -<span style="color: #BB0000;">0.000</span><span style="color: #BB0000; text-decoration: underline;">376</span> -<span style="color: #BB0000;">0.037</span><span style="color: #BB0000; text-decoration: underline;">5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: ar_t_dist &lt;dist&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">CART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 8</span></span></span>
+<span><span class="co">#&gt;    relative_index abnormal_returns event_window_length car_window     car</span></span>
+<span><span class="co">#&gt;             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>            -<span style="color: #BB0000;">10</span>         0.002<span style="text-decoration: underline;">82</span>                    1 [-10, -10] 0.002<span style="text-decoration: underline;">82</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>             -<span style="color: #BB0000;">9</span>         0.000<span style="text-decoration: underline;">357</span>                   2 [-10, -9]  0.003<span style="text-decoration: underline;">17</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>             -<span style="color: #BB0000;">8</span>         0.009<span style="text-decoration: underline;">20</span>                    3 [-10, -8]  0.012<span style="text-decoration: underline;">4</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>             -<span style="color: #BB0000;">7</span>         0.022<span style="text-decoration: underline;">2</span>                     4 [-10, -7]  0.034<span style="text-decoration: underline;">6</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>             -<span style="color: #BB0000;">6</span>        -<span style="color: #BB0000;">0.005</span><span style="color: #BB0000; text-decoration: underline;">79</span>                    5 [-10, -6]  0.028<span style="text-decoration: underline;">8</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>             -<span style="color: #BB0000;">5</span>         0.005<span style="text-decoration: underline;">83</span>                    6 [-10, -5]  0.034<span style="text-decoration: underline;">6</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>             -<span style="color: #BB0000;">4</span>        -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">92</span>                    7 [-10, -4]  0.029<span style="text-decoration: underline;">7</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>             -<span style="color: #BB0000;">3</span>         0.002<span style="text-decoration: underline;">58</span>                    8 [-10, -3]  0.032<span style="text-decoration: underline;">3</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>             -<span style="color: #BB0000;">2</span>         0.000<span style="text-decoration: underline;">213</span>                   9 [-10, -2]  0.032<span style="text-decoration: underline;">5</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>             -<span style="color: #BB0000;">1</span>        -<span style="color: #BB0000;">0.000</span><span style="color: #BB0000; text-decoration: underline;">376</span>                  10 [-10, -1]  0.032<span style="text-decoration: underline;">1</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: corrected_car &lt;dbl&gt;, car_t &lt;dbl&gt;, car_t_dist &lt;dist&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span><span class="op">$</span><span class="va">CSectT</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   group [2]</span></span></span>
+<span><span class="co">#&gt;   group    data                model            CSectT            </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VW Group <span style="color: #949494;">&lt;tibble [720 × 13]&gt;</span> <span style="color: #949494;">&lt;tibble [2 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [21 × 10]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Other    <span style="color: #949494;">&lt;tibble [720 × 13]&gt;</span> <span style="color: #949494;">&lt;tibble [2 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [21 × 10]&gt;</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span><span class="op">$</span><span class="va">CSectT</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 10</span></span></span>
+<span><span class="co">#&gt;    relative_index      aar n_events n_valid_events n_pos n_neg  aar_t    caar</span></span>
+<span><span class="co">#&gt;             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>            -<span style="color: #BB0000;">10</span>  0.004<span style="text-decoration: underline;">18</span>        2              2     2     0  3.07  0.004<span style="text-decoration: underline;">18</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>             -<span style="color: #BB0000;">9</span> -<span style="color: #BB0000;">0.001</span><span style="color: #BB0000; text-decoration: underline;">22</span>        2              2     1     1 -<span style="color: #BB0000;">0.774</span> 0.002<span style="text-decoration: underline;">95</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>             -<span style="color: #BB0000;">8</span>  0.006<span style="text-decoration: underline;">69</span>        2              2     2     0  2.66  0.009<span style="text-decoration: underline;">64</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>             -<span style="color: #BB0000;">7</span>  0.015<span style="text-decoration: underline;">8</span>         2              2     2     0  2.46  0.025<span style="text-decoration: underline;">4</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>             -<span style="color: #BB0000;">6</span> -<span style="color: #BB0000;">0.002</span><span style="color: #BB0000; text-decoration: underline;">61</span>        2              2     1     1 -<span style="color: #BB0000;">0.819</span> 0.022<span style="text-decoration: underline;">8</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>             -<span style="color: #BB0000;">5</span>  0.004<span style="text-decoration: underline;">55</span>        2              2     2     0  3.55  0.027<span style="text-decoration: underline;">4</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>             -<span style="color: #BB0000;">4</span> -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">16</span>        2              2     0     2 -<span style="color: #BB0000;">5.48</span>  0.023<span style="text-decoration: underline;">2</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>             -<span style="color: #BB0000;">3</span>  0.004<span style="text-decoration: underline;">71</span>        2              2     2     0  2.21  0.027<span style="text-decoration: underline;">9</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>             -<span style="color: #BB0000;">2</span>  0.007<span style="text-decoration: underline;">96</span>        2              2     2     0  1.03  0.035<span style="text-decoration: underline;">9</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>             -<span style="color: #BB0000;">1</span> -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">83</span>        2              2     0     2 -<span style="color: #BB0000;">1.08</span>  0.031<span style="text-decoration: underline;">0</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: caar_t &lt;dbl&gt;, car_window &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h3>
+<p>This vignette covered the core market-model pipeline. To go
+deeper:</p>
+<ul>
+<li>
+<strong>Return models:</strong> See
+<code><a href="../articles/factor-models-bhar.html">vignette("factor-models-bhar")</a></code> for multi-factor and
+long-horizon models</li>
+<li>
+<strong>Test statistics:</strong> See
+<code><a href="../articles/inference-robustness.html">vignette("inference-robustness")</a></code> for robust inference and
+bootstrap</li>
+<li>
+<strong>Result extraction:</strong> See
+<code><a href="../articles/result-extraction.html">vignette("result-extraction")</a></code> for export,
+<code>tidy()</code>, and cross-sectional analysis</li>
+<li>
+<strong>AI advisor:</strong> See <code><a href="../articles/ai-advisor.html">vignette("ai-advisor")</a></code>
+for deterministic diagnostics and LLM interpretation</li>
+<li>
+<strong>Full gallery:</strong> See <code><a href="../articles/gallery.html">vignette("gallery")</a></code>
+for all available vignettes by topic</li>
+</ul>
 </div>
-<div class="section level2">
-<h2 id="roadmap">Roadmap<a class="anchor" aria-label="anchor" href="#roadmap"></a>
-</h2>
-<p>While EventStudy already offers a powerful tool set for conducting
-event study analysis in R, development is actively ongoing. The roadmap
-for future features includes adding more test statistics, supporting
-long-term event study, volatility and volume event study with test
-statistics, and intraday event study. Stay tuned for more updates!</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>

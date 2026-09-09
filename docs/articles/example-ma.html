@@ -5,10 +5,18 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Example: M&amp;A Deal Announcements -- Power Analysis on Synthetic Data • EventStudy</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/Plus_Jakarta_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Example: M&amp;A Deal Announcements -- Power Analysis on Synthetic Data">
@@ -21,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.62.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,8 +83,7 @@
 <script src="example-ma_files/crosstalk-1.2.2/js/crosstalk.min.js"></script><link href="example-ma_files/plotly-htmlwidgets-css-2.25.2/plotly-htmlwidgets.css" rel="stylesheet">
 <script src="example-ma_files/plotly-main-2.25.2/plotly-latest.min.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Example: M&amp;A Deal Announcements -- Power Analysis on Synthetic Data</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Example: M&amp;A Deal Announcements -- Power Analysis on Synthetic Data</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/sipemu/eventstudy/blob/HEAD/vignettes/articles/example-ma.Rmd" class="external-link"><code>vignettes/articles/example-ma.Rmd</code></a></small>
@@ -231,7 +238,7 @@ conventional 80% power target.</p>
 <span>    yaxis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Power"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <div class="plotly html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:672px;height:384px;"></div>
-<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"visdat":{"5dc0365634dda":["function () ","plotlyVisDat"]},"cur_data":"5dc0365634dda","attrs":{"5dc0365634dda":{"x":{},"y":{},"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"},"5dc0365634dda.1":{"x":0.001,"y":0.80000000000000004,"xend":0.01,"yend":0.80000000000000004,"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"inherit":false}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Power curve: detection rate vs true abnormal return (synthetic)","xaxis":{"domain":[0,1],"automargin":true,"title":"True abnormal return"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Power","range":[0,1]},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[0.001,0.002,0.0040000000000000001,0.0060000000000000001,0.01],"y":[0.035000000000000003,0.10000000000000001,0.27000000000000002,0.56999999999999995,0.95999999999999996],"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8,"line":{"color":"rgba(31,119,180,1)"}},"type":"scatter","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.001,0.01],"y":[0.80000000000000004,0.80000000000000004],"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"marker":{"color":"rgba(255,127,14,1)","line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"visdat":{"29f98f35df7739":["function () ","plotlyVisDat"]},"cur_data":"29f98f35df7739","attrs":{"29f98f35df7739":{"x":{},"y":{},"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"},"29f98f35df7739.1":{"x":0.001,"y":0.80000000000000004,"xend":0.01,"yend":0.80000000000000004,"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"inherit":false}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Power curve: detection rate vs true abnormal return (synthetic)","xaxis":{"domain":[0,1],"automargin":true,"title":"True abnormal return"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Power","range":[0,1]},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[0.001,0.002,0.0040000000000000001,0.0060000000000000001,0.01],"y":[0.035000000000000003,0.10000000000000001,0.27000000000000002,0.56999999999999995,0.95999999999999996],"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8,"line":{"color":"rgba(31,119,180,1)"}},"type":"scatter","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.001,0.01],"y":[0.80000000000000004,0.80000000000000004],"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"marker":{"color":"rgba(255,127,14,1)","line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 <div class="section level2">
 <h2 id="power-analysis-interpretation">Power analysis interpretation<a class="anchor" aria-label="anchor" href="#power-analysis-interpretation"></a>
@@ -317,7 +324,7 @@ Multiple Testing</a> – robust alternatives.</li>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] EventStudy_0.62.0</span></span>
+<span><span class="co">#&gt; [1] EventStudy_0.65.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         </span></span>

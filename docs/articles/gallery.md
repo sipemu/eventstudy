@@ -1,5 +1,16 @@
 # Gallery
 
+15+ Return Models
+
+12 Test Statistics
+
+5 DiD Estimators
+
+Part of the EventStudy ecosystem: [Google Sheets
+Template](https://eventstudy.de/products/gsheet-template) . [R
+Package](https://sipemu.github.io/eventstudy/) . [WebAssembly
+App](https://eventstudy.de/products/eventstudy-app)
+
 ## Core Workflow
 
 [](https://sipemu.github.io/eventstudy/articles/introduction.md)

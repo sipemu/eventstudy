@@ -82,6 +82,12 @@ conventional significance levels. Weak or diffuse effects, by contrast,
 demand far larger samples – the familiar power-vs-effect-size tradeoff
 (MacKinlay 1997).
 
+> **Note:** power estimates above are Monte Carlo averages from 200
+> simulation runs. At p ≈ 0.50 the sampling error is roughly ±3–5
+> percentage points (95% interval), so small differences between
+> adjacent grid points are within simulation noise and should not be
+> over-interpreted.
+
 ## Design implications
 
 Power is jointly determined by the true effect size, the number of
@@ -142,7 +148,7 @@ excludes.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.62.0
+    #> [1] EventStudy_0.65.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         

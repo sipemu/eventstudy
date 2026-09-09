@@ -31,7 +31,7 @@ recommend_stat(x, provider = NULL, ...)
 
 - provider:
 
-  Accepted but ignored in the offline path — present only so the Phase 7
+  Accepted but ignored in the offline path – present only so the Phase 7
   call shape is forward-compatible. Default `NULL`.
 
 - ...:
@@ -40,7 +40,7 @@ recommend_stat(x, provider = NULL, ...)
 
 ## Value
 
-An S3 object of class `"es_advice"` — a named list with:
+An S3 object of class `"es_advice"` – a named list with:
 
 - `source`:
 
@@ -48,7 +48,7 @@ An S3 object of class `"es_advice"` — a named list with:
 
 - `is_deterministic`:
 
-  `TRUE` — advice is rule-based, not LLM-generated.
+  `TRUE` – advice is rule-based, not LLM-generated.
 
 - `rules_matched`:
 
@@ -74,6 +74,17 @@ contract, flagged `is_deterministic = TRUE` and `source = "offline_kb"`.
 [`flag_robustness`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
 [`es_diagnostics`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
 [`es_kb`](https://sipemu.github.io/eventstudy/reference/es_kb.md)
+
+Other eventstudy-advisor:
+[`AnthropicProvider`](https://sipemu.github.io/eventstudy/reference/AnthropicProvider.md),
+[`CustomProvider`](https://sipemu.github.io/eventstudy/reference/CustomProvider.md),
+[`OpenAICompatProvider`](https://sipemu.github.io/eventstudy/reference/OpenAICompatProvider.md),
+[`ProviderBase`](https://sipemu.github.io/eventstudy/reference/ProviderBase.md),
+[`es_advise()`](https://sipemu.github.io/eventstudy/reference/es_advise.md),
+[`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`es_kb()`](https://sipemu.github.io/eventstudy/reference/es_kb.md),
+[`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
+[`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md)
 
 ## Examples
 

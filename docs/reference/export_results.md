@@ -48,3 +48,13 @@ export_results(
 ## Value
 
 The file path (invisibly).
+
+## See also
+
+[`run_event_study`](https://sipemu.github.io/eventstudy/reference/run_event_study.md),
+[`tidy.EventStudyTask`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)
+
+Other eventstudy-export:
+[`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md),
+[`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md),
+[`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)

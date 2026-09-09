@@ -6,6 +6,15 @@ The Event Study task contains all necessary data for performing an event
 study. Furthermore, all calculations are saved in the internal dataframe
 named data_tbl.
 
+## See also
+
+Other eventstudy-pipeline:
+[`ParameterSet`](https://sipemu.github.io/eventstudy/reference/ParameterSet.md),
+[`calculate_statistics()`](https://sipemu.github.io/eventstudy/reference/calculate_statistics.md),
+[`fit_model()`](https://sipemu.github.io/eventstudy/reference/fit_model.md),
+[`prepare_event_study()`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md),
+[`run_event_study()`](https://sipemu.github.io/eventstudy/reference/run_event_study.md)
+
 ## Public fields
 
 - `data_tbl`:

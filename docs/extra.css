@@ -79,7 +79,7 @@
   padding: 0.4rem 0.6rem;
   font-size: 0.82rem;
   font-weight: 500;
-  color: #0d6efd;
+  color: #2563eb;
   border-top: 1px solid #dee2e6;
   background: #fff;
 }
@@ -88,24 +88,18 @@
   text-decoration: underline;
 }
 
-/* Section headings */
+/* Section headings - single brand primary underline, foreground text.
+   The former 8-colour per-category system is removed for eventstudy.de
+   ecosystem alignment. The multi-colour .es-tag badges below stay unchanged. */
 .es-section-heading {
   font-weight: 700;
   font-size: 1.15rem;
   margin-top: 1.5rem;
   margin-bottom: 0;
   padding-bottom: 0.3rem;
-  border-bottom: 2px solid;
+  border-bottom: 2px solid #2563eb;
+  color: #0f172a;
 }
-
-.es-section-heading.es-core     { border-bottom-color: #0d6efd; color: #0d6efd; }
-.es-section-heading.es-models   { border-bottom-color: #198754; color: #198754; }
-.es-section-heading.es-stats    { border-bottom-color: #fd7e14; color: #fd7e14; }
-.es-section-heading.es-advanced { border-bottom-color: #6f42c1; color: #6f42c1; }
-.es-section-heading.es-crosssec { border-bottom-color: #dc3545; color: #dc3545; }
-.es-section-heading.es-advisor  { border-bottom-color: #0dcaf0; color: #0dcaf0; }
-.es-section-heading.es-data     { border-bottom-color: #6c757d; color: #6c757d; }
-.es-section-heading.es-examples { border-bottom-color: #20c997; color: #20c997; }
 
 /* Section description */
 .es-section-desc {
@@ -144,3 +138,13 @@
 .es-tag-advisor  { background: #0dcaf0; }
 .es-tag-data     { background: #6c757d; }
 .es-tag-examples { background: #20c997; }
+
+/* Suppress the auto-injected header logo on content pages.
+   pkgdown 2.2.0 data_template() calls has_logo() and, when man/figures/logo.png
+   exists, injects <img class="logo"> into <div class="page-header"> on every
+   article/reference/vignette page via content-article.html `{{#logo}}...{{/logo}}`.
+   man/figures/logo.png must stay for README/favicon/OG-card; the body placement
+   is unwanted. Scoped to .page-header to avoid touching README or OG assets. */
+.page-header .logo {
+  display: none;
+}

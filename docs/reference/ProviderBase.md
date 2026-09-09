@@ -12,6 +12,19 @@ errors. It stores only non-secret configuration (\`model\`,
 \`base_url\`); API keys are NEVER read at construction — they are
 resolved at call time inside each concrete provider's \`complete()\`.
 
+## See also
+
+Other eventstudy-advisor:
+[`AnthropicProvider`](https://sipemu.github.io/eventstudy/reference/AnthropicProvider.md),
+[`CustomProvider`](https://sipemu.github.io/eventstudy/reference/CustomProvider.md),
+[`OpenAICompatProvider`](https://sipemu.github.io/eventstudy/reference/OpenAICompatProvider.md),
+[`es_advise()`](https://sipemu.github.io/eventstudy/reference/es_advise.md),
+[`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`es_kb()`](https://sipemu.github.io/eventstudy/reference/es_kb.md),
+[`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
+[`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md),
+[`recommend_stat()`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md)
+
 ## Public fields
 
 - `model`:

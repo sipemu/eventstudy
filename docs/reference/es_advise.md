@@ -9,7 +9,14 @@ diagnostics or a value mismatching beyond numeric tolerance.
 ## Usage
 
 ``` r
-es_advise(diagnostics, task_type, provider = NULL, model = NULL, ...)
+es_advise(
+  diagnostics,
+  task_type,
+  provider = NULL,
+  model = NULL,
+  section_hint = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -40,6 +47,13 @@ es_advise(diagnostics, task_type, provider = NULL, model = NULL, ...)
   [`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md)),
   so set the model there. Accepted here without error so calling code
   can pass it, but it does not override the provider's configured model.
+
+- section_hint:
+
+  Optional character scalar naming the report section to scope the
+  narrative to (e.g. `"exec_summary"`, `"results"`, `"robustness"`).
+  `NULL` (default) leaves the prompt byte-identical to its pre-Phase-18
+  form. Only applied for the `"report_writing"` task type.
 
 - ...:
 
@@ -86,7 +100,19 @@ object — never a crash, never a fabricated result (mirrors
 [`es_diagnostics`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
 [`recommend_stat`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md),
 [`flag_robustness`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
-[`provider`](https://sipemu.github.io/eventstudy/reference/provider.md)
+[`provider`](https://sipemu.github.io/eventstudy/reference/provider.md),
+[`run_event_study`](https://sipemu.github.io/eventstudy/reference/run_event_study.md)
+
+Other eventstudy-advisor:
+[`AnthropicProvider`](https://sipemu.github.io/eventstudy/reference/AnthropicProvider.md),
+[`CustomProvider`](https://sipemu.github.io/eventstudy/reference/CustomProvider.md),
+[`OpenAICompatProvider`](https://sipemu.github.io/eventstudy/reference/OpenAICompatProvider.md),
+[`ProviderBase`](https://sipemu.github.io/eventstudy/reference/ProviderBase.md),
+[`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`es_kb()`](https://sipemu.github.io/eventstudy/reference/es_kb.md),
+[`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
+[`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md),
+[`recommend_stat()`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md)
 
 ## Examples
 

@@ -19,11 +19,11 @@ Statistics](https://sipemu.github.io/eventstudy/articles/methods-test-statistics
 Do AAPL, MSFT, and GOOGL earn significantly positive abnormal returns
 around their quarterly earnings *beats*? Formally, we test the null
 
-H_0:\\ \mathbb{E}\[AR_t\] = 0 \quad \text{for all } t \text{ in the
+H_0:\\ \mathbb{E}\[AAR_t\] = 0 \quad \text{for all } t \text{ in the
 event window},
 
-against the alternative that the average abnormal return (AAR) and the
-cumulative average abnormal return (CAAR) differ from zero.
+against the alternative that the cumulative average abnormal return
+(CAAR) differs from zero.
 
 ## Data
 
@@ -91,16 +91,17 @@ The Patell Z and BMP statistics both aggregate the three firms’
 standardized abnormal returns, but BMP additionally corrects for
 event-induced cross-sectional variance.
 
-`pz`` ``<-`` ``result``$``aar_caar_tbl``$``PatellZ``[[``1``]``]`` ``bmp`` ``<-`` ``result``$``aar_caar_tbl``$``BMP``[[``1``]``]`` `` ``caar_patell`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``utils``::`[`tail`](https://rdrr.io/r/utils/head.html)`(``pz``$``caar``, ``1L``)``, ``4``)`` ``z_patell`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``utils``::`[`tail`](https://rdrr.io/r/utils/head.html)`(``pz``$``caar_z``, ``1L``)``, ``3``)`` ``t_bmp`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``utils``::`[`tail`](https://rdrr.io/r/utils/head.html)`(``bmp``$``cbmp_t``, ``1L``)``, ``3``)`
+`pz`` ``<-`` ``result``$``aar_caar_tbl``$``PatellZ``[[``1``]``]`` ``bmp`` ``<-`` ``result``$``aar_caar_tbl``$``BMP``[[``1``]``]`` `` ``caar_patell`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``utils``::`[`tail`](https://rdrr.io/r/utils/head.html)`(``pz``$``caar``, ``1L``)``, ``4``)`` ``z_patell`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``utils``::`[`tail`](https://rdrr.io/r/utils/head.html)`(``pz``$``caar_z``, ``1L``)``, ``3``)`` ``t_bmp`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``utils``::`[`tail`](https://rdrr.io/r/utils/head.html)`(``bmp``$``cbmp_t``, ``1L``)``, ``3``)`` ``df_bmp`` ``<-`` ``utils``::`[`tail`](https://rdrr.io/r/utils/head.html)`(``bmp``$``n_valid_events``, ``1L``)`` ``-`` ``1L`` `` ``# Two-sided p-values: Patell Z ~ N(0,1); BMP t ~ t(df_bmp)`` ``p_patell`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``2`` ``*`` `[`pnorm`](https://rdrr.io/r/stats/Normal.html)`(`[`abs`](https://rdrr.io/r/base/MathFun.html)`(``z_patell``)``, lower.tail ``=`` ``FALSE``)``, ``4``)`` ``p_bmp`` ``<-`` `[`round`](https://rdrr.io/r/base/Round.html)`(``2`` ``*`` `[`pt`](https://rdrr.io/r/stats/TDist.html)`(`[`abs`](https://rdrr.io/r/base/MathFun.html)`(``t_bmp``)``, df ``=`` ``df_bmp``, lower.tail ``=`` ``FALSE``)``, ``4``)`
 
 At the end of the event window the CAAR across the three firms is
-0.0377. The Patell Z on the cumulative series is 1.664 and the BMP
-statistic is 2.248. Where the two disagree in magnitude, the BMP figure
-is the more conservative – it inflates the standard error when abnormal
-returns are correlated across firms on the event day, which is exactly
-the situation a common earnings-season calendar can create (Boehmer et
-al. 1991). Read together, they tell you whether an apparently
-significant AAR survives a cross-sectional correlation correction.
+0.0377. The Patell Z on the cumulative series is 1.664 (two-sided p =
+0.0961) and the BMP statistic is 2.248 (two-sided p = 0.1536). Where the
+two disagree in magnitude, the BMP figure is the more conservative – it
+inflates the standard error when abnormal returns are correlated across
+firms on the event day, which is exactly the situation a common
+earnings-season calendar can create (Boehmer et al. 1991). Read
+together, they tell you whether an apparently significant AAR survives a
+cross-sectional correlation correction.
 
 ## Diagnostics note
 
@@ -148,7 +149,7 @@ for the full battery.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.62.0
+    #> [1] EventStudy_0.65.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] plotly_4.12.0        sass_0.4.10          utf8_1.2.6          

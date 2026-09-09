@@ -7,6 +7,24 @@ time-varying correlation between firm and market returns, yielding a
 time-varying beta: \\\beta_t = Cov(R\_{firm}, R\_{market})\_t /
 Var(R\_{market})\_t\\.
 
+## See also
+
+Other eventstudy-models:
+[`BHARModel`](https://sipemu.github.io/eventstudy/reference/BHARModel.md),
+[`Carhart4FactorModel`](https://sipemu.github.io/eventstudy/reference/Carhart4FactorModel.md),
+[`ComparisonPeriodMeanAdjustedModel`](https://sipemu.github.io/eventstudy/reference/ComparisonPeriodMeanAdjustedModel.md),
+[`FamaFrench3FactorModel`](https://sipemu.github.io/eventstudy/reference/FamaFrench3FactorModel.md),
+[`FamaFrench5FactorModel`](https://sipemu.github.io/eventstudy/reference/FamaFrench5FactorModel.md),
+[`GARCHModel`](https://sipemu.github.io/eventstudy/reference/GARCHModel.md),
+[`LinearFactorModel`](https://sipemu.github.io/eventstudy/reference/LinearFactorModel.md),
+[`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md),
+[`MarketAdjustedModel`](https://sipemu.github.io/eventstudy/reference/MarketAdjustedModel.md),
+[`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md),
+[`RollingWindowModel`](https://sipemu.github.io/eventstudy/reference/RollingWindowModel.md),
+[`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md),
+[`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md),
+[`VolumeModel`](https://sipemu.github.io/eventstudy/reference/VolumeModel.md)
+
 ## Super class
 
 [`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md)

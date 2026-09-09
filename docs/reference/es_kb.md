@@ -46,6 +46,17 @@ each rule record before encoding to JSON.
 [`flag_robustness`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
 [`es_diagnostics`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md)
 
+Other eventstudy-advisor:
+[`AnthropicProvider`](https://sipemu.github.io/eventstudy/reference/AnthropicProvider.md),
+[`CustomProvider`](https://sipemu.github.io/eventstudy/reference/CustomProvider.md),
+[`OpenAICompatProvider`](https://sipemu.github.io/eventstudy/reference/OpenAICompatProvider.md),
+[`ProviderBase`](https://sipemu.github.io/eventstudy/reference/ProviderBase.md),
+[`es_advise()`](https://sipemu.github.io/eventstudy/reference/es_advise.md),
+[`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md),
+[`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md),
+[`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md),
+[`recommend_stat()`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md)
+
 ## Examples
 
 ``` r

@@ -98,8 +98,9 @@ industry-wide contagion. The `SignTest` corroborates the direction
 non-parametrically: with every VW-group firm posting negative CARs, the
 sign statistic points the same way as the parametric test, which matters
 when a two-firm group makes the normality assumption of the *t*-test
-fragile (Corrado 1989). This two-group design is the standard technique
-for separating firm-specific from sector-wide regulatory shocks.
+fragile (Brown and Warner 1985). This two-group design is the standard
+technique for separating firm-specific from sector-wide regulatory
+shocks.
 
 ## Diagnostics note
 
@@ -148,7 +149,7 @@ before trusting the parametric *p*-values.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.62.0
+    #> [1] EventStudy_0.65.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] plotly_4.12.0        sass_0.4.10          utf8_1.2.6          
@@ -171,6 +172,6 @@ before trusting the parametric *p*-values.
     #> [52] htmltools_0.5.9      rmarkdown_2.31       labeling_0.4.3      
     #> [55] compiler_4.6.1       S7_0.2.2             distributional_0.8.0
 
-Corrado, Charles J. 1989. “A Nonparametric Test for Abnormal
-Security-Price Performance in Event Studies.” *Journal of Financial
-Economics* 23 (2): 385–95.
+Brown, Stephen J., and Jerold B. Warner. 1985. “Using Daily Stock
+Returns: The Case of Event Studies.” *Journal of Financial Economics* 14
+(1): 3–31.

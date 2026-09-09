@@ -7,6 +7,24 @@ Implements the Fama and French (2015) five-factor model: \$\$R_i - R_f =
 Requires columns: `excess_return`, `market_excess`, `smb`, `hml`, `rmw`,
 `cma`.
 
+## See also
+
+Other eventstudy-models:
+[`BHARModel`](https://sipemu.github.io/eventstudy/reference/BHARModel.md),
+[`Carhart4FactorModel`](https://sipemu.github.io/eventstudy/reference/Carhart4FactorModel.md),
+[`ComparisonPeriodMeanAdjustedModel`](https://sipemu.github.io/eventstudy/reference/ComparisonPeriodMeanAdjustedModel.md),
+[`DCCGARCHModel`](https://sipemu.github.io/eventstudy/reference/DCCGARCHModel.md),
+[`FamaFrench3FactorModel`](https://sipemu.github.io/eventstudy/reference/FamaFrench3FactorModel.md),
+[`GARCHModel`](https://sipemu.github.io/eventstudy/reference/GARCHModel.md),
+[`LinearFactorModel`](https://sipemu.github.io/eventstudy/reference/LinearFactorModel.md),
+[`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md),
+[`MarketAdjustedModel`](https://sipemu.github.io/eventstudy/reference/MarketAdjustedModel.md),
+[`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md),
+[`RollingWindowModel`](https://sipemu.github.io/eventstudy/reference/RollingWindowModel.md),
+[`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md),
+[`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md),
+[`VolumeModel`](https://sipemu.github.io/eventstudy/reference/VolumeModel.md)
+
 ## Super classes
 
 [`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md)

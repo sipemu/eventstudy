@@ -1,5 +1,128 @@
 # Changelog
 
+## EventStudy 0.65.0
+
+The “Polish” milestone lifts the *felt* quality of the package — brand
+identity, plot and report aesthetics, API and message ergonomics, and
+documentation — with no change to statistical results. Behavior on valid
+inputs is unchanged; this release is purely additive.
+
+### Brand & Identity
+
+- New EventStudy logo (CAR-curve motif) at `man/figures/logo.png` and
+  hex sticker at `man/figures/logo-hex.png` (#BRAND-01).
+- Logo wired into README badge row and pkgdown navbar (#BRAND-02).
+- Full favicon set generated for the pkgdown site (#BRAND-03).
+- Open Graph social-preview card configured for shared link thumbnails
+  (#BRAND-04).
+- pkgdown site palette and typography aligned to the eventstudy.de
+  ecosystem brand via `template.bslib` and `pkgdown/extra.scss`, with a
+  restyled home card gallery and numeric-badge strip (#BRAND-05,
+  \#BRAND-06).
+- Lifecycle badge updated from `experimental` to `stable` (#BRAND-07).
+
+### Plot Aesthetics
+
+- **New
+  [`theme_eventstudy()`](https://sipemu.github.io/eventstudy/reference/theme_eventstudy.md)**
+  ggplot2 theme and **`es_colours`** palette (exported from
+  `R/theme.R`). The palette is the colorblind-safe Okabe-Ito set aligned
+  to the ecosystem brand (#VIZ-01, \#VIZ-02).
+- Built-in ggplot2 and plotly visuals
+  ([`plot_event_study()`](https://sipemu.github.io/eventstudy/reference/plot_event_study.md),
+  [`plot_diagnostics()`](https://sipemu.github.io/eventstudy/reference/plot_diagnostics.md),
+  and the single/multi-event helpers) now draw from `es_colours` instead
+  of hardcoded colours, for a consistent, accessible look across the
+  package (#VIZ-03).
+
+### Report Aesthetics
+
+- [`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md)
+  tables now render via **`tinytable`** when available, with a
+  byte-compatible
+  [`knitr::kable()`](https://rdrr.io/pkg/knitr/man/kable.html) fallback
+  when it is not — styled consistently across the HTML, PDF, Word, and
+  Markdown formats (#VIZ-04, \#CRAN-05).
+- Every report plot chunk carries a figure caption, and figure sizing is
+  now per-format (via `ragg`) instead of a single global width (#VIZ-05,
+  \#VIZ-06).
+- HTML reports pick up a brand-tokened `report.css`, injected only on
+  the HTML output path; PDF/Word/Markdown output is unaffected
+  (#VIZ-07).
+
+### API & Message Polish
+
+- `print.*` methods now return `invisible(x)` for clean piping, and
+  `format.*` methods were added where missing (#API-01, \#API-02).
+- Selected
+  [`stop()`](https://rdrr.io/r/base/stop.html)/[`warning()`](https://rdrr.io/r/base/warning.html)
+  calls are now classed `eventstudy_*` conditions (via
+  [`rlang::abort()`](https://rlang.r-lib.org/reference/abort.html)/[`rlang::warn()`](https://rlang.r-lib.org/reference/abort.html))
+  whose messages name the offending argument and value, so failures are
+  catchable by class and easier to diagnose (#API-03, \#API-04).
+- A `verbose=` quiet mode was added; the default is byte-identical to
+  prior behavior (#API-05). Deprecation audit completed with no new
+  dependency (#API-06).
+
+### Docs & Site
+
+- Extensive `@family` and `@seealso` cross-links across the exported
+  API, grouping functions into cohesive clusters for easier navigation
+  (#DOCS-01).
+- README gains an **Ecosystem** section (Google Sheets add-on / R
+  package / WebAssembly app) and honest capability counts (15+ return
+  models, 12 test statistics) reconciled across README, gallery, and
+  vignettes (#DOCS-02).
+- [`pkgdown::check_pkgdown()`](https://pkgdown.r-lib.org/reference/check_pkgdown.html)
+  wired into CI so reference-index drift is caught automatically
+  (#DOCS-03).
+- Getting-started vignette tightened with a one-call Quick Start and
+  cross-links to the other articles (#DOCS-04).
+
+### CRAN Hygiene
+
+- Version bumped to 0.65.0 (#CRAN-02).
+- CI tarball-size assertion (\< 1 MB) and non-ASCII grep guard added
+  (#CRAN-03, \#CRAN-04).
+- Only optional Suggests (`tinytable`, `patchwork`, `ragg`) were added,
+  all guarded by
+  [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html); no new
+  hard dependencies and no new `R CMD check` findings versus the prior
+  baseline (#CRAN-01).
+
+## EventStudy 0.64.0
+
+### One-Call Reporting: es_report() and run_event_study(report = TRUE)
+
+- **New
+  [`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md)
+  orchestrator.** A single function call converts a fitted
+  `EventStudyTask` into a complete, publication-ready report. The
+  function deep-clones the task (non-mutation guarantee), runs
+  [`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md)
+  to harvest diagnostic metadata, assembles a grounded narrative via
+  [`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md)
+  (assembled once before any format loop), and renders output to one or
+  more formats. Returns a named character vector of output path(s)
+  visibly, so the path prints at the REPL without an explicit
+  [`print()`](https://rdrr.io/r/base/print.html).
+
+- **Multi-format output.**
+  [`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md)
+  accepts `format = c("html", "pdf", "word", "md")` and renders one file
+  per format sharing a common basename. All formats are fully offline by
+  default (no API key, no network required); an optional `provider`
+  argument enables LLM-grounded narrative when available.
+
+- **Additive `run_event_study(report = FALSE, report_args = list())`
+  convenience.** The pipeline entry-point gains two new optional
+  arguments. When `report = FALSE` (the default), behaviour is
+  byte-identical to the previous release – no allocation overhead, no
+  side effects. When `report = TRUE`,
+  [`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md)
+  is called after the pipeline completes and the rendered path(s) are
+  attached as `attr(task, "report_path")`.
+
 ## EventStudy 0.62.0
 
 ### Documentation site + CI/CD deploy

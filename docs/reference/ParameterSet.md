@@ -4,6 +4,15 @@ The parameter set defines the Event Study, e.g, the return calculation,
 the event study model, the AR, CAR, AAR, and CAAR test statistics that
 should be applied.
 
+## See also
+
+Other eventstudy-pipeline:
+[`EventStudyTask`](https://sipemu.github.io/eventstudy/reference/EventStudyTask.md),
+[`calculate_statistics()`](https://sipemu.github.io/eventstudy/reference/calculate_statistics.md),
+[`fit_model()`](https://sipemu.github.io/eventstudy/reference/fit_model.md),
+[`prepare_event_study()`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md),
+[`run_event_study()`](https://sipemu.github.io/eventstudy/reference/run_event_study.md)
+
 ## Public fields
 
 - `return_calculation`:

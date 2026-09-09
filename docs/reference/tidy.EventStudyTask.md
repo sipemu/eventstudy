@@ -59,3 +59,10 @@ A tibble with columns following broom conventions:
 - p.value:
 
   p-value where available
+
+## See also
+
+Other eventstudy-export:
+[`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md),
+[`export_results()`](https://sipemu.github.io/eventstudy/reference/export_results.md),
+[`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md)

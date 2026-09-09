@@ -26,8 +26,8 @@ designs — with formulas, assumptions, and references.
 
 Package overview with a complete Dieselgate worked example.
 
-- [Introducing EventStudy: A Powerful Tool for Event Study Analysis in
-  R](https://sipemu.github.io/eventstudy/articles/introduction.md):
+- [Getting Started with
+  EventStudy](https://sipemu.github.io/eventstudy/articles/introduction.md):
 
 ### Gallery
 

@@ -43,3 +43,12 @@ plot_stocks(
 ## Value
 
 A plotly plot object.
+
+## See also
+
+Other eventstudy-plots:
+[`es_colours`](https://sipemu.github.io/eventstudy/reference/es_colours.md),
+[`plot_car_distribution()`](https://sipemu.github.io/eventstudy/reference/plot_car_distribution.md),
+[`plot_diagnostics()`](https://sipemu.github.io/eventstudy/reference/plot_diagnostics.md),
+[`plot_event_study()`](https://sipemu.github.io/eventstudy/reference/plot_event_study.md),
+[`theme_eventstudy()`](https://sipemu.github.io/eventstudy/reference/theme_eventstudy.md)

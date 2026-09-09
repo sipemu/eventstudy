@@ -173,16 +173,22 @@ automated RMarkdown report generation.
 
 - [`export_results()`](https://sipemu.github.io/eventstudy/reference/export_results.md)
   : Export Event Study Results
+- [`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md)
+  : One-Call Event Study Report Orchestrator
 - [`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md)
-  : Generate Event Study Report
+  : Generate Event Study Report (Multi-Format)
 - [`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)
   : Tidy Event Study Results
 
 ## Plotting
 
-Interactive Plotly-based visualization functions for event study
-results, stock prices, diagnostics, and specialized designs.
+Visualization theme, palette, and functions for event study results,
+stock prices, diagnostics, and specialized designs.
 
+- [`theme_eventstudy()`](https://sipemu.github.io/eventstudy/reference/theme_eventstudy.md)
+  : EventStudy ggplot2 Theme
+- [`es_colours`](https://sipemu.github.io/eventstudy/reference/es_colours.md)
+  : EventStudy Colour Palette
 - [`plot_event_study()`](https://sipemu.github.io/eventstudy/reference/plot_event_study.md)
   : Plot Event Study Results
 - [`plot_stocks()`](https://sipemu.github.io/eventstudy/reference/plot_stocks.md)

@@ -15,6 +15,7 @@ estimate_panel_event_study(
   lags = 5,
   base_period = -1,
   cluster = NULL,
+  verbose = getOption("eventstudy.verbose", TRUE),
   ...
 )
 ```
@@ -48,6 +49,11 @@ estimate_panel_event_study(
   Name of the clustering variable for standard errors. Defaults to the
   unit ID.
 
+- verbose:
+
+  Logical; if FALSE, suppress informational messages. Default
+  `getOption("eventstudy.verbose", TRUE)`.
+
 - ...:
 
   Additional arguments passed to the underlying estimator (used by
@@ -69,3 +75,16 @@ The task with `results` populated, containing:
 - method:
 
   The estimation method used
+
+## See also
+
+Other eventstudy-tasks:
+[`IntradayEventStudyTask`](https://sipemu.github.io/eventstudy/reference/IntradayEventStudyTask.md),
+[`PanelEventStudyTask`](https://sipemu.github.io/eventstudy/reference/PanelEventStudyTask.md),
+[`SyntheticControlTask`](https://sipemu.github.io/eventstudy/reference/SyntheticControlTask.md),
+[`estimate_synthetic_control()`](https://sipemu.github.io/eventstudy/reference/estimate_synthetic_control.md),
+[`nonparametric_intraday_test()`](https://sipemu.github.io/eventstudy/reference/nonparametric_intraday_test.md),
+[`plot_panel_event_study()`](https://sipemu.github.io/eventstudy/reference/plot_panel_event_study.md),
+[`plot_synthetic_control()`](https://sipemu.github.io/eventstudy/reference/plot_synthetic_control.md),
+[`prepare_intraday_event_study()`](https://sipemu.github.io/eventstudy/reference/prepare_intraday_event_study.md),
+[`sc_placebo_test()`](https://sipemu.github.io/eventstudy/reference/sc_placebo_test.md)

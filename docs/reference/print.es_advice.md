@@ -3,7 +3,7 @@
 Prints a structured summary of the offline advice, listing each matched
 rule with its severity, citation key, and recommendation. Follows the
 package convention of `print.es_diagnostics` and `print.es_simulation`
-(cat-based, invisible return).
+(delegates to `format.es_advice`, invisible return).
 
 ## Usage
 
