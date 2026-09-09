@@ -10,6 +10,24 @@ Implements the Fama and French (2015) five-factor model:
 Requires columns: \code{excess_return}, \code{market_excess}, \code{smb},
 \code{hml}, \code{rmw}, \code{cma}.
 }
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{ComparisonPeriodMeanAdjustedModel}},
+\code{\link{DCCGARCHModel}},
+\code{\link{FamaFrench3FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketAdjustedModel}},
+\code{\link{MarketModel}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolatilityModel}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Super classes}{
 \code{\link[EventStudy:ModelBase]{ModelBase}} -> \code{\link[EventStudy:LinearFactorModel]{LinearFactorModel}} -> \code{FamaFrench5FactorModel}
 }

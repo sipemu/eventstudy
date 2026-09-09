@@ -39,6 +39,19 @@ p_local <- OpenAICompatProvider$new(
 p_local$complete("Summarise these diagnostics")
 }
 }
+\seealso{
+Other eventstudy-advisor:
+\code{\link{AnthropicProvider}},
+\code{\link{CustomProvider}},
+\code{\link{ProviderBase}},
+\code{\link[=es_advise]{es_advise()}},
+\code{\link[=es_diagnostics]{es_diagnostics()}},
+\code{\link[=es_kb]{es_kb()}},
+\code{\link[=flag_robustness]{flag_robustness()}},
+\code{\link[=provider]{provider()}},
+\code{\link[=recommend_stat]{recommend_stat()}}
+}
+\concept{eventstudy-advisor}
 \section{Super class}{
 \code{\link[EventStudy:ProviderBase]{ProviderBase}} -> \code{OpenAICompatProvider}
 }

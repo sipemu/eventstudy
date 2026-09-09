@@ -18,3 +18,12 @@ A ggplot2 plot arranged with patchwork-style layout.
 Create diagnostic plots for fitted event study models, including
 residual plots and Q-Q plots.
 }
+\seealso{
+Other eventstudy-plots:
+\code{\link{es_colours}},
+\code{\link[=plot_car_distribution]{plot_car_distribution()}},
+\code{\link[=plot_event_study]{plot_event_study()}},
+\code{\link[=plot_stocks]{plot_stocks()}},
+\code{\link[=theme_eventstudy]{theme_eventstudy()}}
+}
+\concept{eventstudy-plots}

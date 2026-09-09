@@ -53,3 +53,16 @@ a <- provider("anthropic", model = "claude-opus-4-8")
 a$complete("Summarise these diagnostics")
 }
 }
+\seealso{
+Other eventstudy-advisor:
+\code{\link{AnthropicProvider}},
+\code{\link{CustomProvider}},
+\code{\link{OpenAICompatProvider}},
+\code{\link{ProviderBase}},
+\code{\link[=es_advise]{es_advise()}},
+\code{\link[=es_diagnostics]{es_diagnostics()}},
+\code{\link[=es_kb]{es_kb()}},
+\code{\link[=flag_robustness]{flag_robustness()}},
+\code{\link[=recommend_stat]{recommend_stat()}}
+}
+\concept{eventstudy-advisor}

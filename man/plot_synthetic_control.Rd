@@ -19,3 +19,16 @@ A ggplot2 object.
 Create plots for synthetic control analysis: trajectory comparison,
 treatment effect gap, or placebo test results.
 }
+\seealso{
+Other eventstudy-tasks:
+\code{\link{IntradayEventStudyTask}},
+\code{\link{PanelEventStudyTask}},
+\code{\link{SyntheticControlTask}},
+\code{\link[=estimate_panel_event_study]{estimate_panel_event_study()}},
+\code{\link[=estimate_synthetic_control]{estimate_synthetic_control()}},
+\code{\link[=nonparametric_intraday_test]{nonparametric_intraday_test()}},
+\code{\link[=plot_panel_event_study]{plot_panel_event_study()}},
+\code{\link[=prepare_intraday_event_study]{prepare_intraday_event_study()}},
+\code{\link[=sc_placebo_test]{sc_placebo_test()}}
+}
+\concept{eventstudy-tasks}

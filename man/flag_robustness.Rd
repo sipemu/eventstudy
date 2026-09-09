@@ -50,4 +50,16 @@ print(advice)
 \seealso{
 \code{\link{recommend_stat}}, \code{\link{es_diagnostics}},
   \code{\link{es_kb}}
+
+Other eventstudy-advisor:
+\code{\link{AnthropicProvider}},
+\code{\link{CustomProvider}},
+\code{\link{OpenAICompatProvider}},
+\code{\link{ProviderBase}},
+\code{\link[=es_advise]{es_advise()}},
+\code{\link[=es_diagnostics]{es_diagnostics()}},
+\code{\link[=es_kb]{es_kb()}},
+\code{\link[=provider]{provider()}},
+\code{\link[=recommend_stat]{recommend_stat()}}
 }
+\concept{eventstudy-advisor}

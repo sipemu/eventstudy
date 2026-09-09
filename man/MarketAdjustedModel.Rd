@@ -13,6 +13,24 @@ Adjusted Model is particularly useful in situations where the estimation of
 individual stock parameters (such as alpha and beta) is not feasible or
 desired, and a basic benchmark for comparison is needed.
 }
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{ComparisonPeriodMeanAdjustedModel}},
+\code{\link{DCCGARCHModel}},
+\code{\link{FamaFrench3FactorModel}},
+\code{\link{FamaFrench5FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketModel}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolatilityModel}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Super class}{
 \code{\link[EventStudy:ModelBase]{ModelBase}} -> \code{MarketAdjustedModel}
 }

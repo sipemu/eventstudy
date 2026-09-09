@@ -96,5 +96,18 @@ print(advice)      # Advice S3 with grounding guarantee
 }
 \seealso{
 \code{\link{es_diagnostics}}, \code{\link{recommend_stat}},
-  \code{\link{flag_robustness}}, \code{\link{provider}}
+  \code{\link{flag_robustness}}, \code{\link{provider}},
+  \code{\link{run_event_study}}
+
+Other eventstudy-advisor:
+\code{\link{AnthropicProvider}},
+\code{\link{CustomProvider}},
+\code{\link{OpenAICompatProvider}},
+\code{\link{ProviderBase}},
+\code{\link[=es_diagnostics]{es_diagnostics()}},
+\code{\link[=es_kb]{es_kb()}},
+\code{\link[=flag_robustness]{flag_robustness()}},
+\code{\link[=provider]{provider()}},
+\code{\link[=recommend_stat]{recommend_stat()}}
 }
+\concept{eventstudy-advisor}

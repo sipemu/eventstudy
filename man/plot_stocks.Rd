@@ -33,3 +33,12 @@ A plotly plot object.
 Visualize the adjusted close prices or abnormal returns of selected stocks
 around a specified event date.
 }
+\seealso{
+Other eventstudy-plots:
+\code{\link{es_colours}},
+\code{\link[=plot_car_distribution]{plot_car_distribution()}},
+\code{\link[=plot_diagnostics]{plot_diagnostics()}},
+\code{\link[=plot_event_study]{plot_event_study()}},
+\code{\link[=theme_eventstudy]{theme_eventstudy()}}
+}
+\concept{eventstudy-plots}

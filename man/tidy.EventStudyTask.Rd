@@ -38,3 +38,10 @@ Extract event study results in a tidy (long-format) tibble compatible
 with broom conventions. This enables integration with standard tidyverse
 workflows.
 }
+\seealso{
+Other eventstudy-export:
+\code{\link[=es_report]{es_report()}},
+\code{\link[=export_results]{export_results()}},
+\code{\link[=generate_report]{generate_report()}}
+}
+\concept{eventstudy-export}

@@ -23,6 +23,8 @@ market defined in the task and the parameter set.
   \code{\link{calculate_statistics}}
 
 Other eventstudy-pipeline:
+\code{\link{EventStudyTask}},
+\code{\link{ParameterSet}},
 \code{\link[=calculate_statistics]{calculate_statistics()}},
 \code{\link[=fit_model]{fit_model()}},
 \code{\link[=run_event_study]{run_event_study()}}

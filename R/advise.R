@@ -970,7 +970,8 @@ print.Advice <- function(x, ...) {
 #'   \code{n_dropped}.
 #'
 #' @seealso \code{\link{es_diagnostics}}, \code{\link{recommend_stat}},
-#'   \code{\link{flag_robustness}}, \code{\link{provider}}
+#'   \code{\link{flag_robustness}}, \code{\link{provider}},
+#'   \code{\link{run_event_study}}
 #'
 #' @examples
 #' \dontrun{

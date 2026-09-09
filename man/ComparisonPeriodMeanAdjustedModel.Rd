@@ -13,6 +13,24 @@ a pre-event period). This model is particularly useful when researchers want
 to control for a stock’s historical performance and do not wish to rely on
 market return data.
 }
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{DCCGARCHModel}},
+\code{\link{FamaFrench3FactorModel}},
+\code{\link{FamaFrench5FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketAdjustedModel}},
+\code{\link{MarketModel}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolatilityModel}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Super class}{
 \code{\link[EventStudy:ModelBase]{ModelBase}} -> \code{ComparisonPeriodMeanAdjustedModel}
 }

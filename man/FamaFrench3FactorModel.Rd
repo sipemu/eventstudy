@@ -11,6 +11,24 @@ The data must contain columns: \code{excess_return} (firm return minus risk-free
 \code{market_excess} (market return minus risk-free), \code{smb}, and \code{hml}.
 These can be joined via a factor table in \code{EventStudyTask}.
 }
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{ComparisonPeriodMeanAdjustedModel}},
+\code{\link{DCCGARCHModel}},
+\code{\link{FamaFrench5FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketAdjustedModel}},
+\code{\link{MarketModel}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolatilityModel}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Super classes}{
 \code{\link[EventStudy:ModelBase]{ModelBase}} -> \code{\link[EventStudy:LinearFactorModel]{LinearFactorModel}} -> \code{FamaFrench3FactorModel}
 }

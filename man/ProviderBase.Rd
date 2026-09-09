@@ -15,6 +15,19 @@ Abstract base class for Grounded AI Advisor providers. Defines the
   NEVER read at construction — they are resolved at call time inside each
   concrete provider's `complete()`.
 }
+\seealso{
+Other eventstudy-advisor:
+\code{\link{AnthropicProvider}},
+\code{\link{CustomProvider}},
+\code{\link{OpenAICompatProvider}},
+\code{\link[=es_advise]{es_advise()}},
+\code{\link[=es_diagnostics]{es_diagnostics()}},
+\code{\link[=es_kb]{es_kb()}},
+\code{\link[=flag_robustness]{flag_robustness()}},
+\code{\link[=provider]{provider()}},
+\code{\link[=recommend_stat]{recommend_stat()}}
+}
+\concept{eventstudy-advisor}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

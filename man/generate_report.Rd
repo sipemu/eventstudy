@@ -98,3 +98,10 @@ paths[["html"]]
 }
 
 }
+\seealso{
+Other eventstudy-export:
+\code{\link[=es_report]{es_report()}},
+\code{\link[=export_results]{export_results()}},
+\code{\link[=tidy.EventStudyTask]{tidy.EventStudyTask()}}
+}
+\concept{eventstudy-export}

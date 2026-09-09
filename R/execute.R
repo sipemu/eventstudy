@@ -32,7 +32,8 @@
 #' @family eventstudy-pipeline
 #' @seealso
 #'   \code{\link{prepare_event_study}}, \code{\link{fit_model}},
-#'   \code{\link{calculate_statistics}}
+#'   \code{\link{calculate_statistics}}, \code{\link{MarketModel}},
+#'   \code{\link{ARTTest}}
 #'
 #' @export
 run_event_study = function(task,

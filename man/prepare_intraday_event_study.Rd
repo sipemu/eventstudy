@@ -18,3 +18,16 @@ The task with returns and windows appended.
 Compute returns and assign estimation/event windows for intraday data.
 Windows are specified in number of observations (bars) rather than days.
 }
+\seealso{
+Other eventstudy-tasks:
+\code{\link{IntradayEventStudyTask}},
+\code{\link{PanelEventStudyTask}},
+\code{\link{SyntheticControlTask}},
+\code{\link[=estimate_panel_event_study]{estimate_panel_event_study()}},
+\code{\link[=estimate_synthetic_control]{estimate_synthetic_control()}},
+\code{\link[=nonparametric_intraday_test]{nonparametric_intraday_test()}},
+\code{\link[=plot_panel_event_study]{plot_panel_event_study()}},
+\code{\link[=plot_synthetic_control]{plot_synthetic_control()}},
+\code{\link[=sc_placebo_test]{sc_placebo_test()}}
+}
+\concept{eventstudy-tasks}

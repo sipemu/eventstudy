@@ -45,7 +45,7 @@
 #' }
 #'
 #' @seealso \code{\link{model_diagnostics}}, \code{\link{recommend_stat}},
-#'   \code{\link{flag_robustness}}
+#'   \code{\link{flag_robustness}}, \code{\link{run_event_study}}
 #'
 #' @family eventstudy-advisor
 #' @export

@@ -22,6 +22,8 @@ Train the defined model on each event and calculate the abnormal return.
   \code{\link{calculate_statistics}}
 
 Other eventstudy-pipeline:
+\code{\link{EventStudyTask}},
+\code{\link{ParameterSet}},
 \code{\link[=calculate_statistics]{calculate_statistics()}},
 \code{\link[=prepare_event_study]{prepare_event_study()}},
 \code{\link[=run_event_study]{run_event_study()}}

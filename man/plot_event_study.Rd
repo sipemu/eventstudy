@@ -38,3 +38,12 @@ Create an event study plot showing abnormal returns (AR), cumulative
 abnormal returns (CAR), average abnormal returns (AAR), or cumulative
 average abnormal returns (CAAR) with confidence bands.
 }
+\seealso{
+Other eventstudy-plots:
+\code{\link{es_colours}},
+\code{\link[=plot_car_distribution]{plot_car_distribution()}},
+\code{\link[=plot_diagnostics]{plot_diagnostics()}},
+\code{\link[=plot_stocks]{plot_stocks()}},
+\code{\link[=theme_eventstudy]{theme_eventstudy()}}
+}
+\concept{eventstudy-plots}

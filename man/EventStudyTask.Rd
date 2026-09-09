@@ -10,6 +10,15 @@ The Event Study task contains all necessary data for performing an event
 study. Furthermore, all calculations are saved in the internal dataframe
 named data_tbl.
 }
+\seealso{
+Other eventstudy-pipeline:
+\code{\link{ParameterSet}},
+\code{\link[=calculate_statistics]{calculate_statistics()}},
+\code{\link[=fit_model]{fit_model()}},
+\code{\link[=prepare_event_study]{prepare_event_study()}},
+\code{\link[=run_event_study]{run_event_study()}}
+}
+\concept{eventstudy-pipeline}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

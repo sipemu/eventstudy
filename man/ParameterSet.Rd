@@ -8,6 +8,15 @@ The parameter set defines the Event Study, e.g, the return
 calculation, the event study model, the AR, CAR, AAR, and CAAR test
 statistics that should be applied.
 }
+\seealso{
+Other eventstudy-pipeline:
+\code{\link{EventStudyTask}},
+\code{\link[=calculate_statistics]{calculate_statistics()}},
+\code{\link[=fit_model]{fit_model()}},
+\code{\link[=prepare_event_study]{prepare_event_study()}},
+\code{\link[=run_event_study]{run_event_study()}}
+}
+\concept{eventstudy-pipeline}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

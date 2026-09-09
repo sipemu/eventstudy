@@ -10,6 +10,24 @@ The bivariate DCC-GARCH model captures both time-varying volatility
 and time-varying correlation between firm and market returns, yielding
 a time-varying beta: \eqn{\beta_t = Cov(R_{firm}, R_{market})_t / Var(R_{market})_t}.
 }
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{ComparisonPeriodMeanAdjustedModel}},
+\code{\link{FamaFrench3FactorModel}},
+\code{\link{FamaFrench5FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketAdjustedModel}},
+\code{\link{MarketModel}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolatilityModel}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Super class}{
 \code{\link[EventStudy:ModelBase]{ModelBase}} -> \code{DCCGARCHModel}
 }

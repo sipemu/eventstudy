@@ -20,3 +20,16 @@ Performs a placebo (permutation) test by re-estimating the synthetic
 control for each donor unit as a pseudo-treated unit. The p-value is
 the rank of the treated unit's RMSPE ratio among all units.
 }
+\seealso{
+Other eventstudy-tasks:
+\code{\link{IntradayEventStudyTask}},
+\code{\link{PanelEventStudyTask}},
+\code{\link{SyntheticControlTask}},
+\code{\link[=estimate_panel_event_study]{estimate_panel_event_study()}},
+\code{\link[=estimate_synthetic_control]{estimate_synthetic_control()}},
+\code{\link[=nonparametric_intraday_test]{nonparametric_intraday_test()}},
+\code{\link[=plot_panel_event_study]{plot_panel_event_study()}},
+\code{\link[=plot_synthetic_control]{plot_synthetic_control()}},
+\code{\link[=prepare_intraday_event_study]{prepare_intraday_event_study()}}
+}
+\concept{eventstudy-tasks}

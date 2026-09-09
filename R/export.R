@@ -16,6 +16,7 @@
 #' @return The file path (invisibly).
 #'
 #' @family eventstudy-export
+#' @seealso \code{\link{run_event_study}}, \code{\link{tidy.EventStudyTask}}
 #' @export
 export_results <- function(task,
                            file,

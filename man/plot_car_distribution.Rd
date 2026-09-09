@@ -29,3 +29,12 @@ A ggplot2 object.
 \description{
 Create a histogram of CARs across events, optionally colored by group.
 }
+\seealso{
+Other eventstudy-plots:
+\code{\link{es_colours}},
+\code{\link[=plot_diagnostics]{plot_diagnostics()}},
+\code{\link[=plot_event_study]{plot_event_study()}},
+\code{\link[=plot_stocks]{plot_stocks()}},
+\code{\link[=theme_eventstudy]{theme_eventstudy()}}
+}
+\concept{eventstudy-plots}

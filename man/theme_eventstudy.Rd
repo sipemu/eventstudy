@@ -24,4 +24,12 @@ legend, and subtle gridlines styled to the EventStudy palette.
 }
 \seealso{
 \code{\link{es_colours}}, \code{\link{plot_event_study}}
+
+Other eventstudy-plots:
+\code{\link{es_colours}},
+\code{\link[=plot_car_distribution]{plot_car_distribution()}},
+\code{\link[=plot_diagnostics]{plot_diagnostics()}},
+\code{\link[=plot_event_study]{plot_event_study()}},
+\code{\link[=plot_stocks]{plot_stocks()}}
 }
+\concept{eventstudy-plots}

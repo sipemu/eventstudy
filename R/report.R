@@ -52,7 +52,8 @@
 #' paths[["html"]]
 #' }
 #'
-#' @seealso \code{\link{generate_report}}, \code{\link{es_diagnostics}}
+#' @seealso \code{\link{generate_report}}, \code{\link{es_diagnostics}},
+#'   \code{\link{run_event_study}}
 #'
 #' @family eventstudy-export
 #' @export

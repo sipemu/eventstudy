@@ -51,9 +51,12 @@ attr(task, "report_path")  # path to the rendered HTML
 }
 \seealso{
 \code{\link{prepare_event_study}}, \code{\link{fit_model}},
-  \code{\link{calculate_statistics}}
+  \code{\link{calculate_statistics}}, \code{\link{MarketModel}},
+  \code{\link{ARTTest}}
 
 Other eventstudy-pipeline:
+\code{\link{EventStudyTask}},
+\code{\link{ParameterSet}},
 \code{\link[=calculate_statistics]{calculate_statistics()}},
 \code{\link[=fit_model]{fit_model()}},
 \code{\link[=prepare_event_study]{prepare_event_study()}}

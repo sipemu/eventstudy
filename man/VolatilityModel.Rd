@@ -9,6 +9,24 @@ as the ratio of event-window squared returns to estimation-window variance.
 The abnormal measure is written to the \code{abnormal_returns} column
 for compatibility with existing test statistics.
 }
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{ComparisonPeriodMeanAdjustedModel}},
+\code{\link{DCCGARCHModel}},
+\code{\link{FamaFrench3FactorModel}},
+\code{\link{FamaFrench5FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketAdjustedModel}},
+\code{\link{MarketModel}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Super class}{
 \code{\link[EventStudy:ModelBase]{ModelBase}} -> \code{VolatilityModel}
 }

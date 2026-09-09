@@ -20,3 +20,29 @@ A named numeric vector of quantiles.
 \description{
 Compute quantiles of the CAR distribution across events.
 }
+\seealso{
+Other eventstudy-statistics:
+\code{\link{ARTTest}},
+\code{\link{BHARTTest}},
+\code{\link{BMPTest}},
+\code{\link{CARTTest}},
+\code{\link{CSectTTest}},
+\code{\link{CalendarTimePortfolioTest}},
+\code{\link{GeneralizedSignTest}},
+\code{\link{KolariPynnonenTest}},
+\code{\link{MultiEventStatisticsSet}},
+\code{\link{PatellZTest}},
+\code{\link{RankTest}},
+\code{\link{SignTest}},
+\code{\link{SingleEventStatisticsSet}},
+\code{\link{StatisticsSetBase}},
+\code{\link[=adjust_p_values]{adjust_p_values()}},
+\code{\link[=bootstrap_test]{bootstrap_test()}},
+\code{\link[=car_by_group]{car_by_group()}},
+\code{\link[=cross_sectional_regression]{cross_sectional_regression()}},
+\code{\link[=model_diagnostics]{model_diagnostics()}},
+\code{\link[=pretrend_test]{pretrend_test()}},
+\code{\link[=simulate_event_study]{simulate_event_study()}},
+\code{\link[=validate_task]{validate_task()}}
+}
+\concept{eventstudy-statistics}

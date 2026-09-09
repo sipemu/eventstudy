@@ -7,6 +7,19 @@
 Task container for synthetic control analysis. Holds treated unit data,
 donor pool data, treatment time, and results after estimation.
 }
+\seealso{
+Other eventstudy-tasks:
+\code{\link{IntradayEventStudyTask}},
+\code{\link{PanelEventStudyTask}},
+\code{\link[=estimate_panel_event_study]{estimate_panel_event_study()}},
+\code{\link[=estimate_synthetic_control]{estimate_synthetic_control()}},
+\code{\link[=nonparametric_intraday_test]{nonparametric_intraday_test()}},
+\code{\link[=plot_panel_event_study]{plot_panel_event_study()}},
+\code{\link[=plot_synthetic_control]{plot_synthetic_control()}},
+\code{\link[=prepare_intraday_event_study]{prepare_intraday_event_study()}},
+\code{\link[=sc_placebo_test]{sc_placebo_test()}}
+}
+\concept{eventstudy-tasks}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

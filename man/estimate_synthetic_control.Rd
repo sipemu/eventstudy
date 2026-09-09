@@ -30,3 +30,16 @@ The task with \code{results} populated.
 Estimate synthetic control weights by minimizing the pre-treatment
 mean squared prediction error. Weights are non-negative and sum to one.
 }
+\seealso{
+Other eventstudy-tasks:
+\code{\link{IntradayEventStudyTask}},
+\code{\link{PanelEventStudyTask}},
+\code{\link{SyntheticControlTask}},
+\code{\link[=estimate_panel_event_study]{estimate_panel_event_study()}},
+\code{\link[=nonparametric_intraday_test]{nonparametric_intraday_test()}},
+\code{\link[=plot_panel_event_study]{plot_panel_event_study()}},
+\code{\link[=plot_synthetic_control]{plot_synthetic_control()}},
+\code{\link[=prepare_intraday_event_study]{prepare_intraday_event_study()}},
+\code{\link[=sc_placebo_test]{sc_placebo_test()}}
+}
+\concept{eventstudy-tasks}

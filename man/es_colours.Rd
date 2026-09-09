@@ -24,4 +24,12 @@ Okabe-Ito order).
 }
 \seealso{
 \code{\link{theme_eventstudy}}, \code{\link{plot_event_study}}
+
+Other eventstudy-plots:
+\code{\link[=plot_car_distribution]{plot_car_distribution()}},
+\code{\link[=plot_diagnostics]{plot_diagnostics()}},
+\code{\link[=plot_event_study]{plot_event_study()}},
+\code{\link[=plot_stocks]{plot_stocks()}},
+\code{\link[=theme_eventstudy]{theme_eventstudy()}}
 }
+\concept{eventstudy-plots}

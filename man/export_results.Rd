@@ -36,3 +36,12 @@ The file path (invisibly).
 \description{
 Export event study results to CSV, Excel, or LaTeX formats.
 }
+\seealso{
+\code{\link{run_event_study}}, \code{\link{tidy.EventStudyTask}}
+
+Other eventstudy-export:
+\code{\link[=es_report]{es_report()}},
+\code{\link[=generate_report]{generate_report()}},
+\code{\link[=tidy.EventStudyTask]{tidy.EventStudyTask()}}
+}
+\concept{eventstudy-export}

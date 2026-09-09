@@ -87,5 +87,12 @@ paths[["html"]]
 
 }
 \seealso{
-\code{\link{generate_report}}, \code{\link{es_diagnostics}}
+\code{\link{generate_report}}, \code{\link{es_diagnostics}},
+  \code{\link{run_event_study}}
+
+Other eventstudy-export:
+\code{\link[=export_results]{export_results()}},
+\code{\link[=generate_report]{generate_report()}},
+\code{\link[=tidy.EventStudyTask]{tidy.EventStudyTask()}}
 }
+\concept{eventstudy-export}

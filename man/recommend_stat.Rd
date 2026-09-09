@@ -61,4 +61,16 @@ print(advice)
 \seealso{
 \code{\link{flag_robustness}}, \code{\link{es_diagnostics}},
   \code{\link{es_kb}}
+
+Other eventstudy-advisor:
+\code{\link{AnthropicProvider}},
+\code{\link{CustomProvider}},
+\code{\link{OpenAICompatProvider}},
+\code{\link{ProviderBase}},
+\code{\link[=es_advise]{es_advise()}},
+\code{\link[=es_diagnostics]{es_diagnostics()}},
+\code{\link[=es_kb]{es_kb()}},
+\code{\link[=flag_robustness]{flag_robustness()}},
+\code{\link[=provider]{provider()}}
 }
+\concept{eventstudy-advisor}

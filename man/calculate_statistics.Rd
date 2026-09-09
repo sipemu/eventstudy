@@ -22,6 +22,8 @@ Calculate test statistics
   \code{\link{fit_model}}
 
 Other eventstudy-pipeline:
+\code{\link{EventStudyTask}},
+\code{\link{ParameterSet}},
 \code{\link[=fit_model]{fit_model()}},
 \code{\link[=prepare_event_study]{prepare_event_study()}},
 \code{\link[=run_event_study]{run_event_study()}}
