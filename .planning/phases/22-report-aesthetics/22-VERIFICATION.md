@@ -6,9 +6,14 @@ score: 8/8 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
+
   - test: "Render es_report() to HTML and PDF/Word on a machine with a complete TeX Live (tabularray.sty present) and eyeball the styled tinytable output, report.css typography, and per-format figure sizing."
     expected: "Tables are brand-styled (bold header, #2563eb accent, right-aligned numerics); HTML typography reads as branded (Inter/JetBrains Mono fallbacks); figures fit page margins in PDF/Word. Publication-grade felt quality."
     why_human: "Visual/felt publication quality is a judgment automation cannot assert; the styled tinytable PDF path also needs tabularray.sty which this box's TeX Live cannot fetch (environment limitation, not a phase gap)."
+audit_acknowledged:
+  milestone: v0.65.0
+  at: 2026-09-09
+  status: human_needed
 ---
 
 # Phase 22: Report Aesthetics Verification Report

@@ -1,5 +1,27 @@
 # Milestones
 
+## v0.65.0 Polish (Shipped: 2026-09-09)
+
+**Phases completed:** 5 phases (20–24), 10 plans, 32 tasks
+
+**Key accomplishments:**
+
+- Brand & identity: new CAR-curve logo + hex sticker, full favicon set + Open Graph card, pkgdown palette/typography/card-gallery aligned to the eventstudy.de ecosystem, lifecycle badge promoted `experimental` → `stable`.
+- Plot aesthetics: new exported `theme_eventstudy()` + colorblind-safe Okabe-Ito `es_colours` palette (`R/theme.R`), applied across all ggplot2 helpers and plotly visuals, removing scattered hardcoded colours.
+- Report aesthetics: `es_report()` tables via `tinytable` (byte-compatible `knitr::kable` fallback), captioned figures, per-format figure sizing via `ragg`, and a brand-tokened HTML-only `report.css` — the prose sanitiser, grounding guard, and `is_html_output()` switch left untouched.
+- API & message polish: `print.*` returns `invisible(x)`, `format.*` methods added where missing, selected errors/warnings migrated to classed `eventstudy_*` rlang conditions naming the offending argument, and a `verbose=` quiet mode with a byte-identical default.
+- Docs & site: `@family`/`@seealso` cross-links across the exported API, README Ecosystem section + honest 15+/12 counts, `pkgdown::check_pkgdown()` in CI, and a tightened getting-started vignette.
+
+**Core invariant held:** Purely additive overlay — zero statistical-correctness or valid-input behavior change. Only optional Suggests (`tinytable`, `patchwork`, `ragg`, all `requireNamespace()`-guarded) added; no new Imports.
+
+**Milestone audit:** PASSED (30/30 requirements, 5/5 phases, 5/5 integration seams, 5/5 flows). Test suite green (2359 pass / 0 fail); zero new `R CMD check` findings vs the documented 1-NOTE baseline.
+
+**Closeout:** override_closeout. Known verification overrides: 2 newly acknowledged, 2 carried forward from a prior close (see STATE.md Deferred Items). Newly acknowledged: Phase 22 `22-VERIFICATION.md` felt-visual-quality eyeball (`status: human_needed` — full-TeX-Live/tabularray.sty environment limitation, not a code gap); Phase 24 deferred test-artifact-hygiene item (report-render tests emit transient `file*.log` into `skeleton/`, not gitignored).
+
+**Release:** Annotated tag `v0.65.0` created locally (not pushed). CRAN submission not performed.
+
+---
+
 ## v0.64.0 Automated AI Reporting (Shipped: 2026-09-07)
 
 **Phases completed:** 4 phases, 9 plans, 11 tasks

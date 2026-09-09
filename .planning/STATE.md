@@ -2,20 +2,21 @@
 gsd_state_version: 1.0
 milestone: v0.65.0
 milestone_name: Polish
+milestone_status: complete
 current_phase: 24
 current_phase_name: docs-site-polish
-status: executing
-stopped_at: Completed 24-02-PLAN.md
-last_updated: "2026-09-09T07:17:04.724Z"
+status: shipped
+stopped_at: Milestone v0.65.0 complete
+last_updated: "2026-09-09T08:00:00.000Z"
 last_activity: 2026-09-09
-last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: 0587806ab9f19e6d06462e73d930210aa4d6aa22
+last_activity_desc: v0.65.0 "Polish" milestone complete — audit PASSED (30/30 reqs, 5/5 phases), NEWS + tag
+state_head: 3f7c911
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 5
   total_plans: 10
   completed_plans: 10
-  percent: 60
+  percent: 100
 ---
 
 # Project State
@@ -25,16 +26,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-08)
 
 **Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics. This milestone lifts the *felt* quality (brand, output, API, docs) to match that substance, without touching statistical correctness.
-**Current focus:** Phase 20 — Brand & Visual Identity (roadmap created, ready to plan)
+**Current focus:** v0.65.0 shipped — planning next milestone
 
 ## Current Position
 
-Phase: 24 (docs-site-polish) — Wave 2 complete (2/2 plans); Phase 24 done (FINAL phase)
-Plan: 02 complete (2/2 plans in Phase 24)
-Status: Both waves done; Phase 24 (Docs & Site Polish) complete
-Last activity: 2026-09-09 — Plan 24-02 complete (DOCS-02/03/04, docs-only): (1) _pkgdown.yml internal section now catches starts_with("format.") — clears the pre-existing check_pkgdown ERROR (6 Phase-23 format.* topics missing from index); check_pkgdown() now "No problems found". (2) README: ASCII-only Ecosystem section (Google Sheets / R package / WebAssembly App) linking eventstudy.de with anchor "Event Study Analysis Made Simple", wrapped in pkgdown-home markers near the top; honest counts 15+ Return Models / 12 Test Statistics (added DCC-GARCH, Rolling-Window, Kolari-Pynnonen). (3) introduction.Rmd retitled "Getting Started with EventStudy", added Quick Start with one-call run_event_study(), removed stale "More a coming soon.", replaced Roadmap with ## Next Steps vignette cross-links; check_pkgdown() wired into pkgdown.yaml CI before Build site (safe, format.* fix landed first). DESCRIPTION 0-line diff; no R/*.R touched; suite FAIL 0 (PASS 2359). Commits 5ac8a29, 1a5eb6c, 0587806.
+Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
+Phase: 24 (docs-site-polish) — final phase, complete
+Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
+Last activity: 2026-09-09 — v0.65.0 milestone completion: NEWS.md expanded across all 5 surfaces (Brand, Plot aesthetics, Report aesthetics, API/message polish, Docs & site); state marked complete; 2 audit items acknowledged (Phase 22 human_needed felt-visual eyeball, Phase 24 test-log-hygiene deferred). Completion is metadata/version/NEWS/tag only — no R/ behavior change.
 
-Progress: [██████░░░░] 60% (v0.65.0 phases)
+Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
 
 ## Milestone Roadmap (v0.65.0 — Phases 20–24)
 
@@ -128,6 +129,8 @@ Research flags for planning:
 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
+| verification_gaps | 22/22-VERIFICATION.md | human_needed (felt-visual eyeball on full-TeX-Live box) | 2026-09-09 | v0.65.0 |
+| deferred_items | 24/deferred-items.md: report-render tests emit transient file*.log into skeleton/ (not gitignored) | acknowledged | 2026-09-09 | v0.65.0 |
 | verification_gaps | 12/12-VERIFICATION.md (archived v0.62.0) | human_needed | 2026-09-07 | v0.64.0 |
 | todos | phase12-code-review-carryforward.md | acknowledged (presence-only) | 2026-09-07 | v0.64.0 |
 | Independence | INDEP-01..03: native reimplementation of did/DIDmultiplegt/rugarch | Deferred | v0.50.0 init | v2 |

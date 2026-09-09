@@ -2,37 +2,38 @@
   "contract": "1.0.0",
   "flavor": "core",
   "milestone": "v0.65.0 — Polish",
+  "milestone_status": "complete",
   "phases": [
     {
       "number": "20",
       "name": "Brand & Visual Identity",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "21",
       "name": "Shared Theme & Plot Aesthetics",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "22",
       "name": "Report Aesthetics",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "23",
       "name": "API & Message Polish",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "24",
       "name": "Docs & Site Polish",
-      "status": "pending"
+      "status": "complete"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 24 of 5 · 60% · executing"
+    "command": "/gsd-new-milestone",
+    "label": "Start next milestone",
+    "reason": "v0.65.0 shipped — 5/5 phases complete"
   },
-  "updated_at": "2026-09-09T06:56:17.987Z"
+  "updated_at": "2026-09-09T08:00:00.000Z"
 }

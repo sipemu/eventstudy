@@ -1,21 +1,71 @@
 # EventStudy 0.65.0
 
-## Brand & Visual Identity
+The "Polish" milestone lifts the *felt* quality of the package — brand identity,
+plot and report aesthetics, API and message ergonomics, and documentation — with
+no change to statistical results. Behavior on valid inputs is unchanged; this
+release is purely additive.
+
+## Brand & Identity
 
 * New EventStudy logo (CAR-curve motif) at `man/figures/logo.png` and hex sticker
   at `man/figures/logo-hex.png` (#BRAND-01).
 * Logo wired into README badge row and pkgdown navbar (#BRAND-02).
-* Full favicon set generated via `pkgdown::build_favicons()` (#BRAND-03).
+* Full favicon set generated for the pkgdown site (#BRAND-03).
 * Open Graph social-preview card configured for shared link thumbnails (#BRAND-04).
-* pkgdown site palette and typography aligned to the eventstudy.de ecosystem
-  brand via `template.bslib` and `pkgdown/extra.scss` (#BRAND-05).
-* Home card gallery and numeric-badge strip restyled to ecosystem look (#BRAND-06).
+* pkgdown site palette and typography aligned to the eventstudy.de ecosystem brand
+  via `template.bslib` and `pkgdown/extra.scss`, with a restyled home card gallery
+  and numeric-badge strip (#BRAND-05, #BRAND-06).
 * Lifecycle badge updated from `experimental` to `stable` (#BRAND-07).
+
+## Plot Aesthetics
+
+* **New `theme_eventstudy()`** ggplot2 theme and **`es_colours`** palette
+  (exported from `R/theme.R`). The palette is the colorblind-safe Okabe-Ito set
+  aligned to the ecosystem brand (#VIZ-01, #VIZ-02).
+* Built-in ggplot2 and plotly visuals (`plot_event_study()`, `plot_diagnostics()`,
+  and the single/multi-event helpers) now draw from `es_colours` instead of
+  hardcoded colours, for a consistent, accessible look across the package (#VIZ-03).
+
+## Report Aesthetics
+
+* `es_report()` tables now render via **`tinytable`** when available, with a
+  byte-compatible `knitr::kable()` fallback when it is not — styled consistently
+  across the HTML, PDF, Word, and Markdown formats (#VIZ-04, #CRAN-05).
+* Every report plot chunk carries a figure caption, and figure sizing is now
+  per-format (via `ragg`) instead of a single global width (#VIZ-05, #VIZ-06).
+* HTML reports pick up a brand-tokened `report.css`, injected only on the HTML
+  output path; PDF/Word/Markdown output is unaffected (#VIZ-07).
+
+## API & Message Polish
+
+* `print.*` methods now return `invisible(x)` for clean piping, and `format.*`
+  methods were added where missing (#API-01, #API-02).
+* Selected `stop()`/`warning()` calls are now classed `eventstudy_*` conditions
+  (via `rlang::abort()`/`rlang::warn()`) whose messages name the offending
+  argument and value, so failures are catchable by class and easier to diagnose
+  (#API-03, #API-04).
+* A `verbose=` quiet mode was added; the default is byte-identical to prior
+  behavior (#API-05). Deprecation audit completed with no new dependency (#API-06).
+
+## Docs & Site
+
+* Extensive `@family` and `@seealso` cross-links across the exported API, grouping
+  functions into cohesive clusters for easier navigation (#DOCS-01).
+* README gains an **Ecosystem** section (Google Sheets add-on / R package /
+  WebAssembly app) and honest capability counts (15+ return models, 12 test
+  statistics) reconciled across README, gallery, and vignettes (#DOCS-02).
+* `pkgdown::check_pkgdown()` wired into CI so reference-index drift is caught
+  automatically (#DOCS-03).
+* Getting-started vignette tightened with a one-call Quick Start and cross-links
+  to the other articles (#DOCS-04).
 
 ## CRAN Hygiene
 
 * Version bumped to 0.65.0 (#CRAN-02).
 * CI tarball-size assertion (< 1 MB) and non-ASCII grep guard added (#CRAN-03, #CRAN-04).
+* Only optional Suggests (`tinytable`, `patchwork`, `ragg`) were added, all guarded
+  by `requireNamespace()`; no new hard dependencies and no new `R CMD check`
+  findings versus the prior baseline (#CRAN-01).
 
 # EventStudy 0.64.0
 

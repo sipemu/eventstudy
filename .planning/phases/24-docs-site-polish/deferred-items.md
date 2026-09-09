@@ -8,3 +8,4 @@
   docs-only 24-02 plan (no R/*.R or config changes permitted). Fix candidate: add
   `inst/rmarkdown/templates/**/skeleton/*.log` (or the rmarkdown intermediates dir)
   to `.gitignore`, or point the template render at a tempdir.
+  status: acknowledged

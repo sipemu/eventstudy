@@ -8,7 +8,7 @@
 - ✅ **v0.62.0 Docs Site** — curated pkgdown site + CI/CD deploy (shipped 2026-09-06)
 - ✅ **v0.63.0 Docs Depth** — Methods articles + worked-examples gallery + per-domain datasets (shipped 2026-09-06)
 - ✅ **v0.64.0 Automated AI Reporting** — Phases 17–19.1 (shipped 2026-09-07)
-- 🚧 **v0.65.0 Polish** — Phases 20–24 (in progress)
+- ✅ **v0.65.0 Polish** — Phases 20–24 (shipped 2026-09-09)
 
 ## Phases
 
@@ -31,7 +31,7 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 
 </details>
 
-### 🚧 v0.65.0 Polish (In Progress)
+### ✅ v0.65.0 Polish (SHIPPED 2026-09-09)
 
 **Milestone Goal:** Visibly lift EventStudy's quality across brand, output, API feel, and docs — a ship-when-good polish pass that makes the package look and feel finished and aligned to the eventstudy.de ecosystem. All changes are additive: behavior on valid inputs is unchanged, existing ~2287 tests stay green, no new `R CMD check --as-cran` findings, and the v0.64.0 grounding/degenerate-input/format invariants must not regress.
 
@@ -43,11 +43,11 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 - Phase 23 (API & Message Polish) is independent of 20–22 (can overlap); owns the valid-input-unchanged + snapshot guardrail.
 - Phase 24 (Docs & Site) depends on Phase 20's logo; can overlap Phase 23.
 
-- [ ] **Phase 20: Brand & Visual Identity** - Logo + hex sticker, favicon, OG card, eventstudy.de-aligned theme + card gallery, stable badge; version bump + tarball/non-ASCII guardrails
-- [ ] **Phase 21: Shared Theme & Plot Aesthetics** - `theme_eventstudy()` + Okabe-Ito `es_colours`, applied across ggplot2 + plotly helpers; Suggests additions land guarded
-- [ ] **Phase 22: Report Aesthetics** - `tinytable` report tables, figure captions, HTML-only report CSS, per-format figure sizing; four-format render locked
-- [ ] **Phase 23: API & Message Polish** - Consistent print/format methods, classed rlang conditions, argument-naming messages, `verbose=` quiet mode, deprecation audit; valid-input behavior unchanged
-- [ ] **Phase 24: Docs & Site Polish** - `@family`/`@seealso` cross-links, README ecosystem refresh, `check_pkgdown()` CI gate, tightened vignettes/articles
+- [x] **Phase 20: Brand & Visual Identity** - Logo + hex sticker, favicon, OG card, eventstudy.de-aligned theme + card gallery, stable badge; version bump + tarball/non-ASCII guardrails
+- [x] **Phase 21: Shared Theme & Plot Aesthetics** - `theme_eventstudy()` + Okabe-Ito `es_colours`, applied across ggplot2 + plotly helpers; Suggests additions land guarded
+- [x] **Phase 22: Report Aesthetics** - `tinytable` report tables, figure captions, HTML-only report CSS, per-format figure sizing; four-format render locked
+- [x] **Phase 23: API & Message Polish** - Consistent print/format methods, classed rlang conditions, argument-naming messages, `verbose=` quiet mode, deprecation audit; valid-input behavior unchanged
+- [x] **Phase 24: Docs & Site Polish** - `@family`/`@seealso` cross-links, README ecosystem refresh, `check_pkgdown()` CI gate, tightened vignettes/articles
 
 ## Phase Details
 
@@ -172,8 +172,8 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 20. Brand & Visual Identity | v0.65.0 | 3/3 | In Progress|  |
-| 21. Shared Theme & Plot Aesthetics | v0.65.0 | 1/1 | In Progress|  |
-| 22. Report Aesthetics | v0.65.0 | 1/1 | In Progress|  |
-| 23. API & Message Polish | v0.65.0 | 3/3 | In Progress|  |
-| 24. Docs & Site Polish | v0.65.0 | 2/2 | In Progress|  |
+| 20. Brand & Visual Identity | v0.65.0 | 3/3 | Complete | 2026-09-09 |
+| 21. Shared Theme & Plot Aesthetics | v0.65.0 | 1/1 | Complete | 2026-09-09 |
+| 22. Report Aesthetics | v0.65.0 | 1/1 | Complete | 2026-09-09 |
+| 23. API & Message Polish | v0.65.0 | 3/3 | Complete | 2026-09-09 |
+| 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
