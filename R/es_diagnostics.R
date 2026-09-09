@@ -98,6 +98,71 @@ es_diagnostics <- function(task, max_events = 20L) {
 }
 
 
+#' Format method for es_diagnostics objects
+#'
+#' Builds the character vector rendered by \code{print.es_diagnostics}
+#' (one element per output line). See \code{\link{print.es_diagnostics}}.
+#'
+#' @param x An object of class \code{"es_diagnostics"}.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A character vector, one element per printed line.
+#'
+#' @export
+format.es_diagnostics <- function(x, ...) {
+  utils::capture.output({
+    cat("Event Study Diagnostics\n")
+    cat("=======================\n")
+    cat("Events total:   ", x$meta$n_events_total, "\n")
+    cat("Events shown:   ", x$meta$n_events_shown, "(full detail)\n")
+
+    n_valid <- x$cross_sectional$n_valid_events
+    if (!is.null(n_valid) && !is.na(n_valid)) {
+      cat("Events valid:   ", n_valid, "\n")
+    }
+
+    # Report if any events were summarised (truncated)
+    if (!is.null(x$meta$n_events_summarized) && x$meta$n_events_summarized > 0L) {
+      cat("Events summarized:", x$meta$n_events_summarized,
+          "(aggregate summary only)\n")
+    }
+
+    # Warn if degenerate events existed in the shown set
+    if (!is.null(x$contract_state$is_fitted)) {
+      n_degen_shown <- sum(!x$contract_state$is_fitted, na.rm = TRUE)
+      if (n_degen_shown > 0L) {
+        cat("[WARN]", n_degen_shown,
+            "degenerate event(s) in shown set (is_fitted=FALSE)\n")
+      }
+    }
+
+    cat("\nEstimation window (medians across shown events):\n")
+    cat("  R-squared:    ",
+        round(median(x$estimation_window$r2, na.rm = TRUE), 4), "\n")
+    cat("  Shapiro-Wilk p:",
+        round(median(x$estimation_window$shapiro_p, na.rm = TRUE), 4), "\n")
+    cat("  DW statistic: ",
+        round(median(x$estimation_window$dw_stat, na.rm = TRUE), 4), "\n")
+
+    cs <- x$cross_sectional
+    cat("\nEvent window (cross-sectional):\n")
+    car_iqr_val <- if (!is.null(cs$car_iqr) && !is.na(cs$car_iqr)) {
+      round(cs$car_iqr, 6)
+    } else {
+      "NA"
+    }
+    cat("  CAR IQR:       ", car_iqr_val, "\n")
+
+    n_op <- if (!is.null(cs$n_overlap_pairs) && !is.na(cs$n_overlap_pairs)) {
+      cs$n_overlap_pairs
+    } else {
+      "NA"
+    }
+    cat("  Overlap pairs: ", n_op, "\n")
+  })
+}
+
+
 #' Print method for es_diagnostics objects
 #'
 #' Prints a concise summary of the diagnostics, following the package
@@ -110,55 +175,7 @@ es_diagnostics <- function(task, max_events = 20L) {
 #'
 #' @export
 print.es_diagnostics <- function(x, ...) {
-  cat("Event Study Diagnostics\n")
-  cat("=======================\n")
-  cat("Events total:   ", x$meta$n_events_total, "\n")
-  cat("Events shown:   ", x$meta$n_events_shown, "(full detail)\n")
-
-  n_valid <- x$cross_sectional$n_valid_events
-  if (!is.null(n_valid) && !is.na(n_valid)) {
-    cat("Events valid:   ", n_valid, "\n")
-  }
-
-  # Report if any events were summarised (truncated)
-  if (!is.null(x$meta$n_events_summarized) && x$meta$n_events_summarized > 0L) {
-    cat("Events summarized:", x$meta$n_events_summarized,
-        "(aggregate summary only)\n")
-  }
-
-  # Warn if degenerate events existed in the shown set
-  if (!is.null(x$contract_state$is_fitted)) {
-    n_degen_shown <- sum(!x$contract_state$is_fitted, na.rm = TRUE)
-    if (n_degen_shown > 0L) {
-      cat("[WARN]", n_degen_shown,
-          "degenerate event(s) in shown set (is_fitted=FALSE)\n")
-    }
-  }
-
-  cat("\nEstimation window (medians across shown events):\n")
-  cat("  R-squared:    ",
-      round(median(x$estimation_window$r2, na.rm = TRUE), 4), "\n")
-  cat("  Shapiro-Wilk p:",
-      round(median(x$estimation_window$shapiro_p, na.rm = TRUE), 4), "\n")
-  cat("  DW statistic: ",
-      round(median(x$estimation_window$dw_stat, na.rm = TRUE), 4), "\n")
-
-  cs <- x$cross_sectional
-  cat("\nEvent window (cross-sectional):\n")
-  car_iqr_val <- if (!is.null(cs$car_iqr) && !is.na(cs$car_iqr)) {
-    round(cs$car_iqr, 6)
-  } else {
-    "NA"
-  }
-  cat("  CAR IQR:       ", car_iqr_val, "\n")
-
-  n_op <- if (!is.null(cs$n_overlap_pairs) && !is.na(cs$n_overlap_pairs)) {
-    cs$n_overlap_pairs
-  } else {
-    "NA"
-  }
-  cat("  Overlap pairs: ", n_op, "\n")
-
+  cat(format(x), sep = "\n")
   invisible(x)
 }
 

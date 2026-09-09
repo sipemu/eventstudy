@@ -173,6 +173,30 @@ cross_sectional_regression <- function(task, formula, data,
 }
 
 
+#' Format Cross-Sectional Regression Results
+#'
+#' Builds the character vector rendered by \code{print.es_cross_sectional}
+#' (one element per output line). The coefficient table is rendered via
+#' \code{base::print.data.frame} and spliced in at the same position.
+#'
+#' @param x An \code{es_cross_sectional} object.
+#' @param ... Additional arguments (unused).
+#'
+#' @return A character vector, one element per printed line.
+#'
+#' @export
+format.es_cross_sectional <- function(x, ...) {
+  utils::capture.output({
+    cat("Cross-Sectional Regression of CARs\n")
+    cat("===================================\n")
+    cat("N:", x$n_obs, "\n")
+    cat("R-squared:", round(x$r_squared, 4), "\n")
+    cat("Adj. R-squared:", round(x$adj_r_squared, 4), "\n\n")
+    cat("Coefficients:\n")
+    base::print.data.frame(round(x$coefficients, 6))
+  })
+}
+
 #' Print Cross-Sectional Regression Results
 #'
 #' @param x An \code{es_cross_sectional} object.
@@ -180,13 +204,7 @@ cross_sectional_regression <- function(task, formula, data,
 #'
 #' @export
 print.es_cross_sectional <- function(x, ...) {
-  cat("Cross-Sectional Regression of CARs\n")
-  cat("===================================\n")
-  cat("N:", x$n_obs, "\n")
-  cat("R-squared:", round(x$r_squared, 4), "\n")
-  cat("Adj. R-squared:", round(x$adj_r_squared, 4), "\n\n")
-  cat("Coefficients:\n")
-  base::print.data.frame(round(x$coefficients, 6))
+  cat(format(x), sep = "\n")
   invisible(x)
 }
 

@@ -129,12 +129,53 @@ flag_robustness.es_diagnostics <- function(x, provider = NULL, ...) {
 }
 
 
+#' Format method for es_advice objects
+#'
+#' Builds the character vector rendered by \code{print.es_advice} (one element
+#' per output line). The opt-in Advisor Pro footer is captured here (a no-op
+#' unless \code{options(eventstudy.advisor_pro_footer = TRUE)}), so
+#' \code{print.es_advice} must not re-emit it.
+#'
+#' @param x An object of class \code{"es_advice"}.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A character vector, one element per printed line.
+#'
+#' @export
+format.es_advice <- function(x, ...) {
+  utils::capture.output({
+    cat("Offline Event Study Advice\n")
+    cat("==========================\n")
+    cat("Source:          ", x$source, "\n")
+    cat("Deterministic:   ", x$is_deterministic, "\n")
+    cat("Rules matched:   ", length(x$rules_matched), "\n")
+
+    if (length(x$rules_matched) == 0L) {
+      cat("\n(No rules fired on these diagnostics.)\n")
+    } else {
+      cat("\n")
+      for (i in seq_along(x$rules_matched)) {
+        rule <- x$rules_matched[[i]]
+        cat(sprintf("[%s] %s  (citation: %s)\n",
+                    toupper(rule$severity),
+                    rule$id,
+                    rule$citation$key))
+        # Wrap recommendation text at ~72 chars for readability
+        rec <- rule$recommendation
+        cat("  Recommendation:", rec, "\n\n")
+      }
+    }
+
+    .advisor_pro_footer()
+  })
+}
+
 #' Print method for es_advice objects
 #'
 #' Prints a structured summary of the offline advice, listing each matched rule
 #' with its severity, citation key, and recommendation. Follows the package
 #' convention of \code{print.es_diagnostics} and \code{print.es_simulation}
-#' (cat-based, invisible return).
+#' (delegates to \code{format.es_advice}, invisible return).
 #'
 #' @param x An object of class \code{"es_advice"}.
 #' @param ... Additional arguments (ignored).
@@ -143,29 +184,7 @@ flag_robustness.es_diagnostics <- function(x, provider = NULL, ...) {
 #'
 #' @export
 print.es_advice <- function(x, ...) {
-  cat("Offline Event Study Advice\n")
-  cat("==========================\n")
-  cat("Source:          ", x$source, "\n")
-  cat("Deterministic:   ", x$is_deterministic, "\n")
-  cat("Rules matched:   ", length(x$rules_matched), "\n")
-
-  if (length(x$rules_matched) == 0L) {
-    cat("\n(No rules fired on these diagnostics.)\n")
-  } else {
-    cat("\n")
-    for (i in seq_along(x$rules_matched)) {
-      rule <- x$rules_matched[[i]]
-      cat(sprintf("[%s] %s  (citation: %s)\n",
-                  toupper(rule$severity),
-                  rule$id,
-                  rule$citation$key))
-      # Wrap recommendation text at ~72 chars for readability
-      rec <- rule$recommendation
-      cat("  Recommendation:", rec, "\n\n")
-    }
-  }
-
-  .advisor_pro_footer()
+  cat(format(x), sep = "\n")
   invisible(x)
 }
 

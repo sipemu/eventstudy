@@ -304,6 +304,42 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
 )
 
 
+#' Format method for EventStudySummary
+#'
+#' Builds the character vector rendered by \code{print.EventStudySummary}
+#' (one element per output line). See \code{\link{print.EventStudySummary}}.
+#'
+#' @param x An EventStudySummary object.
+#' @param ... Additional arguments (unused).
+#'
+#' @return A character vector, one element per printed line.
+#'
+#' @export
+format.EventStudySummary = function(x, ...) {
+  utils::capture.output({
+    cat("Event Study Summary\n")
+    cat("===================\n")
+    cat("Events: ", x$n_events, "\n")
+    cat("Groups: ", paste(x$groups, collapse = ", "), "\n")
+    cat("Symbols:", paste(x$symbols, collapse = ", "), "\n\n")
+
+    if (!is.null(x$model_stats)) {
+      cat("Model Statistics:\n")
+      for (sym in names(x$model_stats)) {
+        s = x$model_stats[[sym]]
+        if (isTRUE(s$is_fitted)) {
+          cat("  ", sym, ": alpha=", round(s$alpha %||% NA_real_, 6),
+              " beta=", round(s$beta %||% NA_real_, 4),
+              " sigma=", round(s$sigma %||% NA_real_, 6),
+              " R2=", round(s$r2 %||% NA_real_, 4), "\n")
+        } else {
+          cat("  ", sym, ": NOT FITTED\n")
+        }
+      }
+    }
+  })
+}
+
 #' Print method for EventStudySummary
 #'
 #' @param x An EventStudySummary object.
@@ -311,26 +347,6 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
 #'
 #' @export
 print.EventStudySummary = function(x, ...) {
-  cat("Event Study Summary\n")
-  cat("===================\n")
-  cat("Events: ", x$n_events, "\n")
-  cat("Groups: ", paste(x$groups, collapse = ", "), "\n")
-  cat("Symbols:", paste(x$symbols, collapse = ", "), "\n\n")
-
-  if (!is.null(x$model_stats)) {
-    cat("Model Statistics:\n")
-    for (sym in names(x$model_stats)) {
-      s = x$model_stats[[sym]]
-      if (isTRUE(s$is_fitted)) {
-        cat("  ", sym, ": alpha=", round(s$alpha %||% NA_real_, 6),
-            " beta=", round(s$beta %||% NA_real_, 4),
-            " sigma=", round(s$sigma %||% NA_real_, 6),
-            " R2=", round(s$r2 %||% NA_real_, 4), "\n")
-      } else {
-        cat("  ", sym, ": NOT FITTED\n")
-      }
-    }
-  }
-
+  cat(format(x), sep = "\n")
   invisible(x)
 }

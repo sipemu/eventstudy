@@ -142,17 +142,34 @@ simulate_event_study <- function(n_events = 20,
 }
 
 
+#' Format method for es_simulation objects
+#'
+#' Builds the character vector rendered by \code{print.es_simulation}
+#' (one element per output line).
+#'
+#' @param x An object of class \code{"es_simulation"}.
+#' @param ... Additional arguments (unused).
+#'
+#' @return A character vector, one element per printed line.
+#'
+#' @export
+format.es_simulation <- function(x, ...) {
+  utils::capture.output({
+    cat("Event Study Simulation\n")
+    cat("  N events:       ", x$params$n_events, "\n")
+    cat("  Event window:   [", x$params$event_window[1], ",",
+        x$params$event_window[2], "]\n")
+    cat("  Abnormal return:", x$params$abnormal_return, "\n")
+    cat("  Test statistic: ", x$params$test_statistic, "\n")
+    cat("  Alpha:          ", x$params$alpha, "\n")
+    cat("  N simulations:  ", x$params$n_simulations, "\n")
+    cat("  Power (day 0):  ", round(x$power, 4), "\n")
+  })
+}
+
 #' @export
 print.es_simulation <- function(x, ...) {
-  cat("Event Study Simulation\n")
-  cat("  N events:       ", x$params$n_events, "\n")
-  cat("  Event window:   [", x$params$event_window[1], ",",
-      x$params$event_window[2], "]\n")
-  cat("  Abnormal return:", x$params$abnormal_return, "\n")
-  cat("  Test statistic: ", x$params$test_statistic, "\n")
-  cat("  Alpha:          ", x$params$alpha, "\n")
-  cat("  N simulations:  ", x$params$n_simulations, "\n")
-  cat("  Power (day 0):  ", round(x$power, 4), "\n")
+  cat(format(x), sep = "\n")
   invisible(x)
 }
 

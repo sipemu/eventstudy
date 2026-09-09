@@ -844,46 +844,65 @@ KB_KEY_MAP <- list(
 #'
 #' @return Invisibly returns \code{x}.
 #'
+#' Format method for Advice objects
+#'
+#' Builds the character vector rendered by \code{print.Advice} (one element
+#' per output line). The opt-in Advisor Pro footer is captured here (a no-op
+#' unless \code{options(eventstudy.advisor_pro_footer = TRUE)}), so
+#' \code{print.Advice} must not re-emit it.
+#'
+#' @param x An object of class \code{"Advice"}.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A character vector, one element per printed line.
+#'
+#' @export
+format.Advice <- function(x, ...) {
+  utils::capture.output({
+    cat("Event Study Advice\n")
+    cat("==================\n")
+    cat("Source:        ", x$source, "\n")
+    cat("Task type:     ", x$task_type, "\n")
+    cat("Deterministic: ", x$is_deterministic, "\n")
+    n_recs <- length(x$recommendations)
+    cat("Recommendations:", n_recs, "\n")
+    if (!is.null(x$n_dropped) && x$n_dropped > 0L) {
+      cat("[GUARD]", x$n_dropped, "recommendation(s) dropped as ungrounded.\n")
+    }
+    cat("\n")
+    if (nzchar(x$interpretation %||% "")) {
+      cat("Interpretation:\n ", x$interpretation, "\n\n")
+    }
+    if (n_recs == 0L) {
+      cat("(No recommendations.)\n")
+    } else {
+      for (i in seq_along(x$recommendations)) {
+        r <- x$recommendations[[i]]
+        cat(sprintf("[%d] %s\n", i, r$action %||% ""))
+        cat("    Kind:   ", r$kind %||% "", "\n")
+        cat("    Effect: ", r$expected_effect %||% "", "\n")
+        cat("    Evidence:\n")
+        for (ev in r$evidence %||% list()) {
+          cat(sprintf("      %s = %s (threshold %s, %s)\n",
+                      ev$diagnostic_key %||% "",
+                      ev$value %||% "NA",
+                      ev$threshold %||% "NA",
+                      ev$direction %||% ""))
+        }
+        cat("\n")
+      }
+    }
+    if (length(x$caveats) > 0L) {
+      cat("Caveats:\n")
+      for (cv in x$caveats) cat(" -", cv, "\n")
+    }
+    .advisor_pro_footer()
+  })
+}
+
 #' @export
 print.Advice <- function(x, ...) {
-  cat("Event Study Advice\n")
-  cat("==================\n")
-  cat("Source:        ", x$source, "\n")
-  cat("Task type:     ", x$task_type, "\n")
-  cat("Deterministic: ", x$is_deterministic, "\n")
-  n_recs <- length(x$recommendations)
-  cat("Recommendations:", n_recs, "\n")
-  if (!is.null(x$n_dropped) && x$n_dropped > 0L) {
-    cat("[GUARD]", x$n_dropped, "recommendation(s) dropped as ungrounded.\n")
-  }
-  cat("\n")
-  if (nzchar(x$interpretation %||% "")) {
-    cat("Interpretation:\n ", x$interpretation, "\n\n")
-  }
-  if (n_recs == 0L) {
-    cat("(No recommendations.)\n")
-  } else {
-    for (i in seq_along(x$recommendations)) {
-      r <- x$recommendations[[i]]
-      cat(sprintf("[%d] %s\n", i, r$action %||% ""))
-      cat("    Kind:   ", r$kind %||% "", "\n")
-      cat("    Effect: ", r$expected_effect %||% "", "\n")
-      cat("    Evidence:\n")
-      for (ev in r$evidence %||% list()) {
-        cat(sprintf("      %s = %s (threshold %s, %s)\n",
-                    ev$diagnostic_key %||% "",
-                    ev$value %||% "NA",
-                    ev$threshold %||% "NA",
-                    ev$direction %||% ""))
-      }
-      cat("\n")
-    }
-  }
-  if (length(x$caveats) > 0L) {
-    cat("Caveats:\n")
-    for (cv in x$caveats) cat(" -", cv, "\n")
-  }
-  .advisor_pro_footer()
+  cat(format(x), sep = "\n")
   invisible(x)
 }
 
