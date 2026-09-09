@@ -18,5 +18,6 @@ Invisibly returns \code{x}.
 Prints a structured summary of the grounded AI advice, including source,
 task type, grounding guard status, interpretation, recommendations with
 evidence, and caveats. Follows the package convention of
-\code{print.es_advice} (cat-based, invisible return).
+\code{print.es_advice} (delegates to \code{format.Advice}, invisible
+return).
 }

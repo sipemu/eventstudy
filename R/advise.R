@@ -832,18 +832,6 @@ KB_KEY_MAP <- list(
 # Public: print.Advice S3 method
 # ---------------------------------------------------------------------------
 
-#' Print method for Advice objects
-#'
-#' Prints a structured summary of the grounded AI advice, including source,
-#' task type, grounding guard status, interpretation, recommendations with
-#' evidence, and caveats. Follows the package convention of
-#' \code{print.es_advice} (cat-based, invisible return).
-#'
-#' @param x An object of class \code{"Advice"}.
-#' @param ... Additional arguments (ignored).
-#'
-#' @return Invisibly returns \code{x}.
-#'
 #' Format method for Advice objects
 #'
 #' Builds the character vector rendered by \code{print.Advice} (one element
@@ -900,6 +888,19 @@ format.Advice <- function(x, ...) {
   })
 }
 
+#' Print method for Advice objects
+#'
+#' Prints a structured summary of the grounded AI advice, including source,
+#' task type, grounding guard status, interpretation, recommendations with
+#' evidence, and caveats. Follows the package convention of
+#' \code{print.es_advice} (delegates to \code{format.Advice}, invisible
+#' return).
+#'
+#' @param x An object of class \code{"Advice"}.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return Invisibly returns \code{x}.
+#'
 #' @export
 print.Advice <- function(x, ...) {
   cat(format(x), sep = "\n")

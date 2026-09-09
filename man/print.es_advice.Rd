@@ -18,5 +18,5 @@ Invisibly returns \code{x}.
 Prints a structured summary of the offline advice, listing each matched rule
 with its severity, citation key, and recommendation. Follows the package
 convention of \code{print.es_diagnostics} and \code{print.es_simulation}
-(cat-based, invisible return).
+(delegates to \code{format.es_advice}, invisible return).
 }
