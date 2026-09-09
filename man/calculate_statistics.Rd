@@ -17,3 +17,13 @@ task
 \description{
 Calculate test statistics
 }
+\seealso{
+\code{\link{run_event_study}}, \code{\link{prepare_event_study}},
+  \code{\link{fit_model}}
+
+Other eventstudy-pipeline:
+\code{\link[=fit_model]{fit_model()}},
+\code{\link[=prepare_event_study]{prepare_event_study()}},
+\code{\link[=run_event_study]{run_event_study()}}
+}
+\concept{eventstudy-pipeline}

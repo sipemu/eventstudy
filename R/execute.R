@@ -29,6 +29,11 @@
 #' attr(task, "report_path")  # path to the rendered HTML
 #' }
 #'
+#' @family eventstudy-pipeline
+#' @seealso
+#'   \code{\link{prepare_event_study}}, \code{\link{fit_model}},
+#'   \code{\link{calculate_statistics}}
+#'
 #' @export
 run_event_study = function(task,
                            parameter_set = ParameterSet$new(),
@@ -55,6 +60,11 @@ run_event_study = function(task,
 #' @param parameter_set The parameter set that defines the event study.
 #'
 #' @return task
+#'
+#' @family eventstudy-pipeline
+#' @seealso
+#'   \code{\link{run_event_study}}, \code{\link{prepare_event_study}},
+#'   \code{\link{calculate_statistics}}
 #'
 #' @export
 fit_model = function(task, parameter_set) {
@@ -116,6 +126,11 @@ fit_model = function(task, parameter_set) {
 #' @param parameter_set The parameter set that defines the event study.
 #'
 #' @return task
+#'
+#' @family eventstudy-pipeline
+#' @seealso
+#'   \code{\link{run_event_study}}, \code{\link{prepare_event_study}},
+#'   \code{\link{fit_model}}
 #'
 #' @export
 calculate_statistics = function(task, parameter_set) {

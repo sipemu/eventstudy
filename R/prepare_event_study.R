@@ -8,6 +8,11 @@
 #'
 #' @return The task object with returns and windows appended.
 #'
+#' @family eventstudy-pipeline
+#' @seealso
+#'   \code{\link{run_event_study}}, \code{\link{fit_model}},
+#'   \code{\link{calculate_statistics}}
+#'
 #' @export
 prepare_event_study <- function(task, parameter_set) {
   if (!inherits(task, "EventStudyTask")) {

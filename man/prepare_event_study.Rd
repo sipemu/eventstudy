@@ -18,3 +18,13 @@ The task object with returns and windows appended.
 Perform return calculation for each stock and the corresponding reference
 market defined in the task and the parameter set.
 }
+\seealso{
+\code{\link{run_event_study}}, \code{\link{fit_model}},
+  \code{\link{calculate_statistics}}
+
+Other eventstudy-pipeline:
+\code{\link[=calculate_statistics]{calculate_statistics()}},
+\code{\link[=fit_model]{fit_model()}},
+\code{\link[=run_event_study]{run_event_study()}}
+}
+\concept{eventstudy-pipeline}
