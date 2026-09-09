@@ -229,6 +229,7 @@ reference:
       - TestStatisticBase
       - degenerate-input-contract
       - starts_with("print.")
+      - starts_with("format.")
 
 articles:
   - title: "Methods"
