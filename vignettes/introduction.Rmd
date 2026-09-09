@@ -200,6 +200,28 @@ est_task$aar_caar_tbl
 es_tt(est_task$aar_caar_tbl$CSectT[[1]])
 ```
 
+## Visualize the Results
+
+The `plot_event_study()` function returns a ggplot2 object; wrapping it in
+`plotly::ggplotly()` converts it to an interactive widget -- hover over data
+points to inspect exact values, zoom into the announcement window, or click
+legend entries to toggle series.
+
+The chart below shows the cumulative abnormal return (CAR) path with confidence
+band for the first event in the study (VW, September 2015 announcement):
+
+```{r plot-car}
+plotly::ggplotly(plot_event_study(est_task, type = "car"))
+```
+
+The next chart shows the average CAAR (Cumulative Average Abnormal Return)
+aggregated across all events -- it summarises the mean market reaction and its
+uncertainty over the event window:
+
+```{r plot-caar}
+plotly::ggplotly(plot_event_study(est_task, type = "caar"))
+```
+
 ## Next Steps
 
 This vignette covered the core market-model pipeline. To go deeper:
