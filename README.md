@@ -14,6 +14,16 @@
 
 A comprehensive, modular R package for financial event study analysis. Implements the classical methodology (MacKinlay 1997) and extends it with modern multi-factor models, long-horizon methods, panel (DiD) event studies, and more.
 
+<!-- pkgdown-home-start -->
+## Ecosystem
+
+EventStudy is part of the [eventstudy.de](https://eventstudy.de) toolkit -- "Event Study Analysis Made Simple":
+
+- **Google Sheets Template** -- quick, no-code event study for small samples
+- **R Package (this package)** -- full programmatic pipeline with 15+ models, 12 test statistics, AI advisor, and publication-ready export
+- **WebAssembly App** -- browser-based analysis with no installation required
+<!-- pkgdown-home-end -->
+
 ## Installation
 
 #### GitHub
@@ -29,9 +39,9 @@ devtools::install_github("sipemu/eventstudy")
 
 - **One-Call Reporting** (new in 0.64.0): Generate a complete, multi-format event study report in a single call: `es_report(task)` -- deep-clones the task, harvests diagnostics, and renders HTML/PDF/Word/Markdown with a grounded narrative (offline by default). Also available as `run_event_study(..., report = TRUE)`.
 
-- **13 Return Models**: Market Model, Market Adjusted, Mean Adjusted, Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.
+- **15+ Return Models**: Market Model, Market Adjusted, Mean Adjusted, Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), DCC-GARCH, Rolling-Window, Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.
 
-- **11 Test Statistics**: Parametric (AR T, CAR T, BHAR T, Cross-Sectional T, Patell Z, BMP) and non-parametric (Sign, Generalized Sign, Rank, Calendar-Time Portfolio).
+- **12 Test Statistics**: Parametric (AR T, CAR T, BHAR T, Cross-Sectional T, Patell Z, BMP, Kolari-Pynnonen) and non-parametric (Sign, Generalized Sign, Rank, Calendar-Time Portfolio).
 
 - **Diagnostics**: Shapiro-Wilk normality, Durbin-Watson, Ljung-Box autocorrelation, pre-trend testing.
 
