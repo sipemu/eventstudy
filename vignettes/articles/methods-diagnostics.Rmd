@@ -124,7 +124,7 @@ boot <- bootstrap_test(task, n_boot = 199, seed = 42)
 ## 7. Rendered Table
 
 ```{r results-table}
-knitr::kable(
+es_tt(
   diag,
   caption = "Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson (dw_stat), Ljung-Box (ljung_box_p)."
 )

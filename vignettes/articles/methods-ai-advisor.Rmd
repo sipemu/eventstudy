@@ -110,7 +110,7 @@ residual checks the advisor reasons over:
 
 ```{r results-table}
 est <- as.data.frame(diag$estimation_window)
-knitr::kable(
+es_tt(
   est,
   caption = "Per-event estimation-window diagnostics feeding the advisor (offline)."
 )

@@ -15,6 +15,26 @@ knitr::opts_chunk$set(
   comment = "#>",
   eval = TRUE
 )
+
+# Vignette-only helper: render a flat tibble/data.frame as a styled HTML table.
+# Uses tinytable when available (bold header, right-aligned numerics), falls back
+# to knitr::kable() otherwise.  Return the table object so knitr::knit_print()
+# renders it -- do NOT call print() inside.
+es_tt <- function(x, caption = NULL, digits = 4) {
+  if (requireNamespace("tinytable", quietly = TRUE)) {
+    align <- ifelse(vapply(x, is.numeric, logical(1L)), "r", "l")
+    tbl <- tinytable::tt(x, caption = caption, digits = digits)
+    tbl <- tinytable::style_tt(tbl, i = 0L, bold = TRUE)
+    for (j_idx in seq_along(align)) {
+      tbl <- tinytable::style_tt(tbl, j = j_idx, align = align[[j_idx]])
+    }
+    tbl
+  } else {
+    args <- list(x = x, caption = caption)
+    if (!is.null(digits)) args$digits <- digits
+    do.call(knitr::kable, args)
+  }
+}
 ```
 
 # Introduction
@@ -78,7 +98,7 @@ Both, the firm data as the index data should have the following structure:
 3.  **adjusted**: The price of the stock at given date. The price column can be parametrized according to your needs when the task is defined. The default is `adjusted`.
 
 ```{r}
-head(firm_tbl)
+es_tt(head(firm_tbl))
 ```
 
 ## Define the Event Study
@@ -127,11 +147,11 @@ head(est_task$data_tbl)
 ```
 
 ```{r}
-head(est_task$data_tbl$data[[1]])
+es_tt(head(est_task$data_tbl$data[[1]]))
 ```
 
 ```{r}
-est_task$data_tbl$request[[1]]
+es_tt(est_task$data_tbl$request[[1]])
 ```
 
 The internal data structure is important for you if you plan to develop your own statistical or econometric model or test statistic.
@@ -141,7 +161,7 @@ est_task = prepare_event_study(est_task, param_set)
 ```
 
 ```{r}
-head(est_task$data_tbl$data[[1]])
+es_tt(head(est_task$data_tbl$data[[1]]))
 ```
 
 ```{r}
@@ -165,11 +185,11 @@ head(est_task$data_tbl)
 ```
 
 ```{r}
-est_task$data_tbl$ART[[1]]
+es_tt(est_task$data_tbl$ART[[1]])
 ```
 
 ```{r}
-est_task$data_tbl$CART[[1]]
+es_tt(est_task$data_tbl$CART[[1]])
 ```
 
 ```{r}
@@ -177,7 +197,7 @@ est_task$aar_caar_tbl
 ```
 
 ```{r}
-est_task$aar_caar_tbl$CSectT[[1]]
+es_tt(est_task$aar_caar_tbl$CSectT[[1]])
 ```
 
 ## Next Steps

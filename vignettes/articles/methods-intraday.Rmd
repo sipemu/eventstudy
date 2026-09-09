@@ -104,7 +104,7 @@ task   <- calculate_statistics(task, params)
 ## 7. Rendered Table
 
 ```{r results-table}
-knitr::kable(
+es_tt(
   head(tidy.EventStudyTask(task, type = "car"), 10),
   caption = "Intraday cumulative abnormal returns around the event minute (first 10 offsets)."
 )

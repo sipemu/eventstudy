@@ -79,7 +79,7 @@ power_tbl <- purrr::map_dfr(ar_grid, function(ar) {
   tibble::tibble(true_abnormal_return = ar, power = sim$power)
 })
 
-knitr::kable(
+es_tt(
   power_tbl, digits = 4,
   caption = "Detection power by true abnormal return (N = 15, cross-sectional test, alpha = 0.05)"
 )

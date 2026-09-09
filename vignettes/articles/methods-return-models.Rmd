@@ -124,7 +124,7 @@ task <- calculate_statistics(task, params)
 ## 7. Rendered Table
 
 ```{r results-table}
-knitr::kable(
+es_tt(
   head(tidy.EventStudyTask(task, type = "car"), 10),
   caption = "Market-model CAR t-statistics on the dieselgate event (first 10 rows)."
 )
@@ -167,8 +167,8 @@ task_g <- prepare_event_study(
 )
 task_g <- fit_model(task_g, params_g)
 task_g <- calculate_statistics(task_g, params_g)
-knitr::kable(head(tidy.EventStudyTask(task_g, type = "car"), 5),
-             caption = "GARCH-based CAR t-statistics.")
+es_tt(head(tidy.EventStudyTask(task_g, type = "car"), 5),
+      caption = "GARCH-based CAR t-statistics.")
 ```
 
 If `rugarch` is not installed the chunk above is skipped. Conceptually, the

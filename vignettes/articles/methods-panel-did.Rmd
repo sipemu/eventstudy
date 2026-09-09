@@ -136,7 +136,7 @@ estimate_panel_event_study(task, method = "borusyak_jaravel_spiess")        # ne
 ## 7. Rendered Table
 
 ```{r results-table}
-knitr::kable(
+es_tt(
   res$results$coefficients,
   caption = "Dynamic TWFE event-time coefficients (base period k = -1) on the synthetic staggered panel."
 )

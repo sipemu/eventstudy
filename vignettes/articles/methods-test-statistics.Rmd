@@ -134,7 +134,7 @@ includes `GeneralizedSignTest`, the Corrado `RankTest`, and the
 ## 7. Rendered Table
 
 ```{r results-table}
-knitr::kable(
+es_tt(
   tidy.EventStudyTask(task, type = "aar"),
   caption = "AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP statistics."
 )

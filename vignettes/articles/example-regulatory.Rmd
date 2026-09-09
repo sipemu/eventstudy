@@ -90,15 +90,15 @@ caar_tbl |>
   dplyr::slice_tail(n = 1) |>
   dplyr::ungroup() |>
   dplyr::select(group, term, caar, caar_statistic, caar_p.value) |>
-  knitr::kable(
+  es_tt(
     digits  = 4,
     caption = "CAAR by group at the end of the event window: VW-Group vs Peers"
   )
 
 # Group-level CAR summary and a between-group difference test.
 grp <- car_by_group(result)
-knitr::kable(grp$summary, digits = 4,
-             caption = "Per-firm CAR summary by group")
+es_tt(grp$summary, digits = 4,
+      caption = "Per-firm CAR summary by group")
 ```
 
 ## Plot

@@ -109,7 +109,7 @@ res_qp <- estimate_synthetic_control(task, method = "quadprog")
 ## 7. Rendered Table
 
 ```{r results-table}
-knitr::kable(
+es_tt(
   head(res$results$trajectory, 10),
   caption = "Treated vs synthetic trajectory with the estimated gap (first 10 periods)."
 )
