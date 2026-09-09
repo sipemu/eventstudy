@@ -1,22 +1,22 @@
 ---
 gsd_state_version: 1.0
 milestone: v0.65.0
-milestone_name: Polish
-milestone_status: complete
 current_phase: 24
 current_phase_name: docs-site-polish
 status: shipped
-stopped_at: Milestone v0.65.0 complete
-last_updated: "2026-09-09T08:00:00.000Z"
+stopped_at: context exhaustion at 76% (2026-09-09)
+last_updated: "2026-09-09T10:18:23.251Z"
 last_activity: 2026-09-09
-last_activity_desc: v0.65.0 "Polish" milestone complete — audit PASSED (30/30 reqs, 5/5 phases), NEWS + tag
-state_head: 3f7c911
+last_activity_desc: "v0.65.0 \"Polish\" milestone complete — audit PASSED (30/30 reqs, 5/5 phases), NEWS + tag"
+state_head: f6ef5bd12afcb981f2533da66e5b02cfc684218b
 progress:
   total_phases: 5
-  completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
-  percent: 100
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+milestone_name: Polish
+milestone_status: complete
 ---
 
 # Project State
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
 Phase: 24 (docs-site-polish) — final phase, complete
 Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
-Last activity: 2026-09-09 — v0.65.0 milestone completion: NEWS.md expanded across all 5 surfaces (Brand, Plot aesthetics, Report aesthetics, API/message polish, Docs & site); state marked complete; 2 audit items acknowledged (Phase 22 human_needed felt-visual eyeball, Phase 24 test-log-hygiene deferred). Completion is metadata/version/NEWS/tag only — no R/ behavior change.
+Last activity: 2026-09-09 — Completed quick task 260909-jls: fixed pkgdown site (hid auto-injected page-header logo via scoped extra.css; made introduction.Rmd render offline with executed outputs against bundled dieselgate data). Docs/site + vignette-source only, no R/ behavior change.
 
 Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
 
@@ -125,6 +125,12 @@ Research flags for planning:
 
 - None. (Resolved: the Phase 20 eventstudy.de palette dependency was closed during Phase 20 execution — palette #2563eb/#ffffff/#0f172a extracted from live CSS, logo/hex sticker built and verified. Phase 20 shipped and verification passed.)
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260909-jls | Fix pkgdown site: hide auto-injected page-header logo via scoped extra.css; make introduction.Rmd render offline with executed outputs (bundled dieselgate data) | 2026-09-09 | ef4eca7 | [260909-jls-fix-pkgdown-site-remove-logo-from-navbar](./quick/260909-jls-fix-pkgdown-site-remove-logo-from-navbar/) |
+
 ## Deferred Items
 
 | Category | Item | Status | Deferred At | Milestone |
@@ -144,8 +150,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-09T07:16:35.828Z
-Stopped at: Completed 24-02-PLAN.md
+Last session: 2026-09-09T10:18:23.237Z
+Stopped at: context exhaustion at 76% (2026-09-09)
 Resume file: None
 
 ## Operator Next Steps
