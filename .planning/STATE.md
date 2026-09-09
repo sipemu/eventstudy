@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
 Phase: 24 (docs-site-polish) — final phase, complete
 Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
-Last activity: 2026-09-09 — Completed quick task 260909-jls: fixed pkgdown site (hid auto-injected page-header logo via scoped extra.css; made introduction.Rmd render offline with executed outputs against bundled dieselgate data). Docs/site + vignette-source only, no R/ behavior change.
+Last activity: 2026-09-09 — Completed quick task 260909-kft: rendered flat result tibbles as styled tinytable HTML tables (kable fallback) across introduction.Rmd + the 10 shared-setup articles/*.Rmd, via a vignette-only es_tt() helper mirroring es_report()'s .report_table() styling. Nested/S3 chunks left as console. Vignette-source only, no R/ behavior change.
 
 Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
 
@@ -130,6 +130,7 @@ Research flags for planning:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260909-jls | Fix pkgdown site: hide auto-injected page-header logo via scoped extra.css; make introduction.Rmd render offline with executed outputs (bundled dieselgate data) | 2026-09-09 | ef4eca7 | [260909-jls-fix-pkgdown-site-remove-logo-from-navbar](./quick/260909-jls-fix-pkgdown-site-remove-logo-from-navbar/) |
+| 260909-kft | Render flat result tibbles as styled tinytable HTML tables (kable fallback) across introduction.Rmd + 10 articles/*.Rmd via es_tt() helper | 2026-09-09 | b1ce106 | [260909-kft-render-result-tibbles-as-styled-html-tab](./quick/260909-kft-render-result-tibbles-as-styled-html-tab/) |
 
 ## Deferred Items
 
