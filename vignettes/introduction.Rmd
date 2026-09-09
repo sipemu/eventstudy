@@ -1,5 +1,5 @@
 ---
-title: "Introducing EventStudy: A Powerful Tool for Event Study Analysis in R"
+title: "Getting Started with EventStudy"
 author: "Simon Mueller"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -19,29 +19,32 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Event Study is a statistical method used to assess the impact of an event on the value of a firm. This method has been widely adopted in empirical finance and has been used to investigate the effects of corporate events like mergers, earnings announcements, and macroeconomic news on the value of firms.
+An event study measures the impact of an event -- a merger, earnings announcement, or macroeconomic shock -- on the value of a firm. `EventStudy` offers a modular pipeline for conducting these analyses in R: apply common return models, run diagnostic and test statistics, and extract publication-ready results, all in a workflow that composes cleanly with the tidyverse.
 
-While Event Study Analysis is a powerful tool, conducting these analyses in R can often be complicated and time-consuming. Until now. I'm excited to introduce EventStudy, a comprehensive and flexible R package designed to streamline the process of conducting Event Study Analyses.
+This vignette walks through the core flow: define a task, run the study, inspect the results, and extract or plot them. It uses the Dieselgate scandal as a running example.
 
-# Why Event Study?
+# Quick Start
 
-Event Study is designed to offer a modular approach to conducting event studies in R. It allows you to apply common models, perform diagnostic tests, and extract results for further analysis. The package is designed to work seamlessly with your existing R workflow and offers a range of features that make conducting event studies in R a breeze.
+If you already have firm data, index data, and a request table (all defined below), the entire pipeline runs in a single call:
 
-# Key Features
+```{r quick-start}
+library(EventStudy)
 
-## Features
+# One-call shortcut: prepare -> fit -> calculate, in one step
+est_task <- run_event_study(
+  EventStudyTask$new(firm_tbl, index_tbl, request_tbl),
+  ParameterSet$new(
+    return_calculation      = LogReturn$new(),
+    return_model            = MarketModel$new(),
+    single_event_statistics = SingleEventStatisticsSet$new(),
+    multi_event_statistics  = MultiEventStatisticsSet$new()
+  )
+)
 
-The `EventStudy` package includes several features that make it a versatile tool for performing event study analyses:
+est_task$aar_caar_tbl
+```
 
--   **Flexible Models and Diagnostic Tests**: You can apply common models and perform diagnostic tests on them. The package is designed to be modular and adaptable, which means you can easily extend it with your own models and tests.
-
--   **Custom Models**: With EventStudy, you have the ability to apply your own market model. This means you can include external factors in your model that are specific to your study or industry.
-
--   **Custom Test Statistics**: You can apply your own test statistics for abnormal returns (AR), average abnormal returns (AAR), cumulative abnormal returns (CAR), and cumulative average abnormal returns (CAAR). This gives you full control over how you want to measure the impact of the event.
-
--   **Result Extraction**: You can extract the results of the event study for further analysis. For example, you might want to perform [Cross-Sectional regression analysis](https://eventstudy.de/features/cross_sectional_regression.html). The package provides convenient functions for extracting confidence bands at each level and for each CAR and CAAR window.
-
--   **Parallel Execution**: If you are dealing with a large number of events, the package supports parallel execution. This allows you to take full advantage of your computer's processing power to speed up the calculations.
+The rest of this vignette unpacks the same pipeline step by step, so you can see -- and customize -- each stage.
 
 # Example: Dieselgate
 
@@ -107,7 +110,7 @@ log_return = LogReturn$new()
 market_model = MarketModel$new()
 ```
 
-For single events the standard [AR and CAR T test](https://eventstudy.de/statistics/ar_car_statistics.html "A Comprehensive Guide to Analyzing Abnormal Returns in Event Studies.") are applied. For performing an Event Study on multiple events, currently the Cross-Sectional T Test (AAR and CAAR) is available. More a coming soon.
+For single events the standard [AR and CAR T test](https://eventstudy.de/statistics/ar_car_statistics.html "A Comprehensive Guide to Analyzing Abnormal Returns in Event Studies.") are applied. For performing an Event Study on multiple events, the Cross-Sectional T Test (AAR and CAAR) is applied by default, alongside Patell Z, BMP, sign, and rank tests.
 
 ```{r}
 # Define single event test statistics
@@ -196,9 +199,15 @@ est_task$aar_caar_tbl
 est_task$aar_caar_tbl$CSectT[[1]]
 ```
 
-# Roadmap
+## Next Steps
 
-While EventStudy already offers a powerful tool set for conducting event study analysis in R, development is actively ongoing. The roadmap for future features includes adding more test statistics, supporting long-term event study, volatility and volume event study with test statistics, and intraday event study. Stay tuned for more updates!
+This vignette covered the core market-model pipeline. To go deeper:
+
+-   **Return models:** See `vignette("factor-models-bhar")` for multi-factor and long-horizon models
+-   **Test statistics:** See `vignette("inference-robustness")` for robust inference and bootstrap
+-   **Result extraction:** See `vignette("result-extraction")` for export, `tidy()`, and cross-sectional analysis
+-   **AI advisor:** See `vignette("ai-advisor")` for deterministic diagnostics and LLM interpretation
+-   **Full gallery:** See `vignette("gallery")` for all available vignettes by topic
 
 # Conclusion
 
