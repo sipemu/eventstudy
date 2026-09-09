@@ -4,11 +4,11 @@ milestone: v0.65.0
 current_phase: 24
 current_phase_name: docs-site-polish
 status: shipped
-stopped_at: context exhaustion at 76% (2026-09-09)
-last_updated: "2026-09-09T10:18:23.251Z"
+stopped_at: context exhaustion at 75% (2026-09-09)
+last_updated: "2026-09-09T13:18:18.699Z"
 last_activity: 2026-09-09
 last_activity_desc: "v0.65.0 \"Polish\" milestone complete — audit PASSED (30/30 reqs, 5/5 phases), NEWS + tag"
-state_head: f6ef5bd12afcb981f2533da66e5b02cfc684218b
+state_head: 277d44b76aadfa7620c803079d3d1e153b52b87f
 progress:
   total_phases: 5
   completed_phases: 0
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
 Phase: 24 (docs-site-polish) — final phase, complete
 Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
-Last activity: 2026-09-09 — Completed quick task 260909-kft: rendered flat result tibbles as styled tinytable HTML tables (kable fallback) across introduction.Rmd + the 10 shared-setup articles/*.Rmd, via a vignette-only es_tt() helper mirroring es_report()'s .report_table() styling. Nested/S3 chunks left as console. Vignette-source only, no R/ behavior change.
+Last activity: 2026-09-09 — Completed quick task 260909-l6h: added interactive plotly event-study plots (plotly::ggplotly-wrapped plot_event_study CAR + CAAR) to introduction.Rmd and widened the pkgdown article content container to 1400px via pkgdown/extra.css (ToC kept). Docs/site + vignette-source only, no R/ behavior change.
 
 Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
 
@@ -131,6 +131,7 @@ Research flags for planning:
 |---|-------------|------|--------|-----------|
 | 260909-jls | Fix pkgdown site: hide auto-injected page-header logo via scoped extra.css; make introduction.Rmd render offline with executed outputs (bundled dieselgate data) | 2026-09-09 | ef4eca7 | [260909-jls-fix-pkgdown-site-remove-logo-from-navbar](./quick/260909-jls-fix-pkgdown-site-remove-logo-from-navbar/) |
 | 260909-kft | Render flat result tibbles as styled tinytable HTML tables (kable fallback) across introduction.Rmd + 10 articles/*.Rmd via es_tt() helper | 2026-09-09 | b1ce106 | [260909-kft-render-result-tibbles-as-styled-html-tab](./quick/260909-kft-render-result-tibbles-as-styled-html-tab/) |
+| 260909-l6h | Add interactive plotly event-study plots (ggplotly-wrapped CAR + CAAR) to introduction.Rmd; widen pkgdown article container to 1400px in extra.css (ToC kept) | 2026-09-09 | 5d93a81 | [260909-l6h-add-interactive-plotly-event-study-plots](./quick/260909-l6h-add-interactive-plotly-event-study-plots/) |
 
 ## Deferred Items
 
@@ -151,8 +152,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-09T10:18:23.237Z
-Stopped at: context exhaustion at 76% (2026-09-09)
+Last session: 2026-09-09T13:18:18.679Z
+Stopped at: context exhaustion at 75% (2026-09-09)
 Resume file: None
 
 ## Operator Next Steps
