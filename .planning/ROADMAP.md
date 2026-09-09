@@ -155,7 +155,9 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   3. `pkgdown::check_pkgdown()` runs in CI and passes (no silent broken cross-references); navbar/news wiring is verified and rough edges are fixed.
   4. Existing vignettes/articles are tightened — getting-started flow and cross-links improved — with no new CRAN vignettes (rich content stays in `vignettes/articles/`).
 
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 24-01-PLAN.md — @family + @seealso roxygen cross-links across all exported functions; single devtools::document() regenerates man/+NAMESPACE (DOCS-01)
+- [ ] 24-02-PLAN.md — README Ecosystem section + honest counts + home markers; _pkgdown.yml format.* fix + check_pkgdown in CI; tightened introduction.Rmd (DOCS-02/03/04)
 **UI hint**: yes
 
 ## Progress
@@ -168,4 +170,4 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
 | 21. Shared Theme & Plot Aesthetics | v0.65.0 | 1/1 | In Progress|  |
 | 22. Report Aesthetics | v0.65.0 | 1/1 | In Progress|  |
 | 23. API & Message Polish | v0.65.0 | 3/3 | In Progress|  |
-| 24. Docs & Site Polish | v0.65.0 | 0/TBD | Not started | - |
+| 24. Docs & Site Polish | v0.65.0 | 0/2 | Not started | - |
