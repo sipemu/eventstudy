@@ -31,8 +31,8 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 
 - [x] **API-01**: All `print.*` methods audited — return `invisible(x)`, consistent formatting; snapshot tests established *before* any change
 - [x] **API-02**: `format.*` methods added where a class has `print()` but no `format()`
-- [ ] **API-03**: Selective `stop()`/`warning()` calls migrated to classed `rlang::abort()`/`rlang::warn()` (rlang already imported, zero new dep); the degenerate-input contract's exactly-one-warning discipline preserved
-- [ ] **API-04**: Error/warning messages name the offending argument and its value
+- [x] **API-03**: Selective `stop()`/`warning()` calls migrated to classed `rlang::abort()`/`rlang::warn()` (rlang already imported, zero new dep); the degenerate-input contract's exactly-one-warning discipline preserved
+- [x] **API-04**: Error/warning messages name the offending argument and its value
 - [ ] **API-05**: A `verbose=` argument quiets informational messages for batch/scripted use; default preserves current behavior (byte-identical when omitted)
 - [ ] **API-06**: Deprecation audit — if any argument is renamed, ship a back-compatible shim with a deprecation warning; if nothing is renamed, documented as a verified no-op (no `lifecycle` dep added)
 
@@ -110,8 +110,8 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 | CRAN-05 | Phase 22 | Complete |
 | API-01 | Phase 23 | Complete |
 | API-02 | Phase 23 | Complete |
-| API-03 | Phase 23 | Pending |
-| API-04 | Phase 23 | Pending |
+| API-03 | Phase 23 | Complete |
+| API-04 | Phase 23 | Complete |
 | API-05 | Phase 23 | Pending |
 | API-06 | Phase 23 | Pending |
 | CRAN-06 | Phase 23 | Pending |

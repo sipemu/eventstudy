@@ -5,11 +5,11 @@ milestone_name: Polish
 current_phase: 23
 current_phase_name: api-message-polish
 status: executing
-stopped_at: Completed 23-01-PLAN.md
-last_updated: "2026-09-09T05:41:29.908Z"
+stopped_at: Completed 23-02-PLAN.md
+last_updated: "2026-09-09T06:01:25.119Z"
 last_activity: 2026-09-09
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: a05d4411a16609c09364270e2b7bfdfebd756de7
+state_head: 2215351faeb8d53b1b914ccb0e082e9f06069fa7
 progress:
   total_phases: 5
   completed_phases: 2
@@ -30,9 +30,9 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 ## Current Position
 
 Phase: 23 (api-message-polish) — IN PROGRESS
-Plan: 01 complete (1/3 plans in Phase 23); 23-02 next (Wave 2)
-Status: Wave 1 of 3 done; ready for 23-02
-Last activity: 2026-09-09 — Plan 23-01 complete: snapshot baseline for 6 print methods + 4 prose-sanitiser variants committed against unmodified code, then split each print.* into an exported format.* (char vector via capture.output) + thin delegating print.*; NAMESPACE registers 6 S3method(format,*). Byte-identical snapshots (git diff --quiet); suite 2324 green; DESCRIPTION unchanged (no new deps).
+Plan: 02 complete (2/3 plans in Phase 23); 23-03 next (Wave 3)
+Status: Wave 2 of 3 done; ready for 23-03
+Last activity: 2026-09-09 — Plan 23-02 complete (API-03/04): migrated ~28 argument/column-validation + not_fitted state-guard stop() sites to classed rlang::abort(class=c("eventstudy_error_<kind>","eventstudy_error")) across task/models/export/report/cross_sectional; 6 kinds; API-04 backtick-arg + quoted-value + first-5-then-ellipsis truncation; new test_classed_conditions.R asserts class + substring per family. All prior expect_error substrings preserved (extend-not-replace, zero test edits); "missing columns" kept not reworded. Invariants byte-untouched (.handle_degenerate/.validate_grounding, 23-01 snapshots); DESCRIPTION unchanged (no cli/lifecycle, no new Imports); suite FAIL 0 (PASS 2214). Commits 9027f94, 2215351.
 
 Progress: [████░░░░░░] 40% (v0.65.0 phases)
 
@@ -72,6 +72,7 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 | Phase 21 P01 | 8m | 4 tasks | 6 files |
 | Phase 22 P01 | 18min | 4 tasks | 4 files |
 | Phase 23 P01 | 8min | 3 tasks | 19 files |
+| Phase 23 P02 | 15m | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,8 @@ Recent decisions affecting current work:
 - [Phase 22]: report.css is injected only on the html branch of .build_output_format via system.file+nzchar; pdf/word/md never reference it
 - [Phase 23]: 23-01: print/format split via utils::capture.output of the original cat() body — byte-exact by construction, zero snapshot updates
 - [Phase 23]: 23-01: Advisor Pro footer emission moved into format.Advice/format.es_advice (captured, silent by default), not re-called in print.* (no double-emit)
+- [Phase 23]: [Phase 23]: 23-02: kept "missing columns" substring (not reworded to "missing required columns") — API-04 backtick/truncation improvement appended after preserved prefix, so all existing expect_error substrings survive with zero test edits
+- [Phase 23]: [Phase 23]: 23-02: classed conditions via rlang::abort(class=c("eventstudy_error_<kind>","eventstudy_error")) — rlang already an Import, no cli/lifecycle, no new dependency
 
 ### v0.64.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -132,8 +135,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-09T05:41:29.836Z
-Stopped at: Completed 23-01-PLAN.md
+Last session: 2026-09-09T06:00:53.595Z
+Stopped at: Completed 23-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
