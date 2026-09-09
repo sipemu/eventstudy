@@ -34,12 +34,8 @@ home:
   sidebar: false
 
 navbar:
-  logo:
-    image: logo.png
-    href: https://sipemu.github.io/eventstudy/
-    alt: EventStudy
   structure:
-    left: [logo, get-started, reference, articles, methods, gallery, examples]
+    left: [get-started, reference, articles, methods, gallery, examples]
     right: [search, github]
   components:
     get-started:

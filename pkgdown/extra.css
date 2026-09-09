@@ -138,3 +138,13 @@
 .es-tag-advisor  { background: #0dcaf0; }
 .es-tag-data     { background: #6c757d; }
 .es-tag-examples { background: #20c997; }
+
+/* Suppress the auto-injected header logo on content pages.
+   pkgdown 2.2.0 data_template() calls has_logo() and, when man/figures/logo.png
+   exists, injects <img class="logo"> into <div class="page-header"> on every
+   article/reference/vignette page via content-article.html `{{#logo}}...{{/logo}}`.
+   man/figures/logo.png must stay for README/favicon/OG-card; the body placement
+   is unwanted. Scoped to .page-header to avoid touching README or OG assets. */
+.page-header .logo {
+  display: none;
+}
