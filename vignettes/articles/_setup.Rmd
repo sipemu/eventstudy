@@ -12,10 +12,62 @@ knitr::opts_chunk$set(
 # Uses tinytable when available (bold header, right-aligned numerics), falls back
 # to knitr::kable() otherwise.  Return the table object so knitr::knit_print()
 # renders it -- do NOT call print() inside.
-es_tt <- function(x, caption = NULL, digits = 4) {
+es_tt <- function(x, caption = NULL, digits = 4, bar_cols = c("aar", "caar")) {
   if (requireNamespace("tinytable", quietly = TRUE)) {
-    align <- ifelse(vapply(x, is.numeric, logical(1L)), "r", "l")
-    tbl <- tinytable::tt(x, caption = caption, digits = digits)
+    # Identify bar target columns: bar_cols that exist in x and are numeric
+    target_cols <- intersect(bar_cols, names(x)[vapply(x, is.numeric, logical(1L))])
+
+    # Local helper: convert a numeric vector to HTML diverging-bar cell strings
+    make_bar_html <- function(vals, m, digs) {
+      vapply(vals, function(val) {
+        num_str <- if (is.na(val)) {
+          formatC(NA_real_, digits = digs, format = "f")
+        } else {
+          formatC(val, digits = digs, format = "f")
+        }
+        if (is.na(val) || !is.finite(val) || val == 0) {
+          paste0(
+            '<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">',
+            '<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>',
+            '</div>',
+            '<span style="font-variant-numeric:tabular-nums;">', num_str, '</span>'
+          )
+        } else {
+          bar_pct <- round(50 * abs(val) / m, 2)
+          bar_pct <- min(bar_pct, 50)
+          if (val < 0) {
+            bar_style <- paste0(
+              'position:absolute;right:50%;top:0;height:100%;',
+              'width:', bar_pct, '%;background:#dc2626;'
+            )
+          } else {
+            bar_style <- paste0(
+              'position:absolute;left:50%;top:0;height:100%;',
+              'width:', bar_pct, '%;background:#16a34a;'
+            )
+          }
+          paste0(
+            '<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">',
+            '<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>',
+            '<div style="', bar_style, '"></div>',
+            '</div>',
+            '<span style="font-variant-numeric:tabular-nums;">', num_str, '</span>'
+          )
+        }
+      }, character(1L))
+    }
+
+    # Replace target columns with HTML strings; track which were replaced
+    x_out <- x
+    for (col in target_cols) {
+      m <- max(abs(x_out[[col]]), na.rm = TRUE)
+      if (length(m) == 0L || is.na(m) || !is.finite(m) || m == 0) next
+      x_out[[col]] <- make_bar_html(x_out[[col]], m, digits)
+    }
+
+    # Compute align on the modified frame (bar cols are now character -> "l")
+    align <- ifelse(vapply(x_out, is.numeric, logical(1L)), "r", "l")
+    tbl <- tinytable::tt(x_out, caption = caption, digits = digits)
     tbl <- tinytable::style_tt(tbl, i = 0L, bold = TRUE)
     for (j_idx in seq_along(align)) {
       tbl <- tinytable::style_tt(tbl, j = j_idx, align = align[[j_idx]])
