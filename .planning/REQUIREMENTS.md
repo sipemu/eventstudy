@@ -38,7 +38,7 @@ Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All change
 
 ### Docs & Site Polish
 
-- [ ] **DOCS-01**: `@family` + `@seealso` roxygen tags added across pipeline/model/statistic/advisor functions so the Reference index cross-links
+- [x] **DOCS-01**: `@family` + `@seealso` roxygen tags added across pipeline/model/statistic/advisor functions so the Reference index cross-links
 - [ ] **DOCS-02**: README refreshed with an Ecosystem section linking the three tools (Google Sheets template · R package · WebAssembly app) and eventstudy.de; pkgdown home markers added
 - [ ] **DOCS-03**: `pkgdown::check_pkgdown()` added to CI (catches silent broken cross-references); navbar/news wiring verified; rough edges fixed
 - [ ] **DOCS-04**: Existing vignettes/articles tightened — getting-started flow and cross-links improved (no new CRAN vignettes; rich content stays in `vignettes/articles/`)
@@ -115,7 +115,7 @@ Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADM
 | API-05 | Phase 23 | Complete |
 | API-06 | Phase 23 | Complete |
 | CRAN-06 | Phase 23 | Complete |
-| DOCS-01 | Phase 24 | Pending |
+| DOCS-01 | Phase 24 | Complete |
 | DOCS-02 | Phase 24 | Pending |
 | DOCS-03 | Phase 24 | Pending |
 | DOCS-04 | Phase 24 | Pending |

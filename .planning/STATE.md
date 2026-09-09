@@ -5,16 +5,16 @@ milestone_name: Polish
 current_phase: 24
 current_phase_name: docs-site-polish
 status: executing
-stopped_at: Completed 23-03-PLAN.md
-last_updated: "2026-09-09T06:56:17.970Z"
+stopped_at: Completed 24-01-PLAN.md
+last_updated: "2026-09-09T07:07:04.676Z"
 last_activity: 2026-09-09
 last_activity_desc: Roadmap created; 30/30 v0.65.0 requirements mapped across 5 phases
-state_head: d33cabac3f3b53fbc32ed878d2b841acfba6e7a9
+state_head: 775dc7622b55eb62e5d042804f45ddce23398713
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 60
 ---
 
@@ -34,7 +34,7 @@ Plan: 03 complete (3/3 plans in Phase 23); Phase 23 done
 Status: All 3 waves done; Phase 23 (API & Message Polish) complete
 Last activity: 2026-09-09 — Plan 23-03 complete (API-05/06, CRAN-06): new R/inform.R .inform(msg, verbose=getOption("eventstudy.verbose",TRUE)) gates 8 informational message() sites (execute/report x3/task_validation x2/panel single-cohort fallback/synthetic quadprog fallback); verbose= plumbed onto run_event_study, es_report, generate_report, validate_task, estimate_panel_event_study, estimate_synthetic_control. Default output byte-identical; warnings/errors/degenerate one-warning NEVER gated (test_verbose.R asserts zero-variance MarketModel$fit() still fires one warning under verbose=FALSE). gridExtra::grid.arrange requireNamespace-guarded in plotting.R (closes Phase-21 carry-in). 23-DEPRECATION-AUDIT.md records grep-verified NO-OP (no lifecycle dep, no shim). DESCRIPTION unchanged (no cli/lifecycle, no new Imports); NAMESPACE unchanged; 23-01 snapshots byte-identical; suite FAIL 0 (PASS 2222). Commits a8d1404, 368fbca, 75d7554.
 
-Progress: [████░░░░░░] 40% (v0.65.0 phases)
+Progress: [██████░░░░] 60% (v0.65.0 phases)
 
 ## Milestone Roadmap (v0.65.0 — Phases 20–24)
 
@@ -74,6 +74,7 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 | Phase 23 P01 | 8min | 3 tasks | 19 files |
 | Phase 23 P02 | 15m | 3 tasks | 6 files |
 | Phase 23 P03 | 35m | 3 tasks | 13 files |
+| Phase 24 P01 | 18m | 3 tasks | 28 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,7 @@ Recent decisions affecting current work:
 - [Phase 23]: 23-01: Advisor Pro footer emission moved into format.Advice/format.es_advice (captured, silent by default), not re-called in print.* (no double-emit)
 - [Phase 23]: [Phase 23]: 23-02: kept "missing columns" substring (not reworded to "missing required columns") — API-04 backtick/truncation improvement appended after preserved prefix, so all existing expect_error substrings survive with zero test edits
 - [Phase 23]: [Phase 23]: 23-02: classed conditions via rlang::abort(class=c("eventstudy_error_<kind>","eventstudy_error")) — rlang already an Import, no cli/lifecycle, no new dependency
+- [Phase 24]: 24-01: 74 exported functions grouped into 7 eventstudy- @family clusters; single document() regen; DESCRIPTION unchanged; suite 2222/0
 
 ### v0.64.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -136,8 +138,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-09T06:10:36.381Z
-Stopped at: Completed 23-03-PLAN.md
+Last session: 2026-09-09T07:07:04.549Z
+Stopped at: Completed 24-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
