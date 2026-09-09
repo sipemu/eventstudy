@@ -59,7 +59,7 @@ in which the test correctly rejected the null on the event day.
 | 0.01                 | 0.96  |
 
 Detection power by true abnormal return (N = 15, cross-sectional test,
-alpha = 0.05) {#tinytable_r4snv3k6cdkhfbpjctsw .table .tinytable
+alpha = 0.05) {#tinytable_dxaxya7915zcegfm402f .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

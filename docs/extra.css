@@ -142,11 +142,12 @@
 /* Widen article and reference content containers while keeping the col-md-3
    right-hand "On this page" ToC intact. Both the ToC and the main content
    column live inside .container.template-article, so raising max-width
-   proportionally widens both without going full-bleed. 1400px is chosen as a
-   readable ceiling above the Bootstrap 5 xxl default of 1320px. */
+   proportionally widens both without going full-bleed. 1560px is chosen as a
+   readable ceiling above the Bootstrap 5 xxl default of 1320px, giving the
+   interactive plotly charts and wide result tables more horizontal room. */
 .container.template-article,
 .container.template-reference {
-  max-width: 1400px;
+  max-width: 1560px;
 }
 
 /* Suppress the auto-injected header logo on content pages.

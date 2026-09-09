@@ -111,7 +111,7 @@ also includes `GeneralizedSignTest`, the Corrado `RankTest`, and the
 | Earnings Beat | 5 | 0.0058317 | 0.004582 | 1.2728 | 0.331 | 0.0377161 | 2.35086 | 0.1431 |
 
 AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP
-statistics. {#tinytable_a3h2iqny8zl3xr3p3z15 .table .tinytable
+statistics. {#tinytable_1w20rqebffjx82a5gggv .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

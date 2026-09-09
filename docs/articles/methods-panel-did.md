@@ -95,7 +95,7 @@ they require optional packages and are gated `eval=FALSE`. Note the
 | 3             | NA       | NA        | NA        | NA               |
 
 Dynamic TWFE event-time coefficients (base period k = -1) on the
-synthetic staggered panel. {#tinytable_nycmr1fqbyb702klk5ne .table
+synthetic staggered panel. {#tinytable_a4h4wamig6y445iv3rir .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

@@ -108,7 +108,7 @@ are selected by passing an **R6 model object** into
 | 1        | VW Group | VOW.DE      | \[-10,-1\]  | 0.032121 | 0.03169   | 1.0137    | 0.31171 |
 
 Market-model CAR t-statistics on the dieselgate event (first 10 rows).
-{#tinytable_kc0mo93mn15h5v04vvla .table .tinytable
+{#tinytable_lybsc1bbfml7gkkzr39b .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

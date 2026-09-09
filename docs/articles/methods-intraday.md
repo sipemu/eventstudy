@@ -77,7 +77,7 @@ request carries `event_id`, `group`, `firm_symbol`, `index_symbol`,
 | 1 | Intraday | FIRM_A | \[-30,-21\] | -0.00206269 | 0.0029735 | -0.69369 | 0.4892 |
 
 Intraday cumulative abnormal returns around the event minute (first 10
-offsets). {#tinytable_5qnmkssvfqzhj28rtlre .table .tinytable
+offsets). {#tinytable_6f452yaslda6h0r9zgy1 .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

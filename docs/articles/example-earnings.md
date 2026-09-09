@@ -75,7 +75,7 @@ since the `broom` generic is not re-exported by the package.
 | MSFT        | \[-5,5\] | 0.06781  | 0.03889   | 1.7436    | 0.08278 |
 
 Cumulative Abnormal Returns by firm (widest event window)
-{#tinytable_z1dgg2j6bu9akoy16vxv .table .tinytable
+{#tinytable_bsweid0dqc212199vop0 .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

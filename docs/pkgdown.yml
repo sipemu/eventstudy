@@ -32,7 +32,7 @@ articles:
   synthetic-control: synthetic-control.html
   time-varying-models: time-varying-models.html
   volume-volatility-event-study: volume-volatility-event-study.html
-last_built: 2026-09-09T13:20Z
+last_built: 2026-09-09T13:37Z
 urls:
   reference: https://sipemu.github.io/eventstudy/reference
   article: https://sipemu.github.io/eventstudy/articles
