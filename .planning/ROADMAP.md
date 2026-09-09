@@ -129,7 +129,19 @@ Full detail: `.planning/milestones/v0.64.0-ROADMAP.md` · requirements: `.planni
   3. A `verbose=` argument quiets informational messages for scripted use, with the default byte-identical to current behavior when omitted; the deprecation audit either ships a back-compatible shim + warning for any rename or is documented as a verified no-op (no `lifecycle` dep).
   4. Behavior on valid inputs is unchanged, the full test suite is green, and snapshot tests cover the print methods plus the prose sanitiser.
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+**Wave 1**
+
+- [ ] 23-01-PLAN.md — Snapshot baseline (6 print + 4 prose-sanitiser) then print→format refactor, byte-identical (API-01, API-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 23-02-PLAN.md — Classed rlang::abort migration (~15 arg/column sites + not_fitted family) + message convention + parity tests (API-03, API-04)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 23-03-PLAN.md — verbose=/.inform() quiet mode + gridExtra guard + deprecation-audit verified no-op (API-05, API-06, CRAN-06)
 
 ### Phase 24: Docs & Site Polish
 
