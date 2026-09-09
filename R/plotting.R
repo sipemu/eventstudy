@@ -345,5 +345,9 @@ plot_diagnostics <- function(task, event_id = NULL) {
     theme_eventstudy()
 
   # Combine plots in a 2x2 grid
+  if (!requireNamespace("gridExtra", quietly = TRUE)) {
+    stop("Package 'gridExtra' is required for the diagnostic grid plot. Please install it.",
+         call. = FALSE)
+  }
   gridExtra::grid.arrange(p1, p2, p3, p4, ncol = 2)
 }
