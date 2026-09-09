@@ -177,40 +177,69 @@ correctly rejected the null on the event day.</p>
 <span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>true_abnormal_return <span class="op">=</span> <span class="va">ar</span>, power <span class="op">=</span> <span class="va">sim</span><span class="op">$</span><span class="va">power</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span><span class="fu">es_tt</span><span class="op">(</span></span>
 <span>  <span class="va">power_tbl</span>, digits <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"Detection power by true abnormal return (N = 15, cross-sectional test, alpha = 0.05)"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>Detection power by true abnormal return (N = 15,
-cross-sectional test, alpha = 0.05)</caption>
-<thead><tr class="header">
-<th align="right">true_abnormal_return</th>
-<th align="right">power</th>
-</tr></thead>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_52kdxfrqjcwtt49yfkoy = TinyTable.createTableFunctions("tinytable_52kdxfrqjcwtt49yfkoy");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '5', j: 1 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_mqwkbb61qzi5tobkpg1s',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 } ], css_id: 'tinytable_css_oh5x5ay2t040j4ivcl8l',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_qev6xoxy84mhweviiu4g',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_52kdxfrqjcwtt49yfkoy.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_52kdxfrqjcwtt49yfkoy td.tinytable_css_mqwkbb61qzi5tobkpg1s, #tinytable_52kdxfrqjcwtt49yfkoy th.tinytable_css_mqwkbb61qzi5tobkpg1s {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_52kdxfrqjcwtt49yfkoy td.tinytable_css_oh5x5ay2t040j4ivcl8l, #tinytable_52kdxfrqjcwtt49yfkoy th.tinytable_css_oh5x5ay2t040j4ivcl8l { text-align: right }
+    #tinytable_52kdxfrqjcwtt49yfkoy td.tinytable_css_qev6xoxy84mhweviiu4g, #tinytable_52kdxfrqjcwtt49yfkoy th.tinytable_css_qev6xoxy84mhweviiu4g {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_52kdxfrqjcwtt49yfkoy" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<caption>Detection power by true abnormal return (N = 15, cross-sectional test, alpha = 0.05)</caption>
+        <thead><tr>
+<th scope="col" data-row="0" data-col="1">true_abnormal_return</th>
+                <th scope="col" data-row="0" data-col="2">power</th>
+              </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="right">0.001</td>
-<td align="right">0.035</td>
-</tr>
-<tr class="even">
-<td align="right">0.002</td>
-<td align="right">0.100</td>
-</tr>
-<tr class="odd">
-<td align="right">0.004</td>
-<td align="right">0.270</td>
-</tr>
-<tr class="even">
-<td align="right">0.006</td>
-<td align="right">0.570</td>
-</tr>
-<tr class="odd">
-<td align="right">0.010</td>
-<td align="right">0.960</td>
-</tr>
+<tr>
+<td data-row="1" data-col="1">0.001</td>
+                  <td data-row="1" data-col="2">0.035</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">0.002</td>
+                  <td data-row="2" data-col="2">0.1</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">0.004</td>
+                  <td data-row="3" data-col="2">0.27</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">0.006</td>
+                  <td data-row="4" data-col="2">0.57</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">0.01</td>
+                  <td data-row="5" data-col="2">0.96</td>
+                </tr>
 </tbody>
 </table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 <div class="section level2">
 <h2 id="results-plot">Results plot<a class="anchor" aria-label="anchor" href="#results-plot"></a>
@@ -238,7 +267,7 @@ conventional 80% power target.</p>
 <span>    yaxis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Power"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <div class="plotly html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:672px;height:384px;"></div>
-<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"visdat":{"29f98f35df7739":["function () ","plotlyVisDat"]},"cur_data":"29f98f35df7739","attrs":{"29f98f35df7739":{"x":{},"y":{},"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"},"29f98f35df7739.1":{"x":0.001,"y":0.80000000000000004,"xend":0.01,"yend":0.80000000000000004,"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"inherit":false}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Power curve: detection rate vs true abnormal return (synthetic)","xaxis":{"domain":[0,1],"automargin":true,"title":"True abnormal return"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Power","range":[0,1]},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[0.001,0.002,0.0040000000000000001,0.0060000000000000001,0.01],"y":[0.035000000000000003,0.10000000000000001,0.27000000000000002,0.56999999999999995,0.95999999999999996],"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8,"line":{"color":"rgba(31,119,180,1)"}},"type":"scatter","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.001,0.01],"y":[0.80000000000000004,0.80000000000000004],"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"marker":{"color":"rgba(255,127,14,1)","line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"visdat":{"2a643924099e32":["function () ","plotlyVisDat"]},"cur_data":"2a643924099e32","attrs":{"2a643924099e32":{"x":{},"y":{},"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"},"2a643924099e32.1":{"x":0.001,"y":0.80000000000000004,"xend":0.01,"yend":0.80000000000000004,"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"inherit":false}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Power curve: detection rate vs true abnormal return (synthetic)","xaxis":{"domain":[0,1],"automargin":true,"title":"True abnormal return"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Power","range":[0,1]},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[0.001,0.002,0.0040000000000000001,0.0060000000000000001,0.01],"y":[0.035000000000000003,0.10000000000000001,0.27000000000000002,0.56999999999999995,0.95999999999999996],"mode":"lines+markers","line":{"color":"#20c997","width":3},"marker":{"color":"#20c997","size":8,"line":{"color":"rgba(31,119,180,1)"}},"type":"scatter","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.001,0.01],"y":[0.80000000000000004,0.80000000000000004],"type":"scatter","mode":"lines","line":{"color":"grey","dash":"dash"},"showlegend":false,"marker":{"color":"rgba(255,127,14,1)","line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 <div class="section level2">
 <h2 id="power-analysis-interpretation">Power analysis interpretation<a class="anchor" aria-label="anchor" href="#power-analysis-interpretation"></a>
@@ -324,28 +353,28 @@ Multiple Testing</a> – robust alternatives.</li>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] EventStudy_0.65.0</span></span>
+<span><span class="co">#&gt; [1] EventStudy_0.62.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         </span></span>
-<span><span class="co">#&gt;  [4] compiler_4.6.1       tidyselect_1.2.1     stringr_1.6.0       </span></span>
-<span><span class="co">#&gt;  [7] tidyr_1.3.2          jquerylib_0.1.4      systemfonts_1.3.2   </span></span>
-<span><span class="co">#&gt; [10] scales_1.4.0         textshaping_1.0.5    yaml_2.3.12         </span></span>
-<span><span class="co">#&gt; [13] fastmap_1.2.0        ggplot2_4.0.3        R6_2.6.1            </span></span>
-<span><span class="co">#&gt; [16] generics_0.1.4       distributional_0.8.0 knitr_1.51          </span></span>
-<span><span class="co">#&gt; [19] htmlwidgets_1.6.4    tibble_3.3.1         desc_1.4.3          </span></span>
-<span><span class="co">#&gt; [22] RColorBrewer_1.1-3   bslib_0.11.0         pillar_1.11.1       </span></span>
-<span><span class="co">#&gt; [25] rlang_1.2.0          stringi_1.8.7        cachem_1.1.0        </span></span>
-<span><span class="co">#&gt; [28] xfun_0.59            S7_0.2.2             fs_2.1.0            </span></span>
-<span><span class="co">#&gt; [31] sass_0.4.10          lazyeval_0.2.3       otel_0.2.0          </span></span>
-<span><span class="co">#&gt; [34] viridisLite_0.4.3    plotly_4.12.0        cli_3.6.6           </span></span>
-<span><span class="co">#&gt; [37] withr_3.0.3          pkgdown_2.2.0        magrittr_2.0.5      </span></span>
-<span><span class="co">#&gt; [40] crosstalk_1.2.2      digest_0.6.39        grid_4.6.1          </span></span>
-<span><span class="co">#&gt; [43] lifecycle_1.0.5      vctrs_0.7.3          data.table_1.18.4   </span></span>
-<span><span class="co">#&gt; [46] evaluate_1.0.5       glue_1.8.1           farver_2.1.2        </span></span>
-<span><span class="co">#&gt; [49] ragg_1.5.2           purrr_1.2.2          httr_1.4.8          </span></span>
-<span><span class="co">#&gt; [52] rmarkdown_2.31       tools_4.6.1          pkgconfig_2.0.3     </span></span>
-<span><span class="co">#&gt; [55] htmltools_0.5.9</span></span></code></pre>
+<span><span class="co">#&gt;  [1] plotly_4.12.0        sass_0.4.10          generics_0.1.4      </span></span>
+<span><span class="co">#&gt;  [4] tidyr_1.3.2          stringi_1.8.7        digest_0.6.39       </span></span>
+<span><span class="co">#&gt;  [7] magrittr_2.0.5       evaluate_1.0.5       grid_4.6.1          </span></span>
+<span><span class="co">#&gt; [10] RColorBrewer_1.1-3   fastmap_1.2.0        jsonlite_2.0.0      </span></span>
+<span><span class="co">#&gt; [13] httr_1.4.8           purrr_1.2.2          crosstalk_1.2.2     </span></span>
+<span><span class="co">#&gt; [16] viridisLite_0.4.3    scales_1.4.0         lazyeval_0.2.3      </span></span>
+<span><span class="co">#&gt; [19] textshaping_1.0.5    jquerylib_0.1.4      cli_3.6.6           </span></span>
+<span><span class="co">#&gt; [22] rlang_1.2.0          withr_3.0.3          cachem_1.1.0        </span></span>
+<span><span class="co">#&gt; [25] yaml_2.3.12          tinytable_0.18.0     otel_0.2.0          </span></span>
+<span><span class="co">#&gt; [28] tools_4.6.1          dplyr_1.2.1          ggplot2_4.0.3       </span></span>
+<span><span class="co">#&gt; [31] vctrs_0.7.3          R6_2.6.1             lifecycle_1.0.5     </span></span>
+<span><span class="co">#&gt; [34] stringr_1.6.0        fs_2.1.0             htmlwidgets_1.6.4   </span></span>
+<span><span class="co">#&gt; [37] ragg_1.5.2           pkgconfig_2.0.3      desc_1.4.3          </span></span>
+<span><span class="co">#&gt; [40] pkgdown_2.2.0        pillar_1.11.1        bslib_0.11.0        </span></span>
+<span><span class="co">#&gt; [43] gtable_0.3.6         glue_1.8.1           data.table_1.18.4   </span></span>
+<span><span class="co">#&gt; [46] systemfonts_1.3.2    xfun_0.59            tibble_3.3.1        </span></span>
+<span><span class="co">#&gt; [49] tidyselect_1.2.1     knitr_1.51           farver_2.1.2        </span></span>
+<span><span class="co">#&gt; [52] htmltools_0.5.9      rmarkdown_2.31       compiler_4.6.1      </span></span>
+<span><span class="co">#&gt; [55] S7_0.2.2             distributional_0.8.0</span></span></code></pre>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-MacKinlay1997" class="csl-entry">
 MacKinlay, A. Craig. 1997. <span>“Event Studies in Economics and

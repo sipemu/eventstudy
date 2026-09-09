@@ -233,159 +233,183 @@ calendar-time inference.</p>
 <h2 id="rendered-table">7. Rendered Table<a class="anchor" aria-label="anchor" href="#rendered-table"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/tidy.EventStudyTask.html">tidy.EventStudyTask</a></span><span class="op">(</span><span class="va">task</span>, type <span class="op">=</span> <span class="st">"aar"</span><span class="op">)</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP statistics."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>AAR / CAAR with cross-sectional t, plus companion
-Patell/BMP/Sign/KP statistics.</caption>
-<colgroup>
-<col width="15%">
-<col width="5%">
-<col width="9%">
-<col width="10%">
-<col width="10%">
-<col width="8%">
-<col width="8%">
-<col width="16%">
-<col width="14%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">group</th>
-<th align="left">term</th>
-<th align="right">estimate</th>
-<th align="right">std.error</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
-<th align="right">caar</th>
-<th align="right">caar_statistic</th>
-<th align="right">caar_p.value</th>
-</tr></thead>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_kq5645vzzpqxfyq4pxif = TinyTable.createTableFunctions("tinytable_kq5645vzzpqxfyq4pxif");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '11', j: 3 }, { i: '11', j: 4 }, { i: '11', j: 5 }, { i: '11', j: 6 }, { i: '11', j: 7 }, { i: '11', j: 8 }, { i: '11', j: 9 } ], css_id: 'tinytable_css_p611v11cvwupaki4ye7u',}, 
+          { positions: [ { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '6', j: 4 }, { i: '7', j: 4 }, { i: '8', j: 4 }, { i: '9', j: 4 }, { i: '10', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '6', j: 5 }, { i: '7', j: 5 }, { i: '8', j: 5 }, { i: '9', j: 5 }, { i: '10', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 }, { i: '6', j: 6 }, { i: '7', j: 6 }, { i: '8', j: 6 }, { i: '9', j: 6 }, { i: '10', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '3', j: 7 }, { i: '4', j: 7 }, { i: '5', j: 7 }, { i: '6', j: 7 }, { i: '7', j: 7 }, { i: '8', j: 7 }, { i: '9', j: 7 }, { i: '10', j: 7 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '3', j: 8 }, { i: '4', j: 8 }, { i: '5', j: 8 }, { i: '6', j: 8 }, { i: '7', j: 8 }, { i: '8', j: 8 }, { i: '9', j: 8 }, { i: '10', j: 8 }, { i: '1', j: 9 }, { i: '2', j: 9 }, { i: '3', j: 9 }, { i: '4', j: 9 }, { i: '5', j: 9 }, { i: '6', j: 9 }, { i: '7', j: 9 }, { i: '8', j: 9 }, { i: '9', j: 9 }, { i: '10', j: 9 } ], css_id: 'tinytable_css_ti5othc5t2vvis8c4knh',}, 
+          { positions: [ { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 }, { i: '0', j: 8 }, { i: '0', j: 9 } ], css_id: 'tinytable_css_akqb4f6oy2k91sw4haks',}, 
+          { positions: [ { i: '11', j: 1 }, { i: '11', j: 2 } ], css_id: 'tinytable_css_rmajfmr6dd2ucbabvjid',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 } ], css_id: 'tinytable_css_gcl582r86kc3lmt9plp7',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_zakv563yz5r7ss1ch5l1',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_kq5645vzzpqxfyq4pxif.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_kq5645vzzpqxfyq4pxif td.tinytable_css_p611v11cvwupaki4ye7u, #tinytable_kq5645vzzpqxfyq4pxif th.tinytable_css_p611v11cvwupaki4ye7u {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_kq5645vzzpqxfyq4pxif td.tinytable_css_ti5othc5t2vvis8c4knh, #tinytable_kq5645vzzpqxfyq4pxif th.tinytable_css_ti5othc5t2vvis8c4knh { text-align: right }
+    #tinytable_kq5645vzzpqxfyq4pxif td.tinytable_css_akqb4f6oy2k91sw4haks, #tinytable_kq5645vzzpqxfyq4pxif th.tinytable_css_akqb4f6oy2k91sw4haks {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    #tinytable_kq5645vzzpqxfyq4pxif td.tinytable_css_rmajfmr6dd2ucbabvjid, #tinytable_kq5645vzzpqxfyq4pxif th.tinytable_css_rmajfmr6dd2ucbabvjid {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_kq5645vzzpqxfyq4pxif td.tinytable_css_gcl582r86kc3lmt9plp7, #tinytable_kq5645vzzpqxfyq4pxif th.tinytable_css_gcl582r86kc3lmt9plp7 { text-align: left }
+    #tinytable_kq5645vzzpqxfyq4pxif td.tinytable_css_zakv563yz5r7ss1ch5l1, #tinytable_kq5645vzzpqxfyq4pxif th.tinytable_css_zakv563yz5r7ss1ch5l1 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_kq5645vzzpqxfyq4pxif" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<caption>AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP statistics.</caption>
+        <thead><tr>
+<th scope="col" data-row="0" data-col="1">group</th>
+                <th scope="col" data-row="0" data-col="2">term</th>
+                <th scope="col" data-row="0" data-col="3">estimate</th>
+                <th scope="col" data-row="0" data-col="4">std.error</th>
+                <th scope="col" data-row="0" data-col="5">statistic</th>
+                <th scope="col" data-row="0" data-col="6">p.value</th>
+                <th scope="col" data-row="0" data-col="7">caar</th>
+                <th scope="col" data-row="0" data-col="8">caar_statistic</th>
+                <th scope="col" data-row="0" data-col="9">caar_p.value</th>
+              </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="left">Earnings Beat</td>
-<td align="left">-5</td>
-<td align="right">-0.0048</td>
-<td align="right">0.0051</td>
-<td align="right">-0.9518</td>
-<td align="right">0.4416</td>
-<td align="right">-0.0048</td>
-<td align="right">-0.9518</td>
-<td align="right">0.4416</td>
-</tr>
-<tr class="even">
-<td align="left">Earnings Beat</td>
-<td align="left">-4</td>
-<td align="right">-0.0018</td>
-<td align="right">0.0011</td>
-<td align="right">-1.6375</td>
-<td align="right">0.2432</td>
-<td align="right">-0.0066</td>
-<td align="right">-1.3184</td>
-<td align="right">0.3181</td>
-</tr>
-<tr class="odd">
-<td align="left">Earnings Beat</td>
-<td align="left">-3</td>
-<td align="right">0.0064</td>
-<td align="right">0.0068</td>
-<td align="right">0.9463</td>
-<td align="right">0.4439</td>
-<td align="right">-0.0003</td>
-<td align="right">-0.1398</td>
-<td align="right">0.9016</td>
-</tr>
-<tr class="even">
-<td align="left">Earnings Beat</td>
-<td align="left">-2</td>
-<td align="right">0.0021</td>
-<td align="right">0.0033</td>
-<td align="right">0.6547</td>
-<td align="right">0.5799</td>
-<td align="right">0.0019</td>
-<td align="right">0.5058</td>
-<td align="right">0.6633</td>
-</tr>
-<tr class="odd">
-<td align="left">Earnings Beat</td>
-<td align="left">-1</td>
-<td align="right">-0.0027</td>
-<td align="right">0.0063</td>
-<td align="right">-0.4380</td>
-<td align="right">0.7041</td>
-<td align="right">-0.0009</td>
-<td align="right">-0.0886</td>
-<td align="right">0.9375</td>
-</tr>
-<tr class="even">
-<td align="left">Earnings Beat</td>
-<td align="left">0</td>
-<td align="right">0.0003</td>
-<td align="right">0.0016</td>
-<td align="right">0.1690</td>
-<td align="right">0.8813</td>
-<td align="right">-0.0006</td>
-<td align="right">-0.0560</td>
-<td align="right">0.9604</td>
-</tr>
-<tr class="odd">
-<td align="left">Earnings Beat</td>
-<td align="left">1</td>
-<td align="right">0.0350</td>
-<td align="right">0.0218</td>
-<td align="right">1.6018</td>
-<td align="right">0.2504</td>
-<td align="right">0.0344</td>
-<td align="right">3.0528</td>
-<td align="right">0.0926</td>
-</tr>
-<tr class="even">
-<td align="left">Earnings Beat</td>
-<td align="left">2</td>
-<td align="right">0.0048</td>
-<td align="right">0.0033</td>
-<td align="right">1.4529</td>
-<td align="right">0.2834</td>
-<td align="right">0.0392</td>
-<td align="right">3.5533</td>
-<td align="right">0.0709</td>
-</tr>
-<tr class="odd">
-<td align="left">Earnings Beat</td>
-<td align="left">3</td>
-<td align="right">-0.0070</td>
-<td align="right">0.0033</td>
-<td align="right">-2.1545</td>
-<td align="right">0.1640</td>
-<td align="right">0.0322</td>
-<td align="right">2.4026</td>
-<td align="right">0.1382</td>
-</tr>
-<tr class="even">
-<td align="left">Earnings Beat</td>
-<td align="left">4</td>
-<td align="right">-0.0003</td>
-<td align="right">0.0027</td>
-<td align="right">-0.1177</td>
-<td align="right">0.9171</td>
-<td align="right">0.0319</td>
-<td align="right">2.7628</td>
-<td align="right">0.1098</td>
-</tr>
-<tr class="odd">
-<td align="left">Earnings Beat</td>
-<td align="left">5</td>
-<td align="right">0.0058</td>
-<td align="right">0.0046</td>
-<td align="right">1.2728</td>
-<td align="right">0.3310</td>
-<td align="right">0.0377</td>
-<td align="right">2.3509</td>
-<td align="right">0.1431</td>
-</tr>
+<tr>
+<td data-row="1" data-col="1">Earnings Beat</td>
+                  <td data-row="1" data-col="2">-5</td>
+                  <td data-row="1" data-col="3">-0.0048091</td>
+                  <td data-row="1" data-col="4">0.005052</td>
+                  <td data-row="1" data-col="5">-0.9518</td>
+                  <td data-row="1" data-col="6">0.4416</td>
+                  <td data-row="1" data-col="7">-0.0048091</td>
+                  <td data-row="1" data-col="8">-0.95184</td>
+                  <td data-row="1" data-col="9">0.44164</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">Earnings Beat</td>
+                  <td data-row="2" data-col="2">-4</td>
+                  <td data-row="2" data-col="3">-0.0018294</td>
+                  <td data-row="2" data-col="4">0.001117</td>
+                  <td data-row="2" data-col="5">-1.6375</td>
+                  <td data-row="2" data-col="6">0.2432</td>
+                  <td data-row="2" data-col="7">-0.0066385</td>
+                  <td data-row="2" data-col="8">-1.31839</td>
+                  <td data-row="2" data-col="9">0.31811</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">Earnings Beat</td>
+                  <td data-row="3" data-col="2">-3</td>
+                  <td data-row="3" data-col="3">0.0063878</td>
+                  <td data-row="3" data-col="4">0.00675</td>
+                  <td data-row="3" data-col="5">0.9463</td>
+                  <td data-row="3" data-col="6">0.4439</td>
+                  <td data-row="3" data-col="7">-0.0002507</td>
+                  <td data-row="3" data-col="8">-0.13985</td>
+                  <td data-row="3" data-col="9">0.90159</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">Earnings Beat</td>
+                  <td data-row="4" data-col="2">-2</td>
+                  <td data-row="4" data-col="3">0.0021288</td>
+                  <td data-row="4" data-col="4">0.003252</td>
+                  <td data-row="4" data-col="5">0.6547</td>
+                  <td data-row="4" data-col="6">0.5799</td>
+                  <td data-row="4" data-col="7">0.0018781</td>
+                  <td data-row="4" data-col="8">0.50577</td>
+                  <td data-row="4" data-col="9">0.66325</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">Earnings Beat</td>
+                  <td data-row="5" data-col="2">-1</td>
+                  <td data-row="5" data-col="3">-0.0027477</td>
+                  <td data-row="5" data-col="4">0.006273</td>
+                  <td data-row="5" data-col="5">-0.438</td>
+                  <td data-row="5" data-col="6">0.7041</td>
+                  <td data-row="5" data-col="7">-0.0008696</td>
+                  <td data-row="5" data-col="8">-0.08863</td>
+                  <td data-row="5" data-col="9">0.93745</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">Earnings Beat</td>
+                  <td data-row="6" data-col="2">0</td>
+                  <td data-row="6" data-col="3">0.000265</td>
+                  <td data-row="6" data-col="4">0.001568</td>
+                  <td data-row="6" data-col="5">0.169</td>
+                  <td data-row="6" data-col="6">0.8813</td>
+                  <td data-row="6" data-col="7">-0.0006046</td>
+                  <td data-row="6" data-col="8">-0.05602</td>
+                  <td data-row="6" data-col="9">0.96042</td>
+                </tr>
+<tr>
+<td data-row="7" data-col="1">Earnings Beat</td>
+                  <td data-row="7" data-col="2">1</td>
+                  <td data-row="7" data-col="3">0.0349844</td>
+                  <td data-row="7" data-col="4">0.02184</td>
+                  <td data-row="7" data-col="5">1.6018</td>
+                  <td data-row="7" data-col="6">0.2504</td>
+                  <td data-row="7" data-col="7">0.0343799</td>
+                  <td data-row="7" data-col="8">3.05278</td>
+                  <td data-row="7" data-col="9">0.09263</td>
+                </tr>
+<tr>
+<td data-row="8" data-col="1">Earnings Beat</td>
+                  <td data-row="8" data-col="2">2</td>
+                  <td data-row="8" data-col="3">0.0048387</td>
+                  <td data-row="8" data-col="4">0.00333</td>
+                  <td data-row="8" data-col="5">1.4529</td>
+                  <td data-row="8" data-col="6">0.2834</td>
+                  <td data-row="8" data-col="7">0.0392185</td>
+                  <td data-row="8" data-col="8">3.55326</td>
+                  <td data-row="8" data-col="9">0.07089</td>
+                </tr>
+<tr>
+<td data-row="9" data-col="1">Earnings Beat</td>
+                  <td data-row="9" data-col="2">3</td>
+                  <td data-row="9" data-col="3">-0.0070158</td>
+                  <td data-row="9" data-col="4">0.003256</td>
+                  <td data-row="9" data-col="5">-2.1545</td>
+                  <td data-row="9" data-col="6">0.164</td>
+                  <td data-row="9" data-col="7">0.0322027</td>
+                  <td data-row="9" data-col="8">2.4026</td>
+                  <td data-row="9" data-col="9">0.13821</td>
+                </tr>
+<tr>
+<td data-row="10" data-col="1">Earnings Beat</td>
+                  <td data-row="10" data-col="2">4</td>
+                  <td data-row="10" data-col="3">-0.0003184</td>
+                  <td data-row="10" data-col="4">0.002705</td>
+                  <td data-row="10" data-col="5">-0.1177</td>
+                  <td data-row="10" data-col="6">0.9171</td>
+                  <td data-row="10" data-col="7">0.0318844</td>
+                  <td data-row="10" data-col="8">2.76278</td>
+                  <td data-row="10" data-col="9">0.10984</td>
+                </tr>
+<tr>
+<td data-row="11" data-col="1">Earnings Beat</td>
+                  <td data-row="11" data-col="2">5</td>
+                  <td data-row="11" data-col="3">0.0058317</td>
+                  <td data-row="11" data-col="4">0.004582</td>
+                  <td data-row="11" data-col="5">1.2728</td>
+                  <td data-row="11" data-col="6">0.331</td>
+                  <td data-row="11" data-col="7">0.0377161</td>
+                  <td data-row="11" data-col="8">2.35086</td>
+                  <td data-row="11" data-col="9">0.1431</td>
+                </tr>
 </tbody>
 </table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 <div class="section level2">
 <h2 id="rendered-plot">8. Rendered Plot<a class="anchor" aria-label="anchor" href="#rendered-plot"></a>

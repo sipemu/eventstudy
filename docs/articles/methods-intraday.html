@@ -205,136 +205,161 @@ carry <code>symbol</code>, <code>timestamp</code> (POSIXct),
 <h2 id="rendered-table">7. Rendered Table<a class="anchor" aria-label="anchor" href="#rendered-table"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/tidy.EventStudyTask.html">tidy.EventStudyTask</a></span><span class="op">(</span><span class="va">task</span>, type <span class="op">=</span> <span class="st">"car"</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"Intraday cumulative abnormal returns around the event minute (first 10 offsets)."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>Intraday cumulative abnormal returns around the event minute
-(first 10 offsets).</caption>
-<colgroup>
-<col width="11%">
-<col width="11%">
-<col width="15%">
-<col width="12%">
-<col width="11%">
-<col width="12%">
-<col width="12%">
-<col width="10%">
-</colgroup>
-<thead><tr class="header">
-<th align="right">event_id</th>
-<th align="left">group</th>
-<th align="left">firm_symbol</th>
-<th align="left">term</th>
-<th align="right">estimate</th>
-<th align="right">std.error</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
-</tr></thead>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_n2r1h2ic9fuo0zqpisr7 = TinyTable.createTableFunctions("tinytable_n2r1h2ic9fuo0zqpisr7");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '10', j: 2 }, { i: '10', j: 3 }, { i: '10', j: 4 } ], css_id: 'tinytable_css_ob2fiukf0jq71ly12atl',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '6', j: 4 }, { i: '7', j: 4 }, { i: '8', j: 4 }, { i: '9', j: 4 } ], css_id: 'tinytable_css_f4rv77u6g0x5356rlw4d',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 }, { i: '0', j: 4 } ], css_id: 'tinytable_css_oxomw27ch3i9bf5tt4vg',}, 
+          { positions: [ { i: '10', j: 1 }, { i: '10', j: 5 }, { i: '10', j: 6 }, { i: '10', j: 7 }, { i: '10', j: 8 } ], css_id: 'tinytable_css_b1sbj49oykxhaj91adsg',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '6', j: 5 }, { i: '7', j: 5 }, { i: '8', j: 5 }, { i: '9', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 }, { i: '6', j: 6 }, { i: '7', j: 6 }, { i: '8', j: 6 }, { i: '9', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '3', j: 7 }, { i: '4', j: 7 }, { i: '5', j: 7 }, { i: '6', j: 7 }, { i: '7', j: 7 }, { i: '8', j: 7 }, { i: '9', j: 7 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '3', j: 8 }, { i: '4', j: 8 }, { i: '5', j: 8 }, { i: '6', j: 8 }, { i: '7', j: 8 }, { i: '8', j: 8 }, { i: '9', j: 8 } ], css_id: 'tinytable_css_26pwv8lp61m1e4leiulz',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 }, { i: '0', j: 8 } ], css_id: 'tinytable_css_qbpgu0o24c6gwyah38l4',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_n2r1h2ic9fuo0zqpisr7.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_n2r1h2ic9fuo0zqpisr7 td.tinytable_css_ob2fiukf0jq71ly12atl, #tinytable_n2r1h2ic9fuo0zqpisr7 th.tinytable_css_ob2fiukf0jq71ly12atl {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_n2r1h2ic9fuo0zqpisr7 td.tinytable_css_f4rv77u6g0x5356rlw4d, #tinytable_n2r1h2ic9fuo0zqpisr7 th.tinytable_css_f4rv77u6g0x5356rlw4d { text-align: left }
+    #tinytable_n2r1h2ic9fuo0zqpisr7 td.tinytable_css_oxomw27ch3i9bf5tt4vg, #tinytable_n2r1h2ic9fuo0zqpisr7 th.tinytable_css_oxomw27ch3i9bf5tt4vg {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    #tinytable_n2r1h2ic9fuo0zqpisr7 td.tinytable_css_b1sbj49oykxhaj91adsg, #tinytable_n2r1h2ic9fuo0zqpisr7 th.tinytable_css_b1sbj49oykxhaj91adsg {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_n2r1h2ic9fuo0zqpisr7 td.tinytable_css_26pwv8lp61m1e4leiulz, #tinytable_n2r1h2ic9fuo0zqpisr7 th.tinytable_css_26pwv8lp61m1e4leiulz { text-align: right }
+    #tinytable_n2r1h2ic9fuo0zqpisr7 td.tinytable_css_qbpgu0o24c6gwyah38l4, #tinytable_n2r1h2ic9fuo0zqpisr7 th.tinytable_css_qbpgu0o24c6gwyah38l4 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_n2r1h2ic9fuo0zqpisr7" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<caption>Intraday cumulative abnormal returns around the event minute (first 10 offsets).</caption>
+        <thead><tr>
+<th scope="col" data-row="0" data-col="1">event_id</th>
+                <th scope="col" data-row="0" data-col="2">group</th>
+                <th scope="col" data-row="0" data-col="3">firm_symbol</th>
+                <th scope="col" data-row="0" data-col="4">term</th>
+                <th scope="col" data-row="0" data-col="5">estimate</th>
+                <th scope="col" data-row="0" data-col="6">std.error</th>
+                <th scope="col" data-row="0" data-col="7">statistic</th>
+                <th scope="col" data-row="0" data-col="8">p.value</th>
+              </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-30]</td>
-<td align="right">0.0001</td>
-<td align="right">0.0009</td>
-<td align="right">0.0821</td>
-<td align="right">0.9347</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-29]</td>
-<td align="right">-0.0014</td>
-<td align="right">0.0013</td>
-<td align="right">-1.0600</td>
-<td align="right">0.2913</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-28]</td>
-<td align="right">-0.0002</td>
-<td align="right">0.0016</td>
-<td align="right">-0.1220</td>
-<td align="right">0.9031</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-27]</td>
-<td align="right">-0.0004</td>
-<td align="right">0.0019</td>
-<td align="right">-0.2126</td>
-<td align="right">0.8320</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-26]</td>
-<td align="right">-0.0008</td>
-<td align="right">0.0021</td>
-<td align="right">-0.3904</td>
-<td align="right">0.6970</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-25]</td>
-<td align="right">-0.0020</td>
-<td align="right">0.0023</td>
-<td align="right">-0.8643</td>
-<td align="right">0.3892</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-24]</td>
-<td align="right">-0.0020</td>
-<td align="right">0.0025</td>
-<td align="right">-0.8151</td>
-<td align="right">0.4166</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-23]</td>
-<td align="right">-0.0028</td>
-<td align="right">0.0027</td>
-<td align="right">-1.0573</td>
-<td align="right">0.2925</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-22]</td>
-<td align="right">-0.0034</td>
-<td align="right">0.0028</td>
-<td align="right">-1.2204</td>
-<td align="right">0.2247</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">Intraday</td>
-<td align="left">FIRM_A</td>
-<td align="left">[-30,-21]</td>
-<td align="right">-0.0021</td>
-<td align="right">0.0030</td>
-<td align="right">-0.6937</td>
-<td align="right">0.4892</td>
-</tr>
+<tr>
+<td data-row="1" data-col="1">1</td>
+                  <td data-row="1" data-col="2">Intraday</td>
+                  <td data-row="1" data-col="3">FIRM_A</td>
+                  <td data-row="1" data-col="4">[-30,-30]</td>
+                  <td data-row="1" data-col="5">0.00007718</td>
+                  <td data-row="1" data-col="6">0.0009403</td>
+                  <td data-row="1" data-col="7">0.08208</td>
+                  <td data-row="1" data-col="8">0.9347</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">1</td>
+                  <td data-row="2" data-col="2">Intraday</td>
+                  <td data-row="2" data-col="3">FIRM_A</td>
+                  <td data-row="2" data-col="4">[-30,-29]</td>
+                  <td data-row="2" data-col="5">-0.00140952</td>
+                  <td data-row="2" data-col="6">0.0013298</td>
+                  <td data-row="2" data-col="7">-1.05996</td>
+                  <td data-row="2" data-col="8">0.2913</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">1</td>
+                  <td data-row="3" data-col="2">Intraday</td>
+                  <td data-row="3" data-col="3">FIRM_A</td>
+                  <td data-row="3" data-col="4">[-30,-28]</td>
+                  <td data-row="3" data-col="5">-0.00019876</td>
+                  <td data-row="3" data-col="6">0.0016287</td>
+                  <td data-row="3" data-col="7">-0.12204</td>
+                  <td data-row="3" data-col="8">0.9031</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">1</td>
+                  <td data-row="4" data-col="2">Intraday</td>
+                  <td data-row="4" data-col="3">FIRM_A</td>
+                  <td data-row="4" data-col="4">[-30,-27]</td>
+                  <td data-row="4" data-col="5">-0.00039988</td>
+                  <td data-row="4" data-col="6">0.0018806</td>
+                  <td data-row="4" data-col="7">-0.21264</td>
+                  <td data-row="4" data-col="8">0.832</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">1</td>
+                  <td data-row="5" data-col="2">Intraday</td>
+                  <td data-row="5" data-col="3">FIRM_A</td>
+                  <td data-row="5" data-col="4">[-30,-26]</td>
+                  <td data-row="5" data-col="5">-0.0008208</td>
+                  <td data-row="5" data-col="6">0.0021026</td>
+                  <td data-row="5" data-col="7">-0.39038</td>
+                  <td data-row="5" data-col="8">0.697</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">1</td>
+                  <td data-row="6" data-col="2">Intraday</td>
+                  <td data-row="6" data-col="3">FIRM_A</td>
+                  <td data-row="6" data-col="4">[-30,-25]</td>
+                  <td data-row="6" data-col="5">-0.00199079</td>
+                  <td data-row="6" data-col="6">0.0023033</td>
+                  <td data-row="6" data-col="7">-0.86433</td>
+                  <td data-row="6" data-col="8">0.3892</td>
+                </tr>
+<tr>
+<td data-row="7" data-col="1">1</td>
+                  <td data-row="7" data-col="2">Intraday</td>
+                  <td data-row="7" data-col="3">FIRM_A</td>
+                  <td data-row="7" data-col="4">[-30,-24]</td>
+                  <td data-row="7" data-col="5">-0.00202787</td>
+                  <td data-row="7" data-col="6">0.0024878</td>
+                  <td data-row="7" data-col="7">-0.81512</td>
+                  <td data-row="7" data-col="8">0.4166</td>
+                </tr>
+<tr>
+<td data-row="8" data-col="1">1</td>
+                  <td data-row="8" data-col="2">Intraday</td>
+                  <td data-row="8" data-col="3">FIRM_A</td>
+                  <td data-row="8" data-col="4">[-30,-23]</td>
+                  <td data-row="8" data-col="5">-0.00281193</td>
+                  <td data-row="8" data-col="6">0.0026596</td>
+                  <td data-row="8" data-col="7">-1.05728</td>
+                  <td data-row="8" data-col="8">0.2925</td>
+                </tr>
+<tr>
+<td data-row="9" data-col="1">1</td>
+                  <td data-row="9" data-col="2">Intraday</td>
+                  <td data-row="9" data-col="3">FIRM_A</td>
+                  <td data-row="9" data-col="4">[-30,-22]</td>
+                  <td data-row="9" data-col="5">-0.00344262</td>
+                  <td data-row="9" data-col="6">0.0028209</td>
+                  <td data-row="9" data-col="7">-1.22039</td>
+                  <td data-row="9" data-col="8">0.2247</td>
+                </tr>
+<tr>
+<td data-row="10" data-col="1">1</td>
+                  <td data-row="10" data-col="2">Intraday</td>
+                  <td data-row="10" data-col="3">FIRM_A</td>
+                  <td data-row="10" data-col="4">[-30,-21]</td>
+                  <td data-row="10" data-col="5">-0.00206269</td>
+                  <td data-row="10" data-col="6">0.0029735</td>
+                  <td data-row="10" data-col="7">-0.69369</td>
+                  <td data-row="10" data-col="8">0.4892</td>
+                </tr>
 </tbody>
 </table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 <div class="section level2">
 <h2 id="rendered-plot">8. Rendered Plot<a class="anchor" aria-label="anchor" href="#rendered-plot"></a>
