@@ -10,11 +10,14 @@
 #' @param parameter_set The parameter set that defines the event study.
 #' @param min_estimation_obs Minimum number of observations required in the
 #'   estimation window. Default is 30.
+#' @param verbose Logical; if FALSE, suppress informational messages. Default
+#'   \code{getOption("eventstudy.verbose", TRUE)}. Warnings are never gated.
 #'
 #' @return The task object (invisibly). Warnings are issued for each problem found.
 #'
 #' @export
-validate_task <- function(task, parameter_set = NULL, min_estimation_obs = 30) {
+validate_task <- function(task, parameter_set = NULL, min_estimation_obs = 30,
+                          verbose = getOption("eventstudy.verbose", TRUE)) {
   if (!inherits(task, "EventStudyTask")) {
     stop("The task must be an EventStudyTask!")
   }
@@ -94,9 +97,9 @@ validate_task <- function(task, parameter_set = NULL, min_estimation_obs = 30) {
   }
 
   if (n_issues == 0) {
-    message("Validation passed: no issues found across ", n_events, " event(s).")
+    .inform(paste0("Validation passed: no issues found across ", n_events, " event(s)."), verbose)
   } else {
-    message("Validation complete: ", n_issues, " issue(s) found across ", n_events, " event(s).")
+    .inform(paste0("Validation complete: ", n_issues, " issue(s) found across ", n_events, " event(s)."), verbose)
   }
 
   invisible(task)

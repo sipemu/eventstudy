@@ -30,6 +30,8 @@
 #' @param confidence_level Confidence level for plots. Default 0.95.
 #' @param interactive Logical. Use interactive plotly plots in HTML output.
 #'   Default \code{TRUE}.
+#' @param verbose Logical; if FALSE, suppress informational messages. Default
+#'   \code{getOption("eventstudy.verbose", TRUE)}.
 #' @param ... Additional arguments forwarded to \code{generate_report()} and
 #'   on to \code{rmarkdown::render}.
 #'
@@ -63,6 +65,7 @@ es_report <- function(task,
                       author           = NULL,
                       confidence_level = 0.95,
                       interactive      = TRUE,
+                      verbose          = getOption("eventstudy.verbose", TRUE),
                       ...) {
 
   # ---- 1. Task-class guard (mirror generate_report wording) ----
@@ -98,6 +101,7 @@ es_report <- function(task,
     interactive      = interactive,
     provider         = provider,
     narrative        = NULL,
+    verbose          = verbose,
     ...
   )
 
@@ -147,6 +151,8 @@ es_report <- function(task,
 #'   \code{NULL}. If both \code{provider} and \code{narrative} are \code{NULL},
 #'   a fully offline narrative is assembled. Ignored when a pre-built
 #'   \code{narrative} list is supplied by the caller.
+#' @param verbose Logical; if FALSE, suppress informational messages. Default
+#'   \code{getOption("eventstudy.verbose", TRUE)}.
 #' @param ... Additional arguments passed to \code{rmarkdown::render}.
 #'
 #' @return A named character vector of output file paths, invisibly, keyed by
@@ -179,6 +185,7 @@ generate_report <- function(task,
                             advice = NULL,
                             narrative = NULL,
                             provider = NULL,
+                            verbose = getOption("eventstudy.verbose", TRUE),
                             ...) {
 
   # ---- 1. Hard deps: rmarkdown + knitr required for HTML baseline ----
@@ -304,9 +311,12 @@ generate_report <- function(task,
   # ---- 8. Console mode message ONCE after assembly (OFFLINE-02) ----
   if (!is.null(narrative) && is.list(narrative)) {
     mode_used <- narrative$report_mode %||% "offline"
-    message(
-      "Report mode: ",
-      if (identical(mode_used, "ai")) "AI-grounded narrative" else "Offline rule-based narrative"
+    .inform(
+      paste0(
+        "Report mode: ",
+        if (identical(mode_used, "ai")) "AI-grounded narrative" else "Offline rule-based narrative"
+      ),
+      verbose
     )
   }
 
@@ -370,7 +380,7 @@ generate_report <- function(task,
         stop("generate_report(): rmarkdown html_document() unavailable. ",
              "Install 'rmarkdown': install.packages('rmarkdown')")
       }
-      message("generate_report(): skipping '", fmt, "' -- toolchain not available.")
+      .inform(paste0("generate_report(): skipping '", fmt, "' -- toolchain not available."), verbose)
       next
     }
 
@@ -387,7 +397,7 @@ generate_report <- function(task,
 
     out_path <- file.path(output_dir, out_name)
     output_paths[[fmt]] <- out_path
-    message("Report generated: ", out_path)
+    .inform(paste0("Report generated: ", out_path), verbose)
   }
 
   if (length(output_paths) == 0L) {

@@ -102,6 +102,8 @@ PanelEventStudyTask <- R6::R6Class(
 #'   Default -1 (the period just before treatment).
 #' @param cluster Name of the clustering variable for standard errors.
 #'   Defaults to the unit ID.
+#' @param verbose Logical; if FALSE, suppress informational messages. Default
+#'   \code{getOption("eventstudy.verbose", TRUE)}.
 #' @param ... Additional arguments passed to the underlying estimator
 #'   (used by \code{callaway_santanna}, \code{dechaisemartin_dhaultfoeuille},
 #'   and \code{borusyak_jaravel_spiess} methods).
@@ -125,6 +127,7 @@ estimate_panel_event_study <- function(task,
                                         lags = 5,
                                         base_period = -1,
                                         cluster = NULL,
+                                        verbose = getOption("eventstudy.verbose", TRUE),
                                         ...) {
   if (!inherits(task, "PanelEventStudyTask")) {
     stop("task must be a PanelEventStudyTask.")
@@ -148,7 +151,7 @@ estimate_panel_event_study <- function(task,
     dynamic_twfe  = .estimate_dynamic_twfe(task, panel, leads, lags,
                                             base_period, cluster),
     sun_abraham   = .estimate_sun_abraham(task, panel, leads, lags,
-                                           base_period, cluster),
+                                           base_period, cluster, verbose = verbose),
     callaway_santanna = .estimate_callaway_santanna(task, panel, leads, lags,
                                                       base_period, ...),
     dechaisemartin_dhaultfoeuille = .estimate_dechaisemartin_dhaultfoeuille(
@@ -314,7 +317,8 @@ estimate_panel_event_study <- function(task,
 #' Sun & Abraham (2021) Interaction-Weighted Estimator
 #' @noRd
 .estimate_sun_abraham <- function(task, panel, leads, lags,
-                                   base_period, cluster) {
+                                   base_period, cluster,
+                                   verbose = getOption("eventstudy.verbose", TRUE)) {
   # Sun & Abraham approach: interact cohort indicators with rel_time indicators
   # Cohort = treatment_time value
 
@@ -323,7 +327,7 @@ estimate_panel_event_study <- function(task,
 
   if (length(cohorts) < 2) {
     # Fall back to dynamic TWFE for single-cohort designs
-    message("Only one treatment cohort found. Falling back to dynamic TWFE.")
+    .inform("Only one treatment cohort found. Falling back to dynamic TWFE.", verbose)
     return(.estimate_dynamic_twfe(task, panel, leads, lags, base_period, cluster))
   }
 

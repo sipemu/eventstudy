@@ -15,6 +15,8 @@
 #'   \code{provider}, and any other argument accepted by \code{es_report()}.
 #'   Defaults to \code{list()} (uses \code{es_report()} defaults, which render
 #'   \code{"event_study_report.html"} in the working directory).
+#' @param verbose Logical; if FALSE, suppress informational messages. Default
+#'   \code{getOption("eventstudy.verbose", TRUE)}.
 #'
 #' @return The task object with all results computed. When \code{report = TRUE},
 #'   the returned task additionally carries \code{attr(task, "report_path")}
@@ -31,7 +33,8 @@
 run_event_study = function(task,
                            parameter_set = ParameterSet$new(),
                            report = FALSE,
-                           report_args = list()) {
+                           report_args = list(),
+                           verbose = getOption("eventstudy.verbose", TRUE)) {
   task = prepare_event_study(task, parameter_set)
   task = fit_model(task, parameter_set)
   task = calculate_statistics(task, parameter_set)
@@ -39,7 +42,7 @@ run_event_study = function(task,
   if (isTRUE(report)) {
     paths <- do.call(es_report, c(list(task = task), report_args))
     attr(task, "report_path") <- paths
-    message("Report written to: ", paste(paths, collapse = ", "))
+    .inform(paste0("Report written to: ", paste(paths, collapse = ", ")), verbose)
   }
 
   task

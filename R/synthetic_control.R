@@ -73,12 +73,15 @@ SyntheticControlTask <- R6::R6Class(
 #'   \pkg{quadprog}) or \code{"optim"} (uses \code{stats::optim} L-BFGS-B).
 #' @param covariates Optional character vector of covariate column names
 #'   in both treated and donor data to include in the matching.
+#' @param verbose Logical; if FALSE, suppress informational messages. Default
+#'   \code{getOption("eventstudy.verbose", TRUE)}.
 #'
 #' @return The task with \code{results} populated.
 #'
 #' @export
 estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
-                                        covariates = NULL) {
+                                        covariates = NULL,
+                                        verbose = getOption("eventstudy.verbose", TRUE)) {
   if (!inherits(task, "SyntheticControlTask")) {
     stop("task must be a SyntheticControlTask.")
   }
@@ -133,7 +136,7 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
     }
   } else {
     if (method == "quadprog") {
-      message("Package 'quadprog' not available. Falling back to optim.")
+      .inform("Package 'quadprog' not available. Falling back to optim.", verbose)
     }
     weights <- .solve_sc_optim(y_pre, X_pre)
   }
