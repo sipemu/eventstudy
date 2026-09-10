@@ -1,131 +1,98 @@
-# Requirements: EventStudy v0.65.0 "Polish"
+# Requirements: EventStudy v0.66.0 Stabilization & CRAN Resubmission
 
-**Defined:** 2026-09-08
-**Core Value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics. This milestone lifts the *felt* quality (brand, output, API, docs) to match that substance, without touching statistical correctness.
+**Defined:** 2026-09-10
+**Core Value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong. This milestone proves that correctness numerically, locks the public API against accidental breakage, and gets the package back onto CRAN.
 
 ## v1 Requirements
 
-Requirements for the v0.65.0 milestone. Each maps to a roadmap phase. All changes are additive; behavior on valid inputs must not change; existing ~2287 tests stay green.
+Requirements for this milestone. Each maps to exactly one roadmap phase.
 
-### Brand & Visual Identity
+### CRAN Hygiene (blocks all downstream check runs — must land first)
 
-- [x] **BRAND-01**: A real EventStudy logo + hex sticker exists — SVG source under `data-raw/brand/` (`.Rbuildignore`'d), optimised PNG at `man/figures/logo.png` (tarball-safe, <50 KB)
-- [x] **BRAND-02**: Logo is wired into the README badge (`usethis::use_logo()` pattern) and the pkgdown navbar
-- [x] **BRAND-03**: Full favicon set generated via `pkgdown::build_favicons()` and committed under `pkgdown/` (out of the CRAN tarball)
-- [x] **BRAND-04**: Open Graph social-preview card configured so shared links render a branded thumbnail
-- [x] **BRAND-05**: pkgdown `bslib` theme aligned to the eventstudy.de brand — palette (primary/bg/fg), typography, via `_pkgdown.yml template.bslib` + `pkgdown/extra.scss`
-- [x] **BRAND-06**: pkgdown home card gallery + numeric badges ("15 Return Models", "12 Test Statistics", "6 DiD Estimators") restyled to the ecosystem look
-- [x] **BRAND-07**: Lifecycle badge flipped `experimental` → `stable`; README badge row refreshed
+- [ ] **HYG-01**: Every non-ASCII byte in `R/*.R` is replaced with a `\uXXXX` escape (or removed), so `R CMD check --as-cran` emits no non-ASCII WARNING; the CI non-ASCII baseline guard is refreshed to match.
+- [ ] **HYG-02**: `median` and `tail` in `R/es_diagnostics.R` are namespace-qualified (or added to `importFrom`/`globalVariables`), eliminating the undefined-globals NOTE.
+- [ ] **HYG-03**: The stale `EventStudy_0.62.0.tar.gz` is removed from the repo and a `tar.gz` ignore rule is added, so no non-standard-file NOTE appears.
+- [ ] **HYG-04**: All optional-package call sites are audited for `requireNamespace()` guarding + Suggests declaration (explicitly `gridExtra` in `R/plotting.R`); any unguarded/undeclared use is fixed.
 
-### Report & Plot Aesthetics
+### Correctness of Results
 
-- [x] **VIZ-01**: New `R/theme.R` provides `theme_eventstudy()` + an `es_colours` Okabe-Ito colorblind-safe palette (exported, documented)
-- [x] **VIZ-02**: `theme_eventstudy()` + `es_colours` applied across all ggplot2 plot helpers (`.plot_single_event`, `.plot_multi_event`, `plot_diagnostics`); hardcoded `steelblue`/`red`/`grey40` removed; `plot_stocks()` (plotly) left structurally intact
-- [x] **VIZ-03**: plotly interactive visuals restyled to `es_colours` (hover, legend, colour consistency)
-- [x] **VIZ-04**: `es_report()` tables rendered via `tinytable` with a `knitr::kable()` fallback, styled, across HTML/PDF/Word/Markdown
-- [x] **VIZ-05**: Figure captions (`fig.cap`) present on every plot chunk in `skeleton.Rmd`
-- [x] **VIZ-06**: `inst/rmarkdown/report.css` typography + table styling injected on the HTML branch only (does not touch the prose sanitiser or grounding guard)
-- [x] **VIZ-07**: Per-format figure sizing so PDF/Word figures fit page margins (replaces the global `fig.width = 10` that overflows PDF); `ragg` device used for anti-aliased raster output
+- [ ] **CORR-01**: Each of the 13+ return models and 8+ test statistics is audited against its published academic formula, and its convention choices (return type, forecast-error correction, degrees of freedom, p-value sidedness, Patell denominator) are documented; any discrepancy is fixed with a regression test.
+- [ ] **CORR-02**: Golden-value regression tests pin the key statistics against reference values (published-table numbers and/or `estudy2`-derived constants), each test annotating the exact conventions it assumes and using an explicit tolerance (relative for cross-implementation, tight absolute for algebraic identities).
+- [ ] **CORR-03**: Property-based / invariant tests assert cross-cutting identities — e.g. `CAR == cumsum(AR)`, cross-method consistency, boundary/degenerate windows — across the model and statistic matrix.
+- [ ] **CORR-04**: Numerical-stability guards protect precision/overflow/conditioning in the sensitive paths (matrix ops, GARCH convergence, bootstrap, long-window CAR cumulation), with tests documenting chosen tolerances to avoid cross-platform CI flakiness.
 
-### API & Message Polish
+### Stable API
 
-- [x] **API-01**: All `print.*` methods audited — return `invisible(x)`, consistent formatting; snapshot tests established *before* any change
-- [x] **API-02**: `format.*` methods added where a class has `print()` but no `format()`
-- [x] **API-03**: Selective `stop()`/`warning()` calls migrated to classed `rlang::abort()`/`rlang::warn()` (rlang already imported, zero new dep); the degenerate-input contract's exactly-one-warning discipline preserved
-- [x] **API-04**: Error/warning messages name the offending argument and its value
-- [x] **API-05**: A `verbose=` argument quiets informational messages for batch/scripted use; default preserves current behavior (byte-identical when omitted)
-- [x] **API-06**: Deprecation audit — if any argument is renamed, ship a back-compatible shim with a deprecation warning; if nothing is renamed, documented as a verified no-op (no `lifecycle` dep added)
+- [ ] **APIS-01**: A signature-consistency audit reconciles inconsistent argument names/order/defaults across the public API; outliers are either aligned or scheduled for deprecation with a recorded rationale. (Runs before the snapshot is captured.)
+- [ ] **APIS-02**: Return-shape contracts lock the column names/types/shapes of pipeline-returned tibbles in a new `R/shape_contracts.R` (sibling to `R/contract.R`), opt-in via an option and default-off, covering both valid and degenerate (`is_fitted = FALSE`) outputs.
+- [ ] **APIS-03**: API snapshot tests capture the full public signature surface (exports via `getNamespaceExports()`, `formals()` per function, registered S3 methods) using structural assertions — not rendered `print()` output — and are install-gated with `skip_if_not_installed("EventStudy")` so an accidental break fails CI.
+- [ ] **APIS-04**: A formal deprecation policy + lifecycle is documented and wired (warn, never silently break) using a base `.Deprecated()` / `lifecycle`-Suggests shim, with NEWS discipline, so future API changes have a backward-compatible path.
 
-### Docs & Site Polish
+### Install-Tested CI
 
-- [x] **DOCS-01**: `@family` + `@seealso` roxygen tags added across pipeline/model/statistic/advisor functions so the Reference index cross-links
-- [x] **DOCS-02**: README refreshed with an Ecosystem section linking the three tools (Google Sheets template · R package · WebAssembly app) and eventstudy.de; pkgdown home markers added
-- [x] **DOCS-03**: `pkgdown::check_pkgdown()` added to CI (catches silent broken cross-references); navbar/news wiring verified; rough edges fixed
-- [x] **DOCS-04**: Existing vignettes/articles tightened — getting-started flow and cross-links improved (no new CRAN vignettes; rich content stays in `vignettes/articles/`)
+- [ ] **CI-01**: CI gates on `R CMD check` / `rcmdcheck` against the *installed* package (not `devtools::load_all()`), so "green in dev, broken when installed" bugs (the `.report_table()` class) fail CI; at least one job runs with `_R_CHECK_FORCE_SUGGESTS_` set to exercise Suggests-present behavior.
+- [ ] **CI-02**: `inst/rmarkdown/` templates and examples/vignettes are audited for bare internal calls and default network access, closing the load_all/installed divergence surface.
 
-### Release Hygiene & Guardrails (cross-cutting)
+### CRAN Resubmission
 
-- [x] **CRAN-01**: DESCRIPTION adds only `tinytable`, `patchwork`, `ragg` to Suggests (`requireNamespace()`-guarded); no new Imports
-- [x] **CRAN-02**: Version bumped to 0.65.0; NEWS.md v0.65.0 section written; DESCRIPTION/NEWS consistent (bump lands as the first commit of execution)
-- [x] **CRAN-03**: CRAN tarball stays lean (assert < 1 MB in CI); brand sources in `.Rbuildignore`'d dirs; `man/figures/` assets optimised
-- [x] **CRAN-04**: No non-ASCII in `R/`, `man/figures/`, `inst/` (CI grep guard); no new `R CMD check --as-cran` NOTEs/WARNINGs vs baseline
-- [x] **CRAN-05**: All four report formats (HTML/PDF/Word/Markdown) render; PDF contains no `<script>` tags; the `knitr::is_html_output()` static/interactive switch stays intact — locked by regression test
-- [x] **CRAN-06**: Behavior on valid inputs unchanged; full test suite green; snapshot tests cover print methods + the prose sanitiser
+- [ ] **CRAN-01**: `R CMD check --as-cran` is clean (0 ERRORs, 0 WARNINGs; only explainable NOTEs) on the local environment with the full suite green.
+- [ ] **CRAN-02**: Multi-platform checks pass — `devtools::check_win_devel()` + `check_win_release()` and rhub v2 (and/or macOS) — with results captured.
+- [ ] **CRAN-03**: The exact 2024-04-20 archival reason is retrieved and `cran-comments.md` is rewritten for v0.66.0 with an explicit archival acknowledgment, the reason, the fixes made, and the platform check results.
+- [ ] **CRAN-04**: Examples/tests/vignettes are CRAN-policy compliant — no network by default, no writing outside tempdir, no gratuitous `\dontrun{}`, example runtimes within policy — verified before submission.
+- [ ] **CRAN-05**: The package is submitted to CRAN (`devtools::submit_cran()` / webform) and the maintainer email confirmation is completed.
 
 ## Future Requirements
 
-Deferred to a later milestone. Tracked, not in this roadmap.
+Deferred — tracked, not in this roadmap.
 
-### Reporting Depth
-
-- **RPTX-01**: `es_report()` support for panel / intraday / synthetic-control tasks (gated on SURF-02 diagnostics surfaces)
-- **RPTX-02**: Bootstrap-CI reporting in the report
-- **RPTX-03**: Rich Word output via officedown
-- **RPTC-01**: User-supplied custom report templates
-
-### Surfaces / Commercial
-
-- **SURF-01/02**: MCP server surface; panel/intraday/synthetic diagnostics
-- **PRO-01/02**: Retrieval-corpus "Advisor Pro" + managed hosting (waitlist-gated)
+- **INDEP-01..03**: Native reimplementation of did/DIDmultiplegt/rugarch — separate independence milestone.
+- **SCALE-01..03**: Streaming / data.table backend / sparse FE — orthogonal performance work.
+- **PRO-01..02**: RAG-corpus "Advisor Pro" — waitlist-gated commercial tier.
 
 ## Out of Scope
 
-Explicitly excluded for v0.65.0. Documented to prevent scope creep.
+Explicitly excluded to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Heavy table packages (`gt` ~60 deps, `kableExtra`, `flextable` 57 deps) | `tinytable` covers all four formats with zero hard deps; heavy deps break the CRAN-clean discipline |
-| `cli` as a hard import | Nice message formatting, but a heavy dep for a polish pass; classed `rlang` conditions deliver the substance |
-| `lifecycle` dependency (unless renames exist) | Research: zero benefit if nothing is renamed; API-06 stays a no-op unless a real rename appears |
-| `_brand.yml` unified brand config | Explicit `template.bslib` in `_pkgdown.yml` is simpler for a single-site v0.65.0; revisit if the ecosystem adopts `_brand.yml` |
-| A v1.0 release gate | This is an incremental, ship-when-good minor; 1.0 readiness is a separate decision |
-| New statistical methods, models, or estimators | Correctness/output-feel only; no change to statistical intent |
-| Changing valid-input behavior of any existing method | Additive polish only; the never-silently-wrong contract is untouched |
-| Shipping rich articles/logo sources inside the CRAN tarball | Kept pkgdown-only / `.Rbuildignore`'d to keep the tarball lean and `R CMD check` fast |
+| Changing the statistical intent of any existing method | Correctness/robustness/API-lock only; behavior on valid inputs must not change |
+| New statistical methods, models, or task types | Stabilization milestone — no new capability surface |
+| New hard `Imports` dependencies | New tooling (`lifecycle`, `waldo`, `patrick`, `hedgehog`) stays dev/test-only in Suggests |
+| Adding `estudy2`/`eventstudies` to DESCRIPTION | Both are themselves archived on CRAN; usable only as source-level golden-value derivation tools |
+| The 1.0 release decision | Remains a separate future decision; v0.66.0 is a ship-when-good minor |
+| Byte-level `print()` snapshot tests for the full API | They churn on tibble/rlang version bumps; API lock uses structural assertions instead |
 
 ## Traceability
 
-Mapped during roadmap creation (2026-09-08). Phases 20–24 per `.planning/ROADMAP.md`.
+Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BRAND-01 | Phase 20 | Complete |
-| BRAND-02 | Phase 20 | Complete |
-| BRAND-03 | Phase 20 | Complete |
-| BRAND-04 | Phase 20 | Complete |
-| BRAND-05 | Phase 20 | Complete |
-| BRAND-06 | Phase 20 | Complete |
-| BRAND-07 | Phase 20 | Complete |
-| CRAN-02 | Phase 20 | Complete |
-| CRAN-03 | Phase 20 | Complete |
-| CRAN-04 | Phase 20 | Complete |
-| VIZ-01 | Phase 21 | Complete |
-| VIZ-02 | Phase 21 | Complete |
-| VIZ-03 | Phase 21 | Complete |
-| CRAN-01 | Phase 21 | Complete |
-| VIZ-04 | Phase 22 | Complete |
-| VIZ-05 | Phase 22 | Complete |
-| VIZ-06 | Phase 22 | Complete |
-| VIZ-07 | Phase 22 | Complete |
-| CRAN-05 | Phase 22 | Complete |
-| API-01 | Phase 23 | Complete |
-| API-02 | Phase 23 | Complete |
-| API-03 | Phase 23 | Complete |
-| API-04 | Phase 23 | Complete |
-| API-05 | Phase 23 | Complete |
-| API-06 | Phase 23 | Complete |
-| CRAN-06 | Phase 23 | Complete |
-| DOCS-01 | Phase 24 | Complete |
-| DOCS-02 | Phase 24 | Complete |
-| DOCS-03 | Phase 24 | Complete |
-| DOCS-04 | Phase 24 | Complete |
+| HYG-01 | TBD | Pending |
+| HYG-02 | TBD | Pending |
+| HYG-03 | TBD | Pending |
+| HYG-04 | TBD | Pending |
+| CORR-01 | TBD | Pending |
+| CORR-02 | TBD | Pending |
+| CORR-03 | TBD | Pending |
+| CORR-04 | TBD | Pending |
+| APIS-01 | TBD | Pending |
+| APIS-02 | TBD | Pending |
+| APIS-03 | TBD | Pending |
+| APIS-04 | TBD | Pending |
+| CI-01 | TBD | Pending |
+| CI-02 | TBD | Pending |
+| CRAN-01 | TBD | Pending |
+| CRAN-02 | TBD | Pending |
+| CRAN-03 | TBD | Pending |
+| CRAN-04 | TBD | Pending |
+| CRAN-05 | TBD | Pending |
 
 **Coverage:**
-
-- v1 requirements: 30 total (BRAND 7, VIZ 7, API 6, DOCS 4, CRAN 6)
-- Mapped to phases: 30 (Phase 20: 10 · Phase 21: 4 · Phase 22: 5 · Phase 23: 7 · Phase 24: 4)
-- Unmapped: 0 ✓
+- v1 requirements: 19 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 19 ⚠️
 
 ---
-*Requirements defined: 2026-09-08*
-*Last updated: 2026-09-08 after roadmap creation (Phases 20–24 mapped, 30/30 coverage)*
+*Requirements defined: 2026-09-10*
+*Last updated: 2026-09-10 after initial definition*
