@@ -14,3 +14,4 @@
 ^docs$
 ^pkgdown$
 ^vignettes/articles
+^EventStudy_.*\.tar\.gz$

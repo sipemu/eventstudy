@@ -6,3 +6,5 @@ EventStudy.Rcheck/
 *.Rcheck/
 # transient rmarkdown render logs from report-template tests
 inst/rmarkdown/templates/event_study_report/skeleton/*.log
+# built R source tarballs (never version these; the package ships via CRAN)
+*.tar.gz
