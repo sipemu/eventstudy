@@ -112,27 +112,29 @@ task <- calculate_statistics(task, params)
 
 ``` r
 
-knitr::kable(
+es_tt(
   head(tidy.EventStudyTask(task, type = "car"), 10),
   caption = "Market-model CAR t-statistics on the dieselgate event (first 10 rows)."
 )
 ```
 
 | event_id | group    | firm_symbol | term        | estimate | std.error | statistic | p.value |
-|---------:|:---------|:------------|:------------|---------:|----------:|----------:|--------:|
-|        1 | VW Group | VOW.DE      | \[-10,-10\] |   0.0028 |    0.0100 |    0.2796 |  0.7800 |
-|        1 | VW Group | VOW.DE      | \[-10,-9\]  |   0.0031 |    0.0142 |    0.2175 |  0.8280 |
-|        1 | VW Group | VOW.DE      | \[-10,-8\]  |   0.0124 |    0.0174 |    0.7134 |  0.4762 |
-|        1 | VW Group | VOW.DE      | \[-10,-7\]  |   0.0348 |    0.0200 |    1.7381 |  0.0834 |
-|        1 | VW Group | VOW.DE      | \[-10,-6\]  |   0.0291 |    0.0224 |    1.2986 |  0.1953 |
-|        1 | VW Group | VOW.DE      | \[-10,-5\]  |   0.0349 |    0.0245 |    1.4203 |  0.1568 |
-|        1 | VW Group | VOW.DE      | \[-10,-4\]  |   0.0299 |    0.0265 |    1.1273 |  0.2607 |
-|        1 | VW Group | VOW.DE      | \[-10,-3\]  |   0.0324 |    0.0283 |    1.1436 |  0.2539 |
-|        1 | VW Group | VOW.DE      | \[-10,-2\]  |   0.0326 |    0.0301 |    1.0830 |  0.2799 |
-|        1 | VW Group | VOW.DE      | \[-10,-1\]  |   0.0321 |    0.0317 |    1.0137 |  0.3117 |
+|----------|----------|-------------|-------------|----------|-----------|-----------|---------|
+| 1        | VW Group | VOW.DE      | \[-10,-10\] | 0.002802 | 0.01002   | 0.2796    | 0.78    |
+| 1        | VW Group | VOW.DE      | \[-10,-9\]  | 0.003083 | 0.01417   | 0.2175    | 0.82796 |
+| 1        | VW Group | VOW.DE      | \[-10,-8\]  | 0.012382 | 0.01736   | 0.7134    | 0.47624 |
+| 1        | VW Group | VOW.DE      | \[-10,-7\]  | 0.034831 | 0.02004   | 1.7381    | 0.08344 |
+| 1        | VW Group | VOW.DE      | \[-10,-6\]  | 0.029097 | 0.02241   | 1.2986    | 0.19528 |
+| 1        | VW Group | VOW.DE      | \[-10,-5\]  | 0.034859 | 0.02454   | 1.4203    | 0.15679 |
+| 1        | VW Group | VOW.DE      | \[-10,-4\]  | 0.029885 | 0.02651   | 1.1273    | 0.26072 |
+| 1        | VW Group | VOW.DE      | \[-10,-3\]  | 0.032411 | 0.02834   | 1.1436    | 0.25389 |
+| 1        | VW Group | VOW.DE      | \[-10,-2\]  | 0.032555 | 0.03006   | 1.083     | 0.27987 |
+| 1        | VW Group | VOW.DE      | \[-10,-1\]  | 0.032121 | 0.03169   | 1.0137    | 0.31171 |
 
 Market-model CAR t-statistics on the dieselgate event (first 10 rows).
-{.table}
+{#tinytable_a4s4zva8gc0h1bysek5y .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 
@@ -181,19 +183,21 @@ task_g <- prepare_event_study(
 )
 task_g <- fit_model(task_g, params_g)
 task_g <- calculate_statistics(task_g, params_g)
-knitr::kable(head(tidy.EventStudyTask(task_g, type = "car"), 5),
-             caption = "GARCH-based CAR t-statistics.")
+es_tt(head(tidy.EventStudyTask(task_g, type = "car"), 5),
+      caption = "GARCH-based CAR t-statistics.")
 ```
 
 | event_id | group    | firm_symbol | term        | estimate | std.error | statistic | p.value |
-|---------:|:---------|:------------|:------------|---------:|----------:|----------:|--------:|
-|        1 | VW Group | VOW.DE      | \[-10,-10\] |   0.0030 |    0.0099 |    0.2995 |  0.7648 |
-|        1 | VW Group | VOW.DE      | \[-10,-9\]  |   0.0034 |    0.0141 |    0.2433 |  0.8080 |
-|        1 | VW Group | VOW.DE      | \[-10,-8\]  |   0.0129 |    0.0172 |    0.7483 |  0.4550 |
-|        1 | VW Group | VOW.DE      | \[-10,-7\]  |   0.0355 |    0.0199 |    1.7860 |  0.0753 |
-|        1 | VW Group | VOW.DE      | \[-10,-6\]  |   0.0299 |    0.0222 |    1.3468 |  0.1793 |
+|----------|----------|-------------|-------------|----------|-----------|-----------|---------|
+| 1        | VW Group | VOW.DE      | \[-10,-10\] | 0.002975 | 0.009936  | 0.2995    | 0.76485 |
+| 1        | VW Group | VOW.DE      | \[-10,-9\]  | 0.003418 | 0.014051  | 0.2433    | 0.80799 |
+| 1        | VW Group | VOW.DE      | \[-10,-8\]  | 0.012877 | 0.017209  | 0.7483    | 0.45502 |
+| 1        | VW Group | VOW.DE      | \[-10,-7\]  | 0.03549  | 0.019872  | 1.786     | 0.07534 |
+| 1        | VW Group | VOW.DE      | \[-10,-6\]  | 0.029923 | 0.022217  | 1.3468    | 0.17928 |
 
-GARCH-based CAR t-statistics. {.table}
+GARCH-based CAR t-statistics. {#tinytable_ykan6rk0t0twdhx0iehv .table
+.tinytable style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 If `rugarch` is not installed the chunk above is skipped. Conceptually,
 the GARCH model replaces the constant OLS residual variance \sigma^2

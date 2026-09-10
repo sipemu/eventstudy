@@ -117,28 +117,18 @@ also includes `GeneralizedSignTest`, the Corrado `RankTest`, and the
 
 ``` r
 
-knitr::kable(
+es_tt(
   tidy.EventStudyTask(task, type = "aar"),
   caption = "AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP statistics."
 )
 ```
 
-| group | term | estimate | std.error | statistic | p.value | caar | caar_statistic | caar_p.value |
-|:---|:---|---:|---:|---:|---:|---:|---:|---:|
-| Earnings Beat | -5 | -0.0048 | 0.0051 | -0.9518 | 0.4416 | -0.0048 | -0.9518 | 0.4416 |
-| Earnings Beat | -4 | -0.0018 | 0.0011 | -1.6375 | 0.2432 | -0.0066 | -1.3184 | 0.3181 |
-| Earnings Beat | -3 | 0.0064 | 0.0068 | 0.9463 | 0.4439 | -0.0003 | -0.1398 | 0.9016 |
-| Earnings Beat | -2 | 0.0021 | 0.0033 | 0.6547 | 0.5799 | 0.0019 | 0.5058 | 0.6633 |
-| Earnings Beat | -1 | -0.0027 | 0.0063 | -0.4380 | 0.7041 | -0.0009 | -0.0886 | 0.9375 |
-| Earnings Beat | 0 | 0.0003 | 0.0016 | 0.1690 | 0.8813 | -0.0006 | -0.0560 | 0.9604 |
-| Earnings Beat | 1 | 0.0350 | 0.0218 | 1.6018 | 0.2504 | 0.0344 | 3.0528 | 0.0926 |
-| Earnings Beat | 2 | 0.0048 | 0.0033 | 1.4529 | 0.2834 | 0.0392 | 3.5533 | 0.0709 |
-| Earnings Beat | 3 | -0.0070 | 0.0033 | -2.1545 | 0.1640 | 0.0322 | 2.4026 | 0.1382 |
-| Earnings Beat | 4 | -0.0003 | 0.0027 | -0.1177 | 0.9171 | 0.0319 | 2.7628 | 0.1098 |
-| Earnings Beat | 5 | 0.0058 | 0.0046 | 1.2728 | 0.3310 | 0.0377 | 2.3509 | 0.1431 |
+[TABLE]
 
 AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP
-statistics. {.table}
+statistics. {#tinytable_koa0g3i367zzudlzssv2 .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 

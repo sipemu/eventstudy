@@ -20,6 +20,7 @@ defined below), the entire pipeline runs in a single call:
 
 ``` r
 
+# Preview of the full pipeline — data objects are loaded and unpacked step-by-step below.
 library(EventStudy)
 
 # One-call shortcut: prepare -> fit -> calculate, in one step
@@ -62,37 +63,17 @@ study period.
 
 ``` r
 
-#' warnings: false
-library(tidyquant)
-library(dplyr)
-library(purrr)
-library(readr)
-library(DT)
-
 library(EventStudy)
 
-index_symbol = c("^GDAXI")
-firm_symbols = c("VOW.DE", "PAH3.DE", "BMW.DE", "MBG.DE")
+# Load the bundled frozen Dieselgate dataset (replaces a live network download via
+# tidyquant so this vignette builds fully offline and reproducibly on CRAN/pkgdown).
+data(dieselgate)
 
-group <- c(rep("VW Group", 2), rep("Other", 2))
-request_tbl <- cbind(c(1:4), firm_symbols, rep(index_symbol, 4), 
-                     rep("18.09.2015", 4), 
-                     group, rep(-10, 4), rep(10, 4), rep(-11, 4), rep(250, 4)) %>% 
-  as_tibble()
-
-names(request_tbl) <- c("event_id", "firm_symbol", "index_symbol", "event_date", 
-                        "group", "event_window_start", "event_window_end", 
-                        "shift_estimation_window", "estimation_window_length")
-
-firm_symbols %>%
-  tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
-  dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
-  dplyr::select(symbol, date, adjusted) -> firm_tbl
-
-index_symbol %>%
-  tidyquant::tq_get(from = "2014-06-01", to = "2015-11-01") %>%
-  dplyr::mutate(date = format(date, "%d.%m.%Y")) %>%
-  dplyr::select(symbol, date, adjusted) -> index_tbl
+firm_tbl    <- dieselgate$firm     # symbol / date / adjusted (4 firms, DD-MM-YYYY dates)
+index_tbl   <- dieselgate$index    # symbol / date / adjusted (^GDAXI)
+request_tbl <- dieselgate$request  # event_id / firm_symbol / index_symbol / event_date /
+                                   # group / event_window_start / event_window_end /
+                                   # shift_estimation_window / estimation_window_length
 ```
 
 Both, the firm data as the index data should have the following
@@ -106,8 +87,17 @@ structure:
 
 ``` r
 
-DT::datatable(firm_tbl)
+es_tt(head(firm_tbl))
 ```
+
+| symbol | date       | adjusted |
+|--------|------------|----------|
+| VOW.DE | 02.06.2014 | 112.5    |
+| VOW.DE | 03.06.2014 | 112.4    |
+| VOW.DE | 04.06.2014 | 109.5    |
+| VOW.DE | 05.06.2014 | 111.6    |
+| VOW.DE | 06.06.2014 | 111.9    |
+| VOW.DE | 09.06.2014 | 112.4    |
 
 ### Define the Event Study
 
@@ -146,7 +136,7 @@ Your Event Study is then defined in a parameter set:
 ``` r
 
 # Setup parameter set
-param_set = ParameterSet$new(return_calculation      = log_return, 
+param_set = ParameterSet$new(return_calculation      = log_return,
                              return_model            = market_model,
                              single_event_statistics = single_event_tests,
                              multi_event_statistics  = multiple_event_tests)
@@ -172,18 +162,39 @@ data frame:
 
 ``` r
 
-DT::datatable(est_task$data_tbl)
+head(est_task$data_tbl)
+#> # A tibble: 4 × 5
+#> # Groups:   event_id, group, firm_symbol [4]
+#>   firm_symbol event_id group    data               request         
+#>   <chr>          <int> <chr>    <list>             <list>          
+#> 1 VOW.DE             1 VW Group <tibble [360 × 4]> <tibble [1 × 6]>
+#> 2 PAH3.DE            2 VW Group <tibble [360 × 4]> <tibble [1 × 6]>
+#> 3 BMW.DE             3 Other    <tibble [360 × 4]> <tibble [1 × 6]>
+#> 4 MBG.DE             4 Other    <tibble [360 × 4]> <tibble [1 × 6]>
 ```
 
 ``` r
 
-DT::datatable(est_task$data_tbl$data[[1]])
+es_tt(head(est_task$data_tbl$data[[1]]))
 ```
+
+| date       | firm_adjusted | index_symbol | index_adjusted |
+|------------|---------------|--------------|----------------|
+| 02.06.2014 | 112.5         | ^GDAXI       | 9950           |
+| 03.06.2014 | 112.4         | ^GDAXI       | 9920           |
+| 04.06.2014 | 109.5         | ^GDAXI       | 9927           |
+| 05.06.2014 | 111.6         | ^GDAXI       | 9948           |
+| 06.06.2014 | 111.9         | ^GDAXI       | 9987           |
+| 09.06.2014 | 112.4         | ^GDAXI       | 10009          |
 
 ``` r
 
-DT::datatable(est_task$data_tbl$request[[1]])
+es_tt(est_task$data_tbl$request[[1]])
 ```
+
+| index_symbol | event_date | event_window_start | event_window_end | shift_estimation_window | estimation_window_length |
+|----|----|----|----|----|----|
+| ^GDAXI | 18.09.2015 | -10 | 10 | -11 | 250 |
 
 The internal data structure is important for you if you plan to develop
 your own statistical or econometric model or test statistic.
@@ -195,8 +206,17 @@ est_task = prepare_event_study(est_task, param_set)
 
 ``` r
 
-est_task$data_tbl$data[[1]]
+es_tt(head(est_task$data_tbl$data[[1]]))
 ```
+
+| date | firm_adjusted | index_symbol | index_adjusted | firm_returns | index_returns | event_date | relative_index | event_window | estimation_window |
+|----|----|----|----|----|----|----|----|----|----|
+| 02.06.2014 | 112.5 | ^GDAXI | 9950 | NA | NA | 0 | -329 | 0 | 0 |
+| 03.06.2014 | 112.4 | ^GDAXI | 9920 | -0.001284 | -0.0030579 | 0 | -328 | 0 | 0 |
+| 04.06.2014 | 109.5 | ^GDAXI | 9927 | -0.026287 | 0.0006983 | 0 | -327 | 0 | 0 |
+| 05.06.2014 | 111.6 | ^GDAXI | 9948 | 0.019586 | 0.0021294 | 0 | -326 | 0 | 0 |
+| 06.06.2014 | 111.9 | ^GDAXI | 9987 | 0.00284 | 0.0039489 | 0 | -325 | 0 | 0 |
+| 09.06.2014 | 112.4 | ^GDAXI | 10009 | 0.003861 | 0.0021444 | 0 | -324 | 0 | 0 |
 
 ``` r
 
@@ -205,12 +225,48 @@ est_task = fit_model(est_task, param_set)
 
 ``` r
 
-est_task$data_tbl
+head(est_task$data_tbl)
+#> # A tibble: 4 × 6
+#> # Groups:   event_id, group, firm_symbol [4]
+#>   firm_symbol event_id group    data                request          model     
+#>   <chr>          <int> <chr>    <list>              <list>           <list>    
+#> 1 VOW.DE             1 VW Group <tibble [360 × 11]> <tibble [1 × 6]> <MarktMdl>
+#> 2 PAH3.DE            2 VW Group <tibble [360 × 11]> <tibble [1 × 6]> <MarktMdl>
+#> 3 BMW.DE             3 Other    <tibble [360 × 11]> <tibble [1 × 6]> <MarktMdl>
+#> 4 MBG.DE             4 Other    <tibble [360 × 11]> <tibble [1 × 6]> <MarktMdl>
 ```
 
 ``` r
 
 est_task$data_tbl$model[[1]]
+#> <MarketModel>
+#>   Inherits from: <ModelBase>
+#>   Public:
+#>     abnormal_returns: function (data_tbl) 
+#>     clone: function (deep = FALSE) 
+#>     degenerate_mode: lenient
+#>     event_id: 1
+#>     firm_symbol: VOW.DE
+#>     fit: function (data_tbl) 
+#>     formula: formula
+#>     hac_lag: NULL
+#>     initialize: function (use_hac = FALSE, hac_lag = NULL) 
+#>     is_fitted: active binding
+#>     model: active binding
+#>     model_name: MarketModel
+#>     set_formula: function (formula) 
+#>     statistics: active binding
+#>     use_hac: FALSE
+#>   Private:
+#>     .degenerate_handled: FALSE
+#>     .error: NULL
+#>     .fitted_model: lm
+#>     .is_fitted: TRUE
+#>     .statistics: list
+#>     add_residuals: function (residuals) 
+#>     calculate_forecast_error_correction: function (sigma, estimation_window_length, estimation_market_returns, 
+#>     calculate_statistics: function (data_tbl) 
+#>     first_order_autocorrelation: function (residuals)
 ```
 
 ``` r
@@ -220,27 +276,164 @@ est_task = calculate_statistics(est_task, param_set)
 
 ``` r
 
-est_task$data_tbl
+head(est_task$data_tbl)
+#> # A tibble: 4 × 8
+#> # Groups:   event_id, group, firm_symbol [4]
+#>   firm_symbol event_id group    data     request  model      ART      CART    
+#>   <chr>          <int> <chr>    <list>   <list>   <list>     <list>   <list>  
+#> 1 VOW.DE             1 VW Group <tibble> <tibble> <MarktMdl> <tibble> <tibble>
+#> 2 PAH3.DE            2 VW Group <tibble> <tibble> <MarktMdl> <tibble> <tibble>
+#> 3 BMW.DE             3 Other    <tibble> <tibble> <MarktMdl> <tibble> <tibble>
+#> 4 MBG.DE             4 Other    <tibble> <tibble> <MarktMdl> <tibble> <tibble>
 ```
 
 ``` r
 
-est_task$data_tbl$ART[[1]]
+es_tt(est_task$data_tbl$ART[[1]])
+#> Warning in `[<-.data.frame`(`*tmp*`, idx, col, value =
+#> structure(list(structure(list(: provided 21 variables to replace 1 variables
 ```
+
+| relative_index | abnormal_returns | ar_t      | ar_t_dist |
+|----------------|------------------|-----------|-----------|
+| -10            | 0.0028169        | 0.28098   | 248       |
+| -9             | 0.0003573        | 0.03564   | 0         |
+| -8             | 0.0091997        | 0.91765   | 1         |
+| -7             | 0.0222041        | 2.21482   | NA        |
+| -6             | -0.0057857       | -0.57712  | 248       |
+| -5             | 0.0058288        | 0.58141   | 0         |
+| -4             | -0.0049238       | -0.49114  | 1         |
+| -3             | 0.0025836        | 0.2577    | NA        |
+| -2             | 0.0002132        | 0.02127   | 248       |
+| -1             | -0.0003757       | -0.03748  | 0         |
+| 0              | -0.0026243       | -0.26177  | 1         |
+| 1              | -0.1910336       | -19.05523 | NA        |
+| 2              | -0.1418452       | -14.14879 | 248       |
+| 3              | 0.0626856        | 6.25277   | 0         |
+| 4              | 0.0215244        | 2.14702   | 1         |
+| 5              | -0.0576803       | -5.7535   | NA        |
+| 6              | -0.0523001       | -5.21684  | 248       |
+| 7              | -0.0318594       | -3.17791  | 0         |
+| 8              | -0.0074962       | -0.74773  | 1         |
+| 9              | 0.0185153        | 1.84686   | NA        |
+| 10             | -0.0423404       | -4.22337  | 248       |
 
 ``` r
 
-est_task$data_tbl$CART[[1]]
+es_tt(est_task$data_tbl$CART[[1]])
+#> Warning in `[<-.data.frame`(`*tmp*`, idx, col, value =
+#> structure(list(structure(list(: provided 21 variables to replace 1 variables
 ```
+
+| relative_index | abnormal_returns | event_window_length | car_window | car | corrected_car | car_t | car_t_dist |
+|----|----|----|----|----|----|----|----|
+| -10 | 0.0028169 | 1 | \[-10, -10\] | 0.002817 | 0.281 | 0.281 | 248 |
+| -9 | 0.0003573 | 2 | \[-10, -9\] | 0.003174 | 0.3166 | 0.2239 | 0.002816886 |
+| -8 | 0.0091997 | 3 | \[-10, -8\] | 0.012374 | 1.2343 | 0.7126 | 0.01002526 |
+| -7 | 0.0222041 | 4 | \[-10, -7\] | 0.034578 | 3.4491 | 1.7245 | NA |
+| -6 | -0.0057857 | 5 | \[-10, -6\] | 0.028792 | 2.872 | 1.2844 | 248 |
+| -5 | 0.0058288 | 6 | \[-10, -5\] | 0.034621 | 3.4534 | 1.4098 | 0.002816886 |
+| -4 | -0.0049238 | 7 | \[-10, -4\] | 0.029697 | 2.9622 | 1.1196 | 0.01002526 |
+| -3 | 0.0025836 | 8 | \[-10, -3\] | 0.032281 | 3.2199 | 1.1384 | NA |
+| -2 | 0.0002132 | 9 | \[-10, -2\] | 0.032494 | 3.2412 | 1.0804 | 248 |
+| -1 | -0.0003757 | 10 | \[-10, -1\] | 0.032118 | 3.2037 | 1.0131 | 0.002816886 |
+| 0 | -0.0026243 | 11 | \[-10, 0\] | 0.029494 | 2.942 | 0.887 | 0.01002526 |
+| 1 | -0.1910336 | 12 | \[-10, 1\] | -0.16154 | -16.1133 | -4.6515 | NA |
+| 2 | -0.1418452 | 13 | \[-10, 2\] | -0.303385 | -30.2621 | -8.3932 | 248 |
+| 3 | 0.0626856 | 14 | \[-10, 3\] | -0.240699 | -24.0093 | -6.4168 | 0.002816886 |
+| 4 | 0.0215244 | 15 | \[-10, 4\] | -0.219175 | -21.8623 | -5.6448 | 0.01002526 |
+| 5 | -0.0576803 | 16 | \[-10, 5\] | -0.276855 | -27.6158 | -6.9039 | NA |
+| 6 | -0.0523001 | 17 | \[-10, 6\] | -0.329155 | -32.8326 | -7.9631 | 248 |
+| 7 | -0.0318594 | 18 | \[-10, 7\] | -0.361015 | -36.0105 | -8.4878 | 0.002816886 |
+| 8 | -0.0074962 | 19 | \[-10, 8\] | -0.368511 | -36.7583 | -8.4329 | 0.01002526 |
+| 9 | 0.0185153 | 20 | \[-10, 9\] | -0.349996 | -34.9114 | -7.8064 | NA |
+| 10 | -0.0423404 | 21 | \[-10, 10\] | -0.392336 | -39.1348 | -8.5399 | 248 |
 
 ``` r
 
 est_task$aar_caar_tbl
+#> # A tibble: 2 × 4
+#> # Groups:   group [2]
+#>   group    data                model            CSectT            
+#>   <chr>    <list>              <list>           <list>            
+#> 1 VW Group <tibble [720 × 13]> <tibble [2 × 3]> <tibble [21 × 10]>
+#> 2 Other    <tibble [720 × 13]> <tibble [2 × 3]> <tibble [21 × 10]>
 ```
 
 ``` r
 
-est_task$aar_caar_tbl$CSectT[[1]]
+es_tt(est_task$aar_caar_tbl$CSectT[[1]])
+```
+
+[TABLE]
+
+### Visualize the Results
+
+The
+[`plot_event_study()`](https://sipemu.github.io/eventstudy/reference/plot_event_study.md)
+function returns a ggplot2 object; wrapping it in
+[`plotly::ggplotly()`](https://rdrr.io/pkg/plotly/man/ggplotly.html)
+converts it to an interactive widget – hover over data points to inspect
+exact values, zoom into the announcement window, or click legend entries
+to toggle series.
+
+#### Cumulative Abnormal Return (CAR)
+
+The chart below shows the cumulative abnormal return (CAR) path with
+confidence band for the first event in the study (VW, September 2015
+announcement).
+
+The CAR is the running sum of abnormal returns from the start of the
+event window to each day t. Abnormal returns are the firm’s actual
+returns minus what the market model predicted – in other words, the
+return in excess of what you would have expected given the index
+movement that day. At day 0 (the event date) the cumulative sum resets
+conceptually: positive values above the band reflect unexpectedly good
+news; negative values below the band reflect unexpectedly bad news.
+
+The shaded region is the confidence band. When the CAR path moves
+outside the band the abnormal performance is statistically
+distinguishable from zero – the market is responding to the event beyond
+chance variation. When the path stays inside the band the evidence of
+abnormal performance is not strong enough to rule out noise. For the VW
+Dieselgate event you will notice a pronounced drop right around the
+announcement window: the CAR falls sharply below the lower bound of the
+confidence band, confirming a statistically significant negative market
+reaction to the emissions disclosure.
+
+Use the hover tooltip to read off the exact CAR value and
+confidence-band limits at any relative day. The zoom and legend-toggle
+controls let you focus on the announcement window or isolate individual
+series.
+
+``` r
+
+plotly::ggplotly(plot_event_study(est_task, type = "car"))
+```
+
+#### Cumulative Average Abnormal Return (CAAR)
+
+The next chart shows the cumulative average abnormal return (CAAR)
+aggregated across all events in the study.
+
+Where the single-event CAR reflects one firm’s reaction, the CAAR
+averages abnormal returns across all events at each relative day.
+Averaging smooths out firm-specific noise – idiosyncratic movements that
+happen to coincide with the event window for a particular firm but are
+unrelated to the event itself. When a clean CAAR signal emerges (a
+sustained move outside the confidence band) it reflects a systematic
+market reaction shared across firms, not just one company’s
+idiosyncratic move. A narrow confidence band signals that the individual
+event reactions were consistent with each other; a wide band suggests
+heterogeneous reactions across the sample.
+
+For the Dieselgate study the CAAR chart summarises the mean market
+reaction across all four affected automotive companies, providing a
+portfolio-level view of how the scandal reverberated through the sector.
+
+``` r
+
+plotly::ggplotly(plot_event_study(est_task, type = "caar"))
 ```
 
 ### Next Steps

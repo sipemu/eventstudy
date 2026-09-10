@@ -199,48 +199,83 @@ generic is not re-exported by the package.</p>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_tail</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">firm_symbol</span>, <span class="va">term</span>, <span class="va">estimate</span>, <span class="va">std.error</span>, <span class="va">statistic</span>, <span class="va">p.value</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="fu">es_tt</span><span class="op">(</span></span>
 <span>    digits  <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Cumulative Abnormal Returns by firm (widest event window)"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>Cumulative Abnormal Returns by firm (widest event
-window)</caption>
-<thead><tr class="header">
-<th align="left">firm_symbol</th>
-<th align="left">term</th>
-<th align="right">estimate</th>
-<th align="right">std.error</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
-</tr></thead>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_h5azlkna1estoa1cvpdg = TinyTable.createTableFunctions("tinytable_h5azlkna1estoa1cvpdg");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '3', j: 3 }, { i: '3', j: 4 }, { i: '3', j: 5 }, { i: '3', j: 6 } ], css_id: 'tinytable_css_ll88b1l8m19ba30thtsc',}, 
+          { positions: [ { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 } ], css_id: 'tinytable_css_98d46xgab5wiptahp8ni',}, 
+          { positions: [ { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 } ], css_id: 'tinytable_css_80910o4f74m8r675vj9n',}, 
+          { positions: [ { i: '3', j: 1 }, { i: '3', j: 2 } ], css_id: 'tinytable_css_dfzyh9gx65hzp7a1zu30',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 } ], css_id: 'tinytable_css_4298ss0kqukaxvfxz40z',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_9fkc9nzxqm4cro2aadv1',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_h5azlkna1estoa1cvpdg.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_h5azlkna1estoa1cvpdg td.tinytable_css_ll88b1l8m19ba30thtsc, #tinytable_h5azlkna1estoa1cvpdg th.tinytable_css_ll88b1l8m19ba30thtsc {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_h5azlkna1estoa1cvpdg td.tinytable_css_98d46xgab5wiptahp8ni, #tinytable_h5azlkna1estoa1cvpdg th.tinytable_css_98d46xgab5wiptahp8ni { text-align: right }
+    #tinytable_h5azlkna1estoa1cvpdg td.tinytable_css_80910o4f74m8r675vj9n, #tinytable_h5azlkna1estoa1cvpdg th.tinytable_css_80910o4f74m8r675vj9n {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    #tinytable_h5azlkna1estoa1cvpdg td.tinytable_css_dfzyh9gx65hzp7a1zu30, #tinytable_h5azlkna1estoa1cvpdg th.tinytable_css_dfzyh9gx65hzp7a1zu30 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_h5azlkna1estoa1cvpdg td.tinytable_css_4298ss0kqukaxvfxz40z, #tinytable_h5azlkna1estoa1cvpdg th.tinytable_css_4298ss0kqukaxvfxz40z { text-align: left }
+    #tinytable_h5azlkna1estoa1cvpdg td.tinytable_css_9fkc9nzxqm4cro2aadv1, #tinytable_h5azlkna1estoa1cvpdg th.tinytable_css_9fkc9nzxqm4cro2aadv1 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_h5azlkna1estoa1cvpdg" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<caption>Cumulative Abnormal Returns by firm (widest event window)</caption>
+        <thead><tr>
+<th scope="col" data-row="0" data-col="1">firm_symbol</th>
+                <th scope="col" data-row="0" data-col="2">term</th>
+                <th scope="col" data-row="0" data-col="3">estimate</th>
+                <th scope="col" data-row="0" data-col="4">std.error</th>
+                <th scope="col" data-row="0" data-col="5">statistic</th>
+                <th scope="col" data-row="0" data-col="6">p.value</th>
+              </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="left">AAPL</td>
-<td align="left">[-5,5]</td>
-<td align="right">0.0323</td>
-<td align="right">0.0353</td>
-<td align="right">0.9150</td>
-<td align="right">0.3613</td>
-</tr>
-<tr class="even">
-<td align="left">GOOGL</td>
-<td align="left">[-5,5]</td>
-<td align="right">0.0130</td>
-<td align="right">0.0517</td>
-<td align="right">0.2518</td>
-<td align="right">0.8014</td>
-</tr>
-<tr class="odd">
-<td align="left">MSFT</td>
-<td align="left">[-5,5]</td>
-<td align="right">0.0678</td>
-<td align="right">0.0389</td>
-<td align="right">1.7436</td>
-<td align="right">0.0828</td>
-</tr>
+<tr>
+<td data-row="1" data-col="1">AAPL</td>
+                  <td data-row="1" data-col="2">[-5,5]</td>
+                  <td data-row="1" data-col="3">0.03232</td>
+                  <td data-row="1" data-col="4">0.03533</td>
+                  <td data-row="1" data-col="5">0.915</td>
+                  <td data-row="1" data-col="6">0.36133</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">GOOGL</td>
+                  <td data-row="2" data-col="2">[-5,5]</td>
+                  <td data-row="2" data-col="3">0.01302</td>
+                  <td data-row="2" data-col="4">0.05171</td>
+                  <td data-row="2" data-col="5">0.2518</td>
+                  <td data-row="2" data-col="6">0.80143</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">MSFT</td>
+                  <td data-row="3" data-col="2">[-5,5]</td>
+                  <td data-row="3" data-col="3">0.06781</td>
+                  <td data-row="3" data-col="4">0.03889</td>
+                  <td data-row="3" data-col="5">1.7436</td>
+                  <td data-row="3" data-col="6">0.08278</td>
+                </tr>
 </tbody>
 </table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 <div class="section level2">
 <h2 id="plot">Plot<a class="anchor" aria-label="anchor" href="#plot"></a>
@@ -257,7 +292,7 @@ plot for the article.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu">plotly</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plotly/man/ggplotly.html" class="external-link">ggplotly</a></span><span class="op">(</span><span class="va">gg</span><span class="op">)</span></span></code></pre></div>
 <div class="plotly html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:672px;height:384px;"></div>
-<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"data":[{"x":[-5,-4,-3,-2,-1,0,1,2,3,4,5,5,5,4,3,2,1,0,-1,-2,-3,-4,-5,-5],"y":[-0.018157540426955204,-0.030322120059856975,-0.037382526842233962,-0.034589466678691901,-0.037335584303313865,-0.042770171536235899,-0.024207272074791515,-0.029402146117503317,-0.037431149811987127,-0.036586235472405013,-0.036915102809597984,-0.036915102809597984,0.10155719375071126,0.095441918944770984,0.087821755156021905,0.088687425170754522,0.086255407103127957,0.059498397121408836,0.056022418992615911,0.04891246996664745,0.034932271557828659,0.028722665584271945,0.023593427895714471,-0.018157540426955204],"text":["relative_index: -5<br />ci_lower: -0.01816<br />ci_upper: 0.02359","relative_index: -4<br />ci_lower: -0.03032<br />ci_upper: 0.02872","relative_index: -3<br />ci_lower: -0.03738<br />ci_upper: 0.03493","relative_index: -2<br />ci_lower: -0.03459<br />ci_upper: 0.04891","relative_index: -1<br />ci_lower: -0.03734<br />ci_upper: 0.05602","relative_index:  0<br />ci_lower: -0.04277<br />ci_upper: 0.05950","relative_index:  1<br />ci_lower: -0.02421<br />ci_upper: 0.08626","relative_index:  2<br />ci_lower: -0.02940<br />ci_upper: 0.08869","relative_index:  3<br />ci_lower: -0.03743<br />ci_upper: 0.08782","relative_index:  4<br />ci_lower: -0.03659<br />ci_upper: 0.09544","relative_index:  5<br />ci_lower: -0.03692<br />ci_upper: 0.10156","relative_index:  5<br />ci_lower: -0.03692<br />ci_upper: 0.10156","relative_index:  5<br />ci_lower: -0.03692<br />ci_upper: 0.10156","relative_index:  4<br />ci_lower: -0.03659<br />ci_upper: 0.09544","relative_index:  3<br />ci_lower: -0.03743<br />ci_upper: 0.08782","relative_index:  2<br />ci_lower: -0.02940<br />ci_upper: 0.08869","relative_index:  1<br />ci_lower: -0.02421<br />ci_upper: 0.08626","relative_index:  0<br />ci_lower: -0.04277<br />ci_upper: 0.05950","relative_index: -1<br />ci_lower: -0.03734<br />ci_upper: 0.05602","relative_index: -2<br />ci_lower: -0.03459<br />ci_upper: 0.04891","relative_index: -3<br />ci_lower: -0.03738<br />ci_upper: 0.03493","relative_index: -4<br />ci_lower: -0.03032<br />ci_upper: 0.02872","relative_index: -5<br />ci_lower: -0.01816<br />ci_upper: 0.02359","relative_index: -5<br />ci_lower: -0.01816<br />ci_upper: 0.02359"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"transparent","dash":"solid"},"fill":"toself","fillcolor":"rgba(37,99,235,0.2)","hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-5,-4,-3,-2,-1,0,1,2,3,4,5],"y":[0.0027179437343796339,-0.00079972723779251666,-0.0012251276422026506,0.007161501643977772,0.0093434173446510262,0.0083641127925864651,0.031024067514168224,0.029642639526625603,0.025195302672017389,0.029427841736182986,0.032321045470556635],"text":["relative_index: -5<br />value:  0.0027179","relative_index: -4<br />value: -0.0007997","relative_index: -3<br />value: -0.0012251","relative_index: -2<br />value:  0.0071615","relative_index: -1<br />value:  0.0093434","relative_index:  0<br />value:  0.0083641","relative_index:  1<br />value:  0.0310241","relative_index:  2<br />value:  0.0296426","relative_index:  3<br />value:  0.0251953","relative_index:  4<br />value:  0.0294278","relative_index:  5<br />value:  0.0323210"],"type":"scatter","mode":"lines+markers","line":{"width":3.0236220472440949,"color":"rgba(37,99,235,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(37,99,235,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(37,99,235,1)"}},"frame":null},{"x":[-5.5,5.5],"y":[0,0],"text":"yintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(107,114,128,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0],"y":[-0.049986539800583256,0.10877356201505863],"text":"xintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(213,94,0,0.6)","dash":"dot"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":39.246160232461605,"r":7.3059360730593621,"b":37.260273972602747,"l":48.949771689497723},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"AAPL: cumulative abnormal return with 95% confidence band","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"x":0.5,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-5.5,5.5],"tickmode":"array","ticktext":["-5.0","-2.5","0.0","2.5","5.0"],"tickvals":[-5,-2.5,0,2.5,5],"categoryorder":"array","categoryarray":["-5.0","-2.5","0.0","2.5","5.0"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716894984},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"y","title":{"text":"Event Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.049986539800583256,0.10877356201505863],"tickmode":"array","ticktext":["0.00","0.05","0.10"],"tickvals":[6.9388939039072284e-18,0.049999999999999996,0.10000000000000001],"categoryorder":"array","categoryarray":["0.00","0.05","0.10"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"x","title":{"text":"Cumulative Abnormal Return","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716894984},"orientation":"h","x":0.5,"y":-0.14999999999999999,"xanchor":"center","yanchor":"top"},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"25816b2e4334":{"x":{},"ymin":{},"ymax":{},"type":"scatter"},"25814f59f48c":{"x":{},"y":{}},"25816a66864c":{"x":{},"y":{}},"25815e9d72c6":{"yintercept":{}},"25817ab6cb2d":{"xintercept":{}}},"cur_data":"25816b2e4334","visdat":{"25816b2e4334":["function (y) ","x"],"25814f59f48c":["function (y) ","x"],"25816a66864c":["function (y) ","x"],"25815e9d72c6":["function (y) ","x"],"25817ab6cb2d":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"data":[{"x":[-5,-4,-3,-2,-1,0,1,2,3,4,5,5,5,4,3,2,1,0,-1,-2,-3,-4,-5,-5],"y":[-0.018157540426955204,-0.030322120059856975,-0.037382526842233962,-0.034589466678691901,-0.037335584303313865,-0.042770171536235899,-0.024207272074791515,-0.029402146117503317,-0.037431149811987127,-0.036586235472405013,-0.036915102809597984,-0.036915102809597984,0.10155719375071126,0.095441918944770984,0.087821755156021905,0.088687425170754522,0.086255407103127957,0.059498397121408836,0.056022418992615911,0.04891246996664745,0.034932271557828659,0.028722665584271945,0.023593427895714471,-0.018157540426955204],"text":["relative_index: -5<br />ci_lower: -0.01816<br />ci_upper: 0.02359","relative_index: -4<br />ci_lower: -0.03032<br />ci_upper: 0.02872","relative_index: -3<br />ci_lower: -0.03738<br />ci_upper: 0.03493","relative_index: -2<br />ci_lower: -0.03459<br />ci_upper: 0.04891","relative_index: -1<br />ci_lower: -0.03734<br />ci_upper: 0.05602","relative_index:  0<br />ci_lower: -0.04277<br />ci_upper: 0.05950","relative_index:  1<br />ci_lower: -0.02421<br />ci_upper: 0.08626","relative_index:  2<br />ci_lower: -0.02940<br />ci_upper: 0.08869","relative_index:  3<br />ci_lower: -0.03743<br />ci_upper: 0.08782","relative_index:  4<br />ci_lower: -0.03659<br />ci_upper: 0.09544","relative_index:  5<br />ci_lower: -0.03692<br />ci_upper: 0.10156","relative_index:  5<br />ci_lower: -0.03692<br />ci_upper: 0.10156","relative_index:  5<br />ci_lower: -0.03692<br />ci_upper: 0.10156","relative_index:  4<br />ci_lower: -0.03659<br />ci_upper: 0.09544","relative_index:  3<br />ci_lower: -0.03743<br />ci_upper: 0.08782","relative_index:  2<br />ci_lower: -0.02940<br />ci_upper: 0.08869","relative_index:  1<br />ci_lower: -0.02421<br />ci_upper: 0.08626","relative_index:  0<br />ci_lower: -0.04277<br />ci_upper: 0.05950","relative_index: -1<br />ci_lower: -0.03734<br />ci_upper: 0.05602","relative_index: -2<br />ci_lower: -0.03459<br />ci_upper: 0.04891","relative_index: -3<br />ci_lower: -0.03738<br />ci_upper: 0.03493","relative_index: -4<br />ci_lower: -0.03032<br />ci_upper: 0.02872","relative_index: -5<br />ci_lower: -0.01816<br />ci_upper: 0.02359","relative_index: -5<br />ci_lower: -0.01816<br />ci_upper: 0.02359"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"transparent","dash":"solid"},"fill":"toself","fillcolor":"rgba(37,99,235,0.2)","hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-5,-4,-3,-2,-1,0,1,2,3,4,5],"y":[0.0027179437343796339,-0.00079972723779251666,-0.0012251276422026506,0.007161501643977772,0.0093434173446510262,0.0083641127925864651,0.031024067514168224,0.029642639526625603,0.025195302672017389,0.029427841736182986,0.032321045470556635],"text":["relative_index: -5<br />value:  0.0027179","relative_index: -4<br />value: -0.0007997","relative_index: -3<br />value: -0.0012251","relative_index: -2<br />value:  0.0071615","relative_index: -1<br />value:  0.0093434","relative_index:  0<br />value:  0.0083641","relative_index:  1<br />value:  0.0310241","relative_index:  2<br />value:  0.0296426","relative_index:  3<br />value:  0.0251953","relative_index:  4<br />value:  0.0294278","relative_index:  5<br />value:  0.0323210"],"type":"scatter","mode":"lines+markers","line":{"width":3.0236220472440949,"color":"rgba(37,99,235,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(37,99,235,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(37,99,235,1)"}},"frame":null},{"x":[-5.5,5.5],"y":[0,0],"text":"yintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(107,114,128,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0],"y":[-0.049986539800583256,0.10877356201505863],"text":"xintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(213,94,0,0.6)","dash":"dot"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":39.246160232461605,"r":7.3059360730593621,"b":37.260273972602747,"l":48.949771689497723},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"AAPL: cumulative abnormal return with 95% confidence band","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"x":0.5,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-5.5,5.5],"tickmode":"array","ticktext":["-5.0","-2.5","0.0","2.5","5.0"],"tickvals":[-5,-2.5,0,2.5,5],"categoryorder":"array","categoryarray":["-5.0","-2.5","0.0","2.5","5.0"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716894984},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"y","title":{"text":"Event Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.049986539800583256,0.10877356201505863],"tickmode":"array","ticktext":["0.00","0.05","0.10"],"tickvals":[6.9388939039072284e-18,0.049999999999999996,0.10000000000000001],"categoryorder":"array","categoryarray":["0.00","0.05","0.10"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"x","title":{"text":"Cumulative Abnormal Return","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716894984},"orientation":"h","x":0.5,"y":-0.14999999999999999,"xanchor":"center","yanchor":"top"},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"234367862bd0":{"x":{},"ymin":{},"ymax":{},"type":"scatter"},"234320b9a1bb":{"x":{},"y":{}},"23432b3d72fd":{"x":{},"y":{}},"23432233a211":{"yintercept":{}},"23433de4ef55":{"xintercept":{}}},"cur_data":"234367862bd0","visdat":{"234367862bd0":["function (y) ","x"],"234320b9a1bb":["function (y) ","x"],"23432b3d72fd":["function (y) ","x"],"23432233a211":["function (y) ","x"],"23433de4ef55":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 <div class="section level2">
 <h2 id="statistical-interpretation">Statistical interpretation<a class="anchor" aria-label="anchor" href="#statistical-interpretation"></a>
@@ -345,17 +380,17 @@ pipeline reference page.</li>
 <span><span class="co">#&gt; [16] crosstalk_1.2.2      viridisLite_0.4.3    scales_1.4.0        </span></span>
 <span><span class="co">#&gt; [19] textshaping_1.0.5    jquerylib_0.1.4      cli_3.6.6           </span></span>
 <span><span class="co">#&gt; [22] rlang_1.3.0          withr_3.0.3          cachem_1.1.0        </span></span>
-<span><span class="co">#&gt; [25] yaml_2.3.12          otel_0.2.0           tools_4.6.1         </span></span>
-<span><span class="co">#&gt; [28] dplyr_1.2.1          ggplot2_4.0.3        vctrs_0.7.3         </span></span>
-<span><span class="co">#&gt; [31] R6_2.6.1             lifecycle_1.0.5      stringr_1.6.0       </span></span>
-<span><span class="co">#&gt; [34] fs_2.1.0             htmlwidgets_1.6.4    ragg_1.5.2          </span></span>
-<span><span class="co">#&gt; [37] pkgconfig_2.0.3      desc_1.4.3           pkgdown_2.2.1       </span></span>
-<span><span class="co">#&gt; [40] pillar_1.11.1        bslib_0.12.0         gtable_0.3.6        </span></span>
-<span><span class="co">#&gt; [43] glue_1.8.1           data.table_1.18.6.1  systemfonts_1.3.2   </span></span>
-<span><span class="co">#&gt; [46] xfun_0.60            tibble_3.3.1         tidyselect_1.2.1    </span></span>
-<span><span class="co">#&gt; [49] knitr_1.52           farver_2.1.2         htmltools_0.5.9     </span></span>
-<span><span class="co">#&gt; [52] rmarkdown_2.32       labeling_0.4.3       compiler_4.6.1      </span></span>
-<span><span class="co">#&gt; [55] S7_0.2.2             distributional_0.8.1</span></span></code></pre>
+<span><span class="co">#&gt; [25] yaml_2.3.12          tinytable_0.18.0     otel_0.2.0          </span></span>
+<span><span class="co">#&gt; [28] tools_4.6.1          dplyr_1.2.1          ggplot2_4.0.3       </span></span>
+<span><span class="co">#&gt; [31] vctrs_0.7.3          R6_2.6.1             lifecycle_1.0.5     </span></span>
+<span><span class="co">#&gt; [34] stringr_1.6.0        fs_2.1.0             htmlwidgets_1.6.4   </span></span>
+<span><span class="co">#&gt; [37] ragg_1.5.2           pkgconfig_2.0.3      desc_1.4.3          </span></span>
+<span><span class="co">#&gt; [40] pkgdown_2.2.1        pillar_1.11.1        bslib_0.12.0        </span></span>
+<span><span class="co">#&gt; [43] gtable_0.3.6         glue_1.8.1           data.table_1.18.6.1 </span></span>
+<span><span class="co">#&gt; [46] systemfonts_1.3.2    xfun_0.60            tibble_3.3.1        </span></span>
+<span><span class="co">#&gt; [49] tidyselect_1.2.1     knitr_1.52           farver_2.1.2        </span></span>
+<span><span class="co">#&gt; [52] htmltools_0.5.9      rmarkdown_2.32       labeling_0.4.3      </span></span>
+<span><span class="co">#&gt; [55] compiler_4.6.1       S7_0.2.2             distributional_0.9.0</span></span></code></pre>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-BMP1991" class="csl-entry">
 Boehmer, Ekkehart, Jim Musumeci, and Annette B. Poulsen. 1991.

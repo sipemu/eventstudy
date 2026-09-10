@@ -108,21 +108,23 @@ and residual checks the advisor reasons over:
 ``` r
 
 est <- as.data.frame(diag$estimation_window)
-knitr::kable(
+es_tt(
   est,
   caption = "Per-event estimation-window diagnostics feeding the advisor (offline)."
 )
 ```
 
-|     r2 |  sigma | degree_of_freedom |    acf1 | shapiro_p | dw_stat | ljung_box_p |
-|-------:|-------:|------------------:|--------:|----------:|--------:|------------:|
-| 0.7048 | 0.0091 |               248 | -0.0170 |    0.0654 |   2.032 |      0.8607 |
-| 0.7037 | 0.0100 |               248 | -0.0720 |    0.0042 |   2.140 |      0.8233 |
-| 0.7675 | 0.0088 |               248 | -0.0940 |    0.0035 |   2.187 |      0.8430 |
-| 0.8483 | 0.0069 |               248 |  0.1468 |    0.0000 |   1.691 |      0.1447 |
+| r2     | sigma    | degree_of_freedom | acf1     | shapiro_p   | dw_stat | ljung_box_p |
+|--------|----------|-------------------|----------|-------------|---------|-------------|
+| 0.7048 | 0.009108 | 248               | -0.01703 | 0.065413752 | 2.032   | 0.8607      |
+| 0.7037 | 0.01002  | 248               | -0.07195 | 0.004213559 | 2.14    | 0.8233      |
+| 0.7675 | 0.008794 | 248               | -0.09401 | 0.003510082 | 2.187   | 0.843       |
+| 0.8483 | 0.00688  | 248               | 0.14675  | 0.000006053 | 1.691   | 0.1447      |
 
 Per-event estimation-window diagnostics feeding the advisor (offline).
-{.table}
+{#tinytable_dpzrxrlfc24th2oba8aj .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 

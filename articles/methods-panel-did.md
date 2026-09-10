@@ -126,24 +126,26 @@ estimate_panel_event_study(task, method = "borusyak_jaravel_spiess")        # ne
 
 ``` r
 
-knitr::kable(
+es_tt(
   res$results$coefficients,
   caption = "Dynamic TWFE event-time coefficients (base period k = -1) on the synthetic staggered panel."
 )
 ```
 
-| relative_time | estimate | std.error | statistic | p.value |
-|--------------:|---------:|----------:|----------:|--------:|
-|            -3 |  -0.7182 |    0.3181 |    -2.258 |  0.0240 |
-|            -2 |  -0.5610 |    0.2615 |    -2.146 |  0.0319 |
-|            -1 |   0.0000 |    0.0000 |        NA |      NA |
-|             0 |   2.0085 |    0.3333 |     6.026 |  0.0000 |
-|             1 |   2.2249 |    0.4618 |     4.818 |  0.0000 |
-|             2 |   2.8218 |    0.4236 |     6.661 |  0.0000 |
-|             3 |       NA |        NA |        NA |      NA |
+| relative_time | estimate | std.error | statistic | p.value          |
+|---------------|----------|-----------|-----------|------------------|
+| -3            | -0.7182  | 0.3181    | -2.258    | 0.02395869066429 |
+| -2            | -0.561   | 0.2615    | -2.146    | 0.03190555093361 |
+| -1            | 0        | 0         | NA        | NA               |
+| 0             | 2.0085   | 0.3333    | 6.026     | 0.0000000016834  |
+| 1             | 2.2249   | 0.4618    | 4.818     | 0.00000145136014 |
+| 2             | 2.8218   | 0.4236    | 6.661     | 0.00000000002721 |
+| 3             | NA       | NA        | NA        | NA               |
 
 Dynamic TWFE event-time coefficients (base period k = -1) on the
-synthetic staggered panel. {.table}
+synthetic staggered panel. {#tinytable_3soe8woo7sq6mgzzk4wa .table
+.tinytable style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## 8. Rendered Plot
 

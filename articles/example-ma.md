@@ -87,22 +87,24 @@ power_tbl <- purrr::map_dfr(ar_grid, function(ar) {
   tibble::tibble(true_abnormal_return = ar, power = sim$power)
 })
 
-knitr::kable(
+es_tt(
   power_tbl, digits = 4,
   caption = "Detection power by true abnormal return (N = 15, cross-sectional test, alpha = 0.05)"
 )
 ```
 
 | true_abnormal_return | power |
-|---------------------:|------:|
-|                0.001 | 0.035 |
-|                0.002 | 0.100 |
-|                0.004 | 0.270 |
-|                0.006 | 0.570 |
-|                0.010 | 0.960 |
+|----------------------|-------|
+| 0.001                | 0.035 |
+| 0.002                | 0.1   |
+| 0.004                | 0.27  |
+| 0.006                | 0.57  |
+| 0.01                 | 0.96  |
 
 Detection power by true abnormal return (N = 15, cross-sectional test,
-alpha = 0.05) {.table}
+alpha = 0.05) {#tinytable_7xunk7bmnwmztqc2rvvw .table .tinytable
+style="width: auto; margin-left: auto; margin-right: auto;"
+quarto-disable-processing="true"}
 
 ## Results plot
 
@@ -212,23 +214,24 @@ excludes.
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         
-    #>  [4] compiler_4.6.1       tidyselect_1.2.1     stringr_1.6.0       
-    #>  [7] tidyr_1.3.2          jquerylib_0.1.4      systemfonts_1.3.2   
-    #> [10] scales_1.4.0         textshaping_1.0.5    yaml_2.3.12         
-    #> [13] fastmap_1.2.0        ggplot2_4.0.3        R6_2.6.1            
-    #> [16] generics_0.1.4       distributional_0.8.1 knitr_1.52          
-    #> [19] htmlwidgets_1.6.4    tibble_3.3.1         desc_1.4.3          
-    #> [22] RColorBrewer_1.1-3   bslib_0.12.0         pillar_1.11.1       
-    #> [25] rlang_1.3.0          stringi_1.8.9        cachem_1.1.0        
-    #> [28] xfun_0.60            S7_0.2.2             fs_2.1.0            
-    #> [31] sass_0.4.10          otel_0.2.0           viridisLite_0.4.3   
-    #> [34] plotly_4.12.1        cli_3.6.6            withr_3.0.3         
-    #> [37] pkgdown_2.2.1        magrittr_2.0.5       crosstalk_1.2.2     
-    #> [40] digest_0.6.39        grid_4.6.1           lifecycle_1.0.5     
-    #> [43] vctrs_0.7.3          data.table_1.18.6.1  evaluate_1.0.5      
-    #> [46] glue_1.8.1           farver_2.1.2         ragg_1.5.2          
-    #> [49] purrr_1.2.2          httr_1.4.9           rmarkdown_2.32      
-    #> [52] tools_4.6.1          pkgconfig_2.0.3      htmltools_0.5.9
+    #>  [4] compiler_4.6.1       tidyselect_1.2.1     tinytable_0.18.0    
+    #>  [7] stringr_1.6.0        tidyr_1.3.2          jquerylib_0.1.4     
+    #> [10] systemfonts_1.3.2    scales_1.4.0         textshaping_1.0.5   
+    #> [13] yaml_2.3.12          fastmap_1.2.0        ggplot2_4.0.3       
+    #> [16] R6_2.6.1             generics_0.1.4       distributional_0.9.0
+    #> [19] knitr_1.52           htmlwidgets_1.6.4    tibble_3.3.1        
+    #> [22] desc_1.4.3           RColorBrewer_1.1-3   bslib_0.12.0        
+    #> [25] pillar_1.11.1        rlang_1.3.0          stringi_1.8.9       
+    #> [28] cachem_1.1.0         xfun_0.60            S7_0.2.2            
+    #> [31] fs_2.1.0             sass_0.4.10          otel_0.2.0          
+    #> [34] viridisLite_0.4.3    plotly_4.12.1        cli_3.6.6           
+    #> [37] withr_3.0.3          pkgdown_2.2.1        magrittr_2.0.5      
+    #> [40] crosstalk_1.2.2      digest_0.6.39        grid_4.6.1          
+    #> [43] lifecycle_1.0.5      vctrs_0.7.3          data.table_1.18.6.1 
+    #> [46] evaluate_1.0.5       glue_1.8.1           farver_2.1.2        
+    #> [49] ragg_1.5.2           purrr_1.2.2          httr_1.4.9          
+    #> [52] rmarkdown_2.32       tools_4.6.1          pkgconfig_2.0.3     
+    #> [55] htmltools_0.5.9
 
 MacKinlay, A. Craig. 1997. “Event Studies in Economics and Finance.”
 *Journal of Economic Literature* 35 (1): 13–39.

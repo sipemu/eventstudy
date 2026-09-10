@@ -79,14 +79,16 @@
 
 
 
-
-<div class="row">
+<link href="introduction_files/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="introduction_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><script src="introduction_files/plotly-binding-4.12.1/plotly.js"></script><script src="introduction_files/typedarray-0.1/typedarray.min.js"></script><link href="introduction_files/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="introduction_files/crosstalk-1.2.2/js/crosstalk.min.js"></script><link href="introduction_files/plotly-htmlwidgets-css-2.25.2/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="introduction_files/plotly-main-2.25.2/plotly-latest.min.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Getting Started with EventStudy</h1>
                         <h4 data-toc-skip class="author">Simon
 Mueller</h4>
             
-            <h4 data-toc-skip class="date">2026-09-09</h4>
+            <h4 data-toc-skip class="date">2026-09-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sipemu/eventstudy/blob/main/vignettes/introduction.Rmd" class="external-link"><code>vignettes/introduction.Rmd</code></a></small>
       <div class="d-none name"><code>introduction.Rmd</code></div>
@@ -113,7 +115,8 @@ Dieselgate scandal as a running example.</p>
 <p>If you already have firm data, index data, and a request table (all
 defined below), the entire pipeline runs in a single call:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Preview of the full pipeline — data objects are loaded and unpacked step-by-step below.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># One-call shortcut: prepare -&gt; fit -&gt; calculate, in one step</span></span>
 <span><span class="va">est_task</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_event_study.html">run_event_study</a></span><span class="op">(</span></span>
@@ -151,37 +154,17 @@ results.</p>
 market data for the companies of interest and the index during the event
 study period.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#' warnings: false</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://business-science.github.io/tidyquant/" class="external-link">tidyquant</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org" class="external-link">readr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rstudio/DT" class="external-link">DT</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
+<span><span class="co"># Load the bundled frozen Dieselgate dataset (replaces a live network download via</span></span>
+<span><span class="co"># tidyquant so this vignette builds fully offline and reproducibly on CRAN/pkgdown).</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">dieselgate</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">index_symbol</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"^GDAXI"</span><span class="op">)</span></span>
-<span><span class="va">firm_symbols</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"VOW.DE"</span>, <span class="st">"PAH3.DE"</span>, <span class="st">"BMW.DE"</span>, <span class="st">"MBG.DE"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"VW Group"</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Other"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">request_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span>, <span class="va">firm_symbols</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">index_symbol</span>, <span class="fl">4</span><span class="op">)</span>, </span>
-<span>                     <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"18.09.2015"</span>, <span class="fl">4</span><span class="op">)</span>, </span>
-<span>                     <span class="va">group</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="op">-</span><span class="fl">11</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">request_tbl</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"event_id"</span>, <span class="st">"firm_symbol"</span>, <span class="st">"index_symbol"</span>, <span class="st">"event_date"</span>, </span>
-<span>                        <span class="st">"group"</span>, <span class="st">"event_window_start"</span>, <span class="st">"event_window_end"</span>, </span>
-<span>                        <span class="st">"shift_estimation_window"</span>, <span class="st">"estimation_window_length"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">firm_symbols</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">tidyquant</span><span class="fu">::</span><span class="fu"><a href="https://business-science.github.io/tidyquant/reference/tq_get.html" class="external-link">tq_get</a></span><span class="op">(</span>from <span class="op">=</span> <span class="st">"2014-06-01"</span>, to <span class="op">=</span> <span class="st">"2015-11-01"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">"%d.%m.%Y"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">symbol</span>, <span class="va">date</span>, <span class="va">adjusted</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">firm_tbl</span></span>
-<span></span>
-<span><span class="va">index_symbol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">tidyquant</span><span class="fu">::</span><span class="fu"><a href="https://business-science.github.io/tidyquant/reference/tq_get.html" class="external-link">tq_get</a></span><span class="op">(</span>from <span class="op">=</span> <span class="st">"2014-06-01"</span>, to <span class="op">=</span> <span class="st">"2015-11-01"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">date</span>, <span class="st">"%d.%m.%Y"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">symbol</span>, <span class="va">date</span>, <span class="va">adjusted</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">index_tbl</span></span></code></pre></div>
+<span><span class="va">firm_tbl</span>    <span class="op">&lt;-</span> <span class="va">dieselgate</span><span class="op">$</span><span class="va">firm</span>     <span class="co"># symbol / date / adjusted (4 firms, DD-MM-YYYY dates)</span></span>
+<span><span class="va">index_tbl</span>   <span class="op">&lt;-</span> <span class="va">dieselgate</span><span class="op">$</span><span class="va">index</span>    <span class="co"># symbol / date / adjusted (^GDAXI)</span></span>
+<span><span class="va">request_tbl</span> <span class="op">&lt;-</span> <span class="va">dieselgate</span><span class="op">$</span><span class="va">request</span>  <span class="co"># event_id / firm_symbol / index_symbol / event_date /</span></span>
+<span>                                   <span class="co"># group / event_window_start / event_window_end /</span></span>
+<span>                                   <span class="co"># shift_estimation_window / estimation_window_length</span></span></code></pre></div>
 <p>Both, the firm data as the index data should have the following
 structure:</p>
 <ol style="list-style-type: decimal">
@@ -195,7 +178,82 @@ price column can be parametrized according to your needs when the task
 is defined. The default is <code>adjusted</code>.</li>
 </ol>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DT/man/datatable.html" class="external-link">datatable</a></span><span class="op">(</span><span class="va">firm_tbl</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">firm_tbl</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_fz7n78fhaihph80ufau2 = TinyTable.createTableFunctions("tinytable_fz7n78fhaihph80ufau2");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '6', j: 3 } ], css_id: 'tinytable_css_dpzrxrlfc24th2oba8aj',}, 
+          { positions: [ { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 } ], css_id: 'tinytable_css_pkwlbrc85rgtwklgpq5f',}, 
+          { positions: [ { i: '0', j: 3 } ], css_id: 'tinytable_css_y9wrtq5uyw3eertwmix5',}, 
+          { positions: [ { i: '6', j: 1 }, { i: '6', j: 2 } ], css_id: 'tinytable_css_5nhd3agce59j98ikuc4s',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 } ], css_id: 'tinytable_css_43dsblrbdyqncyh9xtz8',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_85qllcgvqm1qys6fwqdu',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_fz7n78fhaihph80ufau2.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_fz7n78fhaihph80ufau2 td.tinytable_css_dpzrxrlfc24th2oba8aj, #tinytable_fz7n78fhaihph80ufau2 th.tinytable_css_dpzrxrlfc24th2oba8aj {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_fz7n78fhaihph80ufau2 td.tinytable_css_pkwlbrc85rgtwklgpq5f, #tinytable_fz7n78fhaihph80ufau2 th.tinytable_css_pkwlbrc85rgtwklgpq5f { text-align: right }
+    #tinytable_fz7n78fhaihph80ufau2 td.tinytable_css_y9wrtq5uyw3eertwmix5, #tinytable_fz7n78fhaihph80ufau2 th.tinytable_css_y9wrtq5uyw3eertwmix5 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    #tinytable_fz7n78fhaihph80ufau2 td.tinytable_css_5nhd3agce59j98ikuc4s, #tinytable_fz7n78fhaihph80ufau2 th.tinytable_css_5nhd3agce59j98ikuc4s {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_fz7n78fhaihph80ufau2 td.tinytable_css_43dsblrbdyqncyh9xtz8, #tinytable_fz7n78fhaihph80ufau2 th.tinytable_css_43dsblrbdyqncyh9xtz8 { text-align: left }
+    #tinytable_fz7n78fhaihph80ufau2 td.tinytable_css_85qllcgvqm1qys6fwqdu, #tinytable_fz7n78fhaihph80ufau2 th.tinytable_css_85qllcgvqm1qys6fwqdu {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_fz7n78fhaihph80ufau2" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col" data-row="0" data-col="1">symbol</th>
+                <th scope="col" data-row="0" data-col="2">date</th>
+                <th scope="col" data-row="0" data-col="3">adjusted</th>
+              </tr></thead>
+<tbody>
+<tr>
+<td data-row="1" data-col="1">VOW.DE</td>
+                  <td data-row="1" data-col="2">02.06.2014</td>
+                  <td data-row="1" data-col="3">112.5</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">VOW.DE</td>
+                  <td data-row="2" data-col="2">03.06.2014</td>
+                  <td data-row="2" data-col="3">112.4</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">VOW.DE</td>
+                  <td data-row="3" data-col="2">04.06.2014</td>
+                  <td data-row="3" data-col="3">109.5</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">VOW.DE</td>
+                  <td data-row="4" data-col="2">05.06.2014</td>
+                  <td data-row="4" data-col="3">111.6</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">VOW.DE</td>
+                  <td data-row="5" data-col="2">06.06.2014</td>
+                  <td data-row="5" data-col="3">111.9</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">VOW.DE</td>
+                  <td data-row="6" data-col="2">09.06.2014</td>
+                  <td data-row="6" data-col="3">112.4</td>
+                </tr>
+</tbody>
+</table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 <div class="section level3">
 <h3 id="define-the-event-study">Define the Event Study<a class="anchor" aria-label="anchor" href="#define-the-event-study"></a>
@@ -224,7 +282,7 @@ default, alongside Patell Z, BMP, sign, and rank tests.</p>
 <p>Your Event Study is then defined in a parameter set:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Setup parameter set</span></span>
-<span><span class="va">param_set</span> <span class="op">=</span> <span class="va"><a href="../reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>return_calculation      <span class="op">=</span> <span class="va">log_return</span>, </span>
+<span><span class="va">param_set</span> <span class="op">=</span> <span class="va"><a href="../reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>return_calculation      <span class="op">=</span> <span class="va">log_return</span>,</span>
 <span>                             return_model            <span class="op">=</span> <span class="va">market_model</span>,</span>
 <span>                             single_event_statistics <span class="op">=</span> <span class="va">single_event_tests</span>,</span>
 <span>                             multi_event_statistics  <span class="op">=</span> <span class="va">multiple_event_tests</span><span class="op">)</span></span></code></pre></div>
@@ -244,35 +302,1405 @@ renamed. Afterwards a join is applied and the data is collected in a
 data frame with one event per row. Let’s have a look at the internal
 data frame:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DT/man/datatable.html" class="external-link">datatable</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   event_id, group, firm_symbol [4]</span></span></span>
+<span><span class="co">#&gt;   firm_symbol event_id group    data               request         </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VOW.DE             1 VW Group <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> PAH3.DE            2 VW Group <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BMW.DE             3 Other    <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> MBG.DE             4 Other    <span style="color: #949494;">&lt;tibble [360 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DT/man/datatable.html" class="external-link">datatable</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_wx3uro1mxmroaxun4rhl = TinyTable.createTableFunctions("tinytable_wx3uro1mxmroaxun4rhl");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '6', j: 2 }, { i: '6', j: 4 } ], css_id: 'tinytable_css_21xe64s2f9yfn48cb226',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 } ], css_id: 'tinytable_css_jg5cvs5tsqeczpz5g8xa',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 4 } ], css_id: 'tinytable_css_zgykm0goqmxlrb56jrui',}, 
+          { positions: [ { i: '6', j: 1 }, { i: '6', j: 3 } ], css_id: 'tinytable_css_8hrjhewne9db7pphiddv',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 } ], css_id: 'tinytable_css_rpbeleodk1aurlgwrlpt',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_spomc8l3zye0m3zqi273',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_wx3uro1mxmroaxun4rhl.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_wx3uro1mxmroaxun4rhl td.tinytable_css_21xe64s2f9yfn48cb226, #tinytable_wx3uro1mxmroaxun4rhl th.tinytable_css_21xe64s2f9yfn48cb226 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_wx3uro1mxmroaxun4rhl td.tinytable_css_jg5cvs5tsqeczpz5g8xa, #tinytable_wx3uro1mxmroaxun4rhl th.tinytable_css_jg5cvs5tsqeczpz5g8xa { text-align: right }
+    #tinytable_wx3uro1mxmroaxun4rhl td.tinytable_css_zgykm0goqmxlrb56jrui, #tinytable_wx3uro1mxmroaxun4rhl th.tinytable_css_zgykm0goqmxlrb56jrui {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    #tinytable_wx3uro1mxmroaxun4rhl td.tinytable_css_8hrjhewne9db7pphiddv, #tinytable_wx3uro1mxmroaxun4rhl th.tinytable_css_8hrjhewne9db7pphiddv {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_wx3uro1mxmroaxun4rhl td.tinytable_css_rpbeleodk1aurlgwrlpt, #tinytable_wx3uro1mxmroaxun4rhl th.tinytable_css_rpbeleodk1aurlgwrlpt { text-align: left }
+    #tinytable_wx3uro1mxmroaxun4rhl td.tinytable_css_spomc8l3zye0m3zqi273, #tinytable_wx3uro1mxmroaxun4rhl th.tinytable_css_spomc8l3zye0m3zqi273 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_wx3uro1mxmroaxun4rhl" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col" data-row="0" data-col="1">date</th>
+                <th scope="col" data-row="0" data-col="2">firm_adjusted</th>
+                <th scope="col" data-row="0" data-col="3">index_symbol</th>
+                <th scope="col" data-row="0" data-col="4">index_adjusted</th>
+              </tr></thead>
+<tbody>
+<tr>
+<td data-row="1" data-col="1">02.06.2014</td>
+                  <td data-row="1" data-col="2">112.5</td>
+                  <td data-row="1" data-col="3">^GDAXI</td>
+                  <td data-row="1" data-col="4">9950</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">03.06.2014</td>
+                  <td data-row="2" data-col="2">112.4</td>
+                  <td data-row="2" data-col="3">^GDAXI</td>
+                  <td data-row="2" data-col="4">9920</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">04.06.2014</td>
+                  <td data-row="3" data-col="2">109.5</td>
+                  <td data-row="3" data-col="3">^GDAXI</td>
+                  <td data-row="3" data-col="4">9927</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">05.06.2014</td>
+                  <td data-row="4" data-col="2">111.6</td>
+                  <td data-row="4" data-col="3">^GDAXI</td>
+                  <td data-row="4" data-col="4">9948</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">06.06.2014</td>
+                  <td data-row="5" data-col="2">111.9</td>
+                  <td data-row="5" data-col="3">^GDAXI</td>
+                  <td data-row="5" data-col="4">9987</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">09.06.2014</td>
+                  <td data-row="6" data-col="2">112.4</td>
+                  <td data-row="6" data-col="3">^GDAXI</td>
+                  <td data-row="6" data-col="4">10009</td>
+                </tr>
+</tbody>
+</table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">DT</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/DT/man/datatable.html" class="external-link">datatable</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">request</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">request</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_lafttwwno9bui9d80270 = TinyTable.createTableFunctions("tinytable_lafttwwno9bui9d80270");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '1', j: 3 }, { i: '1', j: 4 }, { i: '1', j: 5 }, { i: '1', j: 6 } ], css_id: 'tinytable_css_5pb3n9gmmfb5u96vijfp',}, 
+          { positions: [ { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 } ], css_id: 'tinytable_css_t16mz3ymtm5liqo8wgmi',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '1', j: 2 } ], css_id: 'tinytable_css_sdn8jge8so2lrp9lm482',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 } ], css_id: 'tinytable_css_3oa42jvvtkink62ye1wg',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_lafttwwno9bui9d80270.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_lafttwwno9bui9d80270 td.tinytable_css_5pb3n9gmmfb5u96vijfp, #tinytable_lafttwwno9bui9d80270 th.tinytable_css_5pb3n9gmmfb5u96vijfp {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_lafttwwno9bui9d80270 td.tinytable_css_t16mz3ymtm5liqo8wgmi, #tinytable_lafttwwno9bui9d80270 th.tinytable_css_t16mz3ymtm5liqo8wgmi {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    #tinytable_lafttwwno9bui9d80270 td.tinytable_css_sdn8jge8so2lrp9lm482, #tinytable_lafttwwno9bui9d80270 th.tinytable_css_sdn8jge8so2lrp9lm482 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_lafttwwno9bui9d80270 td.tinytable_css_3oa42jvvtkink62ye1wg, #tinytable_lafttwwno9bui9d80270 th.tinytable_css_3oa42jvvtkink62ye1wg {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_lafttwwno9bui9d80270" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col" data-row="0" data-col="1">index_symbol</th>
+                <th scope="col" data-row="0" data-col="2">event_date</th>
+                <th scope="col" data-row="0" data-col="3">event_window_start</th>
+                <th scope="col" data-row="0" data-col="4">event_window_end</th>
+                <th scope="col" data-row="0" data-col="5">shift_estimation_window</th>
+                <th scope="col" data-row="0" data-col="6">estimation_window_length</th>
+              </tr></thead>
+<tbody><tr>
+<td data-row="1" data-col="1">^GDAXI</td>
+                  <td data-row="1" data-col="2">18.09.2015</td>
+                  <td data-row="1" data-col="3">-10</td>
+                  <td data-row="1" data-col="4">10</td>
+                  <td data-row="1" data-col="5">-11</td>
+                  <td data-row="1" data-col="6">250</td>
+                </tr></tbody>
+</table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 <p>The internal data structure is important for you if you plan to
 develop your own statistical or econometric model or test statistic.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/prepare_event_study.html">prepare_event_study</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_pjl9i2qa6bz9nn9a8h9f = TinyTable.createTableFunctions("tinytable_pjl9i2qa6bz9nn9a8h9f");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '6', j: 2 }, { i: '6', j: 4 }, { i: '6', j: 5 }, { i: '6', j: 6 }, { i: '6', j: 7 }, { i: '6', j: 8 }, { i: '6', j: 9 }, { i: '6', j: 10 } ], css_id: 'tinytable_css_390virwgl0uwxn0de6fp',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '3', j: 7 }, { i: '4', j: 7 }, { i: '5', j: 7 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '3', j: 8 }, { i: '4', j: 8 }, { i: '5', j: 8 }, { i: '1', j: 9 }, { i: '2', j: 9 }, { i: '3', j: 9 }, { i: '4', j: 9 }, { i: '5', j: 9 }, { i: '1', j: 10 }, { i: '2', j: 10 }, { i: '3', j: 10 }, { i: '4', j: 10 }, { i: '5', j: 10 } ], css_id: 'tinytable_css_2sb2b02z6612mpoddfb1',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 }, { i: '0', j: 8 }, { i: '0', j: 9 }, { i: '0', j: 10 } ], css_id: 'tinytable_css_7wjm3nroe790ib5zws2m',}, 
+          { positions: [ { i: '6', j: 1 }, { i: '6', j: 3 } ], css_id: 'tinytable_css_3jsebrpa0gvq33uzn6es',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 } ], css_id: 'tinytable_css_jm59ss59m6ekxogjv09k',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_cx9pbo5ipmiivjb9p7dj',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_pjl9i2qa6bz9nn9a8h9f.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_pjl9i2qa6bz9nn9a8h9f td.tinytable_css_390virwgl0uwxn0de6fp, #tinytable_pjl9i2qa6bz9nn9a8h9f th.tinytable_css_390virwgl0uwxn0de6fp {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_pjl9i2qa6bz9nn9a8h9f td.tinytable_css_2sb2b02z6612mpoddfb1, #tinytable_pjl9i2qa6bz9nn9a8h9f th.tinytable_css_2sb2b02z6612mpoddfb1 { text-align: right }
+    #tinytable_pjl9i2qa6bz9nn9a8h9f td.tinytable_css_7wjm3nroe790ib5zws2m, #tinytable_pjl9i2qa6bz9nn9a8h9f th.tinytable_css_7wjm3nroe790ib5zws2m {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    #tinytable_pjl9i2qa6bz9nn9a8h9f td.tinytable_css_3jsebrpa0gvq33uzn6es, #tinytable_pjl9i2qa6bz9nn9a8h9f th.tinytable_css_3jsebrpa0gvq33uzn6es {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_pjl9i2qa6bz9nn9a8h9f td.tinytable_css_jm59ss59m6ekxogjv09k, #tinytable_pjl9i2qa6bz9nn9a8h9f th.tinytable_css_jm59ss59m6ekxogjv09k { text-align: left }
+    #tinytable_pjl9i2qa6bz9nn9a8h9f td.tinytable_css_cx9pbo5ipmiivjb9p7dj, #tinytable_pjl9i2qa6bz9nn9a8h9f th.tinytable_css_cx9pbo5ipmiivjb9p7dj {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_pjl9i2qa6bz9nn9a8h9f" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col" data-row="0" data-col="1">date</th>
+                <th scope="col" data-row="0" data-col="2">firm_adjusted</th>
+                <th scope="col" data-row="0" data-col="3">index_symbol</th>
+                <th scope="col" data-row="0" data-col="4">index_adjusted</th>
+                <th scope="col" data-row="0" data-col="5">firm_returns</th>
+                <th scope="col" data-row="0" data-col="6">index_returns</th>
+                <th scope="col" data-row="0" data-col="7">event_date</th>
+                <th scope="col" data-row="0" data-col="8">relative_index</th>
+                <th scope="col" data-row="0" data-col="9">event_window</th>
+                <th scope="col" data-row="0" data-col="10">estimation_window</th>
+              </tr></thead>
+<tbody>
+<tr>
+<td data-row="1" data-col="1">02.06.2014</td>
+                  <td data-row="1" data-col="2">112.5</td>
+                  <td data-row="1" data-col="3">^GDAXI</td>
+                  <td data-row="1" data-col="4">9950</td>
+                  <td data-row="1" data-col="5">NA</td>
+                  <td data-row="1" data-col="6">NA</td>
+                  <td data-row="1" data-col="7">0</td>
+                  <td data-row="1" data-col="8">-329</td>
+                  <td data-row="1" data-col="9">0</td>
+                  <td data-row="1" data-col="10">0</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">03.06.2014</td>
+                  <td data-row="2" data-col="2">112.4</td>
+                  <td data-row="2" data-col="3">^GDAXI</td>
+                  <td data-row="2" data-col="4">9920</td>
+                  <td data-row="2" data-col="5">-0.001284</td>
+                  <td data-row="2" data-col="6">-0.0030579</td>
+                  <td data-row="2" data-col="7">0</td>
+                  <td data-row="2" data-col="8">-328</td>
+                  <td data-row="2" data-col="9">0</td>
+                  <td data-row="2" data-col="10">0</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">04.06.2014</td>
+                  <td data-row="3" data-col="2">109.5</td>
+                  <td data-row="3" data-col="3">^GDAXI</td>
+                  <td data-row="3" data-col="4">9927</td>
+                  <td data-row="3" data-col="5">-0.026287</td>
+                  <td data-row="3" data-col="6">0.0006983</td>
+                  <td data-row="3" data-col="7">0</td>
+                  <td data-row="3" data-col="8">-327</td>
+                  <td data-row="3" data-col="9">0</td>
+                  <td data-row="3" data-col="10">0</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">05.06.2014</td>
+                  <td data-row="4" data-col="2">111.6</td>
+                  <td data-row="4" data-col="3">^GDAXI</td>
+                  <td data-row="4" data-col="4">9948</td>
+                  <td data-row="4" data-col="5">0.019586</td>
+                  <td data-row="4" data-col="6">0.0021294</td>
+                  <td data-row="4" data-col="7">0</td>
+                  <td data-row="4" data-col="8">-326</td>
+                  <td data-row="4" data-col="9">0</td>
+                  <td data-row="4" data-col="10">0</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">06.06.2014</td>
+                  <td data-row="5" data-col="2">111.9</td>
+                  <td data-row="5" data-col="3">^GDAXI</td>
+                  <td data-row="5" data-col="4">9987</td>
+                  <td data-row="5" data-col="5">0.00284</td>
+                  <td data-row="5" data-col="6">0.0039489</td>
+                  <td data-row="5" data-col="7">0</td>
+                  <td data-row="5" data-col="8">-325</td>
+                  <td data-row="5" data-col="9">0</td>
+                  <td data-row="5" data-col="10">0</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">09.06.2014</td>
+                  <td data-row="6" data-col="2">112.4</td>
+                  <td data-row="6" data-col="3">^GDAXI</td>
+                  <td data-row="6" data-col="4">10009</td>
+                  <td data-row="6" data-col="5">0.003861</td>
+                  <td data-row="6" data-col="6">0.0021444</td>
+                  <td data-row="6" data-col="7">0</td>
+                  <td data-row="6" data-col="8">-324</td>
+                  <td data-row="6" data-col="9">0</td>
+                  <td data-row="6" data-col="10">0</td>
+                </tr>
+</tbody>
+</table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_model.html">fit_model</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   event_id, group, firm_symbol [4]</span></span></span>
+<span><span class="co">#&gt;   firm_symbol event_id group    data                request          model     </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VOW.DE             1 VW Group <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> PAH3.DE            2 VW Group <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BMW.DE             3 Other    <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> MBG.DE             4 Other    <span style="color: #949494;">&lt;tibble [360 × 11]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 6]&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">model</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">model</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; &lt;MarketModel&gt;</span></span>
+<span><span class="co">#&gt;   Inherits from: &lt;ModelBase&gt;</span></span>
+<span><span class="co">#&gt;   Public:</span></span>
+<span><span class="co">#&gt;     abnormal_returns: function (data_tbl) </span></span>
+<span><span class="co">#&gt;     clone: function (deep = FALSE) </span></span>
+<span><span class="co">#&gt;     degenerate_mode: lenient</span></span>
+<span><span class="co">#&gt;     event_id: 1</span></span>
+<span><span class="co">#&gt;     firm_symbol: VOW.DE</span></span>
+<span><span class="co">#&gt;     fit: function (data_tbl) </span></span>
+<span><span class="co">#&gt;     formula: formula</span></span>
+<span><span class="co">#&gt;     hac_lag: NULL</span></span>
+<span><span class="co">#&gt;     initialize: function (use_hac = FALSE, hac_lag = NULL) </span></span>
+<span><span class="co">#&gt;     is_fitted: active binding</span></span>
+<span><span class="co">#&gt;     model: active binding</span></span>
+<span><span class="co">#&gt;     model_name: MarketModel</span></span>
+<span><span class="co">#&gt;     set_formula: function (formula) </span></span>
+<span><span class="co">#&gt;     statistics: active binding</span></span>
+<span><span class="co">#&gt;     use_hac: FALSE</span></span>
+<span><span class="co">#&gt;   Private:</span></span>
+<span><span class="co">#&gt;     .degenerate_handled: FALSE</span></span>
+<span><span class="co">#&gt;     .error: NULL</span></span>
+<span><span class="co">#&gt;     .fitted_model: lm</span></span>
+<span><span class="co">#&gt;     .is_fitted: TRUE</span></span>
+<span><span class="co">#&gt;     .statistics: list</span></span>
+<span><span class="co">#&gt;     add_residuals: function (residuals) </span></span>
+<span><span class="co">#&gt;     calculate_forecast_error_correction: function (sigma, estimation_window_length, estimation_market_returns, </span></span>
+<span><span class="co">#&gt;     calculate_statistics: function (data_tbl) </span></span>
+<span><span class="co">#&gt;     first_order_autocorrelation: function (residuals)</span></span></code></pre></div>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">est_task</span> <span class="op">=</span> <span class="fu"><a href="../reference/calculate_statistics.html">calculate_statistics</a></span><span class="op">(</span><span class="va">est_task</span>, <span class="va">param_set</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   event_id, group, firm_symbol [4]</span></span></span>
+<span><span class="co">#&gt;   firm_symbol event_id group    data     request  model      ART      CART    </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VOW.DE             1 VW Group <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> PAH3.DE            2 VW Group <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BMW.DE             3 Other    <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> MBG.DE             4 Other    <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;MarktMdl&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span> <span style="color: #949494;">&lt;tibble&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">ART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">ART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in `[&lt;-.data.frame`(`*tmp*`, idx, col, value =</span></span>
+<span><span class="co">#&gt; structure(list(structure(list(: provided 21 variables to replace 1 variables</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_yylk1ymfh8q2oxtobqqg = TinyTable.createTableFunctions("tinytable_yylk1ymfh8q2oxtobqqg");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '21', j: 4 } ], css_id: 'tinytable_css_hld0u1onbp68xe2kfv8v',}, 
+          { positions: [ { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '6', j: 4 }, { i: '7', j: 4 }, { i: '8', j: 4 }, { i: '9', j: 4 }, { i: '10', j: 4 }, { i: '11', j: 4 }, { i: '12', j: 4 }, { i: '13', j: 4 }, { i: '14', j: 4 }, { i: '15', j: 4 }, { i: '16', j: 4 }, { i: '17', j: 4 }, { i: '18', j: 4 }, { i: '19', j: 4 }, { i: '20', j: 4 } ], css_id: 'tinytable_css_7ioff73qzom1sd9fn400',}, 
+          { positions: [ { i: '0', j: 4 } ], css_id: 'tinytable_css_1sd5qoitjvxklgvpk1em',}, 
+          { positions: [ { i: '21', j: 1 }, { i: '21', j: 2 }, { i: '21', j: 3 } ], css_id: 'tinytable_css_3i3vse6ufkyocb7psr04',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '11', j: 1 }, { i: '12', j: 1 }, { i: '13', j: 1 }, { i: '14', j: 1 }, { i: '15', j: 1 }, { i: '16', j: 1 }, { i: '17', j: 1 }, { i: '18', j: 1 }, { i: '19', j: 1 }, { i: '20', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 }, { i: '11', j: 2 }, { i: '12', j: 2 }, { i: '13', j: 2 }, { i: '14', j: 2 }, { i: '15', j: 2 }, { i: '16', j: 2 }, { i: '17', j: 2 }, { i: '18', j: 2 }, { i: '19', j: 2 }, { i: '20', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '11', j: 3 }, { i: '12', j: 3 }, { i: '13', j: 3 }, { i: '14', j: 3 }, { i: '15', j: 3 }, { i: '16', j: 3 }, { i: '17', j: 3 }, { i: '18', j: 3 }, { i: '19', j: 3 }, { i: '20', j: 3 } ], css_id: 'tinytable_css_3fo80kbziz4ieo9fkx3d',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_hvk9hbuuz4qgp06xbbi5',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_yylk1ymfh8q2oxtobqqg.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_yylk1ymfh8q2oxtobqqg td.tinytable_css_hld0u1onbp68xe2kfv8v, #tinytable_yylk1ymfh8q2oxtobqqg th.tinytable_css_hld0u1onbp68xe2kfv8v {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_yylk1ymfh8q2oxtobqqg td.tinytable_css_7ioff73qzom1sd9fn400, #tinytable_yylk1ymfh8q2oxtobqqg th.tinytable_css_7ioff73qzom1sd9fn400 { text-align: left }
+    #tinytable_yylk1ymfh8q2oxtobqqg td.tinytable_css_1sd5qoitjvxklgvpk1em, #tinytable_yylk1ymfh8q2oxtobqqg th.tinytable_css_1sd5qoitjvxklgvpk1em {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    #tinytable_yylk1ymfh8q2oxtobqqg td.tinytable_css_3i3vse6ufkyocb7psr04, #tinytable_yylk1ymfh8q2oxtobqqg th.tinytable_css_3i3vse6ufkyocb7psr04 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_yylk1ymfh8q2oxtobqqg td.tinytable_css_3fo80kbziz4ieo9fkx3d, #tinytable_yylk1ymfh8q2oxtobqqg th.tinytable_css_3fo80kbziz4ieo9fkx3d { text-align: right }
+    #tinytable_yylk1ymfh8q2oxtobqqg td.tinytable_css_hvk9hbuuz4qgp06xbbi5, #tinytable_yylk1ymfh8q2oxtobqqg th.tinytable_css_hvk9hbuuz4qgp06xbbi5 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_yylk1ymfh8q2oxtobqqg" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col" data-row="0" data-col="1">relative_index</th>
+                <th scope="col" data-row="0" data-col="2">abnormal_returns</th>
+                <th scope="col" data-row="0" data-col="3">ar_t</th>
+                <th scope="col" data-row="0" data-col="4">ar_t_dist</th>
+              </tr></thead>
+<tbody>
+<tr>
+<td data-row="1" data-col="1">-10</td>
+                  <td data-row="1" data-col="2">0.0028169</td>
+                  <td data-row="1" data-col="3">0.28098</td>
+                  <td data-row="1" data-col="4">248</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">-9</td>
+                  <td data-row="2" data-col="2">0.0003573</td>
+                  <td data-row="2" data-col="3">0.03564</td>
+                  <td data-row="2" data-col="4">0</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">-8</td>
+                  <td data-row="3" data-col="2">0.0091997</td>
+                  <td data-row="3" data-col="3">0.91765</td>
+                  <td data-row="3" data-col="4">1</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">-7</td>
+                  <td data-row="4" data-col="2">0.0222041</td>
+                  <td data-row="4" data-col="3">2.21482</td>
+                  <td data-row="4" data-col="4">NA</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">-6</td>
+                  <td data-row="5" data-col="2">-0.0057857</td>
+                  <td data-row="5" data-col="3">-0.57712</td>
+                  <td data-row="5" data-col="4">248</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">-5</td>
+                  <td data-row="6" data-col="2">0.0058288</td>
+                  <td data-row="6" data-col="3">0.58141</td>
+                  <td data-row="6" data-col="4">0</td>
+                </tr>
+<tr>
+<td data-row="7" data-col="1">-4</td>
+                  <td data-row="7" data-col="2">-0.0049238</td>
+                  <td data-row="7" data-col="3">-0.49114</td>
+                  <td data-row="7" data-col="4">1</td>
+                </tr>
+<tr>
+<td data-row="8" data-col="1">-3</td>
+                  <td data-row="8" data-col="2">0.0025836</td>
+                  <td data-row="8" data-col="3">0.2577</td>
+                  <td data-row="8" data-col="4">NA</td>
+                </tr>
+<tr>
+<td data-row="9" data-col="1">-2</td>
+                  <td data-row="9" data-col="2">0.0002132</td>
+                  <td data-row="9" data-col="3">0.02127</td>
+                  <td data-row="9" data-col="4">248</td>
+                </tr>
+<tr>
+<td data-row="10" data-col="1">-1</td>
+                  <td data-row="10" data-col="2">-0.0003757</td>
+                  <td data-row="10" data-col="3">-0.03748</td>
+                  <td data-row="10" data-col="4">0</td>
+                </tr>
+<tr>
+<td data-row="11" data-col="1">0</td>
+                  <td data-row="11" data-col="2">-0.0026243</td>
+                  <td data-row="11" data-col="3">-0.26177</td>
+                  <td data-row="11" data-col="4">1</td>
+                </tr>
+<tr>
+<td data-row="12" data-col="1">1</td>
+                  <td data-row="12" data-col="2">-0.1910336</td>
+                  <td data-row="12" data-col="3">-19.05523</td>
+                  <td data-row="12" data-col="4">NA</td>
+                </tr>
+<tr>
+<td data-row="13" data-col="1">2</td>
+                  <td data-row="13" data-col="2">-0.1418452</td>
+                  <td data-row="13" data-col="3">-14.14879</td>
+                  <td data-row="13" data-col="4">248</td>
+                </tr>
+<tr>
+<td data-row="14" data-col="1">3</td>
+                  <td data-row="14" data-col="2">0.0626856</td>
+                  <td data-row="14" data-col="3">6.25277</td>
+                  <td data-row="14" data-col="4">0</td>
+                </tr>
+<tr>
+<td data-row="15" data-col="1">4</td>
+                  <td data-row="15" data-col="2">0.0215244</td>
+                  <td data-row="15" data-col="3">2.14702</td>
+                  <td data-row="15" data-col="4">1</td>
+                </tr>
+<tr>
+<td data-row="16" data-col="1">5</td>
+                  <td data-row="16" data-col="2">-0.0576803</td>
+                  <td data-row="16" data-col="3">-5.7535</td>
+                  <td data-row="16" data-col="4">NA</td>
+                </tr>
+<tr>
+<td data-row="17" data-col="1">6</td>
+                  <td data-row="17" data-col="2">-0.0523001</td>
+                  <td data-row="17" data-col="3">-5.21684</td>
+                  <td data-row="17" data-col="4">248</td>
+                </tr>
+<tr>
+<td data-row="18" data-col="1">7</td>
+                  <td data-row="18" data-col="2">-0.0318594</td>
+                  <td data-row="18" data-col="3">-3.17791</td>
+                  <td data-row="18" data-col="4">0</td>
+                </tr>
+<tr>
+<td data-row="19" data-col="1">8</td>
+                  <td data-row="19" data-col="2">-0.0074962</td>
+                  <td data-row="19" data-col="3">-0.74773</td>
+                  <td data-row="19" data-col="4">1</td>
+                </tr>
+<tr>
+<td data-row="20" data-col="1">9</td>
+                  <td data-row="20" data-col="2">0.0185153</td>
+                  <td data-row="20" data-col="3">1.84686</td>
+                  <td data-row="20" data-col="4">NA</td>
+                </tr>
+<tr>
+<td data-row="21" data-col="1">10</td>
+                  <td data-row="21" data-col="2">-0.0423404</td>
+                  <td data-row="21" data-col="3">-4.22337</td>
+                  <td data-row="21" data-col="4">248</td>
+                </tr>
+</tbody>
+</table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">CART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">data_tbl</span><span class="op">$</span><span class="va">CART</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in `[&lt;-.data.frame`(`*tmp*`, idx, col, value =</span></span>
+<span><span class="co">#&gt; structure(list(structure(list(: provided 21 variables to replace 1 variables</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_jj4pd528eytt0gyn9u1g = TinyTable.createTableFunctions("tinytable_jj4pd528eytt0gyn9u1g");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '21', j: 4 }, { i: '21', j: 8 } ], css_id: 'tinytable_css_la1lhl19zrwm7bkgrrj1',}, 
+          { positions: [ { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '6', j: 4 }, { i: '7', j: 4 }, { i: '8', j: 4 }, { i: '9', j: 4 }, { i: '10', j: 4 }, { i: '11', j: 4 }, { i: '12', j: 4 }, { i: '13', j: 4 }, { i: '14', j: 4 }, { i: '15', j: 4 }, { i: '16', j: 4 }, { i: '17', j: 4 }, { i: '18', j: 4 }, { i: '19', j: 4 }, { i: '20', j: 4 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '3', j: 8 }, { i: '4', j: 8 }, { i: '5', j: 8 }, { i: '6', j: 8 }, { i: '7', j: 8 }, { i: '8', j: 8 }, { i: '9', j: 8 }, { i: '10', j: 8 }, { i: '11', j: 8 }, { i: '12', j: 8 }, { i: '13', j: 8 }, { i: '14', j: 8 }, { i: '15', j: 8 }, { i: '16', j: 8 }, { i: '17', j: 8 }, { i: '18', j: 8 }, { i: '19', j: 8 }, { i: '20', j: 8 } ], css_id: 'tinytable_css_a97rtkk99npx3ea6gkh1',}, 
+          { positions: [ { i: '0', j: 4 }, { i: '0', j: 8 } ], css_id: 'tinytable_css_py9kl60kxlms667fxb3a',}, 
+          { positions: [ { i: '21', j: 1 }, { i: '21', j: 2 }, { i: '21', j: 3 }, { i: '21', j: 5 }, { i: '21', j: 6 }, { i: '21', j: 7 } ], css_id: 'tinytable_css_u2ns1ooavklkbyvi8j0k',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '11', j: 1 }, { i: '12', j: 1 }, { i: '13', j: 1 }, { i: '14', j: 1 }, { i: '15', j: 1 }, { i: '16', j: 1 }, { i: '17', j: 1 }, { i: '18', j: 1 }, { i: '19', j: 1 }, { i: '20', j: 1 }, { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 }, { i: '11', j: 2 }, { i: '12', j: 2 }, { i: '13', j: 2 }, { i: '14', j: 2 }, { i: '15', j: 2 }, { i: '16', j: 2 }, { i: '17', j: 2 }, { i: '18', j: 2 }, { i: '19', j: 2 }, { i: '20', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '11', j: 3 }, { i: '12', j: 3 }, { i: '13', j: 3 }, { i: '14', j: 3 }, { i: '15', j: 3 }, { i: '16', j: 3 }, { i: '17', j: 3 }, { i: '18', j: 3 }, { i: '19', j: 3 }, { i: '20', j: 3 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '6', j: 5 }, { i: '7', j: 5 }, { i: '8', j: 5 }, { i: '9', j: 5 }, { i: '10', j: 5 }, { i: '11', j: 5 }, { i: '12', j: 5 }, { i: '13', j: 5 }, { i: '14', j: 5 }, { i: '15', j: 5 }, { i: '16', j: 5 }, { i: '17', j: 5 }, { i: '18', j: 5 }, { i: '19', j: 5 }, { i: '20', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 }, { i: '6', j: 6 }, { i: '7', j: 6 }, { i: '8', j: 6 }, { i: '9', j: 6 }, { i: '10', j: 6 }, { i: '11', j: 6 }, { i: '12', j: 6 }, { i: '13', j: 6 }, { i: '14', j: 6 }, { i: '15', j: 6 }, { i: '16', j: 6 }, { i: '17', j: 6 }, { i: '18', j: 6 }, { i: '19', j: 6 }, { i: '20', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '3', j: 7 }, { i: '4', j: 7 }, { i: '5', j: 7 }, { i: '6', j: 7 }, { i: '7', j: 7 }, { i: '8', j: 7 }, { i: '9', j: 7 }, { i: '10', j: 7 }, { i: '11', j: 7 }, { i: '12', j: 7 }, { i: '13', j: 7 }, { i: '14', j: 7 }, { i: '15', j: 7 }, { i: '16', j: 7 }, { i: '17', j: 7 }, { i: '18', j: 7 }, { i: '19', j: 7 }, { i: '20', j: 7 } ], css_id: 'tinytable_css_ikqgjni7bbhke03qlu5d',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 2 }, { i: '0', j: 3 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 } ], css_id: 'tinytable_css_n43xqg3spcw82a460g56',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_jj4pd528eytt0gyn9u1g.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_jj4pd528eytt0gyn9u1g td.tinytable_css_la1lhl19zrwm7bkgrrj1, #tinytable_jj4pd528eytt0gyn9u1g th.tinytable_css_la1lhl19zrwm7bkgrrj1 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_jj4pd528eytt0gyn9u1g td.tinytable_css_a97rtkk99npx3ea6gkh1, #tinytable_jj4pd528eytt0gyn9u1g th.tinytable_css_a97rtkk99npx3ea6gkh1 { text-align: left }
+    #tinytable_jj4pd528eytt0gyn9u1g td.tinytable_css_py9kl60kxlms667fxb3a, #tinytable_jj4pd528eytt0gyn9u1g th.tinytable_css_py9kl60kxlms667fxb3a {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    #tinytable_jj4pd528eytt0gyn9u1g td.tinytable_css_u2ns1ooavklkbyvi8j0k, #tinytable_jj4pd528eytt0gyn9u1g th.tinytable_css_u2ns1ooavklkbyvi8j0k {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_jj4pd528eytt0gyn9u1g td.tinytable_css_ikqgjni7bbhke03qlu5d, #tinytable_jj4pd528eytt0gyn9u1g th.tinytable_css_ikqgjni7bbhke03qlu5d { text-align: right }
+    #tinytable_jj4pd528eytt0gyn9u1g td.tinytable_css_n43xqg3spcw82a460g56, #tinytable_jj4pd528eytt0gyn9u1g th.tinytable_css_n43xqg3spcw82a460g56 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_jj4pd528eytt0gyn9u1g" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col" data-row="0" data-col="1">relative_index</th>
+                <th scope="col" data-row="0" data-col="2">abnormal_returns</th>
+                <th scope="col" data-row="0" data-col="3">event_window_length</th>
+                <th scope="col" data-row="0" data-col="4">car_window</th>
+                <th scope="col" data-row="0" data-col="5">car</th>
+                <th scope="col" data-row="0" data-col="6">corrected_car</th>
+                <th scope="col" data-row="0" data-col="7">car_t</th>
+                <th scope="col" data-row="0" data-col="8">car_t_dist</th>
+              </tr></thead>
+<tbody>
+<tr>
+<td data-row="1" data-col="1">-10</td>
+                  <td data-row="1" data-col="2">0.0028169</td>
+                  <td data-row="1" data-col="3">1</td>
+                  <td data-row="1" data-col="4">[-10, -10]</td>
+                  <td data-row="1" data-col="5">0.002817</td>
+                  <td data-row="1" data-col="6">0.281</td>
+                  <td data-row="1" data-col="7">0.281</td>
+                  <td data-row="1" data-col="8">248</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">-9</td>
+                  <td data-row="2" data-col="2">0.0003573</td>
+                  <td data-row="2" data-col="3">2</td>
+                  <td data-row="2" data-col="4">[-10, -9]</td>
+                  <td data-row="2" data-col="5">0.003174</td>
+                  <td data-row="2" data-col="6">0.3166</td>
+                  <td data-row="2" data-col="7">0.2239</td>
+                  <td data-row="2" data-col="8">0.002816886</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">-8</td>
+                  <td data-row="3" data-col="2">0.0091997</td>
+                  <td data-row="3" data-col="3">3</td>
+                  <td data-row="3" data-col="4">[-10, -8]</td>
+                  <td data-row="3" data-col="5">0.012374</td>
+                  <td data-row="3" data-col="6">1.2343</td>
+                  <td data-row="3" data-col="7">0.7126</td>
+                  <td data-row="3" data-col="8">0.01002526</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">-7</td>
+                  <td data-row="4" data-col="2">0.0222041</td>
+                  <td data-row="4" data-col="3">4</td>
+                  <td data-row="4" data-col="4">[-10, -7]</td>
+                  <td data-row="4" data-col="5">0.034578</td>
+                  <td data-row="4" data-col="6">3.4491</td>
+                  <td data-row="4" data-col="7">1.7245</td>
+                  <td data-row="4" data-col="8">NA</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">-6</td>
+                  <td data-row="5" data-col="2">-0.0057857</td>
+                  <td data-row="5" data-col="3">5</td>
+                  <td data-row="5" data-col="4">[-10, -6]</td>
+                  <td data-row="5" data-col="5">0.028792</td>
+                  <td data-row="5" data-col="6">2.872</td>
+                  <td data-row="5" data-col="7">1.2844</td>
+                  <td data-row="5" data-col="8">248</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">-5</td>
+                  <td data-row="6" data-col="2">0.0058288</td>
+                  <td data-row="6" data-col="3">6</td>
+                  <td data-row="6" data-col="4">[-10, -5]</td>
+                  <td data-row="6" data-col="5">0.034621</td>
+                  <td data-row="6" data-col="6">3.4534</td>
+                  <td data-row="6" data-col="7">1.4098</td>
+                  <td data-row="6" data-col="8">0.002816886</td>
+                </tr>
+<tr>
+<td data-row="7" data-col="1">-4</td>
+                  <td data-row="7" data-col="2">-0.0049238</td>
+                  <td data-row="7" data-col="3">7</td>
+                  <td data-row="7" data-col="4">[-10, -4]</td>
+                  <td data-row="7" data-col="5">0.029697</td>
+                  <td data-row="7" data-col="6">2.9622</td>
+                  <td data-row="7" data-col="7">1.1196</td>
+                  <td data-row="7" data-col="8">0.01002526</td>
+                </tr>
+<tr>
+<td data-row="8" data-col="1">-3</td>
+                  <td data-row="8" data-col="2">0.0025836</td>
+                  <td data-row="8" data-col="3">8</td>
+                  <td data-row="8" data-col="4">[-10, -3]</td>
+                  <td data-row="8" data-col="5">0.032281</td>
+                  <td data-row="8" data-col="6">3.2199</td>
+                  <td data-row="8" data-col="7">1.1384</td>
+                  <td data-row="8" data-col="8">NA</td>
+                </tr>
+<tr>
+<td data-row="9" data-col="1">-2</td>
+                  <td data-row="9" data-col="2">0.0002132</td>
+                  <td data-row="9" data-col="3">9</td>
+                  <td data-row="9" data-col="4">[-10, -2]</td>
+                  <td data-row="9" data-col="5">0.032494</td>
+                  <td data-row="9" data-col="6">3.2412</td>
+                  <td data-row="9" data-col="7">1.0804</td>
+                  <td data-row="9" data-col="8">248</td>
+                </tr>
+<tr>
+<td data-row="10" data-col="1">-1</td>
+                  <td data-row="10" data-col="2">-0.0003757</td>
+                  <td data-row="10" data-col="3">10</td>
+                  <td data-row="10" data-col="4">[-10, -1]</td>
+                  <td data-row="10" data-col="5">0.032118</td>
+                  <td data-row="10" data-col="6">3.2037</td>
+                  <td data-row="10" data-col="7">1.0131</td>
+                  <td data-row="10" data-col="8">0.002816886</td>
+                </tr>
+<tr>
+<td data-row="11" data-col="1">0</td>
+                  <td data-row="11" data-col="2">-0.0026243</td>
+                  <td data-row="11" data-col="3">11</td>
+                  <td data-row="11" data-col="4">[-10, 0]</td>
+                  <td data-row="11" data-col="5">0.029494</td>
+                  <td data-row="11" data-col="6">2.942</td>
+                  <td data-row="11" data-col="7">0.887</td>
+                  <td data-row="11" data-col="8">0.01002526</td>
+                </tr>
+<tr>
+<td data-row="12" data-col="1">1</td>
+                  <td data-row="12" data-col="2">-0.1910336</td>
+                  <td data-row="12" data-col="3">12</td>
+                  <td data-row="12" data-col="4">[-10, 1]</td>
+                  <td data-row="12" data-col="5">-0.16154</td>
+                  <td data-row="12" data-col="6">-16.1133</td>
+                  <td data-row="12" data-col="7">-4.6515</td>
+                  <td data-row="12" data-col="8">NA</td>
+                </tr>
+<tr>
+<td data-row="13" data-col="1">2</td>
+                  <td data-row="13" data-col="2">-0.1418452</td>
+                  <td data-row="13" data-col="3">13</td>
+                  <td data-row="13" data-col="4">[-10, 2]</td>
+                  <td data-row="13" data-col="5">-0.303385</td>
+                  <td data-row="13" data-col="6">-30.2621</td>
+                  <td data-row="13" data-col="7">-8.3932</td>
+                  <td data-row="13" data-col="8">248</td>
+                </tr>
+<tr>
+<td data-row="14" data-col="1">3</td>
+                  <td data-row="14" data-col="2">0.0626856</td>
+                  <td data-row="14" data-col="3">14</td>
+                  <td data-row="14" data-col="4">[-10, 3]</td>
+                  <td data-row="14" data-col="5">-0.240699</td>
+                  <td data-row="14" data-col="6">-24.0093</td>
+                  <td data-row="14" data-col="7">-6.4168</td>
+                  <td data-row="14" data-col="8">0.002816886</td>
+                </tr>
+<tr>
+<td data-row="15" data-col="1">4</td>
+                  <td data-row="15" data-col="2">0.0215244</td>
+                  <td data-row="15" data-col="3">15</td>
+                  <td data-row="15" data-col="4">[-10, 4]</td>
+                  <td data-row="15" data-col="5">-0.219175</td>
+                  <td data-row="15" data-col="6">-21.8623</td>
+                  <td data-row="15" data-col="7">-5.6448</td>
+                  <td data-row="15" data-col="8">0.01002526</td>
+                </tr>
+<tr>
+<td data-row="16" data-col="1">5</td>
+                  <td data-row="16" data-col="2">-0.0576803</td>
+                  <td data-row="16" data-col="3">16</td>
+                  <td data-row="16" data-col="4">[-10, 5]</td>
+                  <td data-row="16" data-col="5">-0.276855</td>
+                  <td data-row="16" data-col="6">-27.6158</td>
+                  <td data-row="16" data-col="7">-6.9039</td>
+                  <td data-row="16" data-col="8">NA</td>
+                </tr>
+<tr>
+<td data-row="17" data-col="1">6</td>
+                  <td data-row="17" data-col="2">-0.0523001</td>
+                  <td data-row="17" data-col="3">17</td>
+                  <td data-row="17" data-col="4">[-10, 6]</td>
+                  <td data-row="17" data-col="5">-0.329155</td>
+                  <td data-row="17" data-col="6">-32.8326</td>
+                  <td data-row="17" data-col="7">-7.9631</td>
+                  <td data-row="17" data-col="8">248</td>
+                </tr>
+<tr>
+<td data-row="18" data-col="1">7</td>
+                  <td data-row="18" data-col="2">-0.0318594</td>
+                  <td data-row="18" data-col="3">18</td>
+                  <td data-row="18" data-col="4">[-10, 7]</td>
+                  <td data-row="18" data-col="5">-0.361015</td>
+                  <td data-row="18" data-col="6">-36.0105</td>
+                  <td data-row="18" data-col="7">-8.4878</td>
+                  <td data-row="18" data-col="8">0.002816886</td>
+                </tr>
+<tr>
+<td data-row="19" data-col="1">8</td>
+                  <td data-row="19" data-col="2">-0.0074962</td>
+                  <td data-row="19" data-col="3">19</td>
+                  <td data-row="19" data-col="4">[-10, 8]</td>
+                  <td data-row="19" data-col="5">-0.368511</td>
+                  <td data-row="19" data-col="6">-36.7583</td>
+                  <td data-row="19" data-col="7">-8.4329</td>
+                  <td data-row="19" data-col="8">0.01002526</td>
+                </tr>
+<tr>
+<td data-row="20" data-col="1">9</td>
+                  <td data-row="20" data-col="2">0.0185153</td>
+                  <td data-row="20" data-col="3">20</td>
+                  <td data-row="20" data-col="4">[-10, 9]</td>
+                  <td data-row="20" data-col="5">-0.349996</td>
+                  <td data-row="20" data-col="6">-34.9114</td>
+                  <td data-row="20" data-col="7">-7.8064</td>
+                  <td data-row="20" data-col="8">NA</td>
+                </tr>
+<tr>
+<td data-row="21" data-col="1">10</td>
+                  <td data-row="21" data-col="2">-0.0423404</td>
+                  <td data-row="21" data-col="3">21</td>
+                  <td data-row="21" data-col="4">[-10, 10]</td>
+                  <td data-row="21" data-col="5">-0.392336</td>
+                  <td data-row="21" data-col="6">-39.1348</td>
+                  <td data-row="21" data-col="7">-8.5399</td>
+                  <td data-row="21" data-col="8">248</td>
+                </tr>
+</tbody>
+</table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   group [2]</span></span></span>
+<span><span class="co">#&gt;   group    data                model            CSectT            </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> VW Group <span style="color: #949494;">&lt;tibble [720 × 13]&gt;</span> <span style="color: #949494;">&lt;tibble [2 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [21 × 10]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Other    <span style="color: #949494;">&lt;tibble [720 × 13]&gt;</span> <span style="color: #949494;">&lt;tibble [2 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [21 × 10]&gt;</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span><span class="op">$</span><span class="va">CSectT</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span><span class="va">est_task</span><span class="op">$</span><span class="va">aar_caar_tbl</span><span class="op">$</span><span class="va">CSectT</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_a7l7zw6andw4vmfp9m8i = TinyTable.createTableFunctions("tinytable_a7l7zw6andw4vmfp9m8i");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '21', j: 2 }, { i: '21', j: 8 }, { i: '21', j: 10 } ], css_id: 'tinytable_css_1cdeboetczooxu16149f',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '10', j: 2 }, { i: '11', j: 2 }, { i: '12', j: 2 }, { i: '13', j: 2 }, { i: '14', j: 2 }, { i: '15', j: 2 }, { i: '16', j: 2 }, { i: '17', j: 2 }, { i: '18', j: 2 }, { i: '19', j: 2 }, { i: '20', j: 2 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '3', j: 8 }, { i: '4', j: 8 }, { i: '5', j: 8 }, { i: '6', j: 8 }, { i: '7', j: 8 }, { i: '8', j: 8 }, { i: '9', j: 8 }, { i: '10', j: 8 }, { i: '11', j: 8 }, { i: '12', j: 8 }, { i: '13', j: 8 }, { i: '14', j: 8 }, { i: '15', j: 8 }, { i: '16', j: 8 }, { i: '17', j: 8 }, { i: '18', j: 8 }, { i: '19', j: 8 }, { i: '20', j: 8 }, { i: '1', j: 10 }, { i: '2', j: 10 }, { i: '3', j: 10 }, { i: '4', j: 10 }, { i: '5', j: 10 }, { i: '6', j: 10 }, { i: '7', j: 10 }, { i: '8', j: 10 }, { i: '9', j: 10 }, { i: '10', j: 10 }, { i: '11', j: 10 }, { i: '12', j: 10 }, { i: '13', j: 10 }, { i: '14', j: 10 }, { i: '15', j: 10 }, { i: '16', j: 10 }, { i: '17', j: 10 }, { i: '18', j: 10 }, { i: '19', j: 10 }, { i: '20', j: 10 } ], css_id: 'tinytable_css_meq6vwq0545nijiql280',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 8 }, { i: '0', j: 10 } ], css_id: 'tinytable_css_oje02j8ivd0yakvt2b6h',}, 
+          { positions: [ { i: '21', j: 1 }, { i: '21', j: 3 }, { i: '21', j: 4 }, { i: '21', j: 5 }, { i: '21', j: 6 }, { i: '21', j: 7 }, { i: '21', j: 9 } ], css_id: 'tinytable_css_7qicals6lnq8vr96ozk8',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '10', j: 1 }, { i: '11', j: 1 }, { i: '12', j: 1 }, { i: '13', j: 1 }, { i: '14', j: 1 }, { i: '15', j: 1 }, { i: '16', j: 1 }, { i: '17', j: 1 }, { i: '18', j: 1 }, { i: '19', j: 1 }, { i: '20', j: 1 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '10', j: 3 }, { i: '11', j: 3 }, { i: '12', j: 3 }, { i: '13', j: 3 }, { i: '14', j: 3 }, { i: '15', j: 3 }, { i: '16', j: 3 }, { i: '17', j: 3 }, { i: '18', j: 3 }, { i: '19', j: 3 }, { i: '20', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '6', j: 4 }, { i: '7', j: 4 }, { i: '8', j: 4 }, { i: '9', j: 4 }, { i: '10', j: 4 }, { i: '11', j: 4 }, { i: '12', j: 4 }, { i: '13', j: 4 }, { i: '14', j: 4 }, { i: '15', j: 4 }, { i: '16', j: 4 }, { i: '17', j: 4 }, { i: '18', j: 4 }, { i: '19', j: 4 }, { i: '20', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '6', j: 5 }, { i: '7', j: 5 }, { i: '8', j: 5 }, { i: '9', j: 5 }, { i: '10', j: 5 }, { i: '11', j: 5 }, { i: '12', j: 5 }, { i: '13', j: 5 }, { i: '14', j: 5 }, { i: '15', j: 5 }, { i: '16', j: 5 }, { i: '17', j: 5 }, { i: '18', j: 5 }, { i: '19', j: 5 }, { i: '20', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 }, { i: '6', j: 6 }, { i: '7', j: 6 }, { i: '8', j: 6 }, { i: '9', j: 6 }, { i: '10', j: 6 }, { i: '11', j: 6 }, { i: '12', j: 6 }, { i: '13', j: 6 }, { i: '14', j: 6 }, { i: '15', j: 6 }, { i: '16', j: 6 }, { i: '17', j: 6 }, { i: '18', j: 6 }, { i: '19', j: 6 }, { i: '20', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '3', j: 7 }, { i: '4', j: 7 }, { i: '5', j: 7 }, { i: '6', j: 7 }, { i: '7', j: 7 }, { i: '8', j: 7 }, { i: '9', j: 7 }, { i: '10', j: 7 }, { i: '11', j: 7 }, { i: '12', j: 7 }, { i: '13', j: 7 }, { i: '14', j: 7 }, { i: '15', j: 7 }, { i: '16', j: 7 }, { i: '17', j: 7 }, { i: '18', j: 7 }, { i: '19', j: 7 }, { i: '20', j: 7 }, { i: '1', j: 9 }, { i: '2', j: 9 }, { i: '3', j: 9 }, { i: '4', j: 9 }, { i: '5', j: 9 }, { i: '6', j: 9 }, { i: '7', j: 9 }, { i: '8', j: 9 }, { i: '9', j: 9 }, { i: '10', j: 9 }, { i: '11', j: 9 }, { i: '12', j: 9 }, { i: '13', j: 9 }, { i: '14', j: 9 }, { i: '15', j: 9 }, { i: '16', j: 9 }, { i: '17', j: 9 }, { i: '18', j: 9 }, { i: '19', j: 9 }, { i: '20', j: 9 } ], css_id: 'tinytable_css_tpiq917jj1e9q7trxa0r',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 3 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 }, { i: '0', j: 9 } ], css_id: 'tinytable_css_vr2ashrsh994nlru3lnl',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_a7l7zw6andw4vmfp9m8i.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_a7l7zw6andw4vmfp9m8i td.tinytable_css_1cdeboetczooxu16149f, #tinytable_a7l7zw6andw4vmfp9m8i th.tinytable_css_1cdeboetczooxu16149f {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_a7l7zw6andw4vmfp9m8i td.tinytable_css_meq6vwq0545nijiql280, #tinytable_a7l7zw6andw4vmfp9m8i th.tinytable_css_meq6vwq0545nijiql280 { text-align: left }
+    #tinytable_a7l7zw6andw4vmfp9m8i td.tinytable_css_oje02j8ivd0yakvt2b6h, #tinytable_a7l7zw6andw4vmfp9m8i th.tinytable_css_oje02j8ivd0yakvt2b6h {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    #tinytable_a7l7zw6andw4vmfp9m8i td.tinytable_css_7qicals6lnq8vr96ozk8, #tinytable_a7l7zw6andw4vmfp9m8i th.tinytable_css_7qicals6lnq8vr96ozk8 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_a7l7zw6andw4vmfp9m8i td.tinytable_css_tpiq917jj1e9q7trxa0r, #tinytable_a7l7zw6andw4vmfp9m8i th.tinytable_css_tpiq917jj1e9q7trxa0r { text-align: right }
+    #tinytable_a7l7zw6andw4vmfp9m8i td.tinytable_css_vr2ashrsh994nlru3lnl, #tinytable_a7l7zw6andw4vmfp9m8i th.tinytable_css_vr2ashrsh994nlru3lnl {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_a7l7zw6andw4vmfp9m8i" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<thead><tr>
+<th scope="col" data-row="0" data-col="1">relative_index</th>
+                <th scope="col" data-row="0" data-col="2">aar</th>
+                <th scope="col" data-row="0" data-col="3">n_events</th>
+                <th scope="col" data-row="0" data-col="4">n_valid_events</th>
+                <th scope="col" data-row="0" data-col="5">n_pos</th>
+                <th scope="col" data-row="0" data-col="6">n_neg</th>
+                <th scope="col" data-row="0" data-col="7">aar_t</th>
+                <th scope="col" data-row="0" data-col="8">caar</th>
+                <th scope="col" data-row="0" data-col="9">caar_t</th>
+                <th scope="col" data-row="0" data-col="10">car_window</th>
+              </tr></thead>
+<tbody>
+<tr>
+<td data-row="1" data-col="1">-10</td>
+                  <td data-row="1" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:1.09%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0042</span>
+</td>
+                  <td data-row="1" data-col="3">2</td>
+                  <td data-row="1" data-col="4">2</td>
+                  <td data-row="1" data-col="5">2</td>
+                  <td data-row="1" data-col="6">0</td>
+                  <td data-row="1" data-col="7">3.0734</td>
+                  <td data-row="1" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:0.49%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0042</span>
+</td>
+                  <td data-row="1" data-col="9">3.073</td>
+                  <td data-row="1" data-col="10">[-10, -10]</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">-9</td>
+                  <td data-row="2" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:0.32%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0012</span>
+</td>
+                  <td data-row="2" data-col="3">2</td>
+                  <td data-row="2" data-col="4">2</td>
+                  <td data-row="2" data-col="5">1</td>
+                  <td data-row="2" data-col="6">1</td>
+                  <td data-row="2" data-col="7">-0.7737</td>
+                  <td data-row="2" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:0.35%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0030</span>
+</td>
+                  <td data-row="2" data-col="9">13.431</td>
+                  <td data-row="2" data-col="10">[-10, -9]</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">-8</td>
+                  <td data-row="3" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:1.75%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0067</span>
+</td>
+                  <td data-row="3" data-col="3">2</td>
+                  <td data-row="3" data-col="4">2</td>
+                  <td data-row="3" data-col="5">2</td>
+                  <td data-row="3" data-col="6">0</td>
+                  <td data-row="3" data-col="7">2.6587</td>
+                  <td data-row="3" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:1.14%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0096</span>
+</td>
+                  <td data-row="3" data-col="9">3.525</td>
+                  <td data-row="3" data-col="10">[-10, -8]</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">-7</td>
+                  <td data-row="4" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:4.13%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0158</span>
+</td>
+                  <td data-row="4" data-col="3">2</td>
+                  <td data-row="4" data-col="4">2</td>
+                  <td data-row="4" data-col="5">2</td>
+                  <td data-row="4" data-col="6">0</td>
+                  <td data-row="4" data-col="7">2.458</td>
+                  <td data-row="4" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:3.01%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0254</span>
+</td>
+                  <td data-row="4" data-col="9">2.777</td>
+                  <td data-row="4" data-col="10">[-10, -7]</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">-6</td>
+                  <td data-row="5" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:0.68%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0026</span>
+</td>
+                  <td data-row="5" data-col="3">2</td>
+                  <td data-row="5" data-col="4">2</td>
+                  <td data-row="5" data-col="5">1</td>
+                  <td data-row="5" data-col="6">1</td>
+                  <td data-row="5" data-col="7">-0.8193</td>
+                  <td data-row="5" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:2.7%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0228</span>
+</td>
+                  <td data-row="5" data-col="9">3.819</td>
+                  <td data-row="5" data-col="10">[-10, -6]</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">-5</td>
+                  <td data-row="6" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:1.19%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0045</span>
+</td>
+                  <td data-row="6" data-col="3">2</td>
+                  <td data-row="6" data-col="4">2</td>
+                  <td data-row="6" data-col="5">2</td>
+                  <td data-row="6" data-col="6">0</td>
+                  <td data-row="6" data-col="7">3.5468</td>
+                  <td data-row="6" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:3.24%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0274</span>
+</td>
+                  <td data-row="6" data-col="9">3.771</td>
+                  <td data-row="6" data-col="10">[-10, -5]</td>
+                </tr>
+<tr>
+<td data-row="7" data-col="1">-4</td>
+                  <td data-row="7" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:1.09%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0042</span>
+</td>
+                  <td data-row="7" data-col="3">2</td>
+                  <td data-row="7" data-col="4">2</td>
+                  <td data-row="7" data-col="5">0</td>
+                  <td data-row="7" data-col="6">2</td>
+                  <td data-row="7" data-col="7">-5.4838</td>
+                  <td data-row="7" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:2.75%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0232</span>
+</td>
+                  <td data-row="7" data-col="9">3.57</td>
+                  <td data-row="7" data-col="10">[-10, -4]</td>
+                </tr>
+<tr>
+<td data-row="8" data-col="1">-3</td>
+                  <td data-row="8" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:1.23%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0047</span>
+</td>
+                  <td data-row="8" data-col="3">2</td>
+                  <td data-row="8" data-col="4">2</td>
+                  <td data-row="8" data-col="5">2</td>
+                  <td data-row="8" data-col="6">0</td>
+                  <td data-row="8" data-col="7">2.2139</td>
+                  <td data-row="8" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:3.31%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0279</span>
+</td>
+                  <td data-row="8" data-col="9">6.388</td>
+                  <td data-row="8" data-col="10">[-10, -3]</td>
+                </tr>
+<tr>
+<td data-row="9" data-col="1">-2</td>
+                  <td data-row="9" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:2.08%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0080</span>
+</td>
+                  <td data-row="9" data-col="3">2</td>
+                  <td data-row="9" data-col="4">2</td>
+                  <td data-row="9" data-col="5">2</td>
+                  <td data-row="9" data-col="6">0</td>
+                  <td data-row="9" data-col="7">1.0275</td>
+                  <td data-row="9" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:4.25%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0359</span>
+</td>
+                  <td data-row="9" data-col="9">10.612</td>
+                  <td data-row="9" data-col="10">[-10, -2]</td>
+                </tr>
+<tr>
+<td data-row="10" data-col="1">-1</td>
+                  <td data-row="10" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:1.26%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0048</span>
+</td>
+                  <td data-row="10" data-col="3">2</td>
+                  <td data-row="10" data-col="4">2</td>
+                  <td data-row="10" data-col="5">0</td>
+                  <td data-row="10" data-col="6">2</td>
+                  <td data-row="10" data-col="7">-1.0844</td>
+                  <td data-row="10" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:3.68%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0310</span>
+</td>
+                  <td data-row="10" data-col="9">29.015</td>
+                  <td data-row="10" data-col="10">[-10, -1]</td>
+                </tr>
+<tr>
+<td data-row="11" data-col="1">0</td>
+                  <td data-row="11" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:0.37%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0014</span>
+</td>
+                  <td data-row="11" data-col="3">2</td>
+                  <td data-row="11" data-col="4">2</td>
+                  <td data-row="11" data-col="5">0</td>
+                  <td data-row="11" data-col="6">2</td>
+                  <td data-row="11" data-col="7">-1.1908</td>
+                  <td data-row="11" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:3.51%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0296</span>
+</td>
+                  <td data-row="11" data-col="9">231.743</td>
+                  <td data-row="11" data-col="10">[-10, 0]</td>
+                </tr>
+<tr>
+<td data-row="12" data-col="1">1</td>
+                  <td data-row="12" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:50%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.1913</span>
+</td>
+                  <td data-row="12" data-col="3">2</td>
+                  <td data-row="12" data-col="4">2</td>
+                  <td data-row="12" data-col="5">0</td>
+                  <td data-row="12" data-col="6">2</td>
+                  <td data-row="12" data-col="7">-804.3893</td>
+                  <td data-row="12" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:19.14%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.1616</span>
+</td>
+                  <td data-row="12" data-col="9">-1470.036</td>
+                  <td data-row="12" data-col="10">[-10, 1]</td>
+                </tr>
+<tr>
+<td data-row="13" data-col="1">2</td>
+                  <td data-row="13" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:38.15%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.1460</span>
+</td>
+                  <td data-row="13" data-col="3">2</td>
+                  <td data-row="13" data-col="4">2</td>
+                  <td data-row="13" data-col="5">0</td>
+                  <td data-row="13" data-col="6">2</td>
+                  <td data-row="13" data-col="7">-35.5468</td>
+                  <td data-row="13" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:36.43%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.3076</span>
+</td>
+                  <td data-row="13" data-col="9">-72.963</td>
+                  <td data-row="13" data-col="10">[-10, 2]</td>
+                </tr>
+<tr>
+<td data-row="14" data-col="1">3</td>
+                  <td data-row="14" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:10.13%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0387</span>
+</td>
+                  <td data-row="14" data-col="3">2</td>
+                  <td data-row="14" data-col="4">2</td>
+                  <td data-row="14" data-col="5">2</td>
+                  <td data-row="14" data-col="6">0</td>
+                  <td data-row="14" data-col="7">1.6183</td>
+                  <td data-row="14" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:31.84%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.2689</span>
+</td>
+                  <td data-row="14" data-col="9">-9.549</td>
+                  <td data-row="14" data-col="10">[-10, 3]</td>
+                </tr>
+<tr>
+<td data-row="15" data-col="1">4</td>
+                  <td data-row="15" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:4.62%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0177</span>
+</td>
+                  <td data-row="15" data-col="3">2</td>
+                  <td data-row="15" data-col="4">2</td>
+                  <td data-row="15" data-col="5">2</td>
+                  <td data-row="15" data-col="6">0</td>
+                  <td data-row="15" data-col="7">4.59</td>
+                  <td data-row="15" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:29.75%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.2512</span>
+</td>
+                  <td data-row="15" data-col="9">-7.848</td>
+                  <td data-row="15" data-col="10">[-10, 4]</td>
+                </tr>
+<tr>
+<td data-row="16" data-col="1">5</td>
+                  <td data-row="16" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:15.18%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0581</span>
+</td>
+                  <td data-row="16" data-col="3">2</td>
+                  <td data-row="16" data-col="4">2</td>
+                  <td data-row="16" data-col="5">0</td>
+                  <td data-row="16" data-col="6">2</td>
+                  <td data-row="16" data-col="7">-148.579</td>
+                  <td data-row="16" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:36.62%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.3093</span>
+</td>
+                  <td data-row="16" data-col="9">-9.545</td>
+                  <td data-row="16" data-col="10">[-10, 5]</td>
+                </tr>
+<tr>
+<td data-row="17" data-col="1">6</td>
+                  <td data-row="17" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:13.38%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0512</span>
+</td>
+                  <td data-row="17" data-col="3">2</td>
+                  <td data-row="17" data-col="4">2</td>
+                  <td data-row="17" data-col="5">0</td>
+                  <td data-row="17" data-col="6">2</td>
+                  <td data-row="17" data-col="7">-45.6437</td>
+                  <td data-row="17" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:42.69%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.3604</span>
+</td>
+                  <td data-row="17" data-col="9">-11.524</td>
+                  <td data-row="17" data-col="10">[-10, 6]</td>
+                </tr>
+<tr>
+<td data-row="18" data-col="1">7</td>
+                  <td data-row="18" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:4.94%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0189</span>
+</td>
+                  <td data-row="18" data-col="3">2</td>
+                  <td data-row="18" data-col="4">2</td>
+                  <td data-row="18" data-col="5">0</td>
+                  <td data-row="18" data-col="6">2</td>
+                  <td data-row="18" data-col="7">-1.46</td>
+                  <td data-row="18" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:44.93%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.3793</span>
+</td>
+                  <td data-row="18" data-col="9">-20.7</td>
+                  <td data-row="18" data-col="10">[-10, 7]</td>
+                </tr>
+<tr>
+<td data-row="19" data-col="1">8</td>
+                  <td data-row="19" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:1.82%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0070</span>
+</td>
+                  <td data-row="19" data-col="3">2</td>
+                  <td data-row="19" data-col="4">2</td>
+                  <td data-row="19" data-col="5">0</td>
+                  <td data-row="19" data-col="6">2</td>
+                  <td data-row="19" data-col="7">-12.8002</td>
+                  <td data-row="19" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:45.75%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.3863</span>
+</td>
+                  <td data-row="19" data-col="9">-21.723</td>
+                  <td data-row="19" data-col="10">[-10, 8]</td>
+                </tr>
+<tr>
+<td data-row="20" data-col="1">9</td>
+                  <td data-row="20" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;left:50%;top:0;height:100%;width:2.59%;background:#16a34a;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">0.0099</span>
+</td>
+                  <td data-row="20" data-col="3">2</td>
+                  <td data-row="20" data-col="4">2</td>
+                  <td data-row="20" data-col="5">2</td>
+                  <td data-row="20" data-col="6">0</td>
+                  <td data-row="20" data-col="7">1.1519</td>
+                  <td data-row="20" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:44.58%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.3764</span>
+</td>
+                  <td data-row="20" data-col="9">-14.264</td>
+                  <td data-row="20" data-col="10">[-10, 9]</td>
+                </tr>
+<tr>
+<td data-row="21" data-col="1">10</td>
+                  <td data-row="21" data-col="2">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:11.97%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.0458</span>
+</td>
+                  <td data-row="21" data-col="3">2</td>
+                  <td data-row="21" data-col="4">2</td>
+                  <td data-row="21" data-col="5">0</td>
+                  <td data-row="21" data-col="6">2</td>
+                  <td data-row="21" data-col="7">-13.2138</td>
+                  <td data-row="21" data-col="8">
+<div style="display:inline-block;position:relative;width:70px;height:0.9em;vertical-align:middle;">
+<div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:#9ca3af;"></div>
+<div style="position:absolute;right:50%;top:0;height:100%;width:50%;background:#dc2626;"></div>
+</div>
+<span style="font-variant-numeric:tabular-nums;">-0.4222</span>
+</td>
+                  <td data-row="21" data-col="9">-14.142</td>
+                  <td data-row="21" data-col="10">[-10, 10]</td>
+                </tr>
+</tbody>
+</table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
+</div>
+<div class="section level3">
+<h3 id="visualize-the-results">Visualize the Results<a class="anchor" aria-label="anchor" href="#visualize-the-results"></a>
+</h3>
+<p>The <code><a href="../reference/plot_event_study.html">plot_event_study()</a></code> function returns a ggplot2
+object; wrapping it in <code><a href="https://rdrr.io/pkg/plotly/man/ggplotly.html" class="external-link">plotly::ggplotly()</a></code> converts it to an
+interactive widget – hover over data points to inspect exact values,
+zoom into the announcement window, or click legend entries to toggle
+series.</p>
+<div class="section level4">
+<h4 id="cumulative-abnormal-return-car">Cumulative Abnormal Return (CAR)<a class="anchor" aria-label="anchor" href="#cumulative-abnormal-return-car"></a>
+</h4>
+<p>The chart below shows the cumulative abnormal return (CAR) path with
+confidence band for the first event in the study (VW, September 2015
+announcement).</p>
+<p>The CAR is the running sum of abnormal returns from the start of the
+event window to each day t. Abnormal returns are the firm’s actual
+returns minus what the market model predicted – in other words, the
+return in excess of what you would have expected given the index
+movement that day. At day 0 (the event date) the cumulative sum resets
+conceptually: positive values above the band reflect unexpectedly good
+news; negative values below the band reflect unexpectedly bad news.</p>
+<p>The shaded region is the confidence band. When the CAR path moves
+outside the band the abnormal performance is statistically
+distinguishable from zero – the market is responding to the event beyond
+chance variation. When the path stays inside the band the evidence of
+abnormal performance is not strong enough to rule out noise. For the VW
+Dieselgate event you will notice a pronounced drop right around the
+announcement window: the CAR falls sharply below the lower bound of the
+confidence band, confirming a statistically significant negative market
+reaction to the emissions disclosure.</p>
+<p>Use the hover tooltip to read off the exact CAR value and
+confidence-band limits at any relative day. The zoom and legend-toggle
+controls let you focus on the announcement window or isolate individual
+series.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plotly</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plotly/man/ggplotly.html" class="external-link">ggplotly</a></span><span class="op">(</span><span class="fu"><a href="../reference/plot_event_study.html">plot_event_study</a></span><span class="op">(</span><span class="va">est_task</span>, type <span class="op">=</span> <span class="st">"car"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:700px;height:432.632880098888px;"></div>
+<script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"data":[{"x":[-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,10,10,9,8,7,6,5,4,3,2,1,0,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-10],"y":[-0.016832253937920268,-0.024613930582228785,-0.021659494535634469,-0.0047203645072665737,-0.015144646350808533,-0.013509412160811911,-0.022289573012649111,-0.023295438748897244,-0.026453497395347206,-0.030017840036028441,-0.035674937713482485,-0.2296063268396209,-0.37423092585607765,-0.31421968801017719,-0.2952757266169509,-0.35545175429420106,-0.41017081420866813,-0.44437896116239067,-0.45415950093477353,-0.43786923334369887,-0.48237968468962844,-0.48237968468962844,-0.30229234367778968,-0.26212198411313792,-0.28286227144315734,-0.27765048113903662,-0.24813985645585918,-0.19825863583894834,-0.14307414413805003,-0.16717898980564533,-0.23253896367095306,-0.093473092957275614,0.094662710672008515,0.094254231669783417,0.091441341446092325,0.087856881266672182,0.08168390179817997,0.082751320662248717,0.072728978264471916,0.073876194720359778,0.046407122405538181,0.030962229425555925,0.022466025675892905,-0.016832253937920268],"text":["relative_index: -10<br />ci_lower: -0.016832254<br />ci_upper:  0.02246603","relative_index:  -9<br />ci_lower: -0.024613931<br />ci_upper:  0.03096223","relative_index:  -8<br />ci_lower: -0.021659495<br />ci_upper:  0.04640712","relative_index:  -7<br />ci_lower: -0.004720365<br />ci_upper:  0.07387619","relative_index:  -6<br />ci_lower: -0.015144646<br />ci_upper:  0.07272898","relative_index:  -5<br />ci_lower: -0.013509412<br />ci_upper:  0.08275132","relative_index:  -4<br />ci_lower: -0.022289573<br />ci_upper:  0.08168390","relative_index:  -3<br />ci_lower: -0.023295439<br />ci_upper:  0.08785688","relative_index:  -2<br />ci_lower: -0.026453497<br />ci_upper:  0.09144134","relative_index:  -1<br />ci_lower: -0.030017840<br />ci_upper:  0.09425423","relative_index:   0<br />ci_lower: -0.035674938<br />ci_upper:  0.09466271","relative_index:   1<br />ci_lower: -0.229606327<br />ci_upper: -0.09347309","relative_index:   2<br />ci_lower: -0.374230926<br />ci_upper: -0.23253896","relative_index:   3<br />ci_lower: -0.314219688<br />ci_upper: -0.16717899","relative_index:   4<br />ci_lower: -0.295275727<br />ci_upper: -0.14307414","relative_index:   5<br />ci_lower: -0.355451754<br />ci_upper: -0.19825864","relative_index:   6<br />ci_lower: -0.410170814<br />ci_upper: -0.24813986","relative_index:   7<br />ci_lower: -0.444378961<br />ci_upper: -0.27765048","relative_index:   8<br />ci_lower: -0.454159501<br />ci_upper: -0.28286227","relative_index:   9<br />ci_lower: -0.437869233<br />ci_upper: -0.26212198","relative_index:  10<br />ci_lower: -0.482379685<br />ci_upper: -0.30229234","relative_index:  10<br />ci_lower: -0.482379685<br />ci_upper: -0.30229234","relative_index:  10<br />ci_lower: -0.482379685<br />ci_upper: -0.30229234","relative_index:   9<br />ci_lower: -0.437869233<br />ci_upper: -0.26212198","relative_index:   8<br />ci_lower: -0.454159501<br />ci_upper: -0.28286227","relative_index:   7<br />ci_lower: -0.444378961<br />ci_upper: -0.27765048","relative_index:   6<br />ci_lower: -0.410170814<br />ci_upper: -0.24813986","relative_index:   5<br />ci_lower: -0.355451754<br />ci_upper: -0.19825864","relative_index:   4<br />ci_lower: -0.295275727<br />ci_upper: -0.14307414","relative_index:   3<br />ci_lower: -0.314219688<br />ci_upper: -0.16717899","relative_index:   2<br />ci_lower: -0.374230926<br />ci_upper: -0.23253896","relative_index:   1<br />ci_lower: -0.229606327<br />ci_upper: -0.09347309","relative_index:   0<br />ci_lower: -0.035674938<br />ci_upper:  0.09466271","relative_index:  -1<br />ci_lower: -0.030017840<br />ci_upper:  0.09425423","relative_index:  -2<br />ci_lower: -0.026453497<br />ci_upper:  0.09144134","relative_index:  -3<br />ci_lower: -0.023295439<br />ci_upper:  0.08785688","relative_index:  -4<br />ci_lower: -0.022289573<br />ci_upper:  0.08168390","relative_index:  -5<br />ci_lower: -0.013509412<br />ci_upper:  0.08275132","relative_index:  -6<br />ci_lower: -0.015144646<br />ci_upper:  0.07272898","relative_index:  -7<br />ci_lower: -0.004720365<br />ci_upper:  0.07387619","relative_index:  -8<br />ci_lower: -0.021659495<br />ci_upper:  0.04640712","relative_index:  -9<br />ci_lower: -0.024613931<br />ci_upper:  0.03096223","relative_index: -10<br />ci_lower: -0.016832254<br />ci_upper:  0.02246603","relative_index: -10<br />ci_lower: -0.016832254<br />ci_upper:  0.02246603"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"transparent","dash":"solid"},"fill":"toself","fillcolor":"rgba(37,99,235,0.2)","hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10],"y":[0.0028168858689863185,0.0031741494216635689,0.012373813934951856,0.034577915106546599,0.028792165956831692,0.0346209542507184,0.029697164392765429,0.032280721258887465,0.03249392202537256,0.032118195816877484,0.029493886479263015,-0.16153970989844826,-0.30338494476351535,-0.24069933890791126,-0.21917493537750046,-0.27685519506657469,-0.32915533533226365,-0.36101472115071365,-0.36851088618896544,-0.34999560872841839,-0.39233601418370906],"text":["relative_index: -10<br />value:  0.002816886","relative_index:  -9<br />value:  0.003174149","relative_index:  -8<br />value:  0.012373814","relative_index:  -7<br />value:  0.034577915","relative_index:  -6<br />value:  0.028792166","relative_index:  -5<br />value:  0.034620954","relative_index:  -4<br />value:  0.029697164","relative_index:  -3<br />value:  0.032280721","relative_index:  -2<br />value:  0.032493922","relative_index:  -1<br />value:  0.032118196","relative_index:   0<br />value:  0.029493886","relative_index:   1<br />value: -0.161539710","relative_index:   2<br />value: -0.303384945","relative_index:   3<br />value: -0.240699339","relative_index:   4<br />value: -0.219174935","relative_index:   5<br />value: -0.276855195","relative_index:   6<br />value: -0.329155335","relative_index:   7<br />value: -0.361014721","relative_index:   8<br />value: -0.368510886","relative_index:   9<br />value: -0.349995609","relative_index:  10<br />value: -0.392336014"],"type":"scatter","mode":"lines+markers","line":{"width":3.0236220472440949,"color":"rgba(37,99,235,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(37,99,235,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(37,99,235,1)"}},"frame":null},{"x":[-11,11],"y":[0,0],"text":"yintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(107,114,128,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0],"y":[-0.51123180445771033,0.12351483044009036],"text":"xintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(213,94,0,0.6)","dash":"dot"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":39.246160232461605,"r":7.3059360730593621,"b":37.260273972602747,"l":48.949771689497723},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Cumulative Abnormal Returns - Event 1","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"x":0.5,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-11,11],"tickmode":"array","ticktext":["-10","-5","0","5","10"],"tickvals":[-10,-5,0,5,10],"categoryorder":"array","categoryarray":["-10","-5","0","5","10"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"y","title":{"text":"Event Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.51123180445771033,0.12351483044009036],"tickmode":"array","ticktext":["-0.5","-0.4","-0.3","-0.2","-0.1","0.0","0.1"],"tickvals":[-0.5,-0.40000000000000002,-0.29999999999999999,-0.19999999999999996,-0.099999999999999978,0,0.10000000000000009],"categoryorder":"array","categoryarray":["-0.5","-0.4","-0.3","-0.2","-0.1","0.0","0.1"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"x","title":{"text":"Cumulative Abnormal Return","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"orientation":"h","x":0.5,"y":-0.14999999999999999,"xanchor":"center","yanchor":"top"},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"253315bdbe99":{"x":{},"ymin":{},"ymax":{},"type":"scatter"},"2533734a3353":{"x":{},"y":{}},"253339c92a5e":{"x":{},"y":{}},"25336b7c34c":{"yintercept":{}},"25333d539f5c":{"xintercept":{}}},"cur_data":"253315bdbe99","visdat":{"253315bdbe99":["function (y) ","x"],"2533734a3353":["function (y) ","x"],"253339c92a5e":["function (y) ","x"],"25336b7c34c":["function (y) ","x"],"25333d539f5c":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div class="section level4">
+<h4 id="cumulative-average-abnormal-return-caar">Cumulative Average Abnormal Return (CAAR)<a class="anchor" aria-label="anchor" href="#cumulative-average-abnormal-return-caar"></a>
+</h4>
+<p>The next chart shows the cumulative average abnormal return (CAAR)
+aggregated across all events in the study.</p>
+<p>Where the single-event CAR reflects one firm’s reaction, the CAAR
+averages abnormal returns across all events at each relative day.
+Averaging smooths out firm-specific noise – idiosyncratic movements that
+happen to coincide with the event window for a particular firm but are
+unrelated to the event itself. When a clean CAAR signal emerges (a
+sustained move outside the confidence band) it reflects a systematic
+market reaction shared across firms, not just one company’s
+idiosyncratic move. A narrow confidence band signals that the individual
+event reactions were consistent with each other; a wide band suggests
+heterogeneous reactions across the sample.</p>
+<p>For the Dieselgate study the CAAR chart summarises the mean market
+reaction across all four affected automotive companies, providing a
+portfolio-level view of how the scandal reverberated through the
+sector.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">plotly</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/plotly/man/ggplotly.html" class="external-link">ggplotly</a></span><span class="op">(</span><span class="fu"><a href="../reference/plot_event_study.html">plot_event_study</a></span><span class="op">(</span><span class="va">est_task</span>, type <span class="op">=</span> <span class="st">"caar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-e5c8c404fe174e4c81bd" style="width:700px;height:432.632880098888px;"></div>
+<script type="application/json" data-for="htmlwidget-e5c8c404fe174e4c81bd">{"x":{"data":[{"x":[-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,10,10,9,8,7,6,5,4,3,2,1,0,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-10],"y":[0.0015126997952250552,0.0025231091900333714,0.0042800311568764243,0.0074781894655006932,0.011105738372949547,0.013139955821732094,0.010463955717124744,0.019347035917248869,0.029248843241191869,0.028950798915477711,0.029371182441389709,-0.16186519664066701,-0.31586370296877314,-0.32404242497369168,-0.31391536978592616,-0.37275251115498759,-0.42173373167853906,-0.41525917125161615,-0.4211475058923454,-0.42809980900393024,-0.48070120640951458,-0.48070120640951458,-0.36367775939858765,-0.32466515886571662,-0.35143998281071775,-0.34342237248362739,-0.29913067060557147,-0.24575415122288252,-0.18844908689191484,-0.21366983402155254,-0.29933788253188059,-0.16143414930662781,0.029872233520101894,0.033145433636651164,0.042499835250098456,0.036475323686550445,0.035934803678983752,0.041587587950145867,0.034528159227148747,0.043366792519311165,0.014998758024212553,0.0033852922524938967,0.006838228200200587,0.0015126997952250552],"text":["relative_index: -10<br />ci_lower:  0.001512700<br />ci_upper:  0.006838228","relative_index:  -9<br />ci_lower:  0.002523109<br />ci_upper:  0.003385292","relative_index:  -8<br />ci_lower:  0.004280031<br />ci_upper:  0.014998758","relative_index:  -7<br />ci_lower:  0.007478189<br />ci_upper:  0.043366793","relative_index:  -6<br />ci_lower:  0.011105738<br />ci_upper:  0.034528159","relative_index:  -5<br />ci_lower:  0.013139956<br />ci_upper:  0.041587588","relative_index:  -4<br />ci_lower:  0.010463956<br />ci_upper:  0.035934804","relative_index:  -3<br />ci_lower:  0.019347036<br />ci_upper:  0.036475324","relative_index:  -2<br />ci_lower:  0.029248843<br />ci_upper:  0.042499835","relative_index:  -1<br />ci_lower:  0.028950799<br />ci_upper:  0.033145434","relative_index:   0<br />ci_lower:  0.029371182<br />ci_upper:  0.029872234","relative_index:   1<br />ci_lower: -0.161865197<br />ci_upper: -0.161434149","relative_index:   2<br />ci_lower: -0.315863703<br />ci_upper: -0.299337883","relative_index:   3<br />ci_lower: -0.324042425<br />ci_upper: -0.213669834","relative_index:   4<br />ci_lower: -0.313915370<br />ci_upper: -0.188449087","relative_index:   5<br />ci_lower: -0.372752511<br />ci_upper: -0.245754151","relative_index:   6<br />ci_lower: -0.421733732<br />ci_upper: -0.299130671","relative_index:   7<br />ci_lower: -0.415259171<br />ci_upper: -0.343422372","relative_index:   8<br />ci_lower: -0.421147506<br />ci_upper: -0.351439983","relative_index:   9<br />ci_lower: -0.428099809<br />ci_upper: -0.324665159","relative_index:  10<br />ci_lower: -0.480701206<br />ci_upper: -0.363677759","relative_index:  10<br />ci_lower: -0.480701206<br />ci_upper: -0.363677759","relative_index:  10<br />ci_lower: -0.480701206<br />ci_upper: -0.363677759","relative_index:   9<br />ci_lower: -0.428099809<br />ci_upper: -0.324665159","relative_index:   8<br />ci_lower: -0.421147506<br />ci_upper: -0.351439983","relative_index:   7<br />ci_lower: -0.415259171<br />ci_upper: -0.343422372","relative_index:   6<br />ci_lower: -0.421733732<br />ci_upper: -0.299130671","relative_index:   5<br />ci_lower: -0.372752511<br />ci_upper: -0.245754151","relative_index:   4<br />ci_lower: -0.313915370<br />ci_upper: -0.188449087","relative_index:   3<br />ci_lower: -0.324042425<br />ci_upper: -0.213669834","relative_index:   2<br />ci_lower: -0.315863703<br />ci_upper: -0.299337883","relative_index:   1<br />ci_lower: -0.161865197<br />ci_upper: -0.161434149","relative_index:   0<br />ci_lower:  0.029371182<br />ci_upper:  0.029872234","relative_index:  -1<br />ci_lower:  0.028950799<br />ci_upper:  0.033145434","relative_index:  -2<br />ci_lower:  0.029248843<br />ci_upper:  0.042499835","relative_index:  -3<br />ci_lower:  0.019347036<br />ci_upper:  0.036475324","relative_index:  -4<br />ci_lower:  0.010463956<br />ci_upper:  0.035934804","relative_index:  -5<br />ci_lower:  0.013139956<br />ci_upper:  0.041587588","relative_index:  -6<br />ci_lower:  0.011105738<br />ci_upper:  0.034528159","relative_index:  -7<br />ci_lower:  0.007478189<br />ci_upper:  0.043366793","relative_index:  -8<br />ci_lower:  0.004280031<br />ci_upper:  0.014998758","relative_index:  -9<br />ci_lower:  0.002523109<br />ci_upper:  0.003385292","relative_index: -10<br />ci_lower:  0.001512700<br />ci_upper:  0.006838228","relative_index: -10<br />ci_lower:  0.001512700<br />ci_upper:  0.006838228"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"transparent","dash":"solid"},"fill":"toself","fillcolor":"rgba(37,99,235,0.2)","hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10],"y":[0.0041754639977128211,0.002954200721263634,0.0096393945905444891,0.025422490992405931,0.022816948800049149,0.02736377188593898,0.023199379698054249,0.027911179801899656,0.035874339245645162,0.031048116276064439,0.029621707980745801,-0.16164967297364741,-0.30760079275032687,-0.26885612949762211,-0.25118222833892051,-0.30925333118893505,-0.36043220114205526,-0.37934077186762177,-0.38629374435153158,-0.37638248393482343,-0.42218948290405112],"text":["relative_index: -10<br />value:  0.004175464","relative_index:  -9<br />value:  0.002954201","relative_index:  -8<br />value:  0.009639395","relative_index:  -7<br />value:  0.025422491","relative_index:  -6<br />value:  0.022816949","relative_index:  -5<br />value:  0.027363772","relative_index:  -4<br />value:  0.023199380","relative_index:  -3<br />value:  0.027911180","relative_index:  -2<br />value:  0.035874339","relative_index:  -1<br />value:  0.031048116","relative_index:   0<br />value:  0.029621708","relative_index:   1<br />value: -0.161649673","relative_index:   2<br />value: -0.307600793","relative_index:   3<br />value: -0.268856129","relative_index:   4<br />value: -0.251182228","relative_index:   5<br />value: -0.309253331","relative_index:   6<br />value: -0.360432201","relative_index:   7<br />value: -0.379340772","relative_index:   8<br />value: -0.386293744","relative_index:   9<br />value: -0.376382484","relative_index:  10<br />value: -0.422189483"],"type":"scatter","mode":"lines+markers","line":{"width":3.0236220472440949,"color":"rgba(37,99,235,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(37,99,235,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(37,99,235,1)"}},"frame":null},{"x":[-11,11],"y":[0,0],"text":"yintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(107,114,128,1)","dash":"dash"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0,0],"y":[-0.50690460635595591,0.069570192465752453],"text":"xintercept: 0","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(213,94,0,0.6)","dash":"dot"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":39.246160232461605,"r":7.3059360730593621,"b":37.260273972602747,"l":48.949771689497723},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"CAAR - VW Group","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402243},"x":0.5,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-11,11],"tickmode":"array","ticktext":["-10","-5","0","5","10"],"tickvals":[-10,-5,0,5,10],"categoryorder":"array","categoryarray":["-10","-5","0","5","10"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"y","title":{"text":"Event Time","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.50690460635595591,0.069570192465752453],"tickmode":"array","ticktext":["-0.5","-0.4","-0.3","-0.2","-0.1","0.0"],"tickvals":[-0.5,-0.40000000000000002,-0.30000000000000004,-0.20000000000000001,-0.099999999999999978,0],"categoryorder":"array","categoryarray":["-0.5","-0.4","-0.3","-0.2","-0.1","0.0"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(229,231,235,1)","gridwidth":0.5313408053134081,"zeroline":false,"anchor":"x","title":{"text":"Cumulative Average Abnormal Return","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"orientation":"h","x":0.5,"y":-0.14999999999999999,"xanchor":"center","yanchor":"top"},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"25332fd52fb3":{"x":{},"ymin":{},"ymax":{},"type":"scatter"},"253369df499b":{"x":{},"y":{}},"2533789de29b":{"x":{},"y":{}},"25332536bf3b":{"yintercept":{}},"25332cc3269f":{"xintercept":{}}},"cur_data":"25332fd52fb3","visdat":{"25332fd52fb3":["function (y) ","x"],"253369df499b":["function (y) ","x"],"2533789de29b":["function (y) ","x"],"25332536bf3b":["function (y) ","x"],"25332cc3269f":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
 </div>
 <div class="section level3">
 <h3 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>

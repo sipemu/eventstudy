@@ -223,136 +223,161 @@ are also fully live on <code>dieselgate</code> — swap the
 <h2 id="rendered-table">7. Rendered Table<a class="anchor" aria-label="anchor" href="#rendered-table"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/tidy.EventStudyTask.html">tidy.EventStudyTask</a></span><span class="op">(</span><span class="va">task</span>, type <span class="op">=</span> <span class="st">"car"</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"Market-model CAR t-statistics on the dieselgate event (first 10 rows)."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<caption>Market-model CAR t-statistics on the dieselgate event (first 10
-rows).</caption>
-<colgroup>
-<col width="11%">
-<col width="11%">
-<col width="15%">
-<col width="12%">
-<col width="11%">
-<col width="12%">
-<col width="12%">
-<col width="10%">
-</colgroup>
-<thead><tr class="header">
-<th align="right">event_id</th>
-<th align="left">group</th>
-<th align="left">firm_symbol</th>
-<th align="left">term</th>
-<th align="right">estimate</th>
-<th align="right">std.error</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
-</tr></thead>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_a4s4zva8gc0h1bysek5y = TinyTable.createTableFunctions("tinytable_a4s4zva8gc0h1bysek5y");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '10', j: 2 }, { i: '10', j: 3 }, { i: '10', j: 4 } ], css_id: 'tinytable_css_v3w03awl64c00r458on2',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '5', j: 2 }, { i: '6', j: 2 }, { i: '7', j: 2 }, { i: '8', j: 2 }, { i: '9', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '5', j: 3 }, { i: '6', j: 3 }, { i: '7', j: 3 }, { i: '8', j: 3 }, { i: '9', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 }, { i: '5', j: 4 }, { i: '6', j: 4 }, { i: '7', j: 4 }, { i: '8', j: 4 }, { i: '9', j: 4 } ], css_id: 'tinytable_css_y8qdbsvm2aurvaex8uys',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 }, { i: '0', j: 4 } ], css_id: 'tinytable_css_bjbn7ybm8vtzfiavkhkk',}, 
+          { positions: [ { i: '10', j: 1 }, { i: '10', j: 5 }, { i: '10', j: 6 }, { i: '10', j: 7 }, { i: '10', j: 8 } ], css_id: 'tinytable_css_6h3zgkus2i3m0j0kxjgx',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '5', j: 1 }, { i: '6', j: 1 }, { i: '7', j: 1 }, { i: '8', j: 1 }, { i: '9', j: 1 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '5', j: 5 }, { i: '6', j: 5 }, { i: '7', j: 5 }, { i: '8', j: 5 }, { i: '9', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '5', j: 6 }, { i: '6', j: 6 }, { i: '7', j: 6 }, { i: '8', j: 6 }, { i: '9', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '3', j: 7 }, { i: '4', j: 7 }, { i: '5', j: 7 }, { i: '6', j: 7 }, { i: '7', j: 7 }, { i: '8', j: 7 }, { i: '9', j: 7 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '3', j: 8 }, { i: '4', j: 8 }, { i: '5', j: 8 }, { i: '6', j: 8 }, { i: '7', j: 8 }, { i: '8', j: 8 }, { i: '9', j: 8 } ], css_id: 'tinytable_css_075xkqsck953o8hu2ffm',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 }, { i: '0', j: 8 } ], css_id: 'tinytable_css_blv4d46psf51liknb6vl',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_a4s4zva8gc0h1bysek5y.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_a4s4zva8gc0h1bysek5y td.tinytable_css_v3w03awl64c00r458on2, #tinytable_a4s4zva8gc0h1bysek5y th.tinytable_css_v3w03awl64c00r458on2 {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_a4s4zva8gc0h1bysek5y td.tinytable_css_y8qdbsvm2aurvaex8uys, #tinytable_a4s4zva8gc0h1bysek5y th.tinytable_css_y8qdbsvm2aurvaex8uys { text-align: left }
+    #tinytable_a4s4zva8gc0h1bysek5y td.tinytable_css_bjbn7ybm8vtzfiavkhkk, #tinytable_a4s4zva8gc0h1bysek5y th.tinytable_css_bjbn7ybm8vtzfiavkhkk {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    #tinytable_a4s4zva8gc0h1bysek5y td.tinytable_css_6h3zgkus2i3m0j0kxjgx, #tinytable_a4s4zva8gc0h1bysek5y th.tinytable_css_6h3zgkus2i3m0j0kxjgx {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_a4s4zva8gc0h1bysek5y td.tinytable_css_075xkqsck953o8hu2ffm, #tinytable_a4s4zva8gc0h1bysek5y th.tinytable_css_075xkqsck953o8hu2ffm { text-align: right }
+    #tinytable_a4s4zva8gc0h1bysek5y td.tinytable_css_blv4d46psf51liknb6vl, #tinytable_a4s4zva8gc0h1bysek5y th.tinytable_css_blv4d46psf51liknb6vl {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_a4s4zva8gc0h1bysek5y" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<caption>Market-model CAR t-statistics on the dieselgate event (first 10 rows).</caption>
+        <thead><tr>
+<th scope="col" data-row="0" data-col="1">event_id</th>
+                <th scope="col" data-row="0" data-col="2">group</th>
+                <th scope="col" data-row="0" data-col="3">firm_symbol</th>
+                <th scope="col" data-row="0" data-col="4">term</th>
+                <th scope="col" data-row="0" data-col="5">estimate</th>
+                <th scope="col" data-row="0" data-col="6">std.error</th>
+                <th scope="col" data-row="0" data-col="7">statistic</th>
+                <th scope="col" data-row="0" data-col="8">p.value</th>
+              </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-10]</td>
-<td align="right">0.0028</td>
-<td align="right">0.0100</td>
-<td align="right">0.2796</td>
-<td align="right">0.7800</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-9]</td>
-<td align="right">0.0031</td>
-<td align="right">0.0142</td>
-<td align="right">0.2175</td>
-<td align="right">0.8280</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-8]</td>
-<td align="right">0.0124</td>
-<td align="right">0.0174</td>
-<td align="right">0.7134</td>
-<td align="right">0.4762</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-7]</td>
-<td align="right">0.0348</td>
-<td align="right">0.0200</td>
-<td align="right">1.7381</td>
-<td align="right">0.0834</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-6]</td>
-<td align="right">0.0291</td>
-<td align="right">0.0224</td>
-<td align="right">1.2986</td>
-<td align="right">0.1953</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-5]</td>
-<td align="right">0.0349</td>
-<td align="right">0.0245</td>
-<td align="right">1.4203</td>
-<td align="right">0.1568</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-4]</td>
-<td align="right">0.0299</td>
-<td align="right">0.0265</td>
-<td align="right">1.1273</td>
-<td align="right">0.2607</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-3]</td>
-<td align="right">0.0324</td>
-<td align="right">0.0283</td>
-<td align="right">1.1436</td>
-<td align="right">0.2539</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-2]</td>
-<td align="right">0.0326</td>
-<td align="right">0.0301</td>
-<td align="right">1.0830</td>
-<td align="right">0.2799</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-1]</td>
-<td align="right">0.0321</td>
-<td align="right">0.0317</td>
-<td align="right">1.0137</td>
-<td align="right">0.3117</td>
-</tr>
+<tr>
+<td data-row="1" data-col="1">1</td>
+                  <td data-row="1" data-col="2">VW Group</td>
+                  <td data-row="1" data-col="3">VOW.DE</td>
+                  <td data-row="1" data-col="4">[-10,-10]</td>
+                  <td data-row="1" data-col="5">0.002802</td>
+                  <td data-row="1" data-col="6">0.01002</td>
+                  <td data-row="1" data-col="7">0.2796</td>
+                  <td data-row="1" data-col="8">0.78</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">1</td>
+                  <td data-row="2" data-col="2">VW Group</td>
+                  <td data-row="2" data-col="3">VOW.DE</td>
+                  <td data-row="2" data-col="4">[-10,-9]</td>
+                  <td data-row="2" data-col="5">0.003083</td>
+                  <td data-row="2" data-col="6">0.01417</td>
+                  <td data-row="2" data-col="7">0.2175</td>
+                  <td data-row="2" data-col="8">0.82796</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">1</td>
+                  <td data-row="3" data-col="2">VW Group</td>
+                  <td data-row="3" data-col="3">VOW.DE</td>
+                  <td data-row="3" data-col="4">[-10,-8]</td>
+                  <td data-row="3" data-col="5">0.012382</td>
+                  <td data-row="3" data-col="6">0.01736</td>
+                  <td data-row="3" data-col="7">0.7134</td>
+                  <td data-row="3" data-col="8">0.47624</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">1</td>
+                  <td data-row="4" data-col="2">VW Group</td>
+                  <td data-row="4" data-col="3">VOW.DE</td>
+                  <td data-row="4" data-col="4">[-10,-7]</td>
+                  <td data-row="4" data-col="5">0.034831</td>
+                  <td data-row="4" data-col="6">0.02004</td>
+                  <td data-row="4" data-col="7">1.7381</td>
+                  <td data-row="4" data-col="8">0.08344</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">1</td>
+                  <td data-row="5" data-col="2">VW Group</td>
+                  <td data-row="5" data-col="3">VOW.DE</td>
+                  <td data-row="5" data-col="4">[-10,-6]</td>
+                  <td data-row="5" data-col="5">0.029097</td>
+                  <td data-row="5" data-col="6">0.02241</td>
+                  <td data-row="5" data-col="7">1.2986</td>
+                  <td data-row="5" data-col="8">0.19528</td>
+                </tr>
+<tr>
+<td data-row="6" data-col="1">1</td>
+                  <td data-row="6" data-col="2">VW Group</td>
+                  <td data-row="6" data-col="3">VOW.DE</td>
+                  <td data-row="6" data-col="4">[-10,-5]</td>
+                  <td data-row="6" data-col="5">0.034859</td>
+                  <td data-row="6" data-col="6">0.02454</td>
+                  <td data-row="6" data-col="7">1.4203</td>
+                  <td data-row="6" data-col="8">0.15679</td>
+                </tr>
+<tr>
+<td data-row="7" data-col="1">1</td>
+                  <td data-row="7" data-col="2">VW Group</td>
+                  <td data-row="7" data-col="3">VOW.DE</td>
+                  <td data-row="7" data-col="4">[-10,-4]</td>
+                  <td data-row="7" data-col="5">0.029885</td>
+                  <td data-row="7" data-col="6">0.02651</td>
+                  <td data-row="7" data-col="7">1.1273</td>
+                  <td data-row="7" data-col="8">0.26072</td>
+                </tr>
+<tr>
+<td data-row="8" data-col="1">1</td>
+                  <td data-row="8" data-col="2">VW Group</td>
+                  <td data-row="8" data-col="3">VOW.DE</td>
+                  <td data-row="8" data-col="4">[-10,-3]</td>
+                  <td data-row="8" data-col="5">0.032411</td>
+                  <td data-row="8" data-col="6">0.02834</td>
+                  <td data-row="8" data-col="7">1.1436</td>
+                  <td data-row="8" data-col="8">0.25389</td>
+                </tr>
+<tr>
+<td data-row="9" data-col="1">1</td>
+                  <td data-row="9" data-col="2">VW Group</td>
+                  <td data-row="9" data-col="3">VOW.DE</td>
+                  <td data-row="9" data-col="4">[-10,-2]</td>
+                  <td data-row="9" data-col="5">0.032555</td>
+                  <td data-row="9" data-col="6">0.03006</td>
+                  <td data-row="9" data-col="7">1.083</td>
+                  <td data-row="9" data-col="8">0.27987</td>
+                </tr>
+<tr>
+<td data-row="10" data-col="1">1</td>
+                  <td data-row="10" data-col="2">VW Group</td>
+                  <td data-row="10" data-col="3">VOW.DE</td>
+                  <td data-row="10" data-col="4">[-10,-1]</td>
+                  <td data-row="10" data-col="5">0.032121</td>
+                  <td data-row="10" data-col="6">0.03169</td>
+                  <td data-row="10" data-col="7">1.0137</td>
+                  <td data-row="10" data-col="8">0.31171</td>
+                </tr>
 </tbody>
 </table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 <div class="section level2">
 <h2 id="rendered-plot">8. Rendered Plot<a class="anchor" aria-label="anchor" href="#rendered-plot"></a>
@@ -396,83 +421,109 @@ It is gated on <code>rugarch</code>:</p>
 <span><span class="op">)</span></span>
 <span><span class="va">task_g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_model.html">fit_model</a></span><span class="op">(</span><span class="va">task_g</span>, <span class="va">params_g</span><span class="op">)</span></span>
 <span><span class="va">task_g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calculate_statistics.html">calculate_statistics</a></span><span class="op">(</span><span class="va">task_g</span>, <span class="va">params_g</span><span class="op">)</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/tidy.EventStudyTask.html">tidy.EventStudyTask</a></span><span class="op">(</span><span class="va">task_g</span>, type <span class="op">=</span> <span class="st">"car"</span><span class="op">)</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span>             caption <span class="op">=</span> <span class="st">"GARCH-based CAR t-statistics."</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
+<span><span class="fu">es_tt</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/tidy.EventStudyTask.html">tidy.EventStudyTask</a></span><span class="op">(</span><span class="va">task_g</span>, type <span class="op">=</span> <span class="st">"car"</span><span class="op">)</span>, <span class="fl">5</span><span class="op">)</span>,</span>
+<span>      caption <span class="op">=</span> <span class="st">"GARCH-based CAR t-statistics."</span><span class="op">)</span></span></code></pre></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_ykan6rk0t0twdhx0iehv = TinyTable.createTableFunctions("tinytable_ykan6rk0t0twdhx0iehv");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '5', j: 2 }, { i: '5', j: 3 }, { i: '5', j: 4 } ], css_id: 'tinytable_css_ybq2lfh7q4a5ysit8zrp',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '3', j: 2 }, { i: '4', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 }, { i: '3', j: 3 }, { i: '4', j: 3 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '3', j: 4 }, { i: '4', j: 4 } ], css_id: 'tinytable_css_alv87pusudcxkm5blo11',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 }, { i: '0', j: 4 } ], css_id: 'tinytable_css_tu44pi3mcssfqqf13c1j',}, 
+          { positions: [ { i: '5', j: 1 }, { i: '5', j: 5 }, { i: '5', j: 6 }, { i: '5', j: 7 }, { i: '5', j: 8 } ], css_id: 'tinytable_css_j6c5vzvg2dpwsltgsurf',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '3', j: 1 }, { i: '4', j: 1 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '3', j: 5 }, { i: '4', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '3', j: 6 }, { i: '4', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '3', j: 7 }, { i: '4', j: 7 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '3', j: 8 }, { i: '4', j: 8 } ], css_id: 'tinytable_css_b1xp95efxrkx4tkoqs4b',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 }, { i: '0', j: 8 } ], css_id: 'tinytable_css_piezp7tb5iudtiawol6p',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_ykan6rk0t0twdhx0iehv.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_ykan6rk0t0twdhx0iehv td.tinytable_css_ybq2lfh7q4a5ysit8zrp, #tinytable_ykan6rk0t0twdhx0iehv th.tinytable_css_ybq2lfh7q4a5ysit8zrp {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_ykan6rk0t0twdhx0iehv td.tinytable_css_alv87pusudcxkm5blo11, #tinytable_ykan6rk0t0twdhx0iehv th.tinytable_css_alv87pusudcxkm5blo11 { text-align: left }
+    #tinytable_ykan6rk0t0twdhx0iehv td.tinytable_css_tu44pi3mcssfqqf13c1j, #tinytable_ykan6rk0t0twdhx0iehv th.tinytable_css_tu44pi3mcssfqqf13c1j {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    #tinytable_ykan6rk0t0twdhx0iehv td.tinytable_css_j6c5vzvg2dpwsltgsurf, #tinytable_ykan6rk0t0twdhx0iehv th.tinytable_css_j6c5vzvg2dpwsltgsurf {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_ykan6rk0t0twdhx0iehv td.tinytable_css_b1xp95efxrkx4tkoqs4b, #tinytable_ykan6rk0t0twdhx0iehv th.tinytable_css_b1xp95efxrkx4tkoqs4b { text-align: right }
+    #tinytable_ykan6rk0t0twdhx0iehv td.tinytable_css_piezp7tb5iudtiawol6p, #tinytable_ykan6rk0t0twdhx0iehv th.tinytable_css_piezp7tb5iudtiawol6p {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_ykan6rk0t0twdhx0iehv" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
 <caption>GARCH-based CAR t-statistics.</caption>
-<colgroup>
-<col width="11%">
-<col width="11%">
-<col width="15%">
-<col width="12%">
-<col width="11%">
-<col width="12%">
-<col width="12%">
-<col width="10%">
-</colgroup>
-<thead><tr class="header">
-<th align="right">event_id</th>
-<th align="left">group</th>
-<th align="left">firm_symbol</th>
-<th align="left">term</th>
-<th align="right">estimate</th>
-<th align="right">std.error</th>
-<th align="right">statistic</th>
-<th align="right">p.value</th>
-</tr></thead>
+        <thead><tr>
+<th scope="col" data-row="0" data-col="1">event_id</th>
+                <th scope="col" data-row="0" data-col="2">group</th>
+                <th scope="col" data-row="0" data-col="3">firm_symbol</th>
+                <th scope="col" data-row="0" data-col="4">term</th>
+                <th scope="col" data-row="0" data-col="5">estimate</th>
+                <th scope="col" data-row="0" data-col="6">std.error</th>
+                <th scope="col" data-row="0" data-col="7">statistic</th>
+                <th scope="col" data-row="0" data-col="8">p.value</th>
+              </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-10]</td>
-<td align="right">0.0030</td>
-<td align="right">0.0099</td>
-<td align="right">0.2995</td>
-<td align="right">0.7648</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-9]</td>
-<td align="right">0.0034</td>
-<td align="right">0.0141</td>
-<td align="right">0.2433</td>
-<td align="right">0.8080</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-8]</td>
-<td align="right">0.0129</td>
-<td align="right">0.0172</td>
-<td align="right">0.7483</td>
-<td align="right">0.4550</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-7]</td>
-<td align="right">0.0355</td>
-<td align="right">0.0199</td>
-<td align="right">1.7860</td>
-<td align="right">0.0753</td>
-</tr>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">VW Group</td>
-<td align="left">VOW.DE</td>
-<td align="left">[-10,-6]</td>
-<td align="right">0.0299</td>
-<td align="right">0.0222</td>
-<td align="right">1.3468</td>
-<td align="right">0.1793</td>
-</tr>
+<tr>
+<td data-row="1" data-col="1">1</td>
+                  <td data-row="1" data-col="2">VW Group</td>
+                  <td data-row="1" data-col="3">VOW.DE</td>
+                  <td data-row="1" data-col="4">[-10,-10]</td>
+                  <td data-row="1" data-col="5">0.002975</td>
+                  <td data-row="1" data-col="6">0.009936</td>
+                  <td data-row="1" data-col="7">0.2995</td>
+                  <td data-row="1" data-col="8">0.76485</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">1</td>
+                  <td data-row="2" data-col="2">VW Group</td>
+                  <td data-row="2" data-col="3">VOW.DE</td>
+                  <td data-row="2" data-col="4">[-10,-9]</td>
+                  <td data-row="2" data-col="5">0.003418</td>
+                  <td data-row="2" data-col="6">0.014051</td>
+                  <td data-row="2" data-col="7">0.2433</td>
+                  <td data-row="2" data-col="8">0.80799</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">1</td>
+                  <td data-row="3" data-col="2">VW Group</td>
+                  <td data-row="3" data-col="3">VOW.DE</td>
+                  <td data-row="3" data-col="4">[-10,-8]</td>
+                  <td data-row="3" data-col="5">0.012877</td>
+                  <td data-row="3" data-col="6">0.017209</td>
+                  <td data-row="3" data-col="7">0.7483</td>
+                  <td data-row="3" data-col="8">0.45502</td>
+                </tr>
+<tr>
+<td data-row="4" data-col="1">1</td>
+                  <td data-row="4" data-col="2">VW Group</td>
+                  <td data-row="4" data-col="3">VOW.DE</td>
+                  <td data-row="4" data-col="4">[-10,-7]</td>
+                  <td data-row="4" data-col="5">0.03549</td>
+                  <td data-row="4" data-col="6">0.019872</td>
+                  <td data-row="4" data-col="7">1.786</td>
+                  <td data-row="4" data-col="8">0.07534</td>
+                </tr>
+<tr>
+<td data-row="5" data-col="1">1</td>
+                  <td data-row="5" data-col="2">VW Group</td>
+                  <td data-row="5" data-col="3">VOW.DE</td>
+                  <td data-row="5" data-col="4">[-10,-6]</td>
+                  <td data-row="5" data-col="5">0.029923</td>
+                  <td data-row="5" data-col="6">0.022217</td>
+                  <td data-row="5" data-col="7">1.3468</td>
+                  <td data-row="5" data-col="8">0.17928</td>
+                </tr>
 </tbody>
 </table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 <p>If <code>rugarch</code> is not installed the chunk above is skipped.
 Conceptually, the GARCH model replaces the constant OLS residual
 variance <span class="math inline">\sigma^2</span> with a time-varying

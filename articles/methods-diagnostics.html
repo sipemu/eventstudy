@@ -215,71 +215,95 @@ byte-stability.</p>
 <h2 id="rendered-table">7. Rendered Table<a class="anchor" aria-label="anchor" href="#rendered-table"></a>
 </h2>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">es_tt</span><span class="op">(</span></span>
 <span>  <span class="va">diag</span>,</span>
 <span>  caption <span class="op">=</span> <span class="st">"Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson (dw_stat), Ljung-Box (ljung_box_p)."</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table style="width:100%;" class="table">
-<caption>Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson
-(dw_stat), Ljung-Box (ljung_box_p).</caption>
-<colgroup>
-<col width="10%">
-<col width="14%">
-<col width="12%">
-<col width="12%">
-<col width="9%">
-<col width="14%">
-<col width="8%">
-<col width="8%">
-<col width="8%">
-</colgroup>
-<thead><tr class="header">
-<th align="right">event_id</th>
-<th align="left">firm_symbol</th>
-<th align="left">is_fitted</th>
-<th align="right">shapiro_p</th>
-<th align="right">dw_stat</th>
-<th align="right">ljung_box_p</th>
-<th align="right">acf1</th>
-<th align="right">sigma</th>
-<th align="right">r2</th>
-</tr></thead>
+
+    <script src="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.js"></script><script>
+      // Create table-specific functions using external factory
+      const tableFns_jbyaaaye9iekkdr5n9s1 = TinyTable.createTableFunctions("tinytable_jbyaaaye9iekkdr5n9s1");
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: '3', j: 2 }, { i: '3', j: 3 } ], css_id: 'tinytable_css_3soe8woo7sq6mgzzk4wa',}, 
+          { positions: [ { i: '1', j: 2 }, { i: '2', j: 2 }, { i: '1', j: 3 }, { i: '2', j: 3 } ], css_id: 'tinytable_css_zyepqprgfmkpj3vzrtzd',}, 
+          { positions: [ { i: '0', j: 2 }, { i: '0', j: 3 } ], css_id: 'tinytable_css_pma3a6333nju36thmxxm',}, 
+          { positions: [ { i: '3', j: 1 }, { i: '3', j: 4 }, { i: '3', j: 5 }, { i: '3', j: 6 }, { i: '3', j: 7 }, { i: '3', j: 8 }, { i: '3', j: 9 } ], css_id: 'tinytable_css_b0ep0tg0f1f5suq74vsg',}, 
+          { positions: [ { i: '1', j: 1 }, { i: '2', j: 1 }, { i: '1', j: 4 }, { i: '2', j: 4 }, { i: '1', j: 5 }, { i: '2', j: 5 }, { i: '1', j: 6 }, { i: '2', j: 6 }, { i: '1', j: 7 }, { i: '2', j: 7 }, { i: '1', j: 8 }, { i: '2', j: 8 }, { i: '1', j: 9 }, { i: '2', j: 9 } ], css_id: 'tinytable_css_acb3k0t6oypbjmed1xk1',}, 
+          { positions: [ { i: '0', j: 1 }, { i: '0', j: 4 }, { i: '0', j: 5 }, { i: '0', j: 6 }, { i: '0', j: 7 }, { i: '0', j: 8 }, { i: '0', j: 9 } ], css_id: 'tinytable_css_u8k5ad0uhp5cs7hyvejv',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  tableFns_jbyaaaye9iekkdr5n9s1.styleCell(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/vincentarelbundock/tinytable@main/inst/tinytable.css">
+<style>
+    /* tinytable css entries after */
+    #tinytable_jbyaaaye9iekkdr5n9s1 td.tinytable_css_3soe8woo7sq6mgzzk4wa, #tinytable_jbyaaaye9iekkdr5n9s1 th.tinytable_css_3soe8woo7sq6mgzzk4wa {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: left }
+    #tinytable_jbyaaaye9iekkdr5n9s1 td.tinytable_css_zyepqprgfmkpj3vzrtzd, #tinytable_jbyaaaye9iekkdr5n9s1 th.tinytable_css_zyepqprgfmkpj3vzrtzd { text-align: left }
+    #tinytable_jbyaaaye9iekkdr5n9s1 td.tinytable_css_pma3a6333nju36thmxxm, #tinytable_jbyaaaye9iekkdr5n9s1 th.tinytable_css_pma3a6333nju36thmxxm {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: left }
+    #tinytable_jbyaaaye9iekkdr5n9s1 td.tinytable_css_b0ep0tg0f1f5suq74vsg, #tinytable_jbyaaaye9iekkdr5n9s1 th.tinytable_css_b0ep0tg0f1f5suq74vsg {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 0; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.08em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.1em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; text-align: right }
+    #tinytable_jbyaaaye9iekkdr5n9s1 td.tinytable_css_acb3k0t6oypbjmed1xk1, #tinytable_jbyaaaye9iekkdr5n9s1 th.tinytable_css_acb3k0t6oypbjmed1xk1 { text-align: right }
+    #tinytable_jbyaaaye9iekkdr5n9s1 td.tinytable_css_u8k5ad0uhp5cs7hyvejv, #tinytable_jbyaaaye9iekkdr5n9s1 th.tinytable_css_u8k5ad0uhp5cs7hyvejv {  position: relative; --border-bottom: 1; --border-left: 0; --border-right: 0; --border-top: 1; --line-color-bottom: var(--tt-line-color); --line-color-left: var(--tt-line-color); --line-color-right: var(--tt-line-color); --line-color-top: var(--tt-line-color); --line-width-bottom: 0.05em; --line-width-left: 0.1em; --line-width-right: 0.1em; --line-width-top: 0.08em; --line-type-bottom: solid; --line-type-left: solid; --line-type-right: solid; --line-type-top: solid; --trim-bottom-left: 0%; --trim-bottom-right: 0%; --trim-left-bottom: 0%; --trim-left-top: 0%; --trim-right-bottom: 0%; --trim-right-top: 0%; --trim-top-left: 0%; --trim-top-right: 0%; ; font-weight: bold; text-align: right }
+    </style>
+<div class="container">
+      <table class="table tinytable" id="tinytable_jbyaaaye9iekkdr5n9s1" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+<caption>Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson (dw_stat), Ljung-Box (ljung_box_p).</caption>
+        <thead><tr>
+<th scope="col" data-row="0" data-col="1">event_id</th>
+                <th scope="col" data-row="0" data-col="2">firm_symbol</th>
+                <th scope="col" data-row="0" data-col="3">is_fitted</th>
+                <th scope="col" data-row="0" data-col="4">shapiro_p</th>
+                <th scope="col" data-row="0" data-col="5">dw_stat</th>
+                <th scope="col" data-row="0" data-col="6">ljung_box_p</th>
+                <th scope="col" data-row="0" data-col="7">acf1</th>
+                <th scope="col" data-row="0" data-col="8">sigma</th>
+                <th scope="col" data-row="0" data-col="9">r2</th>
+              </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="left">AAPL</td>
-<td align="left">TRUE</td>
-<td align="right">0</td>
-<td align="right">1.766</td>
-<td align="right">0.8511</td>
-<td align="right">0.1090</td>
-<td align="right">0.0107</td>
-<td align="right">0.7165</td>
-</tr>
-<tr class="even">
-<td align="right">2</td>
-<td align="left">MSFT</td>
-<td align="left">TRUE</td>
-<td align="right">0</td>
-<td align="right">1.843</td>
-<td align="right">0.6812</td>
-<td align="right">0.0781</td>
-<td align="right">0.0117</td>
-<td align="right">0.6901</td>
-</tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="left">GOOGL</td>
-<td align="left">TRUE</td>
-<td align="right">0</td>
-<td align="right">1.792</td>
-<td align="right">0.7391</td>
-<td align="right">0.0928</td>
-<td align="right">0.0156</td>
-<td align="right">0.5945</td>
-</tr>
+<tr>
+<td data-row="1" data-col="1">1</td>
+                  <td data-row="1" data-col="2">AAPL</td>
+                  <td data-row="1" data-col="3">TRUE</td>
+                  <td data-row="1" data-col="4">0.000028141128</td>
+                  <td data-row="1" data-col="5">1.766</td>
+                  <td data-row="1" data-col="6">0.8511</td>
+                  <td data-row="1" data-col="7">0.109</td>
+                  <td data-row="1" data-col="8">0.01065</td>
+                  <td data-row="1" data-col="9">0.7165</td>
+                </tr>
+<tr>
+<td data-row="2" data-col="1">2</td>
+                  <td data-row="2" data-col="2">MSFT</td>
+                  <td data-row="2" data-col="3">TRUE</td>
+                  <td data-row="2" data-col="4">0.000000000352</td>
+                  <td data-row="2" data-col="5">1.843</td>
+                  <td data-row="2" data-col="6">0.6812</td>
+                  <td data-row="2" data-col="7">0.07807</td>
+                  <td data-row="2" data-col="8">0.01173</td>
+                  <td data-row="2" data-col="9">0.6901</td>
+                </tr>
+<tr>
+<td data-row="3" data-col="1">3</td>
+                  <td data-row="3" data-col="2">GOOGL</td>
+                  <td data-row="3" data-col="3">TRUE</td>
+                  <td data-row="3" data-col="4">0.000000378554</td>
+                  <td data-row="3" data-col="5">1.792</td>
+                  <td data-row="3" data-col="6">0.7391</td>
+                  <td data-row="3" data-col="7">0.09284</td>
+                  <td data-row="3" data-col="8">0.01559</td>
+                  <td data-row="3" data-col="9">0.5945</td>
+                </tr>
 </tbody>
 </table>
+</div>
+<!-- hack to avoid NA insertion in last line -->
 </div>
 <div class="section level2">
 <h2 id="rendered-plot">8. Rendered Plot<a class="anchor" aria-label="anchor" href="#rendered-plot"></a>
