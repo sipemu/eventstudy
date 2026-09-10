@@ -12,7 +12,7 @@ plot_diagnostics(task, event_id = NULL)
 \item{event_id}{The event identifier to plot diagnostics for.}
 }
 \value{
-A ggplot2 plot arranged with patchwork-style layout.
+A ggplot2 plot arranged in a gridExtra 2x2 grid layout.
 }
 \description{
 Create diagnostic plots for fitted event study models, including

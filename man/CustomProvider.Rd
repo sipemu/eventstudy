@@ -12,7 +12,7 @@ A provider that wraps a user-supplied
 
   The user function is run inside \code{tryCatch}: if it errors, the provider
   degrades to exactly one \code{warning()} plus an `es_provider_response` with
-  \code{text = NA_character_} — it never crashes the session.
+  \code{text = NA_character_} \u2014 it never crashes the session.
 }
 \examples{
 # In-process, no network: the user function supplies the completion text.

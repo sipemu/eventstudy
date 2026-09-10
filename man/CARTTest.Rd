@@ -7,7 +7,7 @@
 The CAR t-test is a statistical method used to determine whether the
 cumulative abnormal return of a security over an event window is
 significantly different from zero. This test helps researchers identify
-whether the event of interest has a significant impact on the security’s
+whether the event of interest has a significant impact on the security\u2019s
 return over the entire event window, considering the cumulative effects of
 the event.
 

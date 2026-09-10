@@ -7,7 +7,7 @@
 The Market Adjusted Model is another simple approach used in event studies
 to estimate the expected returns of a stock and calculate its abnormal
 returns during an event window. This model is less complex than the Market
-Model, as it assumes that a stock’s expected return is equal to the market
+Model, as it assumes that a stock\u2019s expected return is equal to the market
 return, without considering any stock-specific factors. The Market
 Adjusted Model is particularly useful in situations where the estimation of
 individual stock parameters (such as alpha and beta) is not feasible or

@@ -62,9 +62,9 @@ event window, reflecting the shared earnings-beat signal across all three firms.
 
 \strong{Firms:}
 \itemize{
-  \item \code{AAPL} — Apple Inc. (NASDAQ), event_id = 1
-  \item \code{MSFT} — Microsoft Corporation (NASDAQ), event_id = 2
-  \item \code{GOOGL} — Alphabet Inc. Class A (NASDAQ), event_id = 3
+  \item \code{AAPL} \u2014 Apple Inc. (NASDAQ), event_id = 1
+  \item \code{MSFT} \u2014 Microsoft Corporation (NASDAQ), event_id = 2
+  \item \code{GOOGL} \u2014 Alphabet Inc. Class A (NASDAQ), event_id = 3
 }
 \strong{Group:} "Earnings Beat" (all firms).
 \strong{Benchmark:} S&P 500 index (ticker \code{^GSPC}).

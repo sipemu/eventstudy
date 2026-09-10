@@ -275,7 +275,7 @@ plot_event_study <- function(task,
 #' @param task A fitted EventStudyTask.
 #' @param event_id The event identifier to plot diagnostics for.
 #'
-#' @return A ggplot2 plot arranged with patchwork-style layout.
+#' @return A ggplot2 plot arranged in a gridExtra 2x2 grid layout.
 #'
 #' @family eventstudy-plots
 #' @export

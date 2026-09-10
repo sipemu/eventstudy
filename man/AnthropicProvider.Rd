@@ -10,17 +10,17 @@ A provider that issues \code{POST {base_url}/v1/messages} against
   \code{schema} is supplied it adds a tool-use \code{input_schema} block
   (\code{tools} + \code{tool_choice}) to obtain structured output, and the
   response extractor prefers that tool call's structured \code{input} while
-  falling back to the first text block — so the provider never crashes when the
+  falling back to the first text block \u2014 so the provider never crashes when the
   model replies with plain text instead of a tool call.
 
   The API key is resolved at CALL time from \code{ANTHROPIC_API_KEY} (never at
   construction, never stored on the object) and attached with
   \code{req_headers_redacted("x-api-key" = key)}, which redacts the key in
   every print/error path. Note \code{req_auth_bearer_token} does NOT redact an
-  \code{x-api-key} header — the redacted-headers helper is mandatory here. A
+  \code{x-api-key} header \u2014 the redacted-headers helper is mandatory here. A
   missing key, transport/timeout failure, non-2xx status, malformed body, or
   missing completion text each degrades to exactly one \code{warning()} plus an
-  `es_provider_response` with \code{text = NA_character_} — it never crashes the
+  `es_provider_response` with \code{text = NA_character_} \u2014 it never crashes the
   session and never returns a fabricated completion.
 
   \code{httr2} is required only for this provider and is guarded by

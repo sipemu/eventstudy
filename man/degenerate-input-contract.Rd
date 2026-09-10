@@ -41,7 +41,7 @@ When \code{is_fitted = FALSE}, \code{model$abnormal_returns()} returns
 a tibble with \code{abnormal_returns = NA_real_} for all rows. All
 downstream test statistics that depend on fitted models then receive
 \code{NA} inputs and propagate \code{NA} to their outputs. The event
-is retained in the output tibble — it is never silently dropped.
+is retained in the output tibble \u2014 it is never silently dropped.
 }
 \details{
 Degenerate-Input Contract for EventStudy Models

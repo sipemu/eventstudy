@@ -2,16 +2,16 @@
 % Please edit documentation in R/multi_event_test_statistics.R
 \name{KolariPynnonenTest}
 \alias{KolariPynnonenTest}
-\title{Kolari-Pynnönen Adjusted BMP Test}
+\title{Kolari-Pynn\u00f6nen Adjusted BMP Test}
 \description{
 Adjusts the BMP (Boehmer, Musumeci, Poulsen 1991) test for cross-sectional
-correlation of abnormal returns using the Kolari and Pynnönen (2010)
+correlation of abnormal returns using the Kolari and Pynn\u00f6nen (2010)
 correction. The adjustment scales the BMP statistic by a factor that
 accounts for the average pairwise correlation of standardized abnormal
 residuals in the estimation window.
 }
 \references{
-Kolari, J. W. and Pynnönen, S. (2010). Event Study Testing with
+Kolari, J. W. and Pynn\u00f6nen, S. (2010). Event Study Testing with
 Cross-sectional Correlation of Abnormal Returns.
 \emph{The Review of Financial Studies}, 23(11), 3996--4025.
 }
@@ -67,7 +67,7 @@ Other eventstudy-statistics:
 \if{html}{\out{<a id="method-KolariPynnonenTest-compute"></a>}}
 \if{latex}{\out{\hypertarget{method-KolariPynnonenTest-compute}{}}}
 \subsection{\code{KolariPynnonenTest$compute()}}{
-  Computes the Kolari-Pynnönen adjusted BMP test.
+  Computes the Kolari-Pynn\u00f6nen adjusted BMP test.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{KolariPynnonenTest$compute(data_tbl, model)}
