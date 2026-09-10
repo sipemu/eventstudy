@@ -119,7 +119,7 @@ es_tt(
 | 1 | Intraday | FIRM_A | \[-30,-21\] | -0.00206269 | 0.0029735 | -0.69369 | 0.4892 |
 
 Intraday cumulative abnormal returns around the event minute (first 10
-offsets). {#tinytable_b0ep0tg0f1f5suq74vsg .table .tinytable
+offsets). {#tinytable_rkjedw5wcf46h86sbhtg .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

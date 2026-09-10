@@ -129,7 +129,7 @@ car_tbl |>
 | MSFT        | \[-5,5\] | 0.06781  | 0.03889   | 1.7436    | 0.08278 |
 
 Cumulative Abnormal Returns by firm (widest event window)
-{#tinytable_h5azlkna1estoa1cvpdg .table .tinytable
+{#tinytable_na545gnpifdyq2bav77j .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

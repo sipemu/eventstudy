@@ -125,7 +125,7 @@ es_tt(
 | 10   | 3.2637  | 3.739     | -0.47523 |
 
 Treated vs synthetic trajectory with the estimated gap (first 10
-periods). {#tinytable_y8qdbsvm2aurvaex8uys .table .tinytable
+periods). {#tinytable_4i23ba8gzcgerd2q4rw3 .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

@@ -143,7 +143,7 @@ es_tt(
 | 3             | NA       | NA        | NA        | NA               |
 
 Dynamic TWFE event-time coefficients (base period k = -1) on the
-synthetic staggered panel. {#tinytable_3soe8woo7sq6mgzzk4wa .table
+synthetic staggered panel. {#tinytable_e653ruwa9o3hrhgtzmaq .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

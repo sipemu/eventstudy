@@ -132,7 +132,7 @@ es_tt(
 | 1        | VW Group | VOW.DE      | \[-10,-1\]  | 0.032121 | 0.03169   | 1.0137    | 0.31171 |
 
 Market-model CAR t-statistics on the dieselgate event (first 10 rows).
-{#tinytable_a4s4zva8gc0h1bysek5y .table .tinytable
+{#tinytable_i4lzl3612qein5n2hcdi .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -195,7 +195,7 @@ es_tt(head(tidy.EventStudyTask(task_g, type = "car"), 5),
 | 1        | VW Group | VOW.DE      | \[-10,-7\]  | 0.03549  | 0.019872  | 1.786     | 0.07534 |
 | 1        | VW Group | VOW.DE      | \[-10,-6\]  | 0.029923 | 0.022217  | 1.3468    | 0.17928 |
 
-GARCH-based CAR t-statistics. {#tinytable_ykan6rk0t0twdhx0iehv .table
+GARCH-based CAR t-statistics. {#tinytable_1pfjl3bgqtpkc092drs7 .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
