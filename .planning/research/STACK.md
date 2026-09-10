@@ -1,424 +1,379 @@
 # Stack Research
 
-**Domain:** R package polish — brand identity, publication-grade output, and pkgdown theming for EventStudy v0.65.0
-**Researched:** 2026-09-08
-**Confidence:** MEDIUM (CRAN pages verified for all versions; pkgdown/bslib theming verified via official docs; table package comparison cross-checked via multiple sources; hex sticker workflow verified via hexSticker CRAN + usethis docs)
-
-> **Supersedes** the v0.64.0 STACK.md (multi-format report rendering). The v0.64.0 decisions (rmarkdown, knitr, tinytex, pandoc guard pattern) remain in force and are not repeated here. This file covers only what is NEW for v0.65.0 polish work.
+**Domain:** R package hardening — correctness testing, API stability, install-tested CI, CRAN resubmission
+**Researched:** 2026-09-10
+**Confidence:** MEDIUM (all version numbers verified via CRAN index; reference-package archived status cross-checked)
 
 ---
 
-## Context: What Already Exists
+## Scope Constraint
 
-The following are already in EventStudy's `Imports` or `Suggests` and must not be re-added:
-
-| Package | Status | Role |
-|---------|--------|------|
-| `ggplot2` | **Imports** | All plot functions — `plot_event_study()`, `plot_stocks()`, `plot_diagnostic()` |
-| `plotly` | **Imports** | Interactive plots |
-| `rmarkdown` | Suggests | `generate_report()` / `es_report()` renderer |
-| `knitr` | Suggests | Vignette builder + report code chunks |
-| `tinytex` | Suggests | PDF toolchain detection |
-| `DT` | Suggests | Interactive HTML tables (existing, unused in reports) |
-
-`scales` is a transitive dependency of `ggplot2` and is already present on any machine that has EventStudy installed — no DESCRIPTION entry needed.
-
-The pkgdown site already uses Bootstrap 5 (`template: bootstrap: 5`) and has a custom `_pkgdown.yml` with grouped reference, articles nav, and navbar. There is currently no logo or hex sticker. The `pkgdown/` directory is `.Rbuildignore`d per the v0.62.0 decisions.
+This file covers only the **new tooling** needed for v0.66.0. The existing production stack (R6, distributional, plotly, ggplot2, dplyr/tidyr/tibble/purrr/stringr, rlang, testthat 3e, roxygen2, withr, httr2, jsonlite, etc.) is already in DESCRIPTION and is not re-recommended here. **No new hard Imports may be added.** All new tooling is either dev-only (Suggests) or CI-only (workflow files, not in DESCRIPTION at all).
 
 ---
 
-## Area A: Brand Identity — Logo + Hex Sticker
+## Thrust A — Golden / Reference-Value Testing
 
-### A1. hexSticker (dev-only, never in DESCRIPTION)
+### Reference Implementations: estudy2 and eventstudies
 
-| Attribute | Value |
-|-----------|-------|
-| Package | `hexSticker` |
-| CRAN version | **0.5.1** (2026-01-21) |
-| R requirement | >= 3.4.0 |
-| Hard imports | ggimage, ggplot2, grDevices, hexbin, rlang, showtext, sysfonts |
-| Suggests | magick (optional, for post-processing) |
-| System requirements | None (NeedsCompilation: no) |
-| Classification | **Dev-only** — never add to EventStudy DESCRIPTION |
+**Critical finding: both reference packages are archived on CRAN.**
 
-**Why hexSticker:** The `sticker()` function accepts a ggplot2 object, base plot, or image file as the subplot; the filename extension determines whether PNG or SVG is emitted. SVG output is supported by passing `filename = "logo.svg"`. It handles font loading via sysfonts/showtext internally, so custom Google Fonts or local fonts work without separate setup. No ImageMagick required — `magick` is Suggests-only.
+| Package | Last CRAN Version | Archived | Reason |
+|---------|------------------|----------|--------|
+| `estudy2` | 0.10.0 | 2022-09-04 | Policy violation |
+| `eventstudies` | 1.2.2 | 2021-12-05 | Check problems not corrected |
 
-**Hex design workflow:**
-1. Write `inst/logo/logo.R` — a reproducible R script that calls `hexSticker::sticker()`.
-2. Output to `man/figures/logo.png` (181×209 px — the CRAN-acceptable standard) and optionally `man/figures/logo.svg` (preferred for build_favicons).
-3. Run `usethis::use_logo("man/figures/logo.png")` once: it scales the image, generates the README markdown badge snippet, and adds `pkgdown/` to `.Rbuildignore`.
-4. Run `pkgdown::build_favicons()` once (requires network — calls realfavicongenerator.net API): stores a full favicon set in `pkgdown/favicon/`; `init_site()` copies it on each rebuild.
+Because both are archived, neither can be listed as a `Suggests` dep in DESCRIPTION — CRAN policy requires all `Suggests` be available on CRAN. They must be treated as **source-level reference material only**, not runtime deps.
 
-**CRAN tarball implications:**
-- `man/figures/logo.png` at 181×209 px is ~10–30 KB — CRAN-acceptable, no NOTE.
-- `inst/logo/logo.R` is source code, fine to include.
-- `pkgdown/favicon/` is `.Rbuildignore`d — stays out of tarball.
-- The large print-quality SVG/PNG (if generated) should live in `inst/logo/` or `tools/`, not `man/figures/`.
+#### estudy2 as a Golden Source
 
-### A2. usethis (dev-only)
+**Suitability: GOOD for Patell Z and BMP cross-checks; MEDIUM for market model alpha/beta.**
 
-| Attribute | Value |
-|-----------|-------|
-| Package | `usethis` |
-| Role | `use_logo()` — places logo, generates README img tag, manages `.Rbuildignore` |
-| Classification | **Dev-only** — already used for package setup, no new DESCRIPTION entry |
+estudy2 implements the single-index market model (`apply_market_model(returns, regressors, model="sim", method="ols")`), Patell (1976) standardized-residual Z, Brown-Warner (1980/1985), and the Boehmer-Musumeci-Poulsen BMP test. Its formulas are academically grounded and match the standard references (MacKinlay 1997, Patell 1976, Boehmer et al. 1991).
 
-### A3. svglite (dev-only, optional)
+**Convention differences vs EventStudy:**
+- estudy2 returns flat `data.frame` with columns `date`, `weekday`, `percentage`, `mean`, `pt_stat`, `pt_signif`, `bh_stat`, `bh_signif`. EventStudy returns nested tibbles with columns named `ar_t`, `car_t`, `patell_z`, `bmp_stat`. Column names differ; the *values* are what to compare.
+- estudy2 expects `zoo` objects for returns; EventStudy uses nested tibbles. A thin adapter is needed to feed the same raw data through both.
+- estudy2 uses C++ (Rcpp) internally for return calculations; EventStudy uses pure R. For OLS-based statistics the results should agree to at least `1e-6` absolute tolerance.
+- estudy2 CAR parametric functions (`car_parametric_tests`, `car_brown_warner_1985`, `car_lamb`) return columns `car_mean`, `statistic`, `number_of_days` — not cumulative per-day AR. The cross-check is: EventStudy's CAR at window end == estudy2's `car_mean * number_of_days` for mean-based statistics, or direct sum for accumulation-based.
 
-| Attribute | Value |
-|-----------|-------|
-| Package | `svglite` |
-| CRAN version | **2.2.2** (2025-10-21) |
-| Role | SVG graphics device for generating vector ggplot2 output for the hex sticker or site figures |
-| Classification | **Dev-only** — only needed when authoring the logo, not shipped in the package |
+**How to use as golden source (dev-only, not a DESCRIPTION dep):**
+Install estudy2 from GitHub (`remotes::install_github("irudnyts/estudy2")`) in a local dev script only. Hard-code the resulting golden numeric values as `dput()`-derived constants in test files. Tests run without estudy2 installed; the golden derivation is a one-time manual step documented in `data-raw/golden/README.md`.
 
-Use `svglite::svglite("logo.svg")` if hexSticker's built-in SVG output needs font embedding control that `showtext` doesn't provide. In practice, hexSticker's own SVG output (via `filename = "logo.svg"`) is sufficient.
+#### eventstudies as a Golden Source
 
----
+**Suitability: LOW for numeric cross-validation; MEDIUM for pipeline-level smoke checks.**
 
-## Area B: Publication-Grade Tables in es_report()
+eventstudies focuses on the estimation/event pipeline using `zoo` objects and the `eventstudy()` function. It has less parametric-test coverage than estudy2 and uses different data conventions (zoo-based vs tibble-based). Its primary value is as a worked-example reference (bundled datasets `SplitDates`, `StockPriceReturns`) rather than formula-level cross-checks. Skip for numeric golden values; prefer estudy2 or published paper tables instead.
 
-### B1. Recommendation: tinytable as Suggests
+#### Published-Paper Golden Values (Preferred Primary Source)
 
-**Use `tinytable` for all result/diagnostics tables in `es_report()` output across all four formats (HTML, LaTeX/PDF, Word, Markdown).**
+The highest-confidence golden source is numeric tables from the original papers — they are unambiguously stable and require no runtime dep:
+- **MacKinlay (1997)**, "Event Studies in Economics and Finance", *Journal of Economic Literature* 35(1): Table 4 reports market model estimation results and CAR values.
+- **Patell (1976)**, "Corporate Forecasts of Earnings Per Share": Table 1 reports standardized abnormal returns.
+- **Boehmer, Musumeci, Poulsen (1991)**: Table 2 reports BMP statistics.
 
-| Attribute | Value |
-|-----------|-------|
-| Package | `tinytable` |
-| CRAN version | **0.18.0** (2026-08-20) |
-| R requirement | >= 4.1.0 |
-| Hard imports | methods (base R only) |
-| Suggests (all optional) | 21 packages including knitr, rmarkdown, ggplot2, tinytex, webshot2 |
-| Formats supported | HTML, LaTeX, Markdown, Word, PNG, PDF, Typst |
-| System requirements | None |
-| Classification | **Suggests** — add to EventStudy DESCRIPTION Suggests; guard with `requireNamespace("tinytable", quietly = TRUE)` |
+These hard-coded numeric constants run offline everywhere and are the most defensible golden source.
 
-**Why tinytable over alternatives:**
+### Tooling for Golden/Numerical Tests
 
-| Criterion | tinytable | gt | kableExtra | flextable |
-|-----------|-----------|-----|------------|-----------|
-| HTML | Yes | Yes (best) | Yes | Yes |
-| LaTeX/PDF | Yes (tabularray) | Yes (as_latex) | Yes | No |
-| Word | Yes | Yes (as_word) | No | Yes (best) |
-| Markdown | Yes | No | No | No |
-| Hard deps | 1 (methods) | 17 | ~10 | 13 |
-| Total transitive deps | ~0 | ~60 | ~48 | ~57 |
-| Maintenance trajectory | Active, growing | Active | Slowing | Active |
-| CRAN tarball risk | None | High | Medium | High |
-
-tinytable was explicitly designed for R package developers who need to avoid dependency chains and upstream breaking changes. It covers all four es_report() output formats from a single API with zero mandatory dependencies. gt is more powerful for HTML-only scenarios but brings ~60 transitive deps; its Word output is available but not its primary strength. kableExtra is HTML+LaTeX only and its regex-based architecture is acknowledged as hard to maintain. flextable has no LaTeX output.
-
-**Integration point:** In `R/report.R` `generate_report()`, replace `knitr::kable()` calls (if any) with `tinytable::tt()` wrapped in a `requireNamespace("tinytable")` guard. The table output automatically adapts to the active knitr output format.
-
-**Fallback:** When tinytable is not installed, fall back to `knitr::kable()` (already available via the existing knitr Suggests). This maintains the offline-first principle.
+No new packages beyond existing testthat + withr are required. The idioms are:
 
 ```r
-# Pattern for es_report() table output
-.render_table <- function(df, caption = NULL) {
-  if (requireNamespace("tinytable", quietly = TRUE)) {
-    tinytable::tt(df, caption = caption)
-  } else {
-    knitr::kable(df, caption = caption)
-  }
-}
+# Golden constant derived once from a reference run, never recomputed at test time
+GOLDEN_CAR_MARKET_MODEL <- c(-0.0032, 0.0015, -0.0071)  # dput() of reference values
+
+test_that("market model CAR matches MacKinlay 1997 Table 4", {
+  result <- run_pipeline_on_fixture()
+  expect_equal(result$car, GOLDEN_CAR_MARKET_MODEL, tolerance = 1e-6)
+})
 ```
 
-### B2. Do NOT add gt, kableExtra, or flextable
+`expect_equal(tolerance = 1e-6)` is appropriate for OLS-based market model results cross-checked against a C++/reference implementation. Use `tolerance = 1e-4` when cross-checking against hand-computed paper tables (rounding from 4 decimal places). For GARCH-based results, use `tolerance = 1e-4` due to optimizer variance across platforms.
+
+---
+
+## Thrust B — API Signature Snapshot Testing
+
+### testthat 3.3.2 (already in Suggests — no new package required)
+
+`expect_snapshot()` in testthat 3e locks function output, error messages, print method output, and serialized R objects. It is the right tool for API surface tests.
+
+**Idioms for locking the public API surface:**
+
+```r
+# Lock argument names and defaults for a function
+test_that("fit_model() signature is stable", {
+  expect_snapshot(cat(deparse(formals(fit_model))))
+})
+
+# Lock return column names and types for a tibble-returning function
+test_that("calculate_statistics() return shape is stable", {
+  result <- run_pipeline_with_fixture()
+  expect_snapshot(names(result))
+  expect_snapshot(vapply(result, class, character(1)))
+})
+
+# Lock all package exports (snapshot the sorted export list)
+test_that("package exports are stable", {
+  expect_snapshot(sort(getNamespaceExports("EventStudy")))
+})
+
+# Lock S3 method list
+test_that("EventStudyTask S3 methods are stable", {
+  expect_snapshot(
+    grep("^(print|tidy|summary)\\.EventStudyTask",
+         getNamespaceExports("EventStudy"), value = TRUE)
+  )
+})
+```
+
+Snapshots live in `tests/testthat/_snaps/` and are committed to git. Diffs surface via waldo. Update with `testthat::snapshot_accept()` or `TESTTHAT_SNAPSHOT_UPDATE=true` env var.
+
+### waldo 0.6.2 (add to DESCRIPTION Suggests)
+
+waldo is testthat's underlying comparison engine — already used implicitly when `expect_equal()` fails. Adding it explicitly to Suggests (a) documents the dependency and (b) allows direct use of `waldo::compare()` in diagnostic helpers for snapshot diffs. It is lightweight (deps: cli, diffobj, glue, rlang, methods).
+
+| Package | Version | CRAN? | Classification |
+|---------|---------|-------|----------------|
+| `waldo` | 0.6.2 | Yes (2025-07-11) | Suggests (dev-only) |
+
+---
+
+## Thrust C — Deprecation / Lifecycle
+
+### lifecycle 1.0.5 (add to DESCRIPTION Suggests)
+
+lifecycle provides the standard tidyverse/r-lib deprecation infrastructure. rlang (already in Imports) re-exports lifecycle internals, but for calling `lifecycle::deprecate_warn()` directly in package R code, lifecycle itself must be in Suggests and called via `lifecycle::` — or imported with `@importFrom lifecycle deprecate_warn`. Because deprecation warnings fire in production code paths (not just tests), lifecycle belongs in Suggests rather than CI-only.
+
+**Key functions:**
+
+```r
+# Soft deprecation — message once per session (suits internal or API-unused fns)
+lifecycle::deprecate_soft("0.66.0", "old_fun()", "new_fun()")
+
+# Warn deprecation — warning once per 8 hours (suits public API with real users)
+lifecycle::deprecate_warn("0.66.0", "old_fun(arg=)", "new_fun(new_arg=)")
+
+# Hard deprecation — always errors (use only after 2+ release deprecation cycles)
+lifecycle::deprecate_stop("1.0.0", "old_fun()")
+```
+
+**Roxygen badge:**
+
+```r
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#' `old_fun()` is deprecated. Use [new_fun()] instead.
+```
+
+**Policy for EventStudy v0.66.0:** Use `deprecate_warn()` for renamed public arguments — warns without breaking. Never call `deprecate_stop()` in v0.66.0; that requires a 1.0 boundary or a prior deprecation cycle. Add `@importFrom lifecycle deprecate_warn` to `EventStudy-package.R` if calling it in more than one file; otherwise prefix every call with `lifecycle::`.
+
+| Package | Version | CRAN? | Classification |
+|---------|---------|-------|----------------|
+| `lifecycle` | 1.0.5 | Yes (2026-01-08) | Suggests (used in production code) |
+
+---
+
+## Thrust D — Property-Based and Numerical-Tolerance Testing
+
+### testthat 3.3.2 (already in Suggests) — numerical tolerances
+
+The existing `expect_equal(tolerance=)` idiom covers all numerical-stability tests without new packages:
+- `CAR == cumsum(AR)` invariant: `expect_equal(result$car, cumsum(result$ar), tolerance = 1e-10)`
+- Cross-method consistency: `expect_equal(log_ret_approx, simple_ret, tolerance = 0.01)` (order-of-magnitude)
+- Boundary window edge: standard `expect_equal` on AR at first/last window slot vs NA guard
+
+### hedgehog 0.2 (add to DESCRIPTION Suggests)
+
+hedgehog is the foundational property-based testing framework for R — random generators with automatic counterexample shrinking. Use it for invariants that are infeasible to enumerate exhaustively (e.g., `CAR == cumsum(AR)` holds for any AR vector of any length and sign pattern).
+
+```r
+library(hedgehog)
+test_that("CAR equals cumsum(AR) for all valid AR vectors", {
+  forall(
+    gen.c(gen.double(from = -0.1, to = 0.1), from = 1, to = 50),
+    function(ar) expect_equal(cumsum(ar)[length(ar)], sum(ar), tolerance = 1e-12)
+  )
+})
+```
+
+hedgehog was updated November 2025 and is CRAN-clean with no heavyweight deps.
+
+Do not add `quickcheck` (0.1.3, last updated October 2023) — it is a thin testthat wrapper over hedgehog that has not been maintained. Use hedgehog directly.
+
+### patrick 0.3.1 (add to DESCRIPTION Suggests)
+
+patrick enables table-driven (parameterized) tests — exactly what a "cross-model/cross-statistic consistency matrix" requires. It avoids copy-pasted test blocks for each model/statistic/window combination.
+
+```r
+with_parameters_test_that("market model {model_type} returns non-NA AR on valid data", {
+  result <- run_pipeline(model = model_type, data = fixture_data)
+  expect_false(any(is.na(result$ar)))
+}, cases(
+  model_type = list("market_model", "mean_adjusted", "market_adjusted")
+))
+```
+
+Google-maintained; integrates fully with `devtools::test()` and `R CMD check`. Requires only testthat as a dep.
+
+| Package | Version | CRAN? | Classification |
+|---------|---------|-------|----------------|
+| `hedgehog` | 0.2 | Yes (2025-11-03) | Suggests (dev-only) |
+| `patrick` | 0.3.1 | Yes (2025-12-02) | Suggests (dev-only) |
+| `quickcheck` | 0.1.3 | Yes (stale) | **Do not add** — use hedgehog directly |
+
+---
+
+## Thrust E — Install-Tested CI
+
+### The Problem
+
+`devtools::load_all()` patches around NAMESPACE issues and missing `importFrom` declarations. `R CMD check` on the *installed* package catches what `load_all()` hides. The existing cran-comments.md records exactly this class of bug: bare `median`/`tail` in `es_diagnostics.R` not declared in `importFrom`.
+
+### rcmdcheck 1.4.0 (CI-only — do not add to DESCRIPTION)
+
+rcmdcheck provides programmatic R CMD check from R. Key function: `rcmdcheck::rcmdcheck(path = ".", args = c("--as-cran"), error_on = "warning")`. Returns a structured object with `$errors`, `$warnings`, `$notes`. It is already available via devtools; the r-lib/actions `check-r-package@v2` step calls it internally. Do not add it to DESCRIPTION.
+
+### r-lib/actions check-standard.yaml (CI-only — workflow file only, not in DESCRIPTION)
+
+Add `.github/workflows/check-standard.yaml` via `usethis::use_github_action("check-standard")`. This workflow:
+- Runs `R CMD check` via rcmdcheck on **Ubuntu + macOS + Windows** against **r-release, r-devel, r-oldrel-1**
+- Uses `r-lib/actions/setup-r@v2` (installs R), `setup-r-dependencies@v2` (installs deps via pak), `check-r-package@v2` (runs rcmdcheck)
+- Installs the package as a proper tarball — not `load_all()` — so `importFrom` gaps surface immediately
+- Gates on no new ERRORs or WARNINGs under `--as-cran`
+
+**Recommended workflow matrix:**
+
+```yaml
+strategy:
+  matrix:
+    config:
+      - {os: ubuntu-latest,  r: 'release'}
+      - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+      - {os: ubuntu-latest,  r: 'oldrel-1'}
+      - {os: macos-latest,   r: 'release'}
+      - {os: windows-latest, r: 'release'}
+env:
+  _R_CHECK_FORCE_SUGGESTS_: false
+```
+
+Set `_R_CHECK_FORCE_SUGGESTS_=false` to match the existing local check baseline (optional Suggests like rugarch/did are not installed in CI and must not cause ERRORs).
+
+No DESCRIPTION entry needed for any r-lib/actions component.
+
+---
+
+## Thrust F — CRAN Resubmission Toolchain
+
+### devtools 2.5.2 (already dev dependency — not in DESCRIPTION)
+
+The CRAN submission flow using devtools:
+
+1. `devtools::check(remote = TRUE, manual = TRUE)` — local final check with manual pages built
+2. `devtools::check_win_devel()` — submits to CRAN win-builder r-devel; results via email (~30 min)
+3. `devtools::check_win_release()` — submits to win-builder r-release
+4. `devtools::check_mac_release()` — submits to CRAN's M1 macOS builder
+5. `rhub::rhub_check(platforms = c("linux", "macos", "windows"))` — r-hub cross-platform gate
+6. `devtools::submit_cran()` — posts tarball to CRAN web form, attaches `cran-comments.md`
+
+### rhub 2.0.1 (dev-only tool — not in DESCRIPTION)
+
+Use rhub v2; the legacy `rhub::check_for_cran()` is **defunct** as of v2. The new flow:
+
+```r
+# One-time setup (commits a workflow file to the repo):
+rhub::rhub_setup()     # adds .github/workflows/rhub.yaml; commit and push
+
+# Run checks on demand:
+rhub::rhub_check(platforms = c("linux", "macos", "windows"))
+
+# Without GitHub — uses shared R Consortium runners (public, slower):
+rhub::rc_submit()
+```
+
+Results appear in GitHub Actions, not email. rhub v2 uses binary packages so dependency installation is fast. Available on 20+ platforms including clang-asan, valgrind, and intel variants.
+
+### cran-comments.md resubmission structure (no new package)
+
+For an archived package, the cover letter must explicitly address each prior finding. Required structure for EventStudy (archived 2024-04-20):
+
+```
+## Resubmission
+
+This is a resubmission. The package was archived on 2024-04-20.
+
+### Changes since archival
+
+- Non-ASCII characters in R/advise.R, R/knowledge_base.R, R/report.R replaced
+  with \uXXXX Unicode escapes to eliminate the non-ASCII WARNING
+- Undefined globals `median` and `tail` in R/es_diagnostics.R added to
+  importFrom(stats, median) / importFrom(utils, tail) to eliminate the NOTE
+- [List any other findings from the archival-time check result]
+
+### R CMD check results
+
+── R CMD check results ─────────── EventStudy 0.66.0 ────
+Duration: ...
+
+0 errors | 0 warnings | 0 notes
+
+## Test environments
+
+* local: Linux (Manjaro), R 4.6.1 — N pass / 0 fail / N skip
+* win-builder (r-devel): 0 errors, 0 warnings, 0 notes
+* win-builder (r-release): 0 errors, 0 warnings, 0 notes
+* R-hub: linux / macos / windows — 0 errors, 0 warnings, 0 notes
+```
+
+CRAN reviewers for archived packages look for: (a) explicit acknowledgment of the archival reason, (b) evidence all prior findings are fixed, (c) clean `--as-cran` results on at least two platforms.
+
+---
+
+## Complete Addition Summary
+
+### DESCRIPTION Suggests — add these four packages
+
+```
+lifecycle,
+waldo,
+patrick,
+hedgehog,
+```
+
+### CI-only (workflow files, not in DESCRIPTION)
+
+| Tool | Version | How to add |
+|------|---------|------------|
+| r-lib/actions check-standard | v2 | `usethis::use_github_action("check-standard")` |
+| r-lib/actions check-package | v2 | invoked by check-standard |
+
+### Dev-only tools (install locally, not in DESCRIPTION)
+
+| Tool | Version | How to use |
+|------|---------|------------|
+| `devtools` | 2.5.2 | `check_win_devel()`, `submit_cran()` |
+| `rhub` | 2.0.1 | `rhub_setup()`, `rhub_check()` |
+
+---
+
+## What NOT to Add
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| `gt` in Suggests | ~60 transitive deps; heavy; Word/LaTeX not primary strengths | `tinytable` |
-| `kableExtra` in Suggests | HTML+LaTeX only; ~48 deps; maintenance slowing; no Word | `tinytable` + knitr::kable() fallback |
-| `flextable` in Suggests | No LaTeX; 57 deps; only adds value for Word-specific rich formatting not needed here | `tinytable` for Word tables |
-| `officer` in Suggests | Only needed as a flextable companion for Word; tinytable handles Word natively | Not needed |
+| `estudy2` in Suggests | Archived on CRAN 2022-09-04 — CRAN will reject | Install from GitHub locally; hard-code golden values in test constants |
+| `eventstudies` in Suggests | Archived on CRAN 2021-12-05 | Use estudy2 or published paper tables |
+| `quickcheck` | No updates since 2023; thin wrapper over hedgehog | Use `hedgehog` directly |
+| `vdiffr` | Plot snapshot testing not in this milestone's scope | Revisit if visual regression tests become a goal |
+| Any new hard Imports | CRAN discipline — all tooling is test/dev-only | Suggests-guard everything |
+| `lintr` / `styler` | Code style audit is not a v0.66.0 goal | Defer to a future "code quality" milestone |
 
 ---
 
-## Area C: ggplot2 Publication Figures
+## Version Compatibility Notes
 
-### C1. Custom theme function (zero new deps — built on existing ggplot2 Imports)
-
-Create `theme_eventstudy()` in `R/plotting.R` or a new `R/theme.R`. This adds zero dependencies — ggplot2 is already a hard Import.
-
-```r
-#' @export
-theme_eventstudy <- function(base_size = 11, base_family = "") {
-  ggplot2::theme_minimal(base_size = base_size, base_family = base_family) +
-  ggplot2::theme(
-    panel.grid.minor  = ggplot2::element_blank(),
-    panel.grid.major  = ggplot2::element_line(colour = "#e5e7eb", linewidth = 0.4),
-    axis.line         = ggplot2::element_line(colour = "#6b7280", linewidth = 0.5),
-    plot.title        = ggplot2::element_text(face = "bold", size = ggplot2::rel(1.1)),
-    plot.subtitle     = ggplot2::element_text(colour = "#6b7280"),
-    legend.position   = "bottom",
-    strip.text        = ggplot2::element_text(face = "bold")
-  )
-}
-```
-
-Apply via `ggplot2::theme_set(theme_eventstudy())` at the top of each report template.
-
-### C2. scales (already a transitive dep — no new DESCRIPTION entry)
-
-`scales` 1.4.0 (2025-04-24) is already present as a transitive dependency of ggplot2. No DESCRIPTION change needed. Use for:
-
-- `scales::label_percent(accuracy = 0.01)` on CAR/AAR y-axes
-- `scales::label_comma()` for volume axes
-- `scales::percent_format()` for return axes
-- `scales::hue_pal()` / `viridis_pal()` for consistent color schemes
-
-### C3. patchwork (add to Suggests)
-
-| Attribute | Value |
-|-----------|-------|
-| Package | `patchwork` |
-| CRAN version | **1.3.2** (2025-08-25) |
-| Hard imports | ggplot2 >= 3.0.0, gtable, grid, rlang, cli, farver |
-| Suggests | ragg, gt, etc. (all optional) |
-| System requirements | None |
-| Classification | **Suggests** — add to EventStudy DESCRIPTION Suggests; guard with `requireNamespace("patchwork", quietly = TRUE)` |
-
-**Why patchwork:** For multi-panel report figures (e.g., AAR time series + CAR distribution side by side in the report). The `+` operator and `plot_layout()` are idiomatic and well-understood. Pure R, no system deps, lightweight transitive footprint. Guarded as Suggests since most users of the basic pipeline don't need multi-panel composition.
-
-**Integration point:** In the report Rmd template, when building the results/diagnostics section composite figure:
-
-```r
-if (requireNamespace("patchwork", quietly = TRUE)) {
-  p1 + p2 + patchwork::plot_layout(ncol = 2) +
-    patchwork::plot_annotation(tag_levels = "A")
-}
-```
-
-### C4. ragg (add to Suggests — for report knitr device)
-
-| Attribute | Value |
-|-----------|-------|
-| Package | `ragg` |
-| CRAN version | **1.5.2** (2026-03-23) |
-| Hard imports | systemfonts >= 1.0.3, textshaping >= 0.3.0 |
-| System requirements | freetype2, libpng, libtiff, libjpeg, libwebp |
-| Classification | **Suggests** — add to EventStudy DESCRIPTION Suggests |
-
-**Why ragg:** When present, ragg provides anti-aliased text rendering and proper font access in PNG figures inside reports. `ggsave()` uses ragg automatically if installed. For the report Rmd template, set `knitr::opts_chunk$set(dev = "ragg_png")` when ragg is available — this improves all figure output quality. pkgdown already imports ragg directly, so it will always be present in the site build environment.
-
-**Important limitation:** ragg does not support PDF output — PDF figures in rmarkdown PDF reports use the standard `cairo_pdf` or `pdf` device. The ragg Suggests entry only affects HTML/Word/Markdown report figure quality.
-
-**System dep note:** ragg requires freetype2, libpng, libtiff, libjpeg, libwebp at the system level. On most Linux/macOS developer machines these are already present. On CRAN check systems they are present. This is an acceptable Suggests classification because CRAN does not require Suggests deps to build cleanly on all systems — failure to install ragg simply means better font rendering is unavailable, not that the package fails.
-
-**Integration point:** In the report Rmd template header:
-
-```r
-if (requireNamespace("ragg", quietly = TRUE)) {
-  knitr::opts_chunk$set(dev = "ragg_png", dpi = 150)
-}
-```
-
-### C5. systemfonts (Suggests, indirect — via ragg)
-
-| Attribute | Value |
-|-----------|-------|
-| Package | `systemfonts` |
-| CRAN version | **1.3.2** (2026-03-05) |
-| Hard imports | base64enc, grid, jsonlite, lifecycle, tools, utils |
-| Classification | **Do not add to DESCRIPTION directly** — it arrives as a hard import of ragg; if ragg is in Suggests, systemfonts is available whenever ragg is |
-
-No direct DESCRIPTION entry needed. If the package theme function needs a named font family, use `base_family = ""` (system default) rather than hardcoding a font name that may not be installed. Font selection is a report-template-level concern, not a package dep concern.
-
-### C6. ggthemes (do NOT add — unnecessary dep)
-
-ggthemes 5.2.0 provides `theme_economist()`, `theme_wsj()` etc. These are aesthetically appealing for financial data but add a dependency for style-only benefit. The custom `theme_eventstudy()` function (zero deps, built on ggplot2) is the correct approach for a branded package theme. **Do not add ggthemes.**
-
----
-
-## Area D: pkgdown Site Theming
-
-All pkgdown configuration lives in `_pkgdown.yml` and `pkgdown/extra.scss`. Nothing in this area touches the CRAN tarball (pkgdown/ is `.Rbuildignore`d). No new DESCRIPTION entries are needed for any of the following.
-
-### D1. pkgdown (dev-only, already present)
-
-| Attribute | Value |
-|-----------|-------|
-| Package | `pkgdown` |
-| CRAN version | **2.2.1** (2026-07-07) |
-| Hard imports | bslib >= 0.5.1, ragg, rmarkdown >= 2.27, xml2 |
-| System requirements | pandoc >= 2.10.1 |
-| Classification | **Dev-only** — already in use; no DESCRIPTION change |
-
-### D2. Logo + Favicon wiring in pkgdown
-
-Place the generated hex logo at `man/figures/logo.png` (or `man/figures/logo.svg`). pkgdown 2.2.1 auto-discovers either filename and places it in the navbar. No `_pkgdown.yml` configuration needed for logo placement — the file location is the convention.
-
-For favicons, run once during site setup (requires network):
-
-```r
-pkgdown::build_favicons()  # calls realfavicongenerator.net API
-# Stores pkgdown/favicon/ — already .Rbuildignore'd
-```
-
-`init_site()` copies the favicon set on each rebuild. `build_favicons(overwrite = TRUE)` to regenerate after a logo change.
-
-### D3. bslib + _pkgdown.yml theming to match eventstudy.de
-
-bslib 0.12.0 (2026-08-04) is the engine behind pkgdown Bootstrap 5 theming. The package author never imports bslib in EventStudy's DESCRIPTION — bslib is consumed by pkgdown, which is already dev-only.
-
-**Recommended `_pkgdown.yml` template section** (extending the existing Bootstrap 5 config):
-
-```yaml
-template:
-  bootstrap: 5
-  math-rendering: katex
-  bslib:
-    # Match eventstudy.de neutral palette (clean, card-based)
-    primary:        "#2563eb"   # main action color — adjust to match site
-    bg:             "#ffffff"
-    fg:             "#111827"
-    border-radius:  "0.375rem"
-    # Typography — Google Fonts for web consistency
-    base_font:      {google: "Inter"}
-    heading_font:   {google: "Inter"}
-    code_font:      {google: "JetBrains Mono"}
-  light-switch: true            # dark/light toggle in navbar
-```
-
-**Navbar color** is set via:
-
-```yaml
-navbar:
-  bg: light     # or: dark | primary | secondary
-  type: light
-```
-
-**Fine-grained overrides** go in `pkgdown/extra.scss` (compiled into main CSS, can reference Sass variables):
-
-```scss
-// Card gallery styling to match eventstudy.de numeric badge cards
-.card-badge {
-  font-size: 2rem;
-  font-weight: 700;
-  color: $primary;
-}
-.section-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-```
-
-Use `pkgdown/extra.scss` (not `pkgdown/extra.css`) because SCSS is compiled into the main CSS and can reference `$primary`, `$body-bg` and other bslib variables — giving consistent brand colors without hardcoding hex values.
-
-### D4. _brand.yml (optional — use if cross-tool identity is a priority)
-
-bslib 0.12.0 supports a `_brand.yml` file for unified cross-tool theming (pkgdown, Shiny, R Markdown). For EventStudy's scope, this is optional: the eventstudy.de brand is managed by the website team (not this R package), and maintaining a separate `_brand.yml` adds overhead without benefit unless the package site is expected to stay in exact pixel-perfect alignment with the external site.
-
-**If used**, wire via:
-
-```yaml
-# _pkgdown.yml
-template:
-  bslib:
-    version: 5
-    brand: pkgdown/_brand.yml  # path relative to package root
-```
-
-`_brand.yml` supports `colors`, `typography` (fonts), and `logos` (small/medium/large variants). It does NOT replace `template.bslib` settings — it is a layer that feeds into them.
-
-**Verdict:** Skip `_brand.yml` for v0.65.0. Use explicit `template.bslib` settings in `_pkgdown.yml` instead — simpler, fully version-controlled in one file, no ambiguity about which file takes precedence.
-
----
-
-## Summary: DESCRIPTION Changes Required
-
-| Package | Change | Classification | Reason |
-|---------|--------|----------------|--------|
-| `tinytable` | Add to Suggests | Suggests | Multi-format tables in es_report(); zero hard deps; `requireNamespace()`-guarded |
-| `patchwork` | Add to Suggests | Suggests | Multi-panel publication figures in reports; lightweight; guarded |
-| `ragg` | Add to Suggests | Suggests | Anti-aliased figures in HTML/Word/MD reports; guarded; improves visual quality |
-| `hexSticker` | Do NOT add | Dev-only | Logo authoring tool; never a package dep |
-| `usethis` | Do NOT add | Dev-only | Already used for package setup; not a dep |
-| `svglite` | Do NOT add | Dev-only | Only needed during logo SVG authoring |
-| `bslib` | Do NOT add | Dev-only via pkgdown | pkgdown consumes it; package DESCRIPTION never needs it |
-| `systemfonts` | Do NOT add | Transitive via ragg | Arrives automatically when ragg is installed |
-| `scales` | Do NOT add | Transitive via ggplot2 | Already present on any EventStudy installation |
-| `gt` | Do NOT add | Rejected | ~60 transitive deps; tinytable covers all needed formats better for a Suggests dep |
-| `kableExtra` | Do NOT add | Rejected | HTML+LaTeX only; maintenance slowing; tinytable is strictly better |
-| `flextable` | Do NOT add | Rejected | 57 deps; no LaTeX; tinytable covers Word tables adequately |
-| `ggthemes` | Do NOT add | Rejected | Style-only; custom theme_eventstudy() is zero-dep and brand-aligned |
-| `officer` | Do NOT add | Rejected | Needed only as a flextable companion; not required |
-
-```
-# Minimal DESCRIPTION Suggests additions for v0.65.0:
-Suggests:
-    ...existing entries...,
-    tinytable,
-    patchwork,
-    ragg
-```
-
----
-
-## Development Tooling (not in DESCRIPTION)
-
-| Tool | Purpose | Install |
-|------|---------|---------|
-| `hexSticker` 0.5.1 | Generate hex logo PNG/SVG | `install.packages("hexSticker")` |
-| `usethis` | Wire logo into README + .Rbuildignore | `install.packages("usethis")` |
-| `svglite` 2.2.2 | SVG output device if needed for logo work | `install.packages("svglite")` |
-| `pkgdown` 2.2.1 | Build docs site; `build_favicons()` | `install.packages("pkgdown")` |
-| `bslib` 0.12.0 | Consumed by pkgdown for Bootstrap 5 theming | Installed automatically with pkgdown |
-
----
-
-## Alternatives Considered
-
-| Recommended | Alternative | Why Not |
-|-------------|-------------|---------|
-| `tinytable` (Suggests) | `gt` (Suggests) | ~60 transitive deps — too heavy for a Suggests table package; tinytable covers all four formats |
-| `tinytable` (Suggests) | `kableExtra` (Suggests) | HTML+LaTeX only; no Word; maintenance slowing |
-| `tinytable` (Suggests) | `flextable` (Suggests) | 57 deps; no LaTeX; only better for rich Word-only scenarios not needed here |
-| `theme_eventstudy()` in R/ | `ggthemes` (Suggests) | Style-only dep; a custom function built on existing ggplot2 Import is zero-dep and fully brand-controlled |
-| `pkgdown/extra.scss` | `pkgdown/extra.css` | SCSS compiles into main CSS and can reference bslib Sass variables — far more powerful for brand alignment |
-| `template.bslib` in _pkgdown.yml | `_brand.yml` | Simpler; single-file; no cross-tool identity requirement for the R package site at this stage |
-| `hexSticker` (dev-only) | Manual SVG in Inkscape/Figma | Reproducible R code is version-controllable and regenerable; design tool assets are binary blobs |
-| `man/figures/logo.png` | Top-level `logo.png` | `man/figures/` is the standard location per Writing R Extensions; pkgdown and roxygen2 both discover it there |
-
----
-
-## Version Compatibility
-
-| Package | Version Used | Compatible With | Notes |
-|---------|-------------|-----------------|-------|
-| `tinytable` | >= 0.18.0 | R >= 4.1.0 | Zero hard deps; no version-sensitive API surface |
-| `patchwork` | >= 1.3.0 | ggplot2 >= 3.0.0 | `+` operator and `plot_layout()` stable across this range |
-| `ragg` | >= 1.5.0 | systemfonts >= 1.0.3, textshaping >= 0.3.0 | System lib requirements (freetype2 etc.) standard on CRAN check servers |
-| `hexSticker` | >= 0.5.1 | R >= 3.4.0 | Dev-only; showtext/sysfonts bundled as imports |
-| `pkgdown` | >= 2.2.1 | bslib >= 0.5.1, pandoc >= 2.10.1 | `build_favicons()` requires network; logo auto-discovery from 2.x |
-| `bslib` | >= 0.12.0 | Bootstrap 5 | brand.yml support added in 0.12.0 (if used) |
+| Pair | Status | Notes |
+|------|--------|-------|
+| testthat 3.3.2 + patrick 0.3.1 | Compatible | patrick requires testthat >= 3.0.0 |
+| testthat 3.3.2 + hedgehog 0.2 | Compatible | hedgehog integrates with test_that() |
+| lifecycle 1.0.5 + rlang (Imports) | Compatible | rlang re-exports lifecycle internals; no conflict |
+| rhub 2.0.1 + R >= 4.0 | Compatible | EventStudy requires R >= 4.1 — superset |
+| r-lib/actions v2 + R 4.6.x | Compatible | v2 branch supports R 4.x release/devel |
+| `_R_CHECK_FORCE_SUGGESTS_=false` + baseline | Required | Keeps optional-Suggests NOT-installed check from becoming ERRORs in CI |
 
 ---
 
 ## Sources
 
-- CRAN hexSticker — version 0.5.1, 2026-01-21, imports/suggests verified (LOW/web): https://cran.r-project.org/web/packages/hexSticker/index.html
-- hexSticker sticker() function — filename-extension-driven SVG/PNG output confirmed (LOW/web): https://rdrr.io/cran/hexSticker/man/sticker.html
-- usethis use_logo() reference — man/figures/logo.png convention, README wiring, .Rbuildignore management (LOW/web): https://usethis.r-lib.org/reference/use_logo.html
-- pkgdown build_home — logo auto-discovery at man/figures/logo.png (LOW/web): https://pkgdown.r-lib.org/reference/build_home.html
-- pkgdown build_favicons — realfavicongenerator.net API, pkgdown/favicon/ storage, SVG preferred (LOW/web): https://pkgdown.r-lib.org/reference/build_favicons.html
-- pkgdown Customise — extra.css vs extra.scss, template.bslib options, bootswatch, light-switch (LOW/web): https://pkgdown.r-lib.org/articles/customise.html
-- CRAN pkgdown — version 2.2.1, 2026-07-07, bslib >= 0.5.1 import confirmed (LOW/web): https://cran.r-project.org/web/packages/pkgdown/index.html
-- CRAN tinytable — version 0.18.0, 2026-08-20, imports: methods only (LOW/web): https://cran.r-project.org/web/packages/tinytable/index.html
-- tinytable alternatives comparison — tinytable vs gt vs kableExtra vs flextable (LOW/web): https://vincentarelbundock.github.io/tinytable/vignettes/alternatives.html
-- CRAN gt — version 1.3.0, 2026-01-22, 17 imports + 18 suggests (LOW/web): https://cran.r-project.org/web/packages/gt/refman/gt.html
-- CRAN flextable — version 0.10.0, 2026-07-07, 13 imports confirmed (LOW/web): https://cran.r-project.org/web/packages/flextable/index.html
-- CRAN patchwork — version 1.3.2, 2025-08-25, ggplot2 >= 3.0.0 import (LOW/web): https://cran.r-project.org/web/packages/patchwork/index.html
-- CRAN ragg — version 1.5.2, 2026-03-23, system requirements freetype2/libpng/libtiff/libjpeg/libwebp (LOW/web): https://cran.r-project.org/package=ragg
-- CRAN systemfonts — version 1.3.2, 2026-03-05 (LOW/web): https://cran.r-project.org/web/packages/systemfonts/index.html
-- CRAN scales — version 1.4.0, 2025-04-24 (LOW/web): https://cran.r-project.org/web/packages/scales/index.html
-- Tidyverse fonts blog — ragg + systemfonts 2025 canonical workflow, textshaping, PDF limitation (LOW/web): https://tidyverse.org/blog/2025/05/fonts-in-r/
-- CRAN svglite — version 2.2.2, 2025-10-21 (LOW/web): https://cran.r-project.org/package=svglite
-- CRAN bslib — version 0.12.0, 2026-08-04, brand.yml support (LOW/web): https://cran.r-project.org/web/packages/bslib/index.html
-- bslib brand.yml article — _brand.yml fields (colors, fonts, logos), pkgdown integration via template.bslib.brand (LOW/web): https://rstudio.github.io/bslib/articles/brand-yml/index.html
-- Nan Xiao hex sticker blog — inst/logo/logo.R source pattern, man/figures/logo.png output, usethis wiring (LOW/web): https://nanx.me/blog/post/rebranding-r-packages-with-hexagon-stickers/
+- CRAN package index pages for estudy2, eventstudies, lifecycle, rcmdcheck, rhub, devtools, waldo, patrick, hedgehog, quickcheck, testthat — versions confirmed (MEDIUM confidence, cross-checked via webfetch + websearch)
+- [R-hub v2 announcement (April 2024)](https://blog.r-hub.io/2024/04/11/rhub2/) — rhub v2 architecture (MEDIUM)
+- [r-lib/actions examples README](https://github.com/r-lib/actions/blob/v2-branch/examples/README.md) — check-standard.yaml coverage matrix (MEDIUM)
+- [R Packages 2e, Chapter 22: Releasing to CRAN](https://r-pkgs.org/release.html) — submission flow and cran-comments.md format (MEDIUM)
+- [testthat snapshotting article](https://testthat.r-lib.org/articles/snapshotting.html) — expect_snapshot idioms (MEDIUM)
+- [lifecycle stages article](https://lifecycle.r-lib.org/articles/stages.html) — deprecate_warn/soft function signatures (MEDIUM)
+- [estudy2 parametric_tests.R source via rdrr.io](https://rdrr.io/cran/estudy2/src/R/car_parametric_tests.R) — Patell/BMP formulas and return column names (LOW — archived package)
+- [estudy2 intro vignette](https://irudnyts.github.io/estudy2/articles/estudy2-intro.html) — function signatures and workflow (LOW — archived package)
 
 ---
-*Stack research for: EventStudy v0.65.0 Polish — brand identity, publication output, pkgdown theming*
-*Researched: 2026-09-08*
+*Stack research for: EventStudy v0.66.0 Stabilization & CRAN Resubmission*
+*Researched: 2026-09-10*

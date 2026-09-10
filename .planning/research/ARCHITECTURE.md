@@ -1,489 +1,480 @@
 # Architecture Research
 
-**Domain:** R package polish — brand/visual identity, report/plot aesthetics, API/message polish, docs/site polish on a mature CRAN package (EventStudy v0.65.0)
-**Researched:** 2026-09-08
-**Confidence:** HIGH — derived directly from live codebase inspection of all relevant files, supplemented by stable R ecosystem conventions
+**Domain:** CRAN R package — correctness hardening, API locking, install-tested CI, resubmission
+**Researched:** 2026-09-10
+**Confidence:** HIGH (based on direct inspection of existing codebase, not general-domain inference)
 
 ---
 
-## System Overview
+## How the Four Thrusts Integrate with the Existing Architecture
 
-The existing architecture is a mature 6-layer R package. The four polish surfaces are **purely additive overlays**; none require restructuring the pipeline or changing statistical behavior.
-
-```
-+--------------------------------------------------------------------------+
-|                  SURFACE A: Brand / Visual Identity                       |
-|  man/figures/ (logo.svg, logo.png, hex-sticker.png) -- CRAN-shipped      |
-|  pkgdown/ (extra.css, favicon.ico) -- .Rbuildignore'd, site only         |
-|  _pkgdown.yml template.logo / template.assets -- site only               |
-+-------------------------------+------------------------------------------+
-                                |
-+-------------------------------v------------------------------------------+
-|                  SURFACE B: Report & Plot Aesthetics                      |
-|  NEW: R/theme.R -- theme_eventstudy() + es_colours                       |
-|  MODIFY: R/plotting.R -- apply theme_eventstudy() as default             |
-|  MODIFY: inst/rmarkdown/skeleton.Rmd -- typography, table CSS            |
-|  MODIFY: R/report.R -- html_document() options (css=)                    |
-+-------------------------------+------------------------------------------+
-                                |
-+-------------------------------v------------------------------------------+
-|                  SURFACE C: API & Message Polish                          |
-|  NEW: R/conditions.R -- classed rlang conditions factory                  |
-|  MODIFY: R/task.R, R/parameter_set.R, R/models.R etc. -- print methods   |
-|  MODIFY: stop()/warning() -> rlang::abort()/rlang::warn() with class     |
-|  MODIFY: DESCRIPTION -- lifecycle in Suggests (only if deprecation used) |
-+-------------------------------+------------------------------------------+
-                                |
-+-------------------------------v------------------------------------------+
-|                  SURFACE D: Docs & Site Polish                            |
-|  MODIFY: _pkgdown.yml -- template.bslib palette, template.assets         |
-|  MODIFY: pkgdown/extra.css -- eventstudy.de brand colors, typography     |
-|  MODIFY: vignettes/*.Rmd and vignettes/articles/*.Rmd -- cross-links     |
-|  MODIFY: README.md -- logo badge, docs badge refresh                     |
-+-------------------------------+------------------------------------------+
-                                |
-+-------------------------------v------------------------------------------+
-|              Existing Architecture (unchanged behavior)                   |
-|  Pipeline: prepare -> fit -> calculate | R6 Models | Test Statistics      |
-|  Advisor: es_diagnostics -> es_advise -> generate_report / es_report      |
-|  Contract: .handle_degenerate() in contract.R -- untouched                |
-|  Grounding guard: .validate_grounding() in advise.R -- untouched         |
-+--------------------------------------------------------------------------+
-```
+This is a brownfield integration study. All findings are grounded in direct file inspection of
+the current codebase at v0.65.0.
 
 ---
 
-## Surface A: Brand & Visual Identity
+## Thrust 1: Correctness of Results — Golden/Reference Fixtures
 
-### Asset placement — the rule
+### Where fixtures live now
 
-**man/figures/ is the CRAN-safe, README-visible location for the logo.**
-It is committed to the repo, included in the CRAN tarball, and referenced from README.md with a relative path that GitHub and pkgdown both resolve. The `pkgdown/` directory is already `.Rbuildignore`'d (confirmed in `.Rbuildignore`), which makes it the right home for site-only assets (favicon, any supplemental icon variants). The `docs/` directory is also `.Rbuildignore`'d and used for rendered output — do not put source assets there.
+The package already has a working fixtures pattern:
 
-Concrete asset placement:
+```
+tests/testthat/
+  fixtures/                            <- EXISTING, committed to git
+    contract05_baseline.rds            <- MarketModel golden (CONTRACT-05)
+    contract05_bhar_baseline.rds
+    contract05_carhart4_baseline.rds
+    contract05_comparisonperiod_baseline.rds
+    contract05_custom_baseline.rds
+    contract05_ff3_baseline.rds
+    contract05_ff5_baseline.rds
+    contract05_linearfactor_baseline.rds
+    contract05_marketadjusted_baseline.rds
+    contract05_rollingwindow_baseline.rds
+    contract05_volatility_baseline.rds
+    contract05_volume_baseline.rds
+```
 
-| Asset | Path | Committed | In tarball | Visible where |
-|-------|------|-----------|------------|---------------|
-| `logo.svg` (primary vector source) | `man/figures/logo.svg` | Yes | Yes | pkgdown navbar, README |
-| `logo.png` (raster, ~240px) | `man/figures/logo.png` | Yes | Yes | pkgdown navbar fallback, README img tag |
-| `hex-sticker.png` (~240px) | `man/figures/hex-sticker.png` | Yes | Yes | README badge, pkgdown home |
-| `favicon.ico` (16/32px) | `pkgdown/favicon.ico` | Yes | No (.Rbuildignore'd) | pkgdown `<head>` only |
-| Gallery card SVGs (existing) | `pkgdown/*.svg` | Yes | No | pkgdown gallery only |
+The existing `test_contract.R` at line 281 demonstrates the exact load pattern:
 
-Do NOT add `man/figures/favicon.ico` — favicon in the tarball would be a CRAN NOTE trigger for unexpected files in `man/`.
+```r
+baseline <- readRDS(testthat::test_path("fixtures", "contract05_baseline.rds"))
+```
 
-### Wiring logo into `_pkgdown.yml`
+`testthat::test_path()` resolves correctly whether tests run from the package root or the
+testthat directory. Combined with committed .rds files, this is fully offline and CI-safe.
 
-The existing `_pkgdown.yml` uses `template: bootstrap: 5` with no `logo:` or `template.assets` key. Add:
+### New golden fixtures for v0.66.0
+
+For reference-value validation against published examples (estudy2, eventstudies) and
+formula-level checks, follow the same pattern. Extend, do not create a parallel system.
+
+**New fixture naming convention** (extend existing naming under `fixtures/`):
+
+```
+tests/testthat/fixtures/
+  golden_market_model_ols.rds         # AR/CAR from MacKinlay (1997) Table 1 hand-calc
+  golden_patell_z.rds                 # Patell (1976) example values
+  golden_bmp_test.rds                 # Boehmer-Musumeci-Poulsen worked example
+  golden_fama_french_3.rds            # FF3 benchmark against estudy2 output
+  golden_csect_t.rds                  # CSectT reference values
+```
+
+**No data-raw provenance needed** for test-only fixtures: these are computed reference values
+(not real market datasets), so `data-raw/` is not appropriate. For fixtures derived from a
+published reference implementation (estudy2, eventstudies), capture the provenance in
+`data-raw/ref_<name>.R` — a short R script showing the reference package call that produced
+the expected numbers. This is the existing `data-raw/dieselgate.R` pattern from v0.61.0.
+
+**Offline/CI-safe guarantee:** Committed .rds files + `testthat::test_path()` = fully offline,
+no `skip_on_cran()` required. The existing CI (`R-CMD-check.yaml`) runs all tests on
+ubuntu/macos/windows-release plus ubuntu-devel, so all golden tests run on every push.
+
+---
+
+## Thrust 2: Stable API — Snapshot Tests Over the Export Surface
+
+### The export surface (measured at v0.65.0)
+
+From `NAMESPACE`:
+- **77 `export()` entries** (R6 classes + functions)
+- **19 `S3method()` entries** across flag_robustness, format, print, recommend_stat
+
+Total exposed surface: ~96 symbols.
+
+### Where the API snapshot file lives
+
+Use the existing `_snaps/` directory with a dedicated test file:
+
+```
+tests/testthat/
+  test-api-snapshot.R                  <- NEW: drives the snapshot
+  _snaps/
+    api-snapshot.md                    <- NEW: auto-created by expect_snapshot()
+```
+
+testthat 3e maps `test-api-snapshot.R` to `_snaps/api-snapshot.md` automatically. The
+`-` prefix convention in the existing `test-print-snapshots.R` -> `_snaps/print-snapshots.md`
+already proves this works in the project.
+
+### How to capture the full export surface
+
+```r
+# test-api-snapshot.R
+test_that("API surface snapshot -- exports", {
+  exports <- sort(getNamespaceExports("EventStudy"))
+  expect_snapshot(exports)
+})
+
+test_that("API surface snapshot -- formals for each exported function", {
+  exports <- getNamespaceExports("EventStudy")
+  fns     <- exports[vapply(exports, function(nm) {
+    is.function(get(nm, envir = asNamespace("EventStudy")))
+  }, logical(1))]
+  sig_list <- lapply(sort(fns), function(nm) {
+    f <- get(nm, envir = asNamespace("EventStudy"))
+    list(name = nm, args = names(formals(f)))
+  })
+  expect_snapshot(sig_list)
+})
+
+test_that("API surface snapshot -- S3 method registry from NAMESPACE", {
+  ns_text  <- readLines(system.file("NAMESPACE", package = "EventStudy"))
+  s3_lines <- sort(ns_text[grepl("^S3method", ns_text)])
+  expect_snapshot(s3_lines)
+})
+```
+
+**Why `expect_snapshot()` not `.rds`:** The API surface is structured text (function names,
+arg names). `expect_snapshot()` diffs are human-readable in PR reviews. The existing
+`test-print-snapshots.R` pattern is proof this works well in the project.
+
+**Critical constraint:** `getNamespaceExports()` only returns meaningful results for an
+**installed** package, not a `load_all()` session. This is the same class of bug as the
+`skeleton.Rmd` `.report_table()` incident mentioned in PROJECT.md. The API snapshot test
+must run under `R CMD check` (which installs the package first). Add a guard:
+
+```r
+skip_if_not_installed("EventStudy")
+```
+
+This makes the test a no-op in raw `devtools::test()` sessions and fully active under
+`R CMD check`.
+
+### Signature audit output
+
+A separate `test-signature-consistency.R` asserts invariants derived from the audit (e.g.,
+all exported functions that take a `task` arg have it in position 1) as regular
+`expect_true`/`expect_equal` tests -- not snapshots -- so CI fails on violation without
+needing a snapshot update.
+
+---
+
+## Thrust 3: Return-Shape Contracts — Relationship to R/contract.R
+
+### What R/contract.R provides now
+
+`R/contract.R` (v0.50.0) owns three things:
+1. `.resolve_degenerate_mode()` -- ParameterSet field -> lenient/strict resolution
+2. `.finite_residual_df()` -- residual df utility
+3. `.handle_degenerate()` -- degenerate-input condition handler (warn/stop + sets `is_fitted=FALSE`)
+
+The contract covers the **input** side: what to do when estimation data is degenerate.
+
+### Where return-shape contracts fit
+
+Return-shape contracts cover the **output** side: what column names, types, and shapes each
+pipeline stage promises to downstream code. These are orthogonal to degenerate-input handling.
+A shape contract fires regardless -- even an all-NA tibble must still have the correct columns.
+
+**Recommendation: sibling, not extension of `R/contract.R`.**
+
+Rationale: `R/contract.R` is scoped to model-fitting degenerate conditions. Mixing in
+output-shape validation would confuse its documented purpose and make the degenerate-input
+contract harder to audit at a glance.
+
+**New file: `R/shape_contracts.R`**
+
+```r
+# R/shape_contracts.R
+#
+# Return-shape contracts: assert that pipeline outputs have the expected
+# column names, types, and shapes.
+#
+# Activated only when options("EventStudy.check_shapes") is TRUE
+# (default FALSE in production; tests set TRUE via withr::local_options()).
+
+.assert_shape <- function(tbl, expected_cols, context = "") {
+  if (!isTRUE(getOption("EventStudy.check_shapes", FALSE))) return(invisible(tbl))
+  missing <- setdiff(names(expected_cols), names(tbl))
+  if (length(missing) > 0L) {
+    stop(context, ": missing columns: ", paste(missing, collapse = ", "), call. = FALSE)
+  }
+  invisible(tbl)
+}
+```
+
+**Key design decisions:**
+- Shape checks are opt-in via `options("EventStudy.check_shapes")`, default OFF.
+  Zero performance overhead in production. Tests enable it via `withr::local_options()`.
+- Violations raise `stop()` (always a code bug, not a data condition), contrasting
+  with the lenient/strict degenerate-input path.
+
+**Shape constants to define** (tibbles downstream code relies on):
+
+| Output tibble | Required columns | Source |
+|--------------|------------------|--------|
+| `abnormal_returns()` return | `abnormal_returns`, `relative_index`, `event_window`, `estimation_window` | ModelBase subclasses |
+| `fit_model()` nested `model` col | `event_id`, `firm_symbol`, `model` | `R/execute.R` |
+| `calculate_statistics()` single-event | `event_id`, `firm_symbol`, `relative_index`, stat col(s) | stat classes |
+| `calculate_statistics()` multi-event (CSectT) | `relative_index`, `aar`, `caar` | multi-event stats |
+| `tidy()` output | `event_id`, `firm_symbol`, `relative_index`, `abnormal_returns`, `car` | `R/export.R` |
+
+**Connection back to R/contract.R:** When `is_fitted = FALSE`, `abnormal_returns()` must
+still return a tibble with the correct shape (all `abnormal_returns = NA_real_`, but the
+column must be present and correctly typed). The shape contract test explicitly covers this
+case, closing the gap between the two contracts.
+
+**Test placement:** `tests/testthat/test-shape-contracts.R` (NEW). No existing test files
+need modification.
+
+---
+
+## Thrust 4a: Install-Tested CI
+
+### What the existing CI already does
+
+`.github/workflows/R-CMD-check.yaml` already runs:
+- `r-lib/actions/check-r-package@v2` with `args: 'c("--no-manual", "--as-cran")'`
+- Matrix: ubuntu-latest (release), macos-latest (release), windows-latest (release),
+  ubuntu-latest (devel)
+- Tarball size guard (<1 MB), non-ASCII baseline guard, coverage (covr)
+
+`R CMD check` **installs** the package before running tests. The existing CI is already
+install-tested. **No new workflow file is strictly required.**
+
+### The actual gap
+
+The `skeleton.Rmd` `.report_table()` bug (PROJECT.md) happened because `devtools::test()`
+(which uses `load_all()`) does not catch cases where code in templates or vignettes calls
+package-internal symbols that are only accessible after installation.
+
+The fix for v0.66.0:
+1. The API snapshot test (`test-api-snapshot.R`) with `skip_if_not_installed("EventStudy")`
+   will only run under `R CMD check`, making it an install-gated test by construction.
+2. For vignette smoke coverage, keep the existing `--as-cran` flag (it builds vignettes).
+3. Add a minimal smoke-test step to the existing `R-CMD-check.yaml`:
 
 ```yaml
-template:
-  bootstrap: 5
-  math-rendering: katex
-  assets: pkgdown/    # makes favicon.ico in pkgdown/ available at site root
-
-navbar:
-  logo:
-    src: man/figures/logo.svg   # relative; pkgdown resolves from package root
-    href: https://sipemu.github.io/eventstudy/
-    alt: EventStudy logo
+- name: Smoke-test installed package import
+  if: runner.os == 'Linux'
+  run: |
+    Rscript -e "library(EventStudy); stopifnot(is.function(run_event_study))"
 ```
 
-The `template.assets` key copies everything from `pkgdown/` into the built site's root, which is how `favicon.ico` reaches `<head>` automatically (pkgdown 2.x picks up `favicon.ico` from the assets directory).
+### Optional: r-hub multi-platform (pre-submission only)
 
-### Wiring logo into README.md
+For CRAN resubmission validation, run r-hub manually:
+- `devtools::check_win_devel()` for Windows devel
+- `rhub::check_for_cran()` for additional platforms
 
-Standard R package pattern — place at the top of README, before the title:
-
-```markdown
-<img src="man/figures/logo.png" align="right" height="139" alt="EventStudy logo" />
-```
-
-The `align="right"` float is the CRAN/tidyverse convention; GitHub and pkgdown homepage both honor it. `man/figures/` resolves correctly relative to the repo root in both contexts.
-
-### CRAN tarball boundary check
-
-The `.Rbuildignore` already excludes `^pkgdown$`, `^docs$`, `^_pkgdown\.yml$`. Logo and hex in `man/figures/` are included in the tarball — this is correct and expected (they are used by `?EventStudy` help page display and by README on CRAN). The favicon in `pkgdown/` stays out of the tarball. No new `.Rbuildignore` entries are needed beyond potentially adding the hex-sticker source file if it is generated from a separate `.R` script that should not be shipped.
+Document results in `cran-comments.md`. Only add `.github/workflows/rhub.yaml` if automated
+weekly pre-submission gates are desired (not required for v0.66.0).
 
 ---
 
-## Surface B: Report & Plot Aesthetics
+## Thrust 4b: CRAN Resubmission — Pre-existing Issues to Fix
 
-### Integration point 1 — Shared ggplot2 theme
+These are in `cran-comments.md` as deferred issues that block CRAN acceptance:
 
-**New file: `R/theme.R`**
+| Issue | Location | Fix |
+|-------|----------|-----|
+| Bare `median`/`tail` (undefined globals NOTE) | `R/es_diagnostics.R` | Add to `globalVariables()` in `R/EventStudy-package.R` |
+| Non-ASCII in R sources (WARNING) | `R/advise.R`, `R/knowledge_base.R`, `R/report.R` | Replace with `\uXXXX` escapes; refresh `.github/non-ascii-baseline.txt` |
+| Stale tarball in project root | `EventStudy_0.62.0.tar.gz` | Delete; add `^EventStudy_.*\\.tar\\.gz$` to `.Rbuildignore` |
+| Cover letter for archived package | `cran-comments.md` | New v0.66.0 section acknowledging archival + changes |
+| `gridExtra` guard | `R/plotting.R` | Already correctly `requireNamespace()`-guarded; no change needed |
 
-The cleanest pattern for a shared publication theme is a `theme_eventstudy()` function that wraps `ggplot2::theme_minimal()` with package-specific overrides, plus a named colour palette vector. This is additive — no existing function is broken, and callers that do not use it are unaffected.
-
-```r
-# R/theme.R  (new file)
-
-#' EventStudy ggplot2 Theme
-#'
-#' @param base_size Base font size. Default 12.
-#' @param base_family Base font family. Default "".
-#' @return A ggplot2 theme object.
-#' @export
-theme_eventstudy <- function(base_size = 12, base_family = "") {
-  ggplot2::theme_minimal(base_size = base_size, base_family = base_family) %+replace%
-    ggplot2::theme(
-      plot.title    = ggplot2::element_text(size = base_size * 1.1, hjust = 0.5, face = "bold"),
-      plot.subtitle = ggplot2::element_text(size = base_size * 0.9, hjust = 0.5, color = "#6c757d"),
-      axis.title    = ggplot2::element_text(size = base_size * 0.9),
-      legend.position = "bottom",
-      panel.grid.minor = ggplot2::element_blank(),
-      strip.text    = ggplot2::element_text(face = "bold")
-    )
-}
-
-#' EventStudy Colour Palette
-#'
-#' Named vector of brand colours used in event study plots.
-#' @export
-es_colours <- c(
-  primary   = "#0d6efd",   # matches existing es-tag-core in extra.css
-  secondary = "#6c757d",
-  success   = "#198754",
-  warning   = "#fd7e14",
-  danger    = "#dc3545",
-  zero_line = "#495057"
-)
-```
-
-**Apply in `R/plotting.R` (modify):** Replace every `ggplot2::theme_minimal()` call in `.plot_single_event()`, `.plot_multi_event()`, and `plot_diagnostics()` with `theme_eventstudy()`. The colour literals (`"steelblue"`, `"grey40"`, `"red"`) should also be replaced with `es_colours[["primary"]]` etc. This is a pure aesthetic change — existing test assertions on plot structure (not colour) remain green. The `test_plotting.R` tests do not assert on colour values, so they are safe.
-
-**Critical: the `knitr::is_html_output()` switch must not be disturbed.** The existing plotting functions all return ggplot2 objects (not plotly). Only `plot_stocks()` returns a plotly object. The plotly-vs-ggplot2 decision happens inside `skeleton.Rmd`, not inside `plotting.R`. The `params$interactive` flag controls whether the skeleton renders plotly (HTML) or ggplot2 static (non-HTML). `theme_eventstudy()` applies only to ggplot2 objects — it has no effect on plotly traces and does not touch the HTML/non-HTML switch.
-
-### Integration point 2 — Report HTML styling
-
-**The report's HTML output document** is built via `rmarkdown::html_document(theme = "flatly", ...)` in `R/report.R::.build_output_format()`. To apply custom CSS to the report (typography, table styling, figure captions) without breaking PDF/Word/MD paths:
-
-Inject a `css` argument conditionally in `html_document()`:
-
-```r
-# Inside .build_output_format(), html branch (R/report.R ~line 453)
-rmarkdown::html_document(
-  toc          = TRUE,
-  toc_float    = TRUE,
-  theme        = "flatly",
-  code_folding = "hide",
-  css          = system.file("rmarkdown/report.css", package = "EventStudy")
-)
-```
-
-**New file: `inst/rmarkdown/report.css`** — contains typography, table, and figure-caption overrides. This file is in `inst/`, so it is CRAN-shipped (part of the package). It does not affect PDF or Word renders (the `css=` arg applies only to `html_document`).
-
-**Modify `skeleton.Rmd`** for table styling: the skeleton's data/methods section generates deterministic tables from task metadata. These tables can be wrapped in `kableExtra::kable()` with `bootstrap_options = c("striped", "hover")` — but `kableExtra` must stay in Suggests and be guarded with `if (requireNamespace("kableExtra", quietly = TRUE))` with a plain `knitr::kable()` fallback. The fallback path preserves the byte-identical render guarantee for non-HTML.
-
-**Interaction with per-format prose sanitiser (`.sanitise_prose()` in `report_narrative.R`):** This sanitiser operates on narrative character scalars, not on table HTML or CSS. Adding CSS does not touch the sanitiser at all.
-
-**Interaction with grounding guard:** The grounding guard (`.validate_grounding()` in `advise.R`) operates on LLM-generated prose text, not on CSS or kable table output. Aesthetic additions to the skeleton template do not touch the guard.
-
-### Integration point 3 — Figure captions in skeleton.Rmd
-
-Add `fig.cap = "..."` to knitr chunk options in `skeleton.Rmd` for each plot chunk. This is skeleton-only and does not change any R function signature or behavior.
+The non-ASCII issue is the most important: it generates a WARNING (not just a NOTE), which is
+a direct CRAN submission blocker.
 
 ---
 
-## Surface C: API & Message Polish
+## Deprecation Shim Architecture
 
-### Current state
+### Decision
 
-The package uses `stop()` / `warning()` base R conditions throughout (confirmed by inspection of `task.R`, `contract.R`, `models.R`, `advise.R`). The only structured condition type is the `Advice` S3 class in `advise.R`. `rlang` is already in Imports (for `%||%` and `.data`). There are no `cli::` or `lifecycle::` calls anywhere in the current `R/` source.
+From REQUIREMENTS.md API-06 and v0.65.0 scoping: `lifecycle` dependency rejected unless
+actual renames exist. For v0.66.0, use base `R` `.Deprecated()` wrapped in a thin shim.
 
-### Recommended approach: classed rlang conditions, no cli dependency
-
-**Use `rlang::abort()` and `rlang::warn()` with a class vector, not `cli`.** Rationale: `rlang` is already in Imports — zero new dependency. `cli` would be a new hard Imports entry (it cannot be Suggests-only if used inside all core functions). For a polish pass, adding `cli` as Imports is a larger decision than needed; `rlang` classed conditions give structured catchability with no new dep.
-
-**New file: `R/conditions.R`** — condition factory functions:
+### New file: `R/deprecation.R`
 
 ```r
-# R/conditions.R  (new file)
+# R/deprecation.R
+#
+# .es_deprecate() -- thin deprecation shim using base R .Deprecated().
+# No new package dependency required.
+#
+# Raises a warning of class c("deprecatedWarning", "warning") with fields
+# old, new, package -- catchable programmatically by tests.
 
-#' @noRd
-.abort_bad_input <- function(msg, class = NULL, call = rlang::caller_env(), ...) {
-  rlang::abort(
-    message = msg,
-    class   = c(class, "eventstudy_bad_input", "eventstudy_error"),
-    call    = call,
-    ...
-  )
-}
-
-#' @noRd
-.warn_degenerate <- function(msg, class = NULL, call = rlang::caller_env(), ...) {
-  rlang::warn(
-    message = msg,
-    class   = c(class, "eventstudy_degenerate", "eventstudy_warning"),
-    call    = call,
-    ...
-  )
+.es_deprecate <- function(old, new = NULL, pkg = "EventStudy") {
+  .Deprecated(old = old, new = new, package = pkg)
 }
 ```
 
-**Migration strategy — additive, not big-bang.** Do not convert every `stop()` in one phase; that risks breaking tests. Instead:
-
-1. Add `R/conditions.R` with the factory functions.
-2. Convert the highest-visibility call sites: `task.R` validation errors, `contract.R` `.handle_degenerate()` warning emission, and `advise.R` grounding-guard warning. These are the user-visible messages that matter most for polish.
-3. Leave internal model computation errors (`models.R` lm-failure guards) as plain `stop()`/`warning()` — they are low-visibility and the conversion risk is not worth it for polish.
-
-**Hard constraint: `.handle_degenerate()` in `contract.R`** emits exactly one `warning()` per degenerate event. This invariant is tested. The migration from `warning()` to `rlang::warn()` preserves this because `rlang::warn()` calls `base::warning()` internally. The class vector is additive metadata — callers using `tryCatch(..., warning = ...)` still work. However, the regression tests in `test_edge_cases.R` that use `expect_warning()` may need the class added to their matchers if they check message text strictly. This is the one real integration risk in Surface C.
-
-**Hard constraint: the grounding guard** in `advise.R:.validate_grounding()` uses `warning(msg, call. = FALSE)`. This is the drop-and-keep contract: exactly one warning, never `stop()`. Migrating to `rlang::warn()` is safe as long as `call = NULL` (equivalent to `call. = FALSE`) is used.
-
-### Print method polish
-
-The existing `print` methods use raw `cat()` with no alignment or separators. The `rlang` package does not help with print formatting. The recommendation is to apply a consistent header/separator pattern using only base R `cat()` calls — no new dependency. Each print method should follow:
+**Threading through R6 `initialize()` for deprecated args:**
 
 ```r
-# pattern: package-level separator constant
-.ES_SEP <- strrep("-", 40)
-
-print.EventStudyXxx <- function(x, ...) {
-  cat("EventStudy: <ClassName>\n")
-  cat(.ES_SEP, "\n")
-  # ... fields
-  invisible(x)
+initialize = function(old_arg = NULL, new_arg = NULL, ...) {
+  if (!is.null(old_arg)) {
+    .es_deprecate("old_arg", "new_arg")
+    new_arg <- old_arg
+  }
+  # rest of init using new_arg
 }
 ```
 
-This unifies spacing across `EventStudyTask$print()`, `ParameterSet$print()`, `print.es_diagnostics()`, `print.Advice`, `print.es_advice`, `print.es_cross_sectional`, `print.es_simulation`, and `print.EventStudySummary` (8 print surfaces across 6 files).
-
-### Lifecycle deprecation
-
-**`lifecycle` is not currently in DESCRIPTION.** Only add it if at least one function needs formal `deprecate_warn()` or `deprecate_soft()` signaling. For a polish pass, the approach is:
-
-- Functions with changed signatures (if any): add `lifecycle` to Suggests (not Imports), guard with `if (requireNamespace("lifecycle", quietly = TRUE)) lifecycle::deprecate_warn(...)` else `warning(...)`.
-- Functions removed entirely: use a stub that calls `lifecycle::deprecate_stop()` or plain `stop()`.
-- If no signatures are actually changing in v0.65.0, skip `lifecycle` entirely — it adds a Suggests entry for no user benefit.
+**Threading through exported functions:** Same pattern at function entry, before computation.
 
 ---
 
-## Surface D: Docs & Site Polish
+## Integration Map: New vs Modified Files
 
-### Integration points in `_pkgdown.yml`
+### New files
 
-The existing `_pkgdown.yml` uses `template: bootstrap: 5` with no colour overrides. To align to the eventstudy.de brand:
+| File | Purpose | Thrust |
+|------|---------|--------|
+| `tests/testthat/fixtures/golden_*.rds` | Reference-value golden fixtures per model/stat | Correctness |
+| `data-raw/ref_*.R` | Provenance scripts for reference-implementation baselines | Correctness |
+| `tests/testthat/test-golden-values.R` | Load golden fixtures, assert 1e-8 tolerance | Correctness |
+| `tests/testthat/test-formula-audit.R` | Formula-level tests (OLS, Patell, CAR cumsum) | Correctness |
+| `tests/testthat/test-numerical-stability.R` | Long-window CAR, GARCH, bootstrap stability | Correctness |
+| `R/shape_contracts.R` | `.assert_shape()` + shape constant definitions | Return-shape |
+| `tests/testthat/test-shape-contracts.R` | Shape contract tests via withr::local_options | Return-shape |
+| `tests/testthat/test-api-snapshot.R` | expect_snapshot() over full export surface | API snapshot |
+| `tests/testthat/_snaps/api-snapshot.md` | Auto-generated on first run, then committed | API snapshot |
+| `tests/testthat/test-signature-consistency.R` | Invariant assertions from signature audit | API snapshot |
+| `R/deprecation.R` | `.es_deprecate()` shim via base `.Deprecated()` | Deprecation |
 
-```yaml
-template:
-  bootstrap: 5
-  math-rendering: katex
-  bslib:
-    primary: "#0d6efd"
-    link-color: "#0d6efd"
-    font-size-base: "0.95rem"
-    # Keep secondary, success, warning, danger aligned to
-    # existing es-tag-* classes in pkgdown/extra.css
-  assets: pkgdown/
+### Modified files
 
-navbar:
-  logo:
-    src: man/figures/logo.svg
-    href: https://sipemu.github.io/eventstudy/
-    alt: EventStudy logo
-  bg: light
-```
-
-The `template.bslib` keys are CSS custom property overrides passed to Bootstrap 5's Sass compilation inside pkgdown. They are site-only and do not touch the CRAN tarball. These keys do not conflict with existing `extra.css` rules — the bslib overrides apply at the Sass level (affecting all generated Bootstrap utilities), while `extra.css` applies additional custom rules on top.
-
-### Integration points in `pkgdown/extra.css`
-
-The existing `pkgdown/extra.css` (confirmed present) already contains gallery, section-heading, and tag styles. Additions for v0.65.0:
-
-- Typography polish: `body { font-size: 0.95rem; }` and heading-level fine-tuning.
-- Navbar logo sizing: `.navbar-brand img { height: 32px; }`.
-- Home page hero section: a `.es-hero` block class for the README's top section when rendered as pkgdown home.
-- Numeric badge style: `.es-badge` — pill-shaped badge for key counts ("13+ models", "8+ test statistics") aligned to the eventstudy.de card layout.
-
-None of these additions conflict with the existing gallery or tag CSS.
-
-### Cross-link and vignette polish
-
-The `vignettes/articles/` directory is already `.Rbuildignore`'d. The existing `_pkgdown.yml` `articles:` section already routes all 18 CRAN vignettes and pkgdown-only articles correctly. Polish work is limited to:
-
-- Adding cross-reference links between related vignettes (`\code{\link{es_report}}` in `automated-reports.Rmd`; `\code{\link{es_advise}}` cross-links in the AI Advisor article).
-- README.md refresh: add logo badge, update badges section, confirm all links resolve.
-- No changes to the `articles:` or `reference:` blocks in `_pkgdown.yml` unless new articles are added.
+| File | Modification | Thrust |
+|------|-------------|--------|
+| `R/EventStudy-package.R` | Add `"median"`, `"tail"` to `globalVariables()` | CRAN gate |
+| `R/es_diagnostics.R` | Remove bare `median`/`tail` calls (or add importFrom) | CRAN gate |
+| `R/advise.R`, `R/knowledge_base.R`, `R/report.R` | Replace non-ASCII with `\uXXXX` | CRAN gate |
+| `.github/non-ascii-baseline.txt` | Refresh after removing non-ASCII from R/ sources | CRAN gate |
+| `cran-comments.md` | New v0.66.0 section: cover letter, platform results | CRAN gate |
+| `DESCRIPTION` | Version bump to 0.66.0 | Release |
+| `NEWS.md` | v0.66.0 section | Release |
+| `.github/workflows/R-CMD-check.yaml` | Optional: add smoke-test step | CI |
+| `R/contract.R` | No changes -- sibling relationship preserved | -- |
 
 ---
 
-## Component Responsibilities (Polish Surfaces)
+## Suggested Build Order
 
-| Component | File(s) | New vs Modified | Notes |
-|-----------|---------|-----------------|-------|
-| ggplot2 shared theme | `R/theme.R` | NEW | Exports `theme_eventstudy()`, `es_colours` |
-| Colour application in plots | `R/plotting.R` | MODIFY | Replace hardcoded colour strings in 3 private helpers |
-| Report HTML CSS | `inst/rmarkdown/report.css` | NEW | Injected via `html_document(css=)` only |
-| Report format builder | `R/report.R:.build_output_format()` | MODIFY | Add `css=` arg to html branch only |
-| Report skeleton template | `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd` | MODIFY | Typography, kable table styling, figure captions |
-| Classed conditions factory | `R/conditions.R` | NEW | `.abort_bad_input()`, `.warn_degenerate()` |
-| Task print method | `R/task.R` | MODIFY | Consistent separator/header formatting |
-| ParameterSet print | `R/parameter_set.R` | MODIFY | Same pattern |
-| Other print methods | `R/es_diagnostics.R`, `R/advise.R`, `R/advise_offline.R`, `R/simulation.R`, `R/cross_sectional.R`, `R/task.R` (EventStudySummary) | MODIFY | 6 files, formatting-only changes |
-| High-visibility stop/warning | `R/task.R`, `R/contract.R`, `R/advise.R` | MODIFY | Selected conversions to `rlang::abort()`/`rlang::warn()` with class |
-| pkgdown config | `_pkgdown.yml` | MODIFY | Add `template.bslib`, `template.assets`, `navbar.logo` |
-| pkgdown CSS | `pkgdown/extra.css` | MODIFY | Add hero, badge, typography, logo-size rules |
-| Logo/hex assets | `man/figures/logo.svg`, `man/figures/logo.png`, `man/figures/hex-sticker.png` | NEW | CRAN-shipped via man/figures/ |
-| Favicon | `pkgdown/favicon.ico` | NEW | Site-only via pkgdown/; excluded from tarball |
-| README | `README.md` | MODIFY | Logo img tag, badge refresh |
-| Vignette cross-links | `vignettes/*.Rmd`, `vignettes/articles/*.Rmd` | MODIFY | Cross-reference links only |
+Cross-thrust dependencies drive this sequence:
+
+```
+Phase A: CRAN hygiene fixes  (unblocks --as-cran for all subsequent check runs)
+  - Fix bare median/tail in es_diagnostics.R
+  - Fix non-ASCII in advise.R / knowledge_base.R / report.R
+  - Refresh .github/non-ascii-baseline.txt
+  - Delete EventStudy_0.62.0.tar.gz
+
+Phase B: Formula audit + golden fixture capture  (findings feed golden tests)
+  - Audit each model/stat formula against statistical reference
+  - Run estudy2 / eventstudies on reference examples, capture output
+  - Commit golden_*.rds to tests/testthat/fixtures/
+  - Write test-golden-values.R loading those fixtures
+
+Phase C: Edge/property + numerical stability tests
+  - CAR = cumsum(AR) property tests
+  - Cross-method consistency tests
+  - Boundary windows (event window = 1 day, min estimation obs)
+  - GARCH/bootstrap long-window numerical stability
+
+Phase D: Return-shape contracts  (after B/C reveal any shape gaps)
+  - Write R/shape_contracts.R with .assert_shape() + constants
+  - Write test-shape-contracts.R
+  - Verify degenerate-NA case satisfies shape contract
+
+Phase E: API snapshot + signature audit + deprecation policy
+  - establish expect_snapshot() baseline (requires installed pkg, run under R CMD check)
+  - conduct signature audit (formals inconsistencies, naming outliers)
+  - write test-signature-consistency.R
+  - document deprecation policy; write R/deprecation.R
+  - back-compat wiring for any renamed args found in audit
+
+Phase F: CRAN resubmission
+  - devtools::check_win_devel() + rhub::check_for_cran()
+  - Update cran-comments.md with cover letter + platform results
+  - Submit to CRAN
+```
+
+**Why this order:**
+- Phase A first: non-ASCII WARNING and undefined-globals NOTE contaminate every subsequent
+  `R CMD check` run; fix them before any check-gated work.
+- Formula audit (Phase B) must precede golden fixture capture: golden values must reflect
+  the corrected formula, not a bug. If a bug is found, the fixture must be captured after
+  the fix.
+- Return-shape contracts (Phase D) sit after correctness tests because the formula audit
+  may reveal shape gaps (missing columns in edge cases) the contracts should then lock.
+- API snapshot (Phase E) must be last before CRAN: it depends on the installed package and
+  must reflect the final post-audit state of all signatures. Capturing before the signature
+  audit produces a snapshot that immediately needs updating.
+- CRAN resubmission (Phase F) is gated on all prior phases being complete and green.
 
 ---
 
-## Data Flow Changes
+## Anti-Patterns to Avoid
 
-The four surfaces are **all post-computation**: no data-flow changes in the statistical pipeline.
+### Anti-Pattern 1: Parallel fixture directories
 
-### Plotting data flow (Surface B)
+**What to avoid:** Creating `tests/testthat/reference/` or `tests/testthat/golden/` alongside
+the existing `fixtures/` directory.
 
-```
-plot_event_study(task) or .plot_single_event() / .plot_multi_event()
-    |
-    v  (unchanged: extract abnormal_returns, compute CI bounds)
-    |
-    v  CHANGE: ggplot2::theme_minimal() -> theme_eventstudy()
-    |          colour literals -> es_colours[[...]]
-    v
-ggplot2 object returned  (no behavior change)
-```
+**Why it's wrong:** 12 committed .rds files with `contract05_*` naming already establish the
+convention. A parallel directory fragments fixture management.
 
-### Report render data flow (Surface B)
+**Do this instead:** Extend `fixtures/` with `golden_*.rds` naming to distinguish
+reference-value golden tests from the existing degenerate-input baselines.
 
-```
-generate_report(task, format="html", ...)
-    |
-    +-- .build_output_format("html")
-    |       CHANGE: adds css = system.file("rmarkdown/report.css", ...)
-    |
-    +-- assemble_report_narrative()    <- grounding guard: UNTOUCHED
-    |
-    +-- rmarkdown::render(skeleton.Rmd, params = ...)
-            CHANGE: skeleton adds kable styling, figure captions
-            knitr::is_html_output() switch: UNTOUCHED
-```
+### Anti-Pattern 2: Hard-coded numeric literals in golden tests
 
-### Condition data flow (Surface C)
+**What to avoid:** `expect_equal(m$statistics$beta, 0.9823456)`
 
-```
-Before:  stop("task must be ...")                               -> base condition
-After:   rlang::abort("task must be ...", class = "eventstudy_bad_input")
+**Why it's wrong:** Already documented in `test_contract.R` comment: "The test MUST NOT
+hard-code numeric literals -- the .rds IS the reference." Hard-coded values differ by
+platform/R version and can mask real regressions.
 
-Before:  warning(msg, call. = FALSE)  <- in .handle_degenerate()
-After:   rlang::warn(msg, class = "eventstudy_degenerate", call = NULL)
-```
+**Do this instead:** Capture once into .rds, load with `readRDS(testthat::test_path(...))`,
+compare with `expect_equal(tolerance = 1e-8)`.
 
-The `tryCatch()` wrappers in `report.R` and `es_report.R` that catch `error` do not need modification — `rlang::abort()` conditions are still caught by `tryCatch(..., error = function(e) ...)`.
+### Anti-Pattern 3: Extending R/contract.R with return-shape logic
 
----
+**What to avoid:** Adding `.assert_shape()` or shape constant declarations to `R/contract.R`.
 
-## Dependency-Ordered Build Sequence
+**Why it's wrong:** `R/contract.R` has a clear, documented, single responsibility: degenerate-
+input handling on the input side of the pipeline. Adding output-shape validation mixes concerns
+and makes the degenerate-input contract harder to audit.
 
-This order respects all data-flow dependencies and CRAN boundaries:
+**Do this instead:** Create `R/shape_contracts.R` as a sibling. The two files share the
+invariant that even degenerate outputs must have correct shape, which is tested in
+`test-shape-contracts.R`.
 
-**Phase 1 — Brand/Asset Foundation (no code deps)**
-- Create `man/figures/logo.svg`, `man/figures/logo.png`, `man/figures/hex-sticker.png`
-- Create `pkgdown/favicon.ico`
-- Modify `README.md`: add logo img tag
-- Modify `_pkgdown.yml`: add `navbar.logo`, `template.assets: pkgdown/`
-- Modify `pkgdown/extra.css`: add logo-size, hero, badge rules
-- Verify: `pkgdown::build_site()` locally; confirm favicon appears, logo in navbar; confirm `.Rbuildignore` excludes favicon; `R CMD check --as-cran` clean
+### Anti-Pattern 4: API snapshot under devtools::test() only
 
-**Phase 2 — Shared Theme (must precede plot application)**
-- Create `R/theme.R`: `theme_eventstudy()` + `es_colours`
-- Add `@export` + roxygen docs; run `roxygen2::roxygenise()`
-- Add to `_pkgdown.yml` reference section under "Plotting"
-- Run `devtools::test()`: no test touches colour values, all green
-- Verify: `theme_eventstudy()` available; colour palette consistent with `extra.css` es-tag-* colours
+**What to avoid:** Running `getNamespaceExports("EventStudy")` in `devtools::test()` and
+treating the result as the installed package surface.
 
-**Phase 3 — Plot Aesthetics (depends on Phase 2)**
-- Modify `R/plotting.R`: apply `theme_eventstudy()` and `es_colours` in `.plot_single_event()`, `.plot_multi_event()`, `plot_diagnostics()`
-- Do NOT modify `plot_stocks()` — it returns a plotly object; `theme_eventstudy()` does not apply
-- Run `devtools::test()`: `test_plotting.R` tests check plot object class/structure, not colours — all green
-- Verify: sample plots render with publication aesthetics
+**Why it's wrong:** `getNamespaceExports()` in a `load_all()` session reflects the in-memory
+loaded state, not the installed NAMESPACE file. This is the same class of bug as the
+`skeleton.Rmd` incident. The snapshot would pass locally but fail to catch installation-time
+discrepancies.
 
-**Phase 4 — Report Aesthetics (depends on Phase 2 for colour consistency)**
-- Create `inst/rmarkdown/report.css`
-- Modify `R/report.R:.build_output_format()`: add `css=` to html branch
-- Modify `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd`: kable table styling (with `kableExtra` Suggests guard), figure captions
-- Run `devtools::test()`: `test_report.R` tests render reports; confirm HTML output contains CSS; confirm PDF/Word paths unaffected
-- Verify: `knitr::is_html_output()` behavior unchanged; per-format prose sanitiser path unchanged; grounding guard path unchanged
-
-**Phase 5 — API/Message Polish (independent of Phases 2-4)**
-- Create `R/conditions.R`
-- Modify `R/task.R`, `R/contract.R`, `R/advise.R`: migrate selected `stop()`/`warning()` to classed rlang conditions
-- Modify all 8 print method files: apply consistent header/separator pattern
-- Run `devtools::test()`: check that `expect_warning()` tests still match (adjust class matchers if needed in `test_edge_cases.R`)
-- Verify: `inherits(tryCatch(bad_call, error = identity), "eventstudy_bad_input")` is TRUE; no behavioral change on valid inputs
-
-**Phase 6 — Docs & Site Polish (depends on Phase 1 for logo; can overlap with 5)**
-- Modify `_pkgdown.yml`: add `template.bslib` colour overrides
-- Modify `pkgdown/extra.css`: typography, badge, hero additions
-- Modify vignettes for cross-links
-- Modify README.md: badge refresh, docs link update
-- Run `pkgdown::build_site()` locally; confirm all articles render, no broken links
-- CI: push to main triggers `pkgdown.yaml` workflow; confirm gh-pages deploy
-
----
-
-## Architecture Anti-Patterns to Avoid
-
-### Anti-Pattern 1: Applying theme_eventstudy() inside plot_stocks()
-
-**What people do:** Call `theme_eventstudy()` on a plotly object or pass it to plotly layout.
-**Why it's wrong:** plotly objects are not ggplot2 objects; the `+` operator will throw an error at runtime. The existing tests for `plot_stocks()` would fail.
-**Do this instead:** Apply `theme_eventstudy()` only in the ggplot2-returning functions (`.plot_single_event`, `.plot_multi_event`, `plot_diagnostics`). Leave `plot_stocks()` as plotly-only and style it separately via plotly's `layout()` if desired.
-
-### Anti-Pattern 2: Putting report.css inside the skeleton/ directory with a relative path
-
-**What people do:** Save `report.css` next to `skeleton.Rmd` and reference it with a relative path.
-**Why it's wrong:** `rmarkdown::render()` is called with `input = template_path` but `output_dir` varies. Relative CSS references resolve against `input` directory only during render's intermediate step; the final HTML may not find the CSS if moved to a different output dir.
-**Do this instead:** Use `system.file("rmarkdown/report.css", package = "EventStudy")` to obtain the absolute path at render time and pass it as the `css` argument to `html_document()`.
-
-### Anti-Pattern 3: Adding cli to Imports for print method polish
-
-**What people do:** Take a hard dependency on `cli` for pretty-printing in `print.*` methods.
-**Why it's wrong:** `cli` is a substantial transitive dependency (rlang, fansi, etc.). Adding it to Imports makes every user pull it in at install time. The existing print methods are adequate; the gap is formatting consistency, not rich semantics.
-**Do this instead:** Use `rlang` (already Imports) for classed conditions. Use plain `cat()` with a package-internal separator constant for formatting. Reserve `cli` consideration for a dedicated messaging overhaul milestone, not a polish pass.
-
-### Anti-Pattern 4: Modifying the grounding guard or report_narrative.R for aesthetics
-
-**What people do:** Edit `.validate_grounding()` or `JOINT_HYPOTHESIS_CAVEAT` to inject HTML styling or change wording.
-**Why it's wrong:** The grounding guard is a correctness invariant locked by regression tests (Phase 19 hardening). Any edit risks breaking the "never render ungrounded literal" guarantee or the single-warning discipline.
-**Do this instead:** All HTML styling goes into `report.css` and the skeleton template. The narrative assembler and grounding guard remain completely untouched.
-
-### Anti-Pattern 5: Placing logo in pkgdown/ only (not man/figures/)
-
-**What people do:** Save `logo.svg` only in `pkgdown/` and reference it from `_pkgdown.yml`.
-**Why it's wrong:** `pkgdown/` is `.Rbuildignore`'d, so the logo is absent from the CRAN tarball. The `README.md` on CRAN's web interface (which does not run pkgdown) would show a broken image.
-**Do this instead:** Logo in `man/figures/` (CRAN-shipped, README-accessible). Favicon and site-only overlays in `pkgdown/`.
-
----
-
-## Integration Boundaries: Grounding Guard & Degenerate-Input Contract
-
-These two invariants must not be touched by any polish surface:
-
-| Invariant | Location | What must not change |
-|-----------|----------|----------------------|
-| Grounding guard | `R/advise.R:.validate_grounding()` | Drop-and-keep logic, single warning emission, never-stop contract |
-| Degenerate-input contract | `R/contract.R:.handle_degenerate()` | Exactly-one-warning discipline, NA propagation, lenient/strict routing |
-| JOINT_HYPOTHESIS_CAVEAT | `R/report_narrative.R:30-35` | Fixed text constant -- wording is a correctness invariant, not aesthetics |
-| Narrative LLM-call budget | `R/report.R:280-285` | NARR-01: `assemble_report_narrative()` called once before format loop |
-| `knitr::is_html_output()` | `skeleton.Rmd` | Controls static/interactive switch -- CSS or caption additions must not move this flag |
-
-The condition-class migration in Surface C modifies the *form* of warnings and errors from `contract.R` and `advise.R`, but the *count* (exactly one per event), *receiver* (same `tryCatch` callers), and *behavior* (NA propagation vs stop) are entirely unchanged.
+**Do this instead:** Wrap with `skip_if_not_installed("EventStudy")`. The test is then a
+no-op in `devtools::test()` and active under `R CMD check`.
 
 ---
 
 ## Sources
 
-- Live codebase inspection: `R/plotting.R`, `R/report.R`, `R/report_narrative.R`, `R/advise.R`, `R/contract.R`, `R/task.R`, `R/parameter_set.R`, `inst/rmarkdown/templates/event_study_report/skeleton/skeleton.Rmd`, `_pkgdown.yml`, `pkgdown/extra.css`, `.Rbuildignore`, `DESCRIPTION` (HIGH confidence -- direct file read)
-- pkgdown 2.x logo/favicon conventions: `template.assets`, `navbar.logo`, `man/figures/` pattern -- widely used by tidyverse packages; usethis::use_logo places assets in man/figures/ (MEDIUM confidence -- stable ecosystem convention)
-- ggplot2 `%+replace%` theme extension pattern -- standard since ggplot2 2.x, documented in `vignette("extending-ggplot2")` (MEDIUM confidence -- stable)
-- rlang classed conditions pattern -- `rlang::abort()` / `rlang::warn()` with class vector, used by tidyverse packages; rlang already in Imports (MEDIUM confidence -- stable)
+- Direct inspection of `R/contract.R`, `NAMESPACE`, `.github/workflows/R-CMD-check.yaml`,
+  `cran-comments.md`, `tests/testthat/fixtures/`, `tests/testthat/_snaps/`,
+  `tests/testthat/test_contract_matrix.R`, `tests/testthat/test_contract.R`,
+  `tests/testthat/test_classed_conditions.R`, `tests/testthat/test-print-snapshots.R`,
+  `R/inform.R`, `R/models.R`, `DESCRIPTION`, `.planning/REQUIREMENTS.md`,
+  `.planning/PROJECT.md` at v0.65.0
+- [testthat snapshot tests documentation](https://testthat.r-lib.org/articles/snapshotting.html)
+- [R Packages (2e) — Releasing to CRAN](https://r-pkgs.org/release.html)
+- [R Packages (2e) — Lifecycle](https://r-pkgs.org/lifecycle.html)
+- [Base R .Deprecated](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Deprecated.html)
 
 ---
-
-*Architecture research for: EventStudy v0.65.0 Polish milestone*
-*Researched: 2026-09-08*
+*Architecture research for: EventStudy v0.66.0 Stabilization & CRAN Resubmission*
+*Researched: 2026-09-10*
+*Confidence: HIGH -- all integration points grounded in direct inspection of v0.65.0 codebase*

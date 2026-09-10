@@ -1,217 +1,200 @@
 # Feature Research
 
-**Domain:** Polish milestone on a mature CRAN R package (financial event study analysis)
-**Researched:** 2026-09-08
-**Confidence:** MEDIUM (cross-checked against existing codebase + official pkgdown/lifecycle/cli docs)
+**Domain:** R package stabilization & CRAN resubmission (brownfield, correctness hardening, API locking, CI, submission gate)
+**Researched:** 2026-09-10
+**Confidence:** MEDIUM — all findings cross-checked against official docs, package source, and primary academic references; numeric golden values verified against estudy2 vignette output.
 
 ---
 
-## Scope Note
-
-This file covers the four polish surfaces for v0.65.0 only. All core pipeline, models, test statistics, AI advisor, reporting, and site infrastructure features are already shipped (see PROJECT.md Validated section). Nothing here re-proposes existing capabilities.
-
----
-
-## Surface 1 — Brand & Visual Identity
+## Thrust 1: Correctness of Results (Reference-Value / Golden Validation)
 
 ### Table Stakes (Users Expect These)
 
-| Feature | Why Expected | Complexity | Existing Component | Notes |
-|---------|--------------|------------|-------------------|-------|
-| Logo PNG in `man/figures/logo.png` auto-detected by pkgdown | pkgdown auto-displays in navbar, README img, and as favicon source; any package with a pkgdown site "should" have one | LOW | `_pkgdown.yml` (no logo key needed — auto-detect) | Must be ~2400x2772px, transparent BG per hexb.in spec; `usethis::use_logo()` handles placement + `.Rbuildignore` |
-| Hex sticker SVG/PNG asset stored in `man/figures/` | Community norm — tidyverse, rOpenSci, nearly every serious CRAN package has one; README badge and download link are expected | LOW–MEDIUM | None (no logo exists yet) | Produced with hexSticker R package; design must express the "event study / time-series + statistics" domain; color must align to eventstudy.de palette |
-| Favicon set in `pkgdown/favicon/` | Any site without a favicon looks unfinished; browsers show generic icon | LOW | `_pkgdown.yml` + `pkgdown/extra.css` | Generated once with `pkgdown::build_favicons()`; stored and committed; auto-included on rebuild |
-| Hex badge in README (`![hex](man/figures/logo.png)`) | Every R package README that has a logo shows it at the top-right, between title and badges | LOW | `README.md` | Standard placement: right-aligned img tag or `usethis::use_logo()` badge snippet |
-| Lifecycle badge corrected to `stable` | Current badge says "experimental"; the package is at v0.64.0 with a full test suite and CRAN release — "experimental" signals untrustworthiness to researchers | LOW | `README.md` badges block | Change to `[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)]` |
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| AR formula matches published spec | Any published event study must reproduce AR = R_{i,t} - alpha_i - beta_i * R_{m,t} exactly | LOW | OLS alpha/beta from estimation window; this is the MacKinlay (1997) definition |
+| CAR = exact cumsum(AR) over event window | Mathematical identity; if violated every downstream result is wrong | LOW | Write as a property test: `expect_equal(car, cumsum(ar_vec), tolerance=1e-10)` |
+| AAR = rowwise mean of AR across firms | Identity invariant; must hold to floating-point precision | LOW | Cross-method consistency check across CSectTTest and manual aggregation |
+| CAAR = cumsum(AAR) | Follows from the two above | LOW | Add as a property assertion in test_multi_event_test_statistics.R |
+| Patell Z formula includes forecast-error variance correction | Without it the test is systematically anti-conservative; every finance textbook specifies it | MEDIUM | Variance = S^2_AR * [1 + 1/M + (R_m,0 - R_bar_m)^2 / sum((R_m,t - R_bar_m)^2)] |
+| BMP test denominator is event-day cross-sectional spread, not estimation-window spread | Core property that makes BMP robust to event-induced variance; if wrong, test reverts to Patell | MEDIUM | t = sqrt(N) * SBAR_0 / S(SAR_0); null is t_{N-1} not N(0,1) |
+| Sign test uses empirical positive fraction from estimation window (Cowan 1992 generalised) | Naive 50/50 null is known biased; generalised sign is table-stakes for any serious package | LOW | p_hat = (1/N) * sum[(1/M_i) * sum(1[AR > 0])] |
 
 ### Differentiators (Competitive Advantage)
 
-| Feature | Value Proposition | Complexity | Existing Component | Notes |
-|---------|-------------------|------------|-------------------|-------|
-| eventstudy.de-aligned pkgdown theme (palette + typography) | Researcher lands on pkgdown from eventstudy.de and sees the same visual language — establishes the three-tool ecosystem coherence ("Event Study Analysis Made Simple") | MEDIUM | `pkgdown/extra.css`, `_pkgdown.yml` template bslib block | Align bslib `primary`, `bg`, `fg` to the neutral card/badge palette of eventstudy.de; add `base_font`/`heading_font` via Google Fonts |
-| Open Graph / social preview card configured | Sharing a link to the pkgdown site on Twitter/LinkedIn shows a branded card (logo + description) instead of a blank preview | LOW | `_pkgdown.yml` `template: opengraph:` block | Requires `url:` in `_pkgdown.yml` (already present); add `opengraph: image: src + alt + twitter: card: summary_large_image` |
-| Logo mark reusable SVG source (for eventstudy.de propagation) | Three-tool ecosystem currently has no logo anywhere; adding one to the R package hex sticker creates the first shared visual identity that can propagate to the GSheets template and WebAssembly app over time | HIGH (coordination) | None; no logo exists on eventstudy.de | Design constraint: the hex sticker IS the logo; eventstudy.de adoption is out of scope for this R package milestone but the asset must be reusable (SVG source required) |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Cross-implementation regression test against estudy2 bundled dataset | Locks correctness against an independent published R implementation; no other CRAN event study package does this explicitly | MEDIUM | estudy2 securities_returns dataset (7 firms, 2019-04-01 to 2020-04-01); golden values from vignette for event 2020-03-16 to 2020-03-20: Patell pt_stat 2.5507/-2.9496/8.4216/6.3196, BW-1980 2.4864/-3.3703/8.1881/6.2334, Boehmer 2.1666/8.6521. Tolerance: `expect_equal(..., tolerance=0.01)` (1% relative) |
+| Property test suite: algebraic identities across all 13 return models | Proves the pipeline composition is self-consistent regardless of model; catches silent float divergence in GARCH/rolling paths | MEDIUM | Check CAR=cumsum(AR), AAR=mean(AR_matrix), CAAR=cumsum(AAR) for each of the 13 models via parameterised helper |
+| Numerical stability guards at matrix operation boundaries | Prevents silently-wrong results when OLS design matrix is near-singular; extends v0.50.0 contract to the numerical layer | HIGH | Use `kappa(X_prime_X) > 1e12` or `rcond(X_prime_X) < 1e-10` as a guard before `lm()` / `solve()`; warn and return NA rather than proceed with unstable estimates |
+| GARCH convergence guard | rugarch can return a fitted object with non-converged optimizer; using those parameters produces wrong abnormal returns | MEDIUM | Check `@fit$convergence == 0` and `!any(is.na(@fit$coef))` before computing ARs; if not converged, trigger the degenerate-input contract (NA + one warning) |
+| Tolerance convention documented in CONTRIBUTING | Makes the tolerance choices transparent and reproducible; reduces reviewer friction | LOW | Absolute `1e-10` for mathematical identities within one codebase; relative `1e-3` for cross-implementation comparisons where model conventions differ slightly |
 
-### Anti-Features (Explicitly Excluded)
+### Anti-Features (Things to Deliberately NOT Do)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Animated / video logo in README | Looks "modern"; GitHub supports GIF badges | Adds distracting noise; research-domain users expect academic seriousness; GitHub strips GIF in some contexts | Static PNG hex sticker — timeless and reusable |
-| Dark-mode toggle on pkgdown site | Popular in web frameworks | pkgdown's light-switch requires careful bslib CSS variables that can break the eventstudy.de palette alignment; this is a rabbit hole for a polish minor | Revisit when bslib dark-mode support stabilizes; omit now |
-| Custom pkgdown template package (e.g., à la `rotemplate`) | Full design control | Heavyweight maintenance burden; over-engineered for a single-package site; `bslib + extra.css` already used and working | Extend existing `extra.css` + `_pkgdown.yml` bslib variables only |
+| Bit-exact snapshot of every test statistic output | "Lock the numbers" | Creates churn on every R version upgrade (floating-point changes in lm, LAPACK backends); reviewer asks "why did 47 golden tests change?" on every CRAN update | Use tolerance-bound assertions (`expect_equal(got, expected, tolerance=1e-6)`) not `identical()` / bit-exact snapshots |
+| Using eventstudies (Ajay Shah, nipfpmf) as the primary golden source | It is a well-known CRAN package | eventstudies uses fundamentally different conventions (its own return transformation, zoo-based API) making numeric cross-validation impractical without manual normalization | Use estudy2 as primary; treat eventstudies as secondary sanity check only |
+| Validating against EventStudyTools.com online calculator | Convenient reference | Output is proprietary, not reproducible, not pinnable to a version; results can change without notice | Use EventStudyTools formulas page as formula specification only, not as golden numbers |
+| Golden test with MacKinlay (1997) Table 1 raw numbers | "The authoritative paper" | Table 1 uses CRSP value-weighted index data (1989-1993) not publicly reproducible; requires exact CRSP data access | Use MacKinlay (1997) as formula/methodology specification; use estudy2 bundled data as the reproducible golden dataset |
+| Property tests that generate random market data | Looks like property-based testing | Random market data generates non-deterministic test output, making CI flaky and CRAN check non-deterministic; CRAN penalizes intermittently failing tests | Use `set.seed()` + fixed synthetic data for all property tests; no random inputs in the test suite |
 
 ---
 
-## Surface 2 — Report & Plot Aesthetics
+## Thrust 2: Stable API (Signature Snapshots, Deprecation Policy, Return-Shape Contracts)
 
 ### Table Stakes (Users Expect These)
 
-| Feature | Why Expected | Complexity | Existing Component | Notes |
-|---------|--------------|------------|-------------------|-------|
-| Consistent color palette across ALL plots (AR, CAR, AAR, CAAR, diagnostic) | Users copying figures into a paper or report expect all EventStudy plots to look like they came from the same package | MEDIUM | `R/plotting.R` (352 lines), `inst/rmarkdown/.../skeleton.Rmd` | Currently hardcoded `"steelblue"`, `"red"`, `"grey40"` per plot function; no shared palette. Fix: define an internal `.es_palette` vector and reference it everywhere |
-| Colorblind-safe palette | Accessibility requirement for journal submission (many journals now require CVD-safe figures); researchers submitting papers expect this | LOW–MEDIUM | `R/plotting.R` | Replace `"steelblue"` series with Okabe-Ito (8-color, well-tested, built into ggplot2 via `scale_colour_manual(values=c("#E69F00","#56B4E9",...))`) or viridis; zero new dependencies |
-| `theme_minimal()` made consistent — margin, axis text, legend placement | Multiple plot functions each call `theme_minimal()` then add inconsistent per-plot overrides; visual differences emerge between plot types | LOW | `R/plotting.R` lines 184, 267, 317, 330, 348 | Define one internal `es_theme()` helper (not exported, no new dep) and replace repeated `theme_minimal() + theme(...)` calls; any downstream ggplot2 plot produced by the package inherits this automatically |
-| Figure captions on plot chunks in `es_report()` HTML/PDF output | Academic reports require numbered figure captions; papers need "Figure 1: Cumulative Abnormal Returns around event date" | MEDIUM | `skeleton.Rmd` (fig.cap not set on plot chunks; kable tables already have caption=) | Add `fig.cap` to each plot chunk in the skeleton; knitr numbers automatically in HTML/PDF. Currently captions are only on kable tables, not on plots |
-| Styled kable tables in HTML report | Plain `knitr::kable()` in HTML output renders as unstyled HTML table — looks unpolished in a rendered HTML report | LOW | `skeleton.Rmd` (uses bare `knitr::kable()` throughout) | Use `knitr::kable(..., booktabs=TRUE)` for PDF (zero new dep); optionally add `kableExtra::kable_styling()` guarded by `requireNamespace("kableExtra")` for HTML — Suggests-only |
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Signature snapshot tests for all exported functions | Any package claiming "stable API" needs a regression test that breaks if an argument is added/removed/renamed | MEDIUM | `expect_snapshot(deparse(formals(run_event_study)))` in `tests/testthat/test_api_signatures.R`; covers ~30 exported functions; stored in `_snaps/test_api_signatures.md` |
+| Return-shape contract: column names, types, and row-count invariants for tibble-returning functions | Downstream code (`tidy()`, `export_results()`, vignettes) depends on column names; silent renames break users | MEDIUM | Use `expect_named(result, c("relative_index","aar","caar",...))` + `expect_s3_class(result$aar, "numeric")` per function |
+| Deprecation warnings via lifecycle pattern (deprecate_warn()) | R community expectation: never break silently | LOW | Use `lifecycle::deprecate_warn("0.66.0", "old_fn()", "new_fn()")` or rlang-classed warning directly |
+| NEWS.md discipline: every deprecation listed with version and replacement | Users need to know what changed and when; CRAN reviewers check NEWS | LOW | Format: `## Deprecated` section in the relevant version block; "old_fn() is deprecated; use new_fn() instead." |
+| Deprecation test: `expect_warning(old_fn(), class = "lifecycle_warning_deprecated")` | Ensures the deprecation fires rather than silently no-ops | LOW | lifecycle's `expect_deprecated()` helper handles the session-once suppression by setting `lifecycle_verbosity = "warning"` |
 
 ### Differentiators (Competitive Advantage)
 
-| Feature | Value Proposition | Complexity | Existing Component | Notes |
-|---------|-------------------|------------|-------------------|-------|
-| Typographic hierarchy in `es_report()` HTML output | Distinguishes the report from a raw `.Rmd` knit; signals EventStudy is a polished tool, not a script; metric callout boxes make key numbers pop | MEDIUM | `skeleton.Rmd` (uses `## ` headers, no custom CSS) | Inject a `<style>` block or link a custom CSS via `html_document(css=...)` inside the template that sets font stack, header sizing, metric callout boxes. Must not require new hard dependencies |
-| Confidence-band fills distinguishable in multi-group AAR/CAAR plots | Multi-group overlapping confidence bands need distinct, clearly labeled fills; current single-group "steelblue" is fine but multi-group coloring is undefined | MEDIUM | `R/plotting.R` `plot_event_study()` | Map group variable to color scale; CI fill = same hue at 20% alpha. Requires `.es_palette` already proposed above |
-| `es_report()` opens browser for HTML when called interactively | Quality-of-life: `es_report(task)` already prints the path; opening the file in the default browser adds UX delight for a one-call function at the REPL | LOW | `R/report.R` `es_report()` | `utils::browseURL(path)` when `open = TRUE` (default: `interactive()` guard so batch scripts are unaffected). Opt-in argument |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Formal lifecycle stage annotation in roxygen (`@lifecycle` badge) | Documents stability promise at the function level; surfaced on pkgdown; sets explicit user expectation | LOW | Badges: experimental / stable / deprecated / superseded — add to roxygen `@description` |
+| Signature audit report before snapshotting | Prevents locking naming inconsistencies into the snapshot permanently; one-time audit catches `estimation_window` vs `est_window` style drift | LOW | `lapply(getNamespaceExports("EventStudy"), function(f) names(formals(get(f, envir=asNamespace("EventStudy")))))` |
+| Return-shape contract as a vignette section | Makes the contract a user-facing promise, not just an internal test | LOW | Add "Return value shapes" to the Methods: Introduction article; list column names/types for each key function |
+| Superseded stage for re-named functions (not deprecated) | Superseded does not emit runtime warnings so it does not annoy users; still documents intent | LOW | Use `lifecycle::deprecate_soft()` or `@lifecycle superseded` roxygen tag |
 
-### Anti-Features (Explicitly Excluded)
+### Anti-Features (Things to Deliberately NOT Do)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| kableExtra as a hard Import | Prettier HTML tables; popular package | kableExtra has been dropped from Imports by several packages due to LaTeX conflicts and dependency weight | Suggests-only with `requireNamespace()` guard; fall back to plain knitr::kable with `booktabs=TRUE` |
-| gt package for report tables | gt produces beautiful HTML tables | gt adds a significant dependency chain; CRAN tarball weight increases | Stick with knitr::kable + optional kableExtra |
-| ggplot2 → plotly conversion for ALL report plots | Interactive plots everywhere look modern | ggplotly() conversion loses ggplot2 theme details and breaks on multi-facet plots; PDF renders break; the existing `knitr::is_html_output()` guard is the correct design | Keep ggplot2 static for PDF/Word; plotly for HTML when `interactive=TRUE` — existing pattern in skeleton.Rmd |
-| Custom R Markdown template file the user can edit | Power users want to tweak the report | Template drift with package updates is a support burden; any user edit is lost on package upgrade | Expose `sections=`, `title=`, `author=` args (already done); for deep customization, `generate_report()` is the lower-level API |
+| Snapshot the full print() output of EventStudyTask objects | "Lock the user-visible representation" | Print output changes on every R/rlang/tibble version causing constant `snapshot_accept()` cycles | Test specific fields: `expect_equal(task$n_events, 3L)` not `expect_snapshot(print(task))` |
+| Snapshot test with `cran = TRUE` for signature tests | "Run on CRAN too" | CRAN check environments vary by platform and locale; snapshot generated on Linux may not match Windows rendering | Use `cran = FALSE` (default) for all signature snapshots |
+| One monolithic snapshot file covering all 30 exported functions | "Efficient" | A single change causes the entire snapshot to appear diff'd; reviewers cannot tell what actually changed | One `expect_snapshot()` call per function or per logical group |
+| Immediate hard removal (deprecate_stop) in the same version as deprecate_warn | "Clean up fast" | Breaks users who just started getting warnings; expectation is warn for at least one minor version cycle | Warn in v0.66.0, make defunct earliest in v0.67.0; document the timeline explicitly in NEWS.md |
+| Adding `lifecycle` to Imports as a hard dependency | "Cleaner code" | Increases the dependency surface CRAN evaluates; not needed at runtime if only used for deprecation signals | Keep lifecycle in Suggests; use `rlang::warn()` with class `lifecycle_warning_deprecated` directly, or guard with `requireNamespace("lifecycle")` |
 
 ---
 
-## Surface 3 — API & Message Polish
+## Thrust 3: Install-Tested CI
 
 ### Table Stakes (Users Expect These)
 
-| Feature | Why Expected | Complexity | Existing Component | Notes |
-|---------|--------------|------------|-------------------|-------|
-| All `print.*` S3 methods return `invisible(x)` | R convention: all `print.*` S3 methods must return their argument invisibly so objects can be used in pipelines without double-printing | LOW | `R/task.R` print.EventStudySummary, `R/advise.R` print.Advice, `R/advise_offline.R` print.es_advice, `R/simulation.R` print.es_simulation | Audit each: must end with `return(invisible(x))`, not `invisible(NULL)` or missing return |
-| Error messages that name the offending argument and its value | `stop("task must be an EventStudyTask.")` gives no clue what was actually passed; idiomatic: `stop("'task' must be an EventStudyTask, got: ", class(task)[1])` | LOW | `R/prepare_event_study.R` lines 14, 18; `R/task.R` many stop() calls | Add the actual value/class to all stop() messages; no new dependency — plain base-R improvement |
-| `format()` method defined for every class that has a `print()` | R convention: `print()` wraps `format()`; missing format() means piping object into `glue()` or `paste()` fails | LOW–MEDIUM | `R/advise.R` (print.Advice exists, format.Advice does not); same for es_diagnostics, es_simulation | Define `format.Cls` assembling the character representation; rewrite `print.Cls` to call `cat(format(x), sep="\n")` |
-| Argument name consistency across all public functions | `run_event_study()`, `fit_model()`, `calculate_statistics()` consistently use `task` then `parameter_set`; newer functions (`es_report`, `es_advise`) must match this contract | LOW | `R/execute.R`, `R/report.R`, `R/advise.R` | Audit: `task` first arg, `parameter_set` second where applicable, `...` at end; document the rule |
-| `run_event_study()` gets `verbose = TRUE/FALSE` | Batch users do not want console output; interactive users want progress signals; currently `message("Report written to: ...")` always fires | LOW | `R/execute.R` line 42 | Add `verbose = TRUE` default; wrap message() calls in `if (verbose)`. Backward-compatible (default TRUE preserves existing behavior) |
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| CI runs `rcmdcheck::rcmdcheck(args = "--as-cran")` not just `devtools::test()` | `load_all()` bypasses NAMESPACE restrictions; installed-package test is the only way to catch "works in dev, broken when installed" bugs | LOW | Use r-lib/actions `check-r-package` workflow; it installs and runs `R CMD check` not `devtools::test()` |
+| Windows CI coverage (win-devel or win-release) | CRAN checks Windows; packages failing only on Windows get rejected | LOW | `devtools::check_win_devel()` locally + GitHub Actions matrix with `{os: windows-latest, r: release}` |
+| `_R_CHECK_FORCE_SUGGESTS_=false` set in CI | Suggested packages (rugarch, did, etc.) are not installed in standard check environments; matches what CRAN runs | LOW | Add `env: _R_CHECK_FORCE_SUGGESTS_: false` to the GHA step |
+| Test suite must pass under R CMD check, not just under `devtools::test()` | Known cases where tests pass under `load_all` but fail under check (NAMESPACE export gaps, missing importFrom) | LOW | Validate by running `devtools::check(args="--no-manual --no-build-vignettes")` locally before any CRAN submission attempt |
 
 ### Differentiators (Competitive Advantage)
 
-| Feature | Value Proposition | Complexity | Existing Component | Notes |
-|---------|-------------------|------------|-------------------|-------|
-| Classed conditions for the three most common user errors | Users can programmatically catch "not fitted" vs "bad input" vs "missing package" in tryCatch; production pipelines that wrap EventStudy need this | MEDIUM | `R/task.R`, `R/models.R`, `R/prepare_event_study.R` — all use bare `stop()` | Three target classes: `eventstudy_error_not_fitted`, `eventstudy_error_bad_input`, `eventstudy_error_missing_package`. Implement via `rlang::abort(message, class="eventstudy_error_X")`. rlang already in Imports |
-| cli-styled `print.EventStudyTask` with header, key stats in aligned columns | Current `cat()` output is plain; tidyverse packages (tibble, dplyr) all use cli formatting; researchers opening a task at the REPL should get a dashboard-style summary | MEDIUM | `R/task.R` lines 93–115: bare `cat()` calls | Rewrite using `cli_h1()`, `cli_dl()` for definition list (key: value), `cli_rule()` for separator. Add cli to Suggests; if not available, fall back to existing cat() pattern |
-| `summary()` method for `EventStudyTask` returning a proper S3 object | `summary(task)` currently falls through to the R6 default; users expect a proper summary on a model-like object | MEDIUM | `R/task.R` — `print.EventStudySummary` S3 exists (line 313); `summary.EventStudyTask` not found | Define `summary.EventStudyTask` returning an `EventStudySummary` S3 object; `print.EventStudySummary` already exists — just needs the `summary()` entrypoint wired |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| macOS CI leg (r-release on macos-latest) | Some packages break on Apple Silicon (arm64 BLAS, rugarch linking) and CRAN checks mac; one mac leg catches this class of issue before submission | LOW | Add `{os: macos-latest, r: release}` to GHA matrix |
+| Scheduled weekly CI run even with no commits | Catches breakage caused by upstream package updates (tidyverse releases, R minor version bumps) | LOW | Add `schedule: - cron: '0 6 * * 1'` to the GHA YAML |
+| Vignette build as separate CI step | Vignettes fail offline for different reasons than code; separating them makes it easier to diagnose the failure class | LOW | Run `devtools::build_vignettes()` separately; compare vs the `--no-build-vignettes` baseline |
 
-### Anti-Features (Explicitly Excluded)
+### Anti-Features (Things to Deliberately NOT Do)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Renaming public functions (e.g. `run_event_study` → `event_study()`) | Shorter, friendlier names | Any function rename in a CRAN package with downstream users is a breaking change requiring a full deprecation cycle; this is a polish minor, not a 1.0 rename | Use `lifecycle::deprecate_warn()` only if a specific argument name is genuinely confusing; no function renames this milestone |
-| cli as a hard Import | cli formatting is polished and widely used | cli is heavier than it looks; several packages have resisted importing it; Suggests means users without cli still work fine | Add to Suggests with `requireNamespace()` guard in print methods |
-| Progress bars for long model fits | UX improvement during batch multi-event runs | progress package dependency; sequential purrr::map() loops would need restructuring; scope creep | `verbose` argument with messages covers the need |
+| Test all 12 optional Suggests packages in CI | "Full coverage" | rugarch, did, DIDmultiplegt, rmgarch, quadprog require Fortran compilers or system libraries; build time doubles or more | Test with `_R_CHECK_FORCE_SUGGESTS_=false` (matching CRAN); add a separate optional-deps workflow that is not a required gate |
+| `devtools::check(document=TRUE)` as the CI gate | Faster, developer-friendly | Does not run `--as-cran`; misses incoming feasibility NOTE, URL validation, strict NOTE/WARNING thresholds | Use `rcmdcheck::rcmdcheck(args="--as-cran")` as the gate; reserve `devtools::check` for local iteration |
 
 ---
 
-## Surface 4 — Docs & Site Polish
+## Thrust 4: CRAN Resubmission (Archived Package)
 
 ### Table Stakes (Users Expect These)
 
-| Feature | Why Expected | Complexity | Existing Component | Notes |
-|---------|--------------|------------|-------------------|-------|
-| `@family` roxygen tags on related function groups | Generates "See Also" sections; drives pkgdown reference page cross-linking; rOpenSci requires it for peer review packages | LOW | `R/` roxygen docs — no `@family` tags found in search | Tag groups: pipeline (`run_event_study`, `prepare_event_study`, `fit_model`, `calculate_statistics`), advisor (`es_advise`, `es_diagnostics`, `es_report`), export (`export_results`, `tidy.EventStudyTask`), plots (`plot_event_study`, `plot_stocks`, `plot_diagnostic`) |
-| Lifecycle badge corrected to `stable` in README | Currently says "experimental"; misleading for a CRAN-released package at v0.64.0 with 2287 passing tests | LOW | `README.md` line 7 | Change badge URL and label; update `lifecycle` field in DESCRIPTION if present |
-| `<!-- pkgdown: home: start/end -->` markers in README | Controls which README content appears on the pkgdown homepage; without markers, the entire README (including dev-install instructions) appears verbatim | LOW | `README.md` — no markers present | Add markers so the pkgdown homepage shows Features + Quick Start but hides the dev-only GitHub install block |
-| `@seealso` cross-links on the three pipeline functions | Users reading `fit_model()` docs should see a link to `calculate_statistics()`; without this, function discovery requires knowing names in advance | LOW | `R/execute.R`, `R/report.R` roxygen blocks — sparse `@seealso` | Add `@seealso \code{\link{calculate_statistics}}` etc. to `run_event_study`, `fit_model`, `calculate_statistics`; add advisor cross-links to `es_advise`, `es_report` |
-| Getting-started article listed first in Articles nav | "Get Started" nav item exists but `introduction` vignette order in Articles section of `_pkgdown.yml` must be verified | LOW | `_pkgdown.yml` articles section | Confirm `introduction` is the first entry in the "Get Started" group; if not, re-order |
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| All pre-existing WARNINGs resolved before submission | CRAN treats WARNINGs as blocking regardless of whether they are "pre-existing"; documenting them does not excuse them | MEDIUM | Known WARNINGs to fix: (a) non-ASCII chars in R/advise.R, R/knowledge_base.R, R/report.R — replace with `\uXXXX` escapes; (b) `median`/`tail` undefined globals in es_diagnostics.R — add `@importFrom stats median` and `@importFrom utils tail` |
+| cran-comments.md resubmission section with archival acknowledgment | CRAN reviewers read this file; it is the cover letter | LOW | `## Resubmission` section at top: list each change; `## R CMD check results`: "0 errors, 0 warnings, N notes" with each NOTE explained; `## Test environments`; `## Reverse dependencies: none (package was archived)`. Optional comment field on CRAN submission form: "This is a resubmission of EventStudy, archived 2024-04-20. [List what was fixed.]" |
+| Version number higher than archived version (0.39.2) | CRAN requires incrementing version at each submission | RESOLVED | Current version 0.65.x → 0.66.0, well above 0.39.2 |
+| `devtools::check_win_devel()` green before submission | Windows-devel is the most demanding CRAN platform; a WARNING there causes rejection | MEDIUM | Run locally; fix any Windows-specific issues (file path separators, encoding) before submitting |
+| `_R_CHECK_FORCE_SUGGESTS_=false` check passing with 0 errors | CRAN runs with missing Suggests; if the package ERRORs here it will be rejected | LOW | Verify graceful degradation via `requireNamespace()` is complete; the current cran-comments.md records an ERROR when this flag is not set — ensure it is documented that this is env-only |
+| All examples either runnable or wrapped in `\dontrun{}` / `\donttest{}` | CRAN checks examples; network-calling or long-running examples cause check failures | LOW | LLM-dependent examples must be in `\dontrun{}`; any example >5 seconds must use `\donttest{}` |
+| Stale 0.62.0 tarball removed from repo | Working tree artifacts cause the `.git`/`.planning` NOTE to appear in unexpected places | LOW | `git rm` the tarball; confirm with `R CMD check` that the NOTE is gone |
 
 ### Differentiators (Competitive Advantage)
 
-| Feature | Value Proposition | Complexity | Existing Component | Notes |
-|---------|-------------------|------------|-------------------|-------|
-| README "Ecosystem" section linking eventstudy.de, GSheets template, and WebAssembly app | Researchers finding the R package via CRAN or GitHub should immediately understand the three-tool ecosystem | LOW | `README.md` — no ecosystem section | Add a concise "Ecosystem" or "Part of the EventStudy Suite" section after Features; 3–5 bullet points with links |
-| pkgdown homepage card strip mirroring eventstudy.de layout | The eventstudy.de brand hub uses a card + numeric-badge layout; the pkgdown homepage echoing this establishes ecosystem coherence | MEDIUM | `pkgdown/extra.css` (gallery grid CSS exists), `README.md` (homepage source) | Adapt existing `.es-gallery` CSS to a "three-tool ecosystem" card strip inside the `pkgdown: home:` block; low-content change |
-| NEWS.md linked from pkgdown navbar | Researchers tracking package changes should reach the changelog in one click; common in mature packages | LOW | `_pkgdown.yml` — no News component in navbar currently | Add `news: { one_page: true }` in `_pkgdown.yml`; pkgdown auto-renders NEWS.md at news/index.html |
-| `CONTRIBUTING.md` pointing to dev workflow | Reduces maintainer questions from new contributors; common in active CRAN packages | LOW | None found | Minimal file: PR welcome, run `devtools::check()`, reference `cran-comments.md`; `.Rbuildignore`d |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| R-hub or win-builder multi-platform check report in cran-comments.md | Shows CRAN team you tested beyond local Linux; reduces back-and-forth review cycles | LOW | Run `devtools::check_win_devel()` + `devtools::check_win_release()` and paste summary; or `rhub::rhub_check(platforms=c("windows","macos","linux"))` |
+| NEWS.md entry for 0.66.0 explicitly citing CRAN resubmission | Reviewers appreciate transparency about what changed since the archived version | LOW | Headline item: `## CRAN resubmission after archival (2024-04-20)` with bulleted list of fixes |
+| Explaining the CRAN incoming feasibility NOTE in cran-comments.md | The NOTE "Package was archived on CRAN" disappears once the package is on CRAN; documenting it prevents it being misread as a current problem | LOW | Add under Notes: "This NOTE appears because the package is currently archived (2024-04-20). It will disappear on acceptance." |
 
-### Anti-Features (Explicitly Excluded)
+### Anti-Features (Things to Deliberately NOT Do)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Rewriting the 18 CRAN vignettes | They could be restructured or updated | Breaking change to vignette slugs breaks external URLs; any rewrite risks introducing errors that fail `R CMD check --as-cran` | Add cross-links and a better intro; restructuring is a future milestone |
-| Moving pkgdown-only articles into CRAN vignettes | Makes rich content available offline in the tarball | Bloats the tarball; slows `R CMD check`; the v0.63.0 decision was deliberate | Status quo: pkgdown-only, clearly labeled in the navbar |
-| PDF vignette for CRAN | Some journals request PDF | PDF vignettes require LaTeX toolchain in CI; adds a NOTE in `R CMD check` if tinytex fails | HTML vignettes on CRAN; PDF available via `es_report(format="pdf")` |
+| Submit immediately after fixing NOTEs without multi-platform testing | "It passes locally" | Local Linux checks miss Windows encoding issues, path separator differences, and Windows-only R CMD check rules | Always run `check_win_devel()` + at least one R-hub Linux check before submitting |
+| Use `gridExtra` without verifying it is in DESCRIPTION | It appeared in the prior check history as a concern | If `gridExtra` is called without `requireNamespace()` guard AND not in Imports/Suggests, the package gets an undeclared-dependency NOTE/ERROR | Audit every `::` call: `grep -rn "::" R/ | grep -v "^#"` and cross-check against DESCRIPTION |
+| Submitting with any un-explained WARNING in cran-comments.md | "Document it as pre-existing" | CRAN policy treats WARNINGs as blocking; documenting them as pre-existing does not excuse them; only works for NOTEs | Fix every WARNING to 0 before submitting; document only NOTEs as pre-existing |
+| Relying on the existing `## Pre-existing NOTEs` section from v0.50.0 cran-comments.md without update | The old section is accurate history | The old section describes findings that may no longer apply; a stale section confuses reviewers | Rewrite cran-comments.md from scratch for the 0.66.0 submission with current check results |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Surface 1: Brand
-  hex sticker design (SVG source)
-      └── enables ──> man/figures/logo.png placement
-      └── enables ──> README hex badge
-  man/figures/logo.png
-      └── enables ──> pkgdown::build_favicons() → pkgdown/favicon/
-      └── enables ──> Open Graph social card (image src)
-  bslib palette alignment
-      └── requires ──> eventstudy.de color codes (design input)
-      └── enhances ──> Open Graph social card image consistency
+[Thrust 1: Correctness] ──requires──> [estudy2 in test/Suggests, skip_if_not_installed]
 
-Surface 2: Report / Plot Aesthetics
-  .es_palette constant
-      └── requires ──> colorblind-safe color selection (design decision, no code dep)
-      └── enables  ──> es_theme() internal helper
-      └── enables  ──> consistent multi-group CI band coloring in plot_event_study()
-  es_theme() internal helper
-      └── requires ──> .es_palette
-      └── enables  ──> all ggplot2 plot functions (R/plotting.R)
-  knitr fig.cap on plot chunks
-      └── requires ──> skeleton.Rmd chunk refactor
-      └── independent of palette/theme changes
+[Thrust 2: API snapshots] ──requires──> [Thrust 2: signature audit complete first]
+                                          (snapshotting before audit locks in inconsistencies)
 
-Surface 3: API & Message Polish
-  format.Cls methods
-      └── enables  ──> print.Cls rewrite (print calls format)
-  classed conditions (rlang::abort)
-      └── requires ──> rlang (already in Imports — zero new dep)
-      └── independent of cli
-  cli print.EventStudyTask
-      └── requires ──> cli in Suggests
-      └── independent of classed conditions
-  verbose= argument
-      └── independent of all other polish items
+[Thrust 2: deprecation policy] ──requires──> [lifecycle in Suggests OR rlang direct call]
 
-Surface 4: Docs & Site
-  @family + @seealso tags (roxygen)
-      └── requires ──> devtools::document() rebuild
-      └── enables  ──> pkgdown reference grouping improvements
-  pkgdown: home: markers in README
-      └── enables  ──> homepage card strip (markers must exist first)
-  logo.png (Surface 1)
-      └── enables  ──> Open Graph image (Surface 1 must complete first)
+[Thrust 3: Install CI] ──blocks──> [Thrust 4: CRAN submission]
+                                    (CI must be green before submitting)
+
+[Thrust 1: 0 WARNINGs] ──blocks──> [Thrust 4: CRAN submission]
+  (non-ASCII + undefined globals must be fixed)
+
+[Thrust 4: cran-comments.md] ──requires──> [Thrust 3: multi-platform check results]
+
+[v0.50.0 contract/regression net] ──enhances──> [Thrust 1: property tests]
+                                                  (degenerate-input NA discipline already tested;
+                                                   golden tests extend to valid-input correctness)
 ```
+
+### Dependency Notes
+
+- **estudy2 as test dependency only:** Add to `Suggests` guarded by `skip_if_not_installed("estudy2")` in tests; do not add to Imports. Avoids polluting the installed package's dependency footprint.
+- **Signature audit before snapshot:** Running snapshot tests before fixing naming inconsistencies locks the wrong names into `_snaps/` files permanently. One audit pass first, then snapshot.
+- **CI green gates CRAN:** The v0.62.0 `pkgdown.yaml` CI already runs `R CMD check`; the new `--as-cran` + `FORCE_SUGGESTS=false` CI is an additive layer, not a replacement.
 
 ---
 
-## MVP Definition
+## MVP Definition (v0.66.0 Scope)
 
-### v0.65.0 Polish minimum
+### Must Ship (blocks CRAN submission)
 
-All four surfaces are in scope. "MVP" here means the irreducible minimum within each surface to satisfy the "Polish" release label.
+- [ ] Fix non-ASCII in R/advise.R, R/knowledge_base.R, R/report.R — required for 0 WARNINGs
+- [ ] Fix `median`/`tail` undefined globals in es_diagnostics.R — required for clean NOTE set
+- [ ] Verify `gridExtra` is declared or all uses are guarded — clean import audit
+- [ ] Remove stale 0.62.0 tarball from repo
+- [ ] CAR = cumsum(AR) property test across all 13 models
+- [ ] estudy2 cross-validation test (securities_returns dataset, tolerance 0.01)
+- [ ] Signature snapshot tests for all ~30 exported functions (after audit)
+- [ ] Return-shape contract tests for tibble-returning functions
+- [ ] `devtools::check_win_devel()` green
+- [ ] Updated cran-comments.md with resubmission section + archival acknowledgment
+- [ ] GitHub Actions `--as-cran` CI leg with `_R_CHECK_FORCE_SUGGESTS_=false`
+- [ ] Submit via `devtools::submit_cran()`
 
-- [ ] **Brand**: Hex sticker PNG + `man/figures/logo.png` placement + favicon generation + lifecycle badge corrected to `stable`
-- [ ] **Report/Plot**: Shared `.es_palette` constant + `es_theme()` internal helper wired into all ggplot2 plots + `fig.cap` on plot chunks in skeleton.Rmd
-- [ ] **API**: Audit all `print.*` methods return `invisible(x)` + error messages name offending argument values
-- [ ] **Docs**: `@family` + `@seealso` tags on pipeline + advisor functions; lifecycle badge; `<!-- pkgdown: home: -->` markers
+### Add After Validation (v0.66.x)
 
-### Add after initial surface pass (v0.65.x)
+- [ ] Lifecycle badges on pkgdown reference pages — if deprecation warnings generate user questions
+- [ ] R-hub multi-platform check artifacts — if CRAN reviewer asks for cross-platform evidence
+- [ ] Kolari-Pynnonen cross-validation against EventStudyTools formula
 
-- [ ] Open Graph social preview card — 15-minute config once logo exists
-- [ ] bslib palette alignment to eventstudy.de — needs color code input from brand
-- [ ] cli-styled `print.EventStudyTask` — higher DX value; needs cli in Suggests
-- [ ] `format()` methods for all S3 classes — complete the print/format contract
-- [ ] `summary.EventStudyTask` S3 wiring — needs design of what to include
-- [ ] README Ecosystem section — content decision (links to eventstudy.de tools)
-- [ ] `run_event_study(verbose=)` — low risk, good for batch users
-- [ ] NEWS.md in pkgdown navbar
-- [ ] Typographic CSS in `es_report()` HTML
+### Future Consideration (v0.67.0+)
 
-### Future consideration (v0.66.0+)
-
-- [ ] Full classed condition hierarchy (all `stop()` → `rlang::abort()`) — needs naming convention decision
-- [ ] CONTRIBUTING.md — helpful but not user-visible behavior
-- [ ] kableExtra-styled report tables — Suggests dep, design decision needed
+- [ ] Numerical stability kappa() guards on all matrix operations — requires auditing all 13 models
+- [ ] GARCH convergence guard — requires rugarch expertise; too broad for this milestone
+- [ ] Superseded/defunct lifecycle cycle for renamed functions — requires deciding on new names first
 
 ---
 
@@ -219,63 +202,80 @@ All four surfaces are in scope. "MVP" here means the irreducible minimum within 
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Hex sticker / logo asset created | HIGH | MEDIUM | P1 |
-| `man/figures/logo.png` placement + favicon | HIGH | LOW | P1 |
-| Lifecycle badge → `stable` | HIGH | LOW | P1 |
-| `.es_palette` constant + `es_theme()` helper | HIGH | LOW | P1 |
-| `fig.cap` on plot chunks in skeleton.Rmd | HIGH | LOW | P1 |
-| `@family` + `@seealso` roxygen tags | MEDIUM | LOW | P1 |
-| `<!-- pkgdown: home: -->` markers in README | MEDIUM | LOW | P1 |
-| `print.*` → `invisible(x)` audit | MEDIUM | LOW | P1 |
-| Error messages name offending values | MEDIUM | LOW | P1 |
-| bslib palette alignment to eventstudy.de | HIGH | MEDIUM | P2 |
-| Open Graph social preview card | MEDIUM | LOW | P2 |
-| `format()` methods for S3 classes | MEDIUM | LOW | P2 |
-| Classed conditions (`rlang::abort`) | MEDIUM | MEDIUM | P2 |
-| cli `print.EventStudyTask` | MEDIUM | MEDIUM | P2 |
-| `summary.EventStudyTask` S3 wiring | MEDIUM | LOW | P2 |
-| `run_event_study(verbose=)` argument | LOW | LOW | P2 |
-| README Ecosystem section | MEDIUM | LOW | P2 |
-| NEWS.md in pkgdown navbar | LOW | LOW | P2 |
-| Typographic CSS in `es_report()` HTML | LOW | MEDIUM | P3 |
-| `es_report()` browser-open on HTML | LOW | LOW | P3 |
-| CONTRIBUTING.md | LOW | LOW | P3 |
-
-**Priority key:**
-- P1: Must have for v0.65.0 to read as a "Polish" release
-- P2: High bang-for-buck; include if time allows
-- P3: Nice to have; defer to v0.65.x or v0.66.0
+| Fix non-ASCII WARNINGs | HIGH (blocks CRAN) | LOW | P1 |
+| Fix undefined globals NOTE | HIGH (blocks CRAN) | LOW | P1 |
+| CAR = cumsum(AR) property tests | HIGH (correctness net) | LOW | P1 |
+| estudy2 golden cross-validation | HIGH (provable correctness) | MEDIUM | P1 |
+| Signature snapshot tests (all exports) | HIGH (API lock) | MEDIUM | P1 |
+| Return-shape contract tests | HIGH (downstream stability) | MEDIUM | P1 |
+| cran-comments.md resubmission section | HIGH (blocks CRAN) | LOW | P1 |
+| GHA --as-cran CI with FORCE_SUGGESTS=false | HIGH (install-tested gate) | LOW | P1 |
+| check_win_devel() green | HIGH (blocks CRAN) | MEDIUM | P1 |
+| Signature audit (naming consistency) | MEDIUM (one-time cleanup) | LOW | P2 |
+| Lifecycle deprecation warnings | MEDIUM (user experience) | LOW | P2 |
+| NEWS.md resubmission headline | MEDIUM (transparency) | LOW | P2 |
+| macOS CI leg | MEDIUM (platform coverage) | LOW | P2 |
+| kappa() numerical stability guards | LOW (edge case) | HIGH | P3 |
+| GARCH convergence guard | LOW (rugarch-specific) | HIGH | P3 |
 
 ---
 
-## Comparator Analysis
+## Golden Source References
 
-| Feature | estudy2 (CRAN) | eventstudyr (CRAN) | EventStudy (this package) |
-|---------|----------------|---------------------|--------------------------|
-| Hex sticker / logo | No | No | Planned v0.65.0 |
-| pkgdown site | No | No | Shipped v0.62.0 |
-| Colorblind-safe plots | No | No | Planned v0.65.0 |
-| Consistent internal theme | No | No | Planned v0.65.0 |
-| cli-style print methods | No | No | Planned v0.65.0 |
-| Classed error conditions | No | No | Planned v0.65.0 |
-| lifecycle badges | No | No | Planned v0.65.0 |
-| @family cross-linking | No | No | Planned v0.65.0 |
+### Primary formula specification: MacKinlay (1997)
+- **Citation:** MacKinlay, A.C. (1997). "Event Studies in Economics and Finance." *Journal of Economic Literature*, 35(1), 13-39.
+- **Role:** Formula specification for AR, CAR, AAR, CAAR and the market model. Table 1 illustrates a worked earnings-announcement example using 600 Dow Jones quarterly announcements 1989-1993 (good/no/bad news split).
+- **Limitation:** Table 1 uses CRSP value-weighted index data not publicly reproducible. Use as formula spec, not as reproducible golden numbers.
+- **Confidence:** HIGH.
 
-Neither comparator has a pkgdown site or any of these polish features. This milestone makes EventStudy the reference implementation in the space for package quality, not just statistical coverage.
+### Secondary formula derivations: Campbell, Lo & MacKinlay (1997)
+- **Citation:** Campbell, J.Y., Lo, A.W., MacKinlay, A.C. (1997). *The Econometrics of Financial Markets*, Chapter 4. Princeton University Press.
+- **Role:** Deeper variance correction derivations for Patell, BMP.
+- **Confidence:** HIGH.
+
+### Reproducible golden dataset: estudy2 (CRAN v0.10.0)
+- **Package:** `irudnyts/estudy2` on CRAN. Bundled dataset: `securities_returns` (7 firms, 2019-04-01 to 2020-04-01; S&P 500 as index).
+- **Golden values — event window 2020-03-16/17/19/20:**
+  - Patell (pt_stat): 2.5507, -2.9496, 8.4216, 6.3196
+  - Brown-Warner 1980 (bw_1980_stat): 2.4864, -3.3703, 8.1881, 6.2334
+  - Boehmer (bh_stat): 2.1666, 8.6521
+- **Tolerance for cross-validation:** `expect_equal(..., tolerance = 0.01)` — 1% relative tolerance accounts for different OLS solver conventions between packages; same sign + same significance level is the meaningful validation bar.
+- **Confidence:** MEDIUM (verified against live vignette output; package may have minor version differences).
+
+### Formula specification: EventStudyTools.com
+- **URL:** https://www.eventstudytools.com/significance-tests
+- **Role:** Clear formula statements for Patell Z, BMP, Sign, KP with variance expressions. Use as formula cross-check, not as golden numbers.
+- **Confidence:** MEDIUM.
+
+---
+
+## Tolerance Conventions
+
+| Comparison Type | Recommended Tolerance | Rationale |
+|----------------|----------------------|-----------|
+| Mathematical identities within one codebase (CAR=cumsum(AR), AAR=mean) | `1e-10` absolute | Same code path; only floating-point accumulation error permitted |
+| Cross-implementation (EventStudy vs estudy2) | `0.01` relative (1%) | Different OLS solvers, return conventions; 1% catches true formula bugs while tolerating solver differences |
+| Cross-implementation significance flags | Same sign + same `***/**/*` level | Statistical conclusion must match even when exact test statistics differ by solver |
+| Patell/BMP vs formula derivation | `0.001` relative | Formula differences are small; 0.1% catches implementation bugs |
+
+In testthat 3e: `expect_equal(got, expected, tolerance = 1e-10)` uses `all.equal()` with relative tolerance by default. For absolute tolerance: `expect_equal(got, expected, tolerance = 1e-10, scale = 1)`.
 
 ---
 
 ## Sources
 
-- [pkgdown Customise](https://pkgdown.r-lib.org/articles/customise.html) — bslib, fonts, navbar (webfetch, LOW confidence)
-- [pkgdown build_favicons](https://pkgdown.r-lib.org/reference/build_favicons.html) — logo placement, favicon generation (webfetch, LOW confidence)
-- [pkgdown Metadata / OG](https://pkgdown.r-lib.org/articles/metadata.html) — Open Graph social card config (webfetch, LOW confidence)
-- [hexSticker GitHub](https://github.com/GuangchuangYu/hexSticker) — sticker() function, PNG dimensions (webfetch, LOW confidence)
-- [R Packages (2e) Lifecycle chapter](https://r-pkgs.org/lifecycle.html) — deprecation workflow, CRAN backward-compat expectations (webfetch, LOW confidence)
-- [cli cli_format_method](https://cli.r-lib.org/reference/cli_format_method.html) — format/print S3 idiom (webfetch, LOW confidence)
-- [rOpenSci Dev Guide](https://devguide.ropensci.org/pkg_building.html) — README structure, badges, @family, cross-linking (webfetch, LOW confidence)
-- Codebase inspection: `R/plotting.R`, `R/task.R`, `R/report.R`, `inst/rmarkdown/templates/.../skeleton.Rmd`, `_pkgdown.yml`, `pkgdown/extra.css`, `README.md`, `DESCRIPTION` (direct Read, HIGH confidence)
+- MacKinlay (1997) via [Semantic Scholar](https://www.semanticscholar.org/paper/Event-Studies-in-Economics-and-Finance-Mackinlay/61d66e74e0d6973baf01ced1ddc27bc182c88bce) and [EconPapers](https://econpapers.repec.org/RePEc:aea:jeclit:v:35:y:1997:i:1:p:13-39)
+- [estudy2 RDocumentation](https://www.rdocumentation.org/packages/estudy2/versions/0.10.0) and [vignette](https://irudnyts.github.io/estudy2/articles/estudy2-intro.html) — primary golden values source
+- [estudy2 parametric test source](https://rdrr.io/cran/estudy2/src/R/car_parametric_tests.R)
+- [EventStudyTools significance tests](https://www.eventstudytools.com/significance-tests) — formula specifications for Patell Z, BMP, Sign, KP
+- [lifecycle package stages](https://lifecycle.r-lib.org/articles/stages.html) — deprecation lifecycle documentation
+- [testthat snapshotting](https://testthat.r-lib.org/articles/snapshotting.html) — snapshot test workflow and pitfalls
+- [R Packages (2e) Ch. 22: CRAN release](https://r-pkgs.org/release.html) — submission procedure
+- [R Packages (2e) Appendix A: R CMD check](https://r-pkgs.org/R-CMD-check.html) — check findings taxonomy
+- [CRAN Repository Policy](https://cran.r-project.org/web/packages/policies.html) — official submission rules
+- [r-package-devel archived package thread](https://stat.ethz.ch/pipermail/r-package-devel/2022q4/008604.html) — community experience with archived resubmissions
+- [Marine Data Science CRAN checklist](https://www.marinedatascience.co/blog/2020/01/09/checklist-for-r-package-re-submissions-on-cran/) — multi-platform check requirements
 
 ---
-*Feature research for: EventStudy v0.65.0 Polish milestone*
-*Researched: 2026-09-08*
+*Feature research for: EventStudy v0.66.0 Stabilization & CRAN Resubmission*
+*Researched: 2026-09-10*
