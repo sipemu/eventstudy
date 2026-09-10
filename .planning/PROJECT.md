@@ -4,7 +4,7 @@
 
 EventStudy is a comprehensive R package (CRAN) for financial event study analysis. It provides a composable R6 pipeline — `prepare_event_study()` → `fit_model()` → `calculate_statistics()` — with 13+ return models (Market, Fama-French 3/5, Carhart 4, GARCH, DCC-GARCH, Rolling-Window, BHAR, Volume, Volatility, Comparison-Period-Mean, Custom), 8+ test statistics (AR/CAR t-tests, Patell Z, BMP, Sign, Kolari-Pynnönen, Calendar-Time Portfolio, Cross-Sectional t), and specialized task types (panel DiD, intraday, synthetic control), plus bootstrap inference, cross-sectional regression, diagnostics, power simulation, and CSV/Excel/LaTeX export.
 
-The package is mature and CRAN-published. The v0.50.0 milestone made it **never silently wrong** on degenerate input (documented contract + regression net). This milestone builds the next layer up: an **LLM-agnostic AI advisor** that guides a user through an entire event study and interprets *only* package-computed numbers — never fabricating a result.
+The package is mature but currently **archived on CRAN** (removed 2024-04-20) and pending resubmission. The v0.50.0 milestone made it **never silently wrong** on degenerate input (documented contract + regression net); v0.60.0–v0.64.0 added a grounded AI advisor and one-call reporting; v0.65.0 polished brand, output, API feel, and docs. This milestone hardens correctness and locks the public API, then uses that base to get the package back onto CRAN.
 
 ## Core Value
 
@@ -12,27 +12,46 @@ The package must never produce a silently incorrect statistical result — and n
 
 ## Current State
 
-**Shipped v0.64.0 "Automated AI Reporting" (2026-09-07).** A single one-call entry
-point — `es_report()`, plus additive `run_event_study(..., report = TRUE)` — now takes
-a fitted event study from data to a polished, publication-ready report: it deep-clones
-the task (non-mutation), harvests `es_diagnostics()`, assembles a grounded section-by-section
-narrative, and renders to HTML/PDF/Word/Markdown. The report renders complete **offline**
-(rule-based advice engine) with no LLM configured; when a provider is present, LLM prose
-is grounding-guarded on the report path — a numeric literal absent from the diagnostics is
-dropped to the offline fallback with one warning and **never rendered**. Tagged and released
-on GitHub; suite green (2287 pass), `R CMD check --as-cran` clean vs baseline (1 pre-existing note).
+**Shipped v0.65.0 "Polish" (2026-09-10).** A quality pass that lifted the *felt*
+finish with no change to statistical results: EventStudy logo + hex sticker wired into
+README and the pkgdown navbar; an eventstudy.de-aligned pkgdown theme (palette, typography,
+card gallery, numeric badges); a shared `theme_eventstudy()` + Okabe-Ito `es_colours` palette
+across all ggplot2/plotly visuals; `es_report()` tables via `tinytable` (kable fallback) with
+per-format figure sizing and HTML-only report CSS; API/message polish (print methods return
+`invisible(x)`, classed `rlang` conditions, argument-naming in errors, `verbose=` quiet mode,
+backward-compatible); and docs/site cross-links. Audit PASSED (30/30 reqs, 5/5 phases);
+suite green; annotated tag `v0.65.0`. Prior milestones v0.60.0–v0.64.0 delivered the grounded
+AI advisor, offline diagnostics, and one-call reporting. **CRAN status: archived 2024-04-20,
+not yet resubmitted.**
 
-## Current Milestone: v0.65.0 Polish
+## Current Milestone: v0.66.0 Stabilization & CRAN Resubmission
 
-**Goal:** Visibly lift EventStudy's quality across brand, output, API feel, and docs — a ship-when-good polish pass that makes the R package look and feel like a finished product, aligned to the eventstudy.de ecosystem. Incremental minor, no 1.0 gate.
+**Goal:** Make results *provably correct* and the public API *stable/locked* — backed by a
+durable regression net and install-tested CI — then use that hardened base to get EventStudy
+back onto CRAN (archived 2024-04-20). Ship-when-good minor; not a 1.0 gate.
 
 **Target features:**
-- **Brand & visual identity** — design a real EventStudy logo + hex sticker (SVG assets), wire into the pkgdown site + README; align the pkgdown theme (palette, typography, card gallery, numeric badges) to the eventstudy.de look so the R package reads as part of the three-tool ecosystem (Google Sheets template · R package · WebAssembly app). eventstudy.de brand: "Event Study Analysis Made Simple" — clean neutral look, card + numeric-badge layout, and currently no logo at all.
-- **Report & plot aesthetics** — bring `es_report()` output and the ggplot2/plotly visuals to publication-grade: typography, spacing, colour, table styling, figure captions.
-- **API & message polish** — consistent signatures, print methods, error/warning wording, deprecation cleanup; back-compat preserved.
-- **Docs & site polish** — tighten vignettes/articles, fix rough edges on the pkgdown site, cross-links, README refresh; reconcile with eventstudy.de's documentation section.
+- **Correctness of results** — reference-value (golden) validation against published examples /
+  reference implementations (estudy2, eventstudies); systematic formula/implementation audit of
+  each return model & test statistic; expanded edge/property tests (CAR = cumsum(AR),
+  cross-method consistency, boundary windows); numerical-stability guards (matrix ops, GARCH,
+  bootstrap, long-window cumulation).
+- **Stable API** — API snapshot tests over the full public signature surface (exports, arg
+  names/defaults, S3 methods); signature-consistency audit reconciling outliers; a formal
+  deprecation policy + lifecycle (warn, don't break); return-shape contracts locking tibble
+  column names/types/shapes downstream code relies on.
+- **Install-tested CI** — a CI layer that exercises the *installed* package / gates on
+  `R CMD check` so "green under `load_all`, broken when installed" bugs (the `skeleton.Rmd`
+  `.report_table()` class) are caught.
+- **CRAN resubmission** — clean `R CMD check --as-cran` (fix bare `median`/`tail` in
+  `es_diagnostics.R`, non-ASCII sweep, verify `gridExtra` guarded/declared, drop the stale
+  0.62.0 tarball); multi-platform checks (win-devel/release, R-hub/mac); updated
+  `cran-comments.md` acknowledging the archival + fixes; submit and confirm.
 
-**Key context:** Logo/hex/site polish are pkgdown/gh-pages only (out of the CRAN tarball). Report/plot + API/message polish touch package code — behavior on valid inputs must not change, existing tests stay green, no new `R CMD check` findings, API changes stay backward-compatible.
+**Key context:** Behavior on valid inputs must not change — this is correctness/robustness/API-lock
+plus a submission gate, not a redesign; existing ~2359-test suite stays green. Deprecations are
+backward-compatible (warn, don't break). Optional deps stay in Suggests, `requireNamespace()`-guarded;
+no new `R CMD check` findings introduced. The 1.0 decision remains separate.
 
 ## Business Context
 
@@ -84,7 +103,9 @@ on GitHub; suite green (2287 pass), `R CMD check --as-cran` clean vs baseline (1
 
 <!-- Next milestone requirements are defined via /gsd-new-milestone (REQUIREMENTS.md is archived per milestone). -->
 
-Defining v0.65.0 "Polish" requirements — brand & visual identity (logo + hex sticker, eventstudy.de-aligned pkgdown theme), report & plot aesthetics, API & message polish, docs & site polish. See `.planning/REQUIREMENTS.md`.
+Defining v0.66.0 "Stabilization & CRAN Resubmission" requirements — correctness of results (reference-value validation, formula audit, edge/property tests, numerical stability), stable API (snapshot tests, signature audit, deprecation policy, return-shape contracts), install-tested CI, and CRAN resubmission (clean `--as-cran`, multi-platform checks, cover letter, submit). See `.planning/REQUIREMENTS.md`.
+
+v0.65.0 "Polish" shipped (brand & visual identity, report & plot aesthetics, API & message polish, docs & site polish) — 2026-09-10.
 
 ### Out of Scope
 
@@ -164,4 +185,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Update Context with current state
 
 ---
-*Last updated: 2026-09-08 after starting v0.65.0 Polish milestone*
+*Last updated: 2026-09-10 after starting v0.66.0 Stabilization & CRAN Resubmission milestone*

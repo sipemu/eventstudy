@@ -1,22 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.65.0
-current_phase: 24
-current_phase_name: docs-site-polish
-status: shipped
-stopped_at: context exhaustion at 75% (2026-09-09)
-last_updated: "2026-09-09T13:18:18.699Z"
-last_activity: 2026-09-09
-last_activity_desc: "v0.65.0 \"Polish\" milestone complete — audit PASSED (30/30 reqs, 5/5 phases), NEWS + tag"
-state_head: 277d44b76aadfa7620c803079d3d1e153b52b87f
+milestone: v0.66.0
+milestone_name: Stabilization & CRAN Resubmission
+status: planning
+last_updated: "2026-09-10T19:43:56.004Z"
+last_activity: 2026-09-10
 progress:
-  total_phases: 5
+  total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
   percent: 0
-milestone_name: Polish
-milestone_status: complete
 ---
 
 # Project State
@@ -30,12 +24,10 @@ See: .planning/PROJECT.md (updated 2026-09-08)
 
 ## Current Position
 
-Milestone: v0.65.0 "Polish" — COMPLETE (all 5 phases 20-24 done, audit PASSED 30/30 reqs)
-Phase: 24 (docs-site-polish) — final phase, complete
-Status: Milestone shipped — DESCRIPTION 0.65.0, NEWS.md 0.65.0 section, annotated tag v0.65.0 (local only)
-Last activity: 2026-09-10 — Completed quick task 260910-0f8: redesigned the article/reference ToC layout in pkgdown/extra.css to fix the off-center body + page-wide horizontal table scroll caused by the earlier 1560px widen. On screens >=1200px the row is now a CSS grid (1fr | minmax(0,900px) centered reading column | 1fr) with the "On this page" ToC sticky in the right gutter; wide tinytable tables get overflow-x:auto so they scroll in-box, not page-wide. Container 1600px and template-reference-topic now covered; narrow screens keep pkgdown's default flow. CSS-only, ASCII-clean, docs/ rebuilt. Final centered/sticky/in-box VISUAL confirmation is a pending human/browser check.
-
-Progress: [██████████] 100% (v0.65.0 phases 20-24 complete)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-09-10 — Milestone v0.66.0 started
 
 ## Milestone Roadmap (v0.65.0 — Phases 20–24)
 
@@ -155,8 +147,8 @@ Research flags for planning:
 
 ## Session Continuity
 
-Last session: 2026-09-09T13:18:18.679Z
-Stopped at: context exhaustion at 75% (2026-09-09)
+Last session: 2026-09-10T19:17:12.525Z
+Stopped at: context exhaustion at 75% (2026-09-10)
 Resume file: None
 
 ## Operator Next Steps
