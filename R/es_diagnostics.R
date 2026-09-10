@@ -139,11 +139,11 @@ format.es_diagnostics <- function(x, ...) {
 
     cat("\nEstimation window (medians across shown events):\n")
     cat("  R-squared:    ",
-        round(median(x$estimation_window$r2, na.rm = TRUE), 4), "\n")
+        round(stats::median(x$estimation_window$r2, na.rm = TRUE), 4), "\n")
     cat("  Shapiro-Wilk p:",
-        round(median(x$estimation_window$shapiro_p, na.rm = TRUE), 4), "\n")
+        round(stats::median(x$estimation_window$shapiro_p, na.rm = TRUE), 4), "\n")
     cat("  DW statistic: ",
-        round(median(x$estimation_window$dw_stat, na.rm = TRUE), 4), "\n")
+        round(stats::median(x$estimation_window$dw_stat, na.rm = TRUE), 4), "\n")
 
     cs <- x$cross_sectional
     cat("\nEvent window (cross-sectional):\n")
@@ -208,7 +208,7 @@ print.es_diagnostics <- function(x, ...) {
       if (has_cart) {
         cart <- task$data_tbl$CART[[i]]
         if (!is.null(cart) && "car" %in% names(cart) && nrow(cart) > 0L) {
-          abs(tail(cart$car, 1L))
+          abs(utils::tail(cart$car, 1L))
         } else {
           NA_real_
         }
@@ -353,7 +353,7 @@ print.es_diagnostics <- function(x, ...) {
         art <- task$data_tbl$ART[[i]]
         if (!is.null(art) && "ar_t" %in% names(art) && nrow(art) > 0L) {
           # Take last row's ar_t (most common: event day = last index)
-          ar_t_val <- tail(art$ar_t, 1L)
+          ar_t_val <- utils::tail(art$ar_t, 1L)
           if (is.numeric(ar_t_val) && length(ar_t_val) == 1L) {
             ar_t[k] <- ar_t_val
             if (!is.na(ar_t_val)) {
@@ -370,7 +370,7 @@ print.es_diagnostics <- function(x, ...) {
         cart <- task$data_tbl$CART[[i]]
         if (!is.null(cart) && nrow(cart) > 0L) {
           # Final row = full-window summary
-          last_row <- tail(cart, 1L)
+          last_row <- utils::tail(cart, 1L)
           if ("car" %in% names(last_row)) {
             final_car[k] <- last_row$car
           }
@@ -421,7 +421,7 @@ print.es_diagnostics <- function(x, ...) {
       tryCatch({
         cart <- task$data_tbl$CART[[i]]
         if (!is.null(cart) && "car" %in% names(cart) && nrow(cart) > 0L) {
-          tail(cart$car, 1L)
+          utils::tail(cart$car, 1L)
         } else {
           NA_real_
         }
@@ -591,7 +591,7 @@ print.es_diagnostics <- function(x, ...) {
     tryCatch({
       cart <- task$data_tbl$CART[[i]]
       if (!is.null(cart) && "car" %in% names(cart) && nrow(cart) > 0L) {
-        tail(cart$car, 1L)
+        utils::tail(cart$car, 1L)
       } else {
         NA_real_
       }
@@ -606,7 +606,7 @@ print.es_diagnostics <- function(x, ...) {
   list(
     n_summarized   = n_rem,
     mean_r2        = mean(r2_vals, na.rm = TRUE),
-    median_r2      = median(r2_vals, na.rm = TRUE),
+    median_r2      = stats::median(r2_vals, na.rm = TRUE),
     mean_final_car = mean(final_car_vals, na.rm = TRUE),
     n_fitted       = n_fitted_rem,
     n_degenerate   = n_rem - n_fitted_rem
