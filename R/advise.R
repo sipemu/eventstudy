@@ -1,5 +1,5 @@
 # =============================================================================
-# Grounded Advise Engine — es_advise() + Advice S3 + runtime grounding guard
+# Grounded Advise Engine \u2014 es_advise() + Advice S3 + runtime grounding guard
 # =============================================================================
 #
 # This file delivers the Phase 7 grounding guarantee: every claim returned by
@@ -16,7 +16,7 @@
 # warning-emitting point; never more than one warning per call.
 #
 # All jsonlite usage is guarded by requireNamespace("jsonlite", quietly=TRUE)
-# (Suggests discipline — package loads and tests cleanly with jsonlite uninstalled).
+# (Suggests discipline \u2014 package loads and tests cleanly with jsonlite uninstalled).
 
 # ---------------------------------------------------------------------------
 # Task types and routing constants
@@ -139,7 +139,7 @@ KB_KEY_MAP <- list(
 #' on any failure (absent jsonlite, NA/empty text, invalid JSON, non-list result).
 #' Uses simplifyVector=FALSE to preserve list-of-lists structure.
 #'
-#' This is NOT the warning-emitting point for the grounding guard — only for
+#' This is NOT the warning-emitting point for the grounding guard \u2014 only for
 #' parse failures. .validate_grounding() is the single guard-drop warning point.
 #'
 #' @param resp An es_provider_response with a $text field.
@@ -149,7 +149,7 @@ KB_KEY_MAP <- list(
 #' @noRd
 .parse_advice_json <- function(resp, source_label, task_type) {
   # If the provider already failed, it emitted its single warning via
-  # .provider_failure() (error field set, text = NA). Degrade SILENTLY here —
+  # .provider_failure() (error field set, text = NA). Degrade SILENTLY here \u2014
   # warning again would violate the exactly-one-warning contract.
   if (!is.null(resp$error)) {
     return(.empty_advice(source_label, task_type))
@@ -202,7 +202,7 @@ KB_KEY_MAP <- list(
 #'
 #' Drops the entire recommendation on any bad evidence entry.
 #' Emits exactly ONE warning when n_drop > 0 (this is the sole warning point
-#' for guard failures — mirrors .provider_failure() discipline).
+#' for guard failures \u2014 mirrors .provider_failure() discipline).
 #' Appends a caveat recording N drops.
 #'
 #' Tolerance: abs(reported - actual) <= max(abs_tol, rel_tol * abs(actual)).
@@ -226,7 +226,7 @@ KB_KEY_MAP <- list(
 
   for (rec in recs) {
     ev_list  <- rec$evidence %||% list()
-    # A recommendation with NO evidence is ungrounded by definition — it cites
+    # A recommendation with NO evidence is ungrounded by definition \u2014 it cites
     # nothing the package computed. Empty evidence[] must be DROPPED, never kept
     # (an empty inner loop would otherwise leave all_good = TRUE). (CR-01)
     all_good <- length(ev_list) > 0L
@@ -241,7 +241,7 @@ KB_KEY_MAP <- list(
       actual   <- .resolve_diag_key(diagnostics, key)
       reported <- ev$value
 
-      # NA handling — all(is.na()) catches an ALL-NA vector too, not just a
+      # NA handling \u2014 all(is.na()) catches an ALL-NA vector too, not just a
       # scalar NA (e.g. every event failed model fitting). Without this a
       # length>1 all-NA vector slips through to mean(na.rm=TRUE) -> NaN and
       # crashes the tolerance compare with no warning. (CR-02)
@@ -252,7 +252,7 @@ KB_KEY_MAP <- list(
 
       if (actual_na && !reported_na) { all_good <- FALSE; break }  # key absent, LLM has value
       if (!actual_na && reported_na) { all_good <- FALSE; break }  # key present, LLM says NA
-      if (actual_na && reported_na)  next                          # both NA — consistent
+      if (actual_na && reported_na)  next                          # both NA \u2014 consistent
 
       # Summarize vector-valued actuals to a scalar for comparison
       # (Vector keys without an index suffix return the whole vector;
@@ -340,7 +340,7 @@ KB_KEY_MAP <- list(
 .extract_numeric_literals <- function(text) {
   if (is.null(text) || length(text) == 0L || is.na(text) || !nzchar(text)) return(numeric(0L))
   # Pattern: optional sign anchored via lookbehind (sign only captured when NOT
-  # preceded by a word char, digit, or dot — prevents "t-statistic" hyphen being
+  # preceded by a word char, digit, or dot \u2014 prevents "t-statistic" hyphen being
   # read as a sign, while still capturing "=-0.032", "( -3.14", "was -0.045").
   # Longest alternative FIRST to avoid split on 4-digit numbers like "1997".
   # Matches: -3.14  0.001  2.35e-4  95  1,234.56  =-0.032  (CAR=-0.045)
@@ -636,7 +636,7 @@ KB_KEY_MAP <- list(
       recommendation = r$recommendation,
       citation       = r$citation,
       severity       = r$severity
-      # condition OMITTED — not serializable (knowledge_base.R:420-421)
+      # condition OMITTED \u2014 not serializable (knowledge_base.R:420-421)
     )
   })
 }
@@ -691,7 +691,7 @@ KB_KEY_MAP <- list(
 #'   6. Schema reminder
 #'
 #' For KB-grounded types (recommend_stat/flag_robustness with provider), the
-#' task instruction explicitly bounds the LLM to prose only — it must not invent
+#' task instruction explicitly bounds the LLM to prose only \u2014 it must not invent
 #' new diagnostic keys, add/remove recommendations, or modify any evidence entry.
 #' This is the intent-preservation instruction; the guard is the enforcement backstop.
 #'
@@ -908,14 +908,14 @@ print.Advice <- function(x, ...) {
 }
 
 # ---------------------------------------------------------------------------
-# Public: es_advise() — the grounded advise engine
+# Public: es_advise() \u2014 the grounded advise engine
 # ---------------------------------------------------------------------------
 
 #' Grounded AI Advice for Event Study Results
 #'
 #' Produces a grounded \code{Advice} S3 object by routing through a task-type
 #' dispatch, calling an optional LLM provider, parsing the JSON response, and
-#' running the runtime grounding guard — which drops any recommendation whose
+#' running the runtime grounding guard \u2014 which drops any recommendation whose
 #' \code{evidence[]} cites a diagnostic key absent from the computed diagnostics
 #' or a value mismatching beyond numeric tolerance.
 #'
@@ -927,7 +927,7 @@ print.Advice <- function(x, ...) {
 #' \describe{
 #'   \item{\code{recommend_stat}, \code{flag_robustness}}{
 #'     No provider: returns the Phase 5 \code{es_advice} object (offline KB
-#'     path — deterministic, \code{is_deterministic = TRUE}).
+#'     path \u2014 deterministic, \code{is_deterministic = TRUE}).
 #'     With provider: KB produces grounded evidence[], LLM adds prose;
 #'     returns an \code{Advice} object (\code{is_deterministic = FALSE}).
 #'   }
@@ -939,7 +939,7 @@ print.Advice <- function(x, ...) {
 #' }
 #'
 #' \strong{Failure discipline:} Any provider failure, malformed JSON, or empty
-#' response degrades to one \code{warning()} + an empty \code{Advice} object —
+#' response degrades to one \code{warning()} + an empty \code{Advice} object \u2014
 #' never a crash, never a fabricated result (mirrors \code{.handle_degenerate()}).
 #'
 #' @param diagnostics An \code{es_diagnostics} object returned by
@@ -1013,7 +1013,7 @@ es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL,
   # --- No-provider routing ---
   if (is.null(provider)) {
     if (task_type %in% LLM_ONLY_TYPES) {
-      # LLM-only types require a provider (ADV-06) — stop(), not warning
+      # LLM-only types require a provider (ADV-06) \u2014 stop(), not warning
       stop(
         sprintf(
           "es_advise(): task_type '%s' requires a provider. Supply provider= or use recommend_stat()/flag_robustness() for the offline path.",
@@ -1029,7 +1029,7 @@ es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL,
     if (task_type == "flag_robustness") {
       return(flag_robustness.es_diagnostics(diagnostics, provider = NULL))
     }
-    # OFFLINE-01 (Phase 17): report_writing offline path — no provider needed
+    # OFFLINE-01 (Phase 17): report_writing offline path \u2014 no provider needed
     if (task_type == "report_writing") {
       return(.build_offline_narrative(diagnostics))
     }
@@ -1096,7 +1096,7 @@ es_advise <- function(diagnostics, task_type, provider = NULL, model = NULL,
     return(.empty_advice(source_label, task_type))
   }
 
-  # Parse JSON (handles NA text, empty string, malformed JSON — each emits one warning)
+  # Parse JSON (handles NA text, empty string, malformed JSON \u2014 each emits one warning)
   parsed <- .parse_advice_json(resp, source_label, task_type)
 
   # If parse failed, parsed is already an Advice S3 (returned by .parse_advice_json)

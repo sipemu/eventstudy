@@ -3,7 +3,7 @@
 #' Extracts already-computed statistical signals from a fitted
 #' \code{EventStudyTask} into a flat, JSON-ready S3 list. This is the
 #' always-available grounding foundation for the knowledge base and offline
-#' advice layer — it recomputes nothing; all signals already exist in the
+#' advice layer \u2014 it recomputes nothing; all signals already exist in the
 #' fitted task.
 #'
 #' @param task A fitted \code{EventStudyTask} (after \code{fit_model()} and
@@ -273,7 +273,7 @@ print.es_diagnostics <- function(x, ...) {
     degree_of_freedom[k] <- stats$degree_of_freedom %||% NA_real_
     acf1[k]           <- stats$first_order_auto_correlation %||% NA_real_
 
-    # Shapiro-Wilk normality test (requires 3–5000 observations)
+    # Shapiro-Wilk normality test (requires 3\u20135000 observations)
     shapiro_p[k] <- tryCatch({
       clean_r <- stats::na.omit(resids)
       if (length(clean_r) >= 3L && length(clean_r) <= 5000L) {
@@ -324,7 +324,7 @@ print.es_diagnostics <- function(x, ...) {
 #' Extract event-window AR/CAR signals for the given event indices
 #'
 #' Converts distributional dist objects to plain scalar p-values via
-#' stats::pt() — never stores dist objects in the output list.
+#' stats::pt() \u2014 never stores dist objects in the output list.
 #'
 #' @param task A fitted EventStudyTask.
 #' @param idx Integer vector of row indices into task$data_tbl.
@@ -501,7 +501,7 @@ print.es_diagnostics <- function(x, ...) {
 #' Extract per-event contract state for the given event indices
 #'
 #' Derives degenerate flags (insufficient_obs, zero_var_index) by re-examining
-#' the estimation-window data — the exact two guards from MarketModel$fit().
+#' the estimation-window data \u2014 the exact two guards from MarketModel$fit().
 #'
 #' @param task A fitted EventStudyTask.
 #' @param idx Integer vector of row indices into task$data_tbl.

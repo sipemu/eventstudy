@@ -12,7 +12,7 @@
 #' Phase 7 LLM layer both evaluate against.
 #'
 #' \strong{KB-04 scope note:} Phase 5 delivers the KB data structure
-#' only — exported and serializable, ready for Phase 7 system-prompt
+#' only \u2014 exported and serializable, ready for Phase 7 system-prompt
 #' injection. The actual prompt-injection behavior is a Phase 7
 #' deliverable and is deliberately out of scope here.
 #'
@@ -35,7 +35,7 @@
 #'
 #' @section Threshold notes:
 #' The following thresholds are literature-informed defaults and are marked
-#' \strong{[ASSUMED]} — they can be tuned without breaking the KB contract:
+#' \strong{[ASSUMED]} \u2014 they can be tuned without breaking the KB contract:
 #' \itemize{
 #'   \item Shapiro-Wilk p-value threshold: 0.05
 #'   \item Proportion for normality-holds rule: \>= 70\% of events
@@ -149,7 +149,7 @@ EVENTSTUDY_KB <- list(
   # Condition: estimation-window residuals appear approximately normal
   # (Shapiro-Wilk p > 0.05 in >= 70% of shown events).
   # Steers toward: Patell Z (valid under normality assumption).
-  # [ASSUMED] proportion threshold 0.70; direction [CITED: MacKinlay 1997 §4]
+  # [ASSUMED] proportion threshold 0.70; direction [CITED: MacKinlay 1997 \u00a74]
   .kb_rule(
     id       = "KB-NORM-PATELL",
     category = "stat_choice",
@@ -178,7 +178,7 @@ EVENTSTUDY_KB <- list(
   # 2. KB-NONNORM-NONPAR --------------------------------------------------------
   # Condition: normality rejected in >= 50% of events (Shapiro-Wilk p < 0.05).
   # Steers toward: Sign Test or Rank Test (Corrado 1989) as non-parametric alt.
-  # [ASSUMED] proportion threshold 0.50; direction Brown & Warner (1985) §3
+  # [ASSUMED] proportion threshold 0.50; direction Brown & Warner (1985) \u00a73
   .kb_rule(
     id       = "KB-NONNORM-NONPAR",
     category = "stat_choice",
@@ -270,7 +270,7 @@ EVENTSTUDY_KB <- list(
   # Condition: Durbin-Watson statistic outside [1.5, 2.5] in the majority of events
   # (< 1.5 indicates positive autocorrelation; > 2.5 indicates negative).
   # Recommendation: Use HAC standard errors or note the caveat.
-  # [ASSUMED] DW bounds 1.5/2.5; direction Brown & Warner (1985) §2
+  # [ASSUMED] DW bounds 1.5/2.5; direction Brown & Warner (1985) \u00a72
   .kb_rule(
     id       = "KB-AC-WARN",
     category = "robustness",
@@ -302,8 +302,8 @@ EVENTSTUDY_KB <- list(
 
   # 6. KB-LOWFIT-WARN -----------------------------------------------------------
   # Condition: R-squared < 0.05 in the majority of events (>= 50%).
-  # Low R² inflates the standard error of abnormal returns (MacKinlay 1997 §3.1).
-  # [ASSUMED] threshold R² < 0.05; direction [CITED: MacKinlay 1997]
+  # Low R\u00b2 inflates the standard error of abnormal returns (MacKinlay 1997 \u00a73.1).
+  # [ASSUMED] threshold R\u00b2 < 0.05; direction [CITED: MacKinlay 1997]
   .kb_rule(
     id       = "KB-LOWFIT-WARN",
     category = "robustness",
@@ -408,7 +408,7 @@ EVENTSTUDY_KB <- list(
 #' exported here so that Phase 7 can inject its contents into an LLM
 #' system prompt without accessing an internal package object.
 #'
-#' \strong{KB-04 note:} This function delivers the \emph{structure} only —
+#' \strong{KB-04 note:} This function delivers the \emph{structure} only \u2014
 #' exported and serializable, ready for Phase 7 system-prompt injection.
 #' The actual prompt-injection behavior is a Phase 7 deliverable and is
 #' deliberately out of scope here.

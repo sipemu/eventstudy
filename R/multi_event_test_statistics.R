@@ -565,16 +565,16 @@ CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
 )
 
 
-#' Kolari-Pynnönen Adjusted BMP Test
+#' Kolari-Pynn\u00f6nen Adjusted BMP Test
 #'
 #' Adjusts the BMP (Boehmer, Musumeci, Poulsen 1991) test for cross-sectional
-#' correlation of abnormal returns using the Kolari and Pynnönen (2010)
+#' correlation of abnormal returns using the Kolari and Pynn\u00f6nen (2010)
 #' correction. The adjustment scales the BMP statistic by a factor that
 #' accounts for the average pairwise correlation of standardized abnormal
 #' residuals in the estimation window.
 #'
 #' @references
-#' Kolari, J. W. and Pynnönen, S. (2010). Event Study Testing with
+#' Kolari, J. W. and Pynn\u00f6nen, S. (2010). Event Study Testing with
 #' Cross-sectional Correlation of Abnormal Returns.
 #' \emph{The Review of Financial Studies}, 23(11), 3996--4025.
 #'
@@ -586,7 +586,7 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                  #' @field name Short code of the test statistic.
                                  name = 'KP',
                                  #' @description
-                                 #' Computes the Kolari-Pynnönen adjusted BMP test.
+                                 #' Computes the Kolari-Pynn\u00f6nen adjusted BMP test.
                                  #'
                                  #' @param data_tbl The data for a multiple event with
                                  #' calculated abnormal returns.
@@ -641,7 +641,7 @@ KolariPynnonenTest <- R6Class("KolariPynnonenTest",
                                        .groups = "drop"
                                      )
 
-                                   # --- Kolari-Pynnönen correction ---
+                                   # --- Kolari-Pynn\u00f6nen correction ---
                                    # Compute average pairwise correlation of SARs from estimation window
                                    est_sar_data <- data_tbl %>%
                                      dplyr::filter(estimation_window == 1) %>%

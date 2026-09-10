@@ -106,7 +106,7 @@ fit_model = function(task, parameter_set) {
                                        firm_symbol = NULL) {
   # Each event needs its own model, therefore a deep clone is necessary
   cloned_return_model = return_model$clone(deep=TRUE)
-  # Thread contract context — models read these fields inside fit()
+  # Thread contract context \u2014 models read these fields inside fit()
   cloned_return_model$degenerate_mode <- degenerate_mode
   cloned_return_model$event_id        <- event_id
   cloned_return_model$firm_symbol     <- firm_symbol

@@ -43,7 +43,7 @@ TestStatisticBase <- R6Class("TestStatisticBase",
 #' The AR t-test is a statistical method used to determine whether the abnormal
 #' return of a security on a specific day is significantly different from zero.
 #' This test helps researchers identify whether the event of interest has a
-#' significant impact on the security’s return at a particular point in time.
+#' significant impact on the security\u2019s return at a particular point in time.
 #'
 #' See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
 #'
@@ -67,7 +67,7 @@ ARTTest <- R6Class("ARTTest",
                        sigma = statistics$sigma %||% NA_real_
                        degree_of_freedom = max(statistics$degree_of_freedom %||% 1, 1)
 
-                       # Guard: sigma == 0 or NA → ar_t is NA (not Inf/NaN).
+                       # Guard: sigma == 0 or NA \u2192 ar_t is NA (not Inf/NaN).
                        # The %||% above handles NULL; this handles zero/near-zero.
                        sigma_degenerate <- is.na(sigma) || sigma < .Machine$double.eps
 
@@ -88,7 +88,7 @@ ARTTest <- R6Class("ARTTest",
 #' The CAR t-test is a statistical method used to determine whether the
 #' cumulative abnormal return of a security over an event window is
 #' significantly different from zero. This test helps researchers identify
-#' whether the event of interest has a significant impact on the security’s
+#' whether the event of interest has a significant impact on the security\u2019s
 #' return over the entire event window, considering the cumulative effects of
 #' the event.
 #'
@@ -114,9 +114,9 @@ CARTTest <- R6Class("CARTTest",
                         sigma = statistics$sigma %||% NA_real_
                         degree_of_freedom = max(statistics$degree_of_freedom %||% 1, 1)
 
-                        # Guard: sigma == 0 or NA → car_t is NA (not Inf/NaN).
+                        # Guard: sigma == 0 or NA \u2192 car_t is NA (not Inf/NaN).
                         # cumsum(abnormal_returns) NA cascade on degenerate model
-                        # is intentional and correct — do not coalesce it here.
+                        # is intentional and correct \u2014 do not coalesce it here.
                         # The distributional sigma uses pmax(...) to prevent its
                         # own crash; car_t itself is guarded separately.
                         sigma_degenerate <- is.na(sigma) || sigma < .Machine$double.eps
@@ -197,7 +197,7 @@ BHARTTest <- R6Class("BHARTTest",
                           # Under simple approximation, sigma of BHAR grows with sqrt(n)
                           bhar_se <- sigma * sqrt(n)
 
-                          # Guard: sigma == 0 or NA → bhar_se is 0/NA → bhar_t
+                          # Guard: sigma == 0 or NA \u2192 bhar_se is 0/NA \u2192 bhar_t
                           # would be Inf/NaN. Return NA_real_ instead.
                           bhar_se_degenerate <- is.na(bhar_se) | bhar_se < .Machine$double.eps
 

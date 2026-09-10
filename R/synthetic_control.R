@@ -102,10 +102,10 @@ estimate_synthetic_control <- function(task, method = c("quadprog", "optim"),
   donor_units <- sort(unique(donors$unit))
   n_donors <- length(donor_units)
 
-  # Guard: empty donor pool — no amount of solver arithmetic can recover from
+  # Guard: empty donor pool \u2014 no amount of solver arithmetic can recover from
   # having zero donors.  Without this check, X_all %*% weights (0-col matrix
   # times 0-length vector) silently yields a zero vector, making y_synth=0
-  # and att = mean(y_treated[post]) — the raw treated outcome level, which is
+  # and att = mean(y_treated[post]) \u2014 the raw treated outcome level, which is
   # a maximally wrong plausible-looking result.
   if (n_donors == 0) {
     warning("Synthetic control: donor pool is empty. ",

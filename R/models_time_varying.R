@@ -176,7 +176,7 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                    # Use finite pair count (not nrow) so NA-heavy estimation windows
                                    # do not inflate df and produce overly permissive t-statistics.
                                    # fit() already uses n_valid for the min-obs guard; calculate_statistics()
-                                   # must match to stay consistent — WR-04 fix.
+                                   # must match to stay consistent \u2014 WR-04 fix.
                                    n_valid_est <- sum(!is.na(estimation_tbl$firm_returns) &
                                                         !is.na(estimation_tbl$index_returns))
                                    ws <- min(self$window_size, n_valid_est)
@@ -461,7 +461,7 @@ DCCGARCHModel <- R6Class("DCCGARCHModel",
                                }
 
                                # Forecast error correction
-                               # Use n_valid (finite obs) not nrow — MODELS-04 FEC fix
+                               # Use n_valid (finite obs) not nrow \u2014 MODELS-04 FEC fix
                                event_window_tbl <- data_tbl %>%
                                  dplyr::filter(event_window == 1)
                                n_valid_fec <- sum(!is.na(estimation_tbl$firm_returns) &

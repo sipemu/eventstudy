@@ -1,8 +1,8 @@
 # =============================================================================
-# advisor_pro.R — Advisor Pro waitlist doc topic + opt-in footer helper
+# advisor_pro.R \u2014 Advisor Pro waitlist doc topic + opt-in footer helper
 # =============================================================================
 
-#' Advisor Pro — Future Retrieval-Grounded Paid Tier
+#' Advisor Pro \u2014 Future Retrieval-Grounded Paid Tier
 #'
 #' \strong{Advisor Pro} is a planned premium add-on for the EventStudy package
 #' that will provide retrieval-augmented, evidence-grounded AI advice backed by
@@ -22,9 +22,9 @@
 #' The current package already ships an offline advice layer based on a
 #' deterministic knowledge base:
 #' \itemize{
-#'   \item \code{\link{recommend_stat}()} — KB-based test-statistic recommendation
-#'   \item \code{\link{flag_robustness}()} — KB-based robustness flags
-#'   \item \code{\link{es_advise}()} — LLM-backed advice (requires provider)
+#'   \item \code{\link{recommend_stat}()} \u2014 KB-based test-statistic recommendation
+#'   \item \code{\link{flag_robustness}()} \u2014 KB-based robustness flags
+#'   \item \code{\link{es_advise}()} \u2014 LLM-backed advice (requires provider)
 #' }
 #'
 #' @section Waitlist:
@@ -33,7 +33,7 @@
 #'
 #' To enable an optional footer reminder after printing advice objects:
 #' \preformatted{options(eventstudy.advisor_pro_footer = TRUE)}
-#' The footer is silent by default; enabling it appends a static URL — no
+#' The footer is silent by default; enabling it appends a static URL \u2014 no
 #' network connection is made.
 #'
 #' @name advisor_pro
@@ -42,7 +42,7 @@ NULL
 
 
 # ---------------------------------------------------------------------------
-# Internal: .advisor_pro_footer — opt-in, static, zero-network footer
+# Internal: .advisor_pro_footer \u2014 opt-in, static, zero-network footer
 # ---------------------------------------------------------------------------
 
 # BIZ-02 / CRAN no-phone-home: this helper is purely presentational.

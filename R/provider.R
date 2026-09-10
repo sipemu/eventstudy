@@ -17,7 +17,7 @@
 # Failure discipline mirrors .handle_degenerate() in R/contract.R: every
 # provider failure routes through the SINGLE point `.provider_failure()`, which
 # emits EXACTLY ONE warning(msg, call. = FALSE) and returns an
-# `es_provider_response` carrying text = NA_character_ — it never lets an
+# `es_provider_response` carrying text = NA_character_ \u2014 it never lets an
 # uncaught error escape and never returns a plausible-looking wrong completion.
 
 # ---------------------------------------------------------------------------
@@ -54,7 +54,7 @@
 #' Every provider failure path routes through here so that exactly ONE warning is
 #' emitted per failure (mirroring `.handle_degenerate()` in R/contract.R). Never
 #' call `warning()` for a provider failure anywhere else. The returned object
-#' carries `text = NA_character_` — never a fabricated completion — preserving the
+#' carries `text = NA_character_` \u2014 never a fabricated completion \u2014 preserving the
 #' package's "never silently wrong" core value at the LLM layer.
 #'
 #' Secrets are NEVER placed into `reason`, the warning, or the returned object.
@@ -92,7 +92,7 @@
 #' The default provider is \code{"custom"} (the no-network provider), so the
 #' package resolves to a working provider with no configuration.
 #'
-#' These environment variables are SELECTORS (which backend/model/URL) — distinct
+#' These environment variables are SELECTORS (which backend/model/URL) \u2014 distinct
 #' from the API-key SECRETS resolved by \code{.resolve_api_key()}. Both are read,
 #' never written.
 #'
@@ -122,7 +122,7 @@
 #'
 #' Reads the provider-conventional secret env var (\code{OPENAI_API_KEY} for
 #' openai-compatible, \code{ANTHROPIC_API_KEY} for anthropic). Returns
-#' \code{NA_character_} when unset — it NEVER stops here; a missing key surfaces
+#' \code{NA_character_} when unset \u2014 it NEVER stops here; a missing key surfaces
 #' as one clear failure at call time via \code{.provider_failure()} inside the
 #' HTTP providers' \code{complete()} (delivered in 06-2/06-3). Keys are read at
 #' call time only, never stored on any object and never printed.
@@ -150,7 +150,7 @@
 #
 # Both helpers reference `httr2` ONLY inside their bodies. They are called only
 # from a concrete provider's complete(), which guards `requireNamespace("httr2")`
-# at its top — so R CMD check stays clean with httr2 uninstalled.
+# at its top \u2014 so R CMD check stays clean with httr2 uninstalled.
 
 #' Build and perform a thin httr2 request, trapping transport failures
 #'
@@ -242,7 +242,7 @@
   }
   status <- httr2::resp_status(resp)
   if (status < 200L || status >= 300L) {
-    # NEVER include the response body or key — only the status code.
+    # NEVER include the response body or key \u2014 only the status code.
     return(.provider_failure(source_label, paste0("HTTP ", status)))
   }
   parsed <- tryCatch(
@@ -260,7 +260,7 @@
 }
 
 # ---------------------------------------------------------------------------
-# ProviderBase — abstract R6 contract
+# ProviderBase \u2014 abstract R6 contract
 # ---------------------------------------------------------------------------
 
 #' @title ProviderBase
@@ -272,7 +272,7 @@
 #'
 #'   `ProviderBase` itself is abstract: calling `complete()` on it errors. It
 #'   stores only non-secret configuration (`model`, `base_url`); API keys are
-#'   NEVER read at construction — they are resolved at call time inside each
+#'   NEVER read at construction \u2014 they are resolved at call time inside each
 #'   concrete provider's `complete()`.
 #' @family eventstudy-advisor
 #' @export
@@ -295,7 +295,7 @@ ProviderBase <- R6::R6Class(
       invisible(self)
     },
 
-    #' @description Complete a prompt. Abstract on the base class — concrete
+    #' @description Complete a prompt. Abstract on the base class \u2014 concrete
     #'   providers override this.
     #' @param prompt Character prompt to send to the provider.
     #' @param schema Optional structured-output schema (list) or NULL.
@@ -314,7 +314,7 @@ ProviderBase <- R6::R6Class(
 )
 
 # ---------------------------------------------------------------------------
-# CustomProvider — in-process user-function hook (NO HTTP)
+# CustomProvider \u2014 in-process user-function hook (NO HTTP)
 # ---------------------------------------------------------------------------
 
 #' @title CustomProvider
@@ -326,7 +326,7 @@ ProviderBase <- R6::R6Class(
 #'
 #'   The user function is run inside \code{tryCatch}: if it errors, the provider
 #'   degrades to exactly one \code{warning()} plus an `es_provider_response` with
-#'   \code{text = NA_character_} — it never crashes the session.
+#'   \code{text = NA_character_} \u2014 it never crashes the session.
 #' @family eventstudy-advisor
 #' @export
 #' @examples
@@ -367,7 +367,7 @@ CustomProvider <- R6::R6Class(
         return(.provider_failure("custom", "custom function errored"))
       }
       # A fn returning NULL / character(0) makes as.character(out) length-0, so
-      # [[1L]] would throw "subscript out of bounds" — coerce safely and guard
+      # [[1L]] would throw "subscript out of bounds" \u2014 coerce safely and guard
       # empties/NA so an empty return degrades to one warning + NA, never crashes.
       txt <- tryCatch(as.character(out), error = function(e) character(0))
       if (length(txt) == 0L || is.na(txt[[1L]])) {
@@ -382,14 +382,14 @@ CustomProvider <- R6::R6Class(
 )
 
 # ---------------------------------------------------------------------------
-# OpenAICompatProvider — OpenAI + any OpenAI-compatible endpoint (HTTP)
+# OpenAICompatProvider \u2014 OpenAI + any OpenAI-compatible endpoint (HTTP)
 # ---------------------------------------------------------------------------
 
 #' @title OpenAICompatProvider
 #' @description A provider that issues \code{POST {base_url}/chat/completions}
 #'   with an OpenAI-shaped request body. Because the endpoint is selected purely
 #'   by \code{base_url} + \code{model}, this single class covers OpenAI itself
-#'   AND every OpenAI-compatible backend — Ollama, LM Studio, or any gateway —
+#'   AND every OpenAI-compatible backend \u2014 Ollama, LM Studio, or any gateway \u2014
 #'   via a \code{base_url} override, with no code change.
 #'
 #'   The API key is resolved at CALL time from \code{OPENAI_API_KEY} (never at
@@ -398,7 +398,7 @@ CustomProvider <- R6::R6Class(
 #'   header in every print/error path. A missing key, transport/timeout failure,
 #'   non-2xx status, malformed body, or missing completion text each degrades to
 #'   exactly one \code{warning()} plus an `es_provider_response` with
-#'   \code{text = NA_character_} — it never crashes the session and never returns
+#'   \code{text = NA_character_} \u2014 it never crashes the session and never returns
 #'   a fabricated completion.
 #'
 #'   \code{httr2} is required only for this provider and is guarded by
@@ -412,7 +412,7 @@ CustomProvider <- R6::R6Class(
 #' p <- OpenAICompatProvider$new(model = "gpt-4o")
 #' p$complete("Summarise these event-study diagnostics")
 #'
-#' # Any OpenAI-compatible endpoint works via a base_url override — e.g. a local
+#' # Any OpenAI-compatible endpoint works via a base_url override \u2014 e.g. a local
 #' # Ollama server (no cloud key needed by the server, but OPENAI_API_KEY is still
 #' # read as the bearer token; set it to any non-empty value for local servers):
 #' p_local <- OpenAICompatProvider$new(
@@ -488,7 +488,7 @@ OpenAICompatProvider <- R6::R6Class(
 )
 
 # ---------------------------------------------------------------------------
-# AnthropicProvider — native Anthropic Messages API (HTTP)
+# AnthropicProvider \u2014 native Anthropic Messages API (HTTP)
 # ---------------------------------------------------------------------------
 
 #' Render a tool_use block's structured input to a single character string
@@ -497,7 +497,7 @@ OpenAICompatProvider <- R6::R6Class(
 #' \code{type == "tool_use"} and render its \code{$input} to a character string
 #' (via \code{jsonlite::toJSON} when available, else a \code{paste} of its
 #' fields). When no tool_use block is present, fall back to the FIRST content
-#' block's \code{$text} — so the provider never crashes when the model answers
+#' block's \code{$text} \u2014 so the provider never crashes when the model answers
 #' with plain text instead of a tool call. This whole function is wrapped by
 #' \code{.finish_response}'s \code{tryCatch}, so any unexpected shape degrades to
 #' the standard one-warning + NA path rather than throwing.
@@ -544,17 +544,17 @@ OpenAICompatProvider <- R6::R6Class(
 #'   \code{schema} is supplied it adds a tool-use \code{input_schema} block
 #'   (\code{tools} + \code{tool_choice}) to obtain structured output, and the
 #'   response extractor prefers that tool call's structured \code{input} while
-#'   falling back to the first text block — so the provider never crashes when the
+#'   falling back to the first text block \u2014 so the provider never crashes when the
 #'   model replies with plain text instead of a tool call.
 #'
 #'   The API key is resolved at CALL time from \code{ANTHROPIC_API_KEY} (never at
 #'   construction, never stored on the object) and attached with
 #'   \code{req_headers_redacted("x-api-key" = key)}, which redacts the key in
 #'   every print/error path. Note \code{req_auth_bearer_token} does NOT redact an
-#'   \code{x-api-key} header — the redacted-headers helper is mandatory here. A
+#'   \code{x-api-key} header \u2014 the redacted-headers helper is mandatory here. A
 #'   missing key, transport/timeout failure, non-2xx status, malformed body, or
 #'   missing completion text each degrades to exactly one \code{warning()} plus an
-#'   `es_provider_response` with \code{text = NA_character_} — it never crashes the
+#'   `es_provider_response` with \code{text = NA_character_} \u2014 it never crashes the
 #'   session and never returns a fabricated completion.
 #'
 #'   \code{httr2} is required only for this provider and is guarded by
@@ -652,7 +652,7 @@ AnthropicProvider <- R6::R6Class(
 )
 
 # ---------------------------------------------------------------------------
-# provider() — convenience factory (all three branches wired)
+# provider() \u2014 convenience factory (all three branches wired)
 # ---------------------------------------------------------------------------
 
 #' Construct a Grounded AI Advisor provider

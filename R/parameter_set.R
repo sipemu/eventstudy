@@ -62,7 +62,7 @@ ParameterSet = R6::R6Class(classname = "ParameterSet",
                                  self$multi_event_statistics = multi_event_statistics
                                }
 
-                               # Validate and normalise degenerate_handling — NULL means
+                               # Validate and normalise degenerate_handling \u2014 NULL means
                                # "use option/default". Store the match.arg()-normalised value
                                # so partial matches like "str" are stored as "strict".
                                if (!is.null(degenerate_handling)) {

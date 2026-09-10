@@ -129,9 +129,9 @@ ModelBase <- R6Class("ModelBase",
 #' The Market Model is a widely used method in event studies to estimate the
 #' expected returns of a stock and calculate its abnormal returns during an
 #' event window. The model is based on a simple linear regression framework and
-#' captures the relationship between a stock’s return and the return of a market
+#' captures the relationship between a stock\u2019s return and the return of a market
 #' index, such as the S&P 500 or the Dow Jones Industrial Average. The
-#' underlying assumption of the Market Model is that a stock’s return is
+#' underlying assumption of the Market Model is that a stock\u2019s return is
 #' primarily influenced by market movements, along with a stock-specific
 #' idiosyncratic component.
 #'
@@ -149,7 +149,7 @@ MarketModel <- R6Class("MarketModel",
                          #' @field hac_lag Integer or NULL. Lag truncation for Newey-West.
                          #'   NULL uses the automatic bandwidth selection.
                          hac_lag = NULL,
-                         # degenerate_mode, event_id, firm_symbol — inherited from ModelBase.
+                         # degenerate_mode, event_id, firm_symbol \u2014 inherited from ModelBase.
                          #' @description
                          #' Create a new MarketModel.
                          #'
@@ -195,7 +195,7 @@ MarketModel <- R6Class("MarketModel",
                                firm_symbol = self$firm_symbol,
                                private_env = private
                              )
-                             # Explicit flag — required at every call site per contract
+                             # Explicit flag \u2014 required at every call site per contract
                              # (in strict mode stop() fires above so this is never reached)
                              private$.is_fitted <- FALSE
                              return(invisible(self))
@@ -341,7 +341,7 @@ MarketModel <- R6Class("MarketModel",
 #' The Market Adjusted Model is another simple approach used in event studies
 #' to estimate the expected returns of a stock and calculate its abnormal
 #' returns during an event window. This model is less complex than the Market
-#' Model, as it assumes that a stock’s expected return is equal to the market
+#' Model, as it assumes that a stock\u2019s expected return is equal to the market
 #' return, without considering any stock-specific factors. The Market
 #' Adjusted Model is particularly useful in situations where the estimation of
 #' individual stock parameters (such as alpha and beta) is not feasible or
@@ -384,7 +384,7 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                    # arithmetic (firm_returns - index_returns) and does NOT need the
                                    # residual series to have non-zero variance to produce valid abnormal
                                    # returns. A stock that perfectly tracks the index yields
-                                   # abnormal_returns = 0 everywhere — the correct economic answer.
+                                   # abnormal_returns = 0 everywhere \u2014 the correct economic answer.
                                    # sigma == 0 is handled at the test-statistic layer (ART/CART sigma
                                    # guards produce NA t-stats in that case). Removing the false-degenerate
                                    # guard here restores correct "never silently wrong" behavior (CR-01).
@@ -432,7 +432,7 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
 
                                    # Constant-mean forecast error correction (no regression parameters estimated)
                                    # Use finite-pair count (not nrow) so NA rows don't inflate denominator
-                                   # and understate the correction factor — WR-03 / MODELS-04 fix.
+                                   # and understate the correction factor \u2014 WR-03 / MODELS-04 fix.
                                    event_window_tbl = data_tbl %>% filter(event_window == 1)
                                    n_event = nrow(event_window_tbl)
                                    n_valid_fec <- max(sum(!is.na(estimation_tbl$firm_returns) &
@@ -450,10 +450,10 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
 #' The Comparison Period Mean Adjusted Model is another relatively simple
 #' approach used in event studies to estimate the expected returns of a stock
 #' and calculate its abnormal returns during an event window. This model is
-#' based on the assumption that a stock’s expected return during the event
+#' based on the assumption that a stock\u2019s expected return during the event
 #' window is equal to its average return during a comparison period (typically
 #' a pre-event period). This model is particularly useful when researchers want
-#' to control for a stock’s historical performance and do not wish to rely on
+#' to control for a stock\u2019s historical performance and do not wish to rely on
 #' market return data.
 #'
 #' @family eventstudy-models
@@ -544,7 +544,7 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
 
                                                  # Constant-mean forecast error correction (no regression)
                                                  # Use finite value count (not nrow) so NA rows don't inflate
-                                                 # denominator — WR-03 / MODELS-04 fix.
+                                                 # denominator \u2014 WR-03 / MODELS-04 fix.
                                                  event_window_tbl = data_tbl %>% filter(event_window == 1)
                                                  n_event = nrow(event_window_tbl)
                                                  n_valid_fec <- max(sum(!is.na(estimation_tbl$firm_returns)), 1L)
@@ -621,7 +621,7 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                 #'
                                 #' @param data_tbl Data frame or tibble containing the data to fit.
                                 fit = function(data_tbl) {
-                                  # Validate required columns — plain stop(), not contract
+                                  # Validate required columns \u2014 plain stop(), not contract
                                   # (missing columns = programmer error, not degenerate data)
                                   missing_cols <- setdiff(self$required_columns, names(data_tbl))
                                   if (length(missing_cols) > 0) {
@@ -668,7 +668,7 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                     private$calculate_statistics(data_tbl)
                                   } else {
                                     # lm() failure (e.g. full rank deficiency) is a
-                                    # degenerate condition — route through contract handler
+                                    # degenerate condition \u2014 route through contract handler
                                     .handle_degenerate(
                                       mode        = mode,
                                       condition   = conditionMessage(res$error),
@@ -1156,7 +1156,7 @@ GARCHModel <- R6Class("GARCHModel",
                            private$first_order_autocorrelation(residuals)
 
                            # Forecast error correction (using average sigma)
-                           # Use n_valid (finite obs) not nrow — MODELS-04 FEC fix
+                           # Use n_valid (finite obs) not nrow \u2014 MODELS-04 FEC fix
                            estimation_tbl <- data_tbl %>% dplyr::filter(estimation_window == 1)
                            event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
                            n_valid_fec <- sum(!is.na(estimation_tbl$firm_returns) &
@@ -1219,7 +1219,7 @@ BHARModel <- R6Class("BHARModel",
                           # NOTE: No zero-variance guard here. BHARModel computes buy-and-hold
                           # abnormal returns via compounding and does NOT require the estimation-
                           # window diff series to have non-zero variance. A stock that tracks the
-                          # index perfectly yields BHAR = 0 — the correct economic answer.
+                          # index perfectly yields BHAR = 0 \u2014 the correct economic answer.
                           # sigma == 0 propagates to the ART/CART/BHARTTest sigma guards which
                           # already return NA t-stats. Removing this guard restores correct
                           # "never silently wrong" behavior (CR-02 Part A).
