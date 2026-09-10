@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v0.66.0
 milestone_name: Stabilization & CRAN Resubmission
 status: planning
-last_updated: "2026-09-10T19:43:56.004Z"
+last_updated: "2026-09-10T20:15:00.000Z"
 last_activity: 2026-09-10
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,58 +17,32 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-09-08)
+See: .planning/PROJECT.md (updated 2026-09-10)
 
-**Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong, and the AI report cites only package-computed diagnostics. This milestone lifts the *felt* quality (brand, output, API, docs) to match that substance, without touching statistical correctness.
-**Current focus:** v0.65.0 shipped — planning next milestone
+**Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong. This milestone proves correctness numerically, locks the public API against accidental breakage, and gets the package back onto CRAN (archived 2024-04-20).
+**Current focus:** v0.66.0 roadmap created (Phases 25–30) — ready to plan Phase 25
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-09-10 — Milestone v0.66.0 started
+Phase: 25 of 30 (CRAN Hygiene & Clean Check Baseline)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-09-10 — Roadmap created for v0.66.0 (Phases 25–30), 19/19 requirements mapped
 
-## Milestone Roadmap (v0.65.0 — Phases 20–24)
+Progress: [░░░░░░░░░░] 0%
 
-- **Phase 20: Brand & Visual Identity** — BRAND-01..07, CRAN-02/03/04. Logo + hex sticker (`man/figures/logo.png` <50 KB, SVG sources in `.Rbuildignore`'d `data-raw/brand/`), README badge + navbar wiring, favicon set + Open Graph card under `pkgdown/`, eventstudy.de-aligned `template.bslib` palette/typography + home card gallery/numeric badges, lifecycle `experimental`→`stable`. Owns the version bump to 0.65.0 (first commit), tarball < 1 MB assertion, and non-ASCII / no-new-check-findings guardrails.
-- **Phase 21: Shared Theme & Plot Aesthetics** — VIZ-01/02/03, CRAN-01. New `R/theme.R` exporting `theme_eventstudy()` + Okabe-Ito `es_colours`; applied across ggplot2 helpers (`.plot_single_event`, `.plot_multi_event`, `plot_diagnostics`) removing hardcoded colours; plotly visuals restyled to `es_colours`; `plot_stocks()` left structurally intact. Lands the only Suggests additions (`tinytable`, `patchwork`, `ragg`, all `requireNamespace()`-guarded, no new Imports).
-- **Phase 22: Report Aesthetics** — VIZ-04/05/06/07, CRAN-05. `es_report()` tables via `tinytable` (kable fallback) styled across all four formats; figure captions on every plot chunk; HTML-only `inst/rmarkdown/report.css`; per-format figure sizing (replacing global `fig.width = 10`) with `ragg`. Locks four-format render, PDF no `<script>`, and the `knitr::is_html_output()` switch by regression test. Prose sanitiser + grounding guard untouched.
-- **Phase 23: API & Message Polish** — API-01..06, CRAN-06. Print methods return `invisible(x)`; `format.*` added where missing; selected `stop()`/`warning()` → classed `rlang::abort()`/`rlang::warn()`; messages name offending argument + value; `verbose=` quiet mode (byte-identical default); deprecation audit (shim-or-verified-no-op, no `lifecycle` dep). Valid-input behavior unchanged; snapshot tests cover print methods + prose sanitiser; exactly-one-warning discipline preserved.
-- **Phase 24: Docs & Site Polish** — DOCS-01..04. `@family`/`@seealso` cross-links; README ecosystem section + home markers; `pkgdown::check_pkgdown()` in CI; tightened vignettes/articles (getting-started flow + cross-links), rich content stays pkgdown-only.
+## Milestone Roadmap (v0.66.0 — Phases 25–30)
 
-Dependency order: Phase 20 (brand/asset foundation + version/guardrails, blocking for site work) → Phase 21 (shared theme foundation + Suggests) → Phase 22 (report aesthetics, needs Phase 21 palette). Phase 23 (API/message) is independent — may overlap. Phase 24 (docs/site) needs Phase 20's logo — may overlap Phase 23.
+Strict sequential build-order chain (no parallelization): 25 → 26 → 27 → 28 → 29 → 30.
 
-Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed to their natural verification phases (CRAN-02/03/04→20, CRAN-01→21, CRAN-05→22, CRAN-06→23).
+- **Phase 25: CRAN Hygiene & Clean Check Baseline** — HYG-01..04. Non-ASCII `\uXXXX` sweep of `R/*.R` + refreshed CI baseline guard; namespace-qualify `median`/`tail` in `R/es_diagnostics.R`; remove stale `EventStudy_0.62.0.tar.gz` + add `tar.gz` ignore rule; audit optional-package call sites (`gridExtra` in `R/plotting.R`) for `requireNamespace()` + Suggests. Establishes the clean `--as-cran` baseline every downstream phase depends on.
+- **Phase 26: Formula Audit & Golden-Value Validation** — CORR-01, CORR-02. Audit all 13+ models / 8+ statistics against published formulas; document convention choices (return type, FEC, df, p-value sidedness, Patell denominator); fix discrepancies with regression tests; THEN pin golden values (published tables / `estudy2`-derived, source-level only) with annotated conventions + explicit tolerances. Bug-fix precedes golden-value pin.
+- **Phase 27: Property & Numerical-Stability Tests** — CORR-03, CORR-04. Cross-cutting invariant/property tests (`CAR == cumsum(AR)`, cross-method consistency, boundary/degenerate windows) across the model/statistic matrix; numerical-stability guards on matrix ops / GARCH / bootstrap / long-window cumulation with documented tolerances (no CI flake). `patrick`/`hedgehog` Suggests-only if used.
+- **Phase 28: API Stabilization & Signature Lock** — APIS-01..04. Signature-consistency audit (APIS-01) → return-shape contracts in new `R/shape_contracts.R`, opt-in/default-off (APIS-02) → deprecation policy + `lifecycle`-Suggests shim (APIS-04) → structural API snapshot via `getNamespaceExports()`/`formals()`/S3 methods, install-gated (APIS-03). Audit + contracts BEFORE snapshot so the snapshot locks the final surface.
+- **Phase 29: Install-Tested CI** — CI-01, CI-02. CI gates on `rcmdcheck` against the *installed* package (not `load_all`), one job with `_R_CHECK_FORCE_SUGGESTS_` set; audit `inst/rmarkdown/` templates + examples/vignettes for bare internal calls / default network access. Catches the `.report_table()` load_all-vs-installed divergence class.
+- **Phase 30: CRAN Resubmission** — CRAN-01..05. Clean local `--as-cran`; multi-platform (win-devel/release + rhub v2/macOS) with captured results; rewrite `cran-comments.md` for v0.66.0 with archival acknowledgment + reason + fixes; CRAN-policy compliance (no network, tempdir-only, no gratuitous `\dontrun{}`, runtime); submit + confirm. Final gate depending on all prior phases.
 
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed (all milestones): 16
-- Average duration: -
-- Total execution time: 0 hours
-
-**Recent Trend:**
-
-- Last 5 plans: n/a (new milestone)
-- Trend: n/a
-
-*Updated after each plan completion*
-**Per-Plan Metrics:**
-
-| Plan | Duration | Tasks | Files |
-|------|----------|-------|-------|
-| Phase 20 P01 | 4m | 3 tasks | 7 files |
-| Phase 20 P02 | 4 min | 3 tasks | 15 files |
-| Phase 20 P03 | 3m | 3 tasks | 6 files |
-| Phase 21 P01 | 8m | 4 tasks | 6 files |
-| Phase 22 P01 | 18min | 4 tasks | 4 files |
-| Phase 23 P01 | 8min | 3 tasks | 19 files |
-| Phase 23 P02 | 15m | 3 tasks | 6 files |
-| Phase 23 P03 | 35m | 3 tasks | 13 files |
-| Phase 24 P01 | 18m | 3 tasks | 28 files |
-| Phase 24 P02 | 12m | 3 tasks | 4 files |
+Coverage: 19/19 v0.66.0 requirements mapped, 0 unmapped.
 
 ## Accumulated Context
 
@@ -77,56 +51,32 @@ Coverage: 30/30 v0.65.0 requirements mapped, 0 unmapped. CRAN-01..06 distributed
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- All four v0.65.0 polish surfaces are purely additive overlays — zero restructuring of the pipeline, advisor, or reporting backend; behavior on valid inputs must not change.
-- Dependency-light stack: add only `tinytable`, `patchwork`, `ragg` to Suggests (all `requireNamespace()`-guarded); explicitly NOT adding `gt`/`kableExtra`/`flextable`/`cli`/`lifecycle`.
-- Brand/site assets split by CRAN boundary: logo/hex PNG in `man/figures/` (tarball-safe, README-visible); SVG sources, favicon, OG card in `.Rbuildignore`'d `data-raw/brand/` and `pkgdown/`.
-- API polish uses classed `rlang` conditions (already imported), not `cli`; `verbose=` default is byte-identical; `lifecycle` added only if a real rename appears (else API-06 is a verified no-op).
-- [Phase 20]: Phase 20 brand assets rendered via librsvg rsvg-convert CLI (dev-time), not the rsvg/hexSticker R packages, keeping DESCRIPTION dependency-free per CRAN-02
-- [Phase 20]: Phase 20 section-heading recolour uses clean-edit (removed 8 per-class rules), not !important
-- [Phase 20]: CI non-ASCII guard is baseline-aware (fails only on NEW non-ASCII), preserving the package's declared UTF-8
-- [Phase 21]: es_colours reference role uses brand slate #6b7280 rather than Okabe-Ito black for zero-lines
-- [Phase 21]: plot_stocks uses fixed es_colours group1 for trace colour (coarse granularity acceptable)
-- [Phase 22]: Report tables route through .report_table() with a byte-compatible knitr::kable fallback when tinytable is absent (.tinytable_available seam)
-- [Phase 22]: report.css is injected only on the html branch of .build_output_format via system.file+nzchar; pdf/word/md never reference it
-- [Phase 23]: 23-01: print/format split via utils::capture.output of the original cat() body — byte-exact by construction, zero snapshot updates
-- [Phase 23]: 23-01: Advisor Pro footer emission moved into format.Advice/format.es_advice (captured, silent by default), not re-called in print.* (no double-emit)
-- [Phase 23]: [Phase 23]: 23-02: kept "missing columns" substring (not reworded to "missing required columns") — API-04 backtick/truncation improvement appended after preserved prefix, so all existing expect_error substrings survive with zero test edits
-- [Phase 23]: [Phase 23]: 23-02: classed conditions via rlang::abort(class=c("eventstudy_error_<kind>","eventstudy_error")) — rlang already an Import, no cli/lifecycle, no new dependency
-- [Phase 24]: 24-01: 74 exported functions grouped into 7 eventstudy- @family clusters; single document() regen; DESCRIPTION unchanged; suite 2222/0
-- [Phase 24]: 24-02: New README content kept ASCII-only; pre-existing non-ASCII badge/prose bytes left untouched (README not covered by the R/man/inst CI ASCII guard)
-- [Phase 24]: 24-02: _pkgdown.yml format.* index fix committed before the CI check_pkgdown step so the pkgdown job stays green
+- Build order is a hard sequential chain: hygiene first (corrupt check runs block everything), audit-before-golden (fix a bug before pinning its value), API audit/contracts before snapshot (don't lock bad names), install-tested CI, CRAN last.
+- New tooling (`lifecycle`, `waldo`, `patrick`, `hedgehog`) is Suggests-only / `requireNamespace()`-guarded — no new hard Imports.
+- `estudy2`/`eventstudies` used only as source-level golden-value derivation tools; never added to DESCRIPTION (both are themselves archived on CRAN).
+- Deprecations are backward-compatible (warn, never silently break); API lock uses structural assertions, not byte-level `print()` snapshots.
 
-### v0.64.0 invariants that MUST NOT regress (carried into every phase)
+### v0.64.0/v0.65.0 invariants that MUST NOT regress (carried into every phase)
 
 - `.validate_grounding()` (advise.R) — drop-and-keep, single warning, never-stop; extended to report prose in Phase 19.1.
 - `.handle_degenerate()` (contract.R) — exactly-one-warning per degenerate event, NA propagation, strict/lenient routing.
 - `knitr::is_html_output()` switch in `skeleton.Rmd` — static/interactive selection must not move.
 - `JOINT_HYPOTHESIS_CAVEAT` wording (report_narrative.R) — fixed correctness constant.
-- `.sanitise_prose()` ordering (ampersand-first) — hardened; CSS/table additions must not touch it.
+- `.sanitise_prose()` ordering (ampersand-first) — hardened.
+- Behavior on valid inputs unchanged; ~2359-test suite stays green throughout.
 
 ### Pending Todos
 
-Research flags for planning:
+Carried into this milestone from v0.65.0 (now formally in scope):
 
-- **Phase 20:** Design input — confirm eventstudy.de colour codes (bslib primary/bg/fg) with brand owner before wiring `template.bslib`.
-- **Phase 22:** Multi-format rendering edge cases — CI integration tests for HTML/PDF/Word/MD render coverage.
-- **Phase 24 (from Phase 20 verify):** README prose is stale — lines ~32/34 still say "13 Return Models" / "11 Test Statistics", contradicting the new gallery badges (15+ Return Models / 12 Test Statistics). Reconcile README prose with the honest counts during docs polish.
-- **Pre-existing tech debt (from Phase 21 review, out of scope):** `gridExtra::grid.arrange` used unguarded in R/plotting.R (~L351) and a stale `@return` "patchwork-style" doc. Not introduced by v0.65.0. Candidate for a future hardening ticket or Phase 23 guard pass — verify gridExtra is guarded/declared before CRAN submission.
+- **Phase 25 (from v0.65.0 tech debt):** `gridExtra::grid.arrange` used unguarded in `R/plotting.R` (~L351) + stale `@return` "patchwork-style" doc — verify gridExtra guarded/declared (HYG-04).
+- **Phase 25:** Non-ASCII sweep + CI baseline refresh; the CI non-ASCII guard is baseline-aware (fails only on NEW non-ASCII) — refresh baseline after the sweep (HYG-01).
+- **Phase 30 (open question):** The exact 2024-04-20 CRAN archival reason is not recorded in any planning artifact — must be retrieved (CRAN archive / maintainer records / check history) before `cran-comments.md` (CRAN-03) can be written. Within-phase dependency, not a blocker.
+- **Phase 30:** Report-render tests emit transient `file*.log` into `skeleton/` (not gitignored) — carried v0.65.0 hygiene item, fold into CRAN-policy compliance (CRAN-04) if it affects tarball cleanliness.
 
 ### Blockers/Concerns
 
-- None. (Resolved: the Phase 20 eventstudy.de palette dependency was closed during Phase 20 execution — palette #2563eb/#ffffff/#0f172a extracted from live CSS, logo/hex sticker built and verified. Phase 20 shipped and verification passed.)
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260909-jls | Fix pkgdown site: hide auto-injected page-header logo via scoped extra.css; make introduction.Rmd render offline with executed outputs (bundled dieselgate data) | 2026-09-09 | ef4eca7 | [260909-jls-fix-pkgdown-site-remove-logo-from-navbar](./quick/260909-jls-fix-pkgdown-site-remove-logo-from-navbar/) |
-| 260909-kft | Render flat result tibbles as styled tinytable HTML tables (kable fallback) across introduction.Rmd + 10 articles/*.Rmd via es_tt() helper | 2026-09-09 | b1ce106 | [260909-kft-render-result-tibbles-as-styled-html-tab](./quick/260909-kft-render-result-tibbles-as-styled-html-tab/) |
-| 260909-l6h | Add interactive plotly event-study plots (ggplotly-wrapped CAR + CAAR) to introduction.Rmd; widen pkgdown article container to 1400px in extra.css (ToC kept) | 2026-09-09 | 5d93a81 | [260909-l6h-add-interactive-plotly-event-study-plots](./quick/260909-l6h-add-interactive-plotly-event-study-plots/) |
-| 260909-ll1 | Extend introduction.Rmd prose (CAR/CAAR interpretation of the plotly charts); widen pkgdown article container from 1400px to 1560px in extra.css (ToC kept); rebuild docs/ | 2026-09-09 | ed5e971 | [260909-ll1-extend-the-explanation-prose-in-the-pkgd](./quick/260909-ll1-extend-the-explanation-prose-in-the-pkgd/) |
-| 260909-mf1 | Make es_tt() bar-aware: diverging in-cell data bars for aar/caar columns (green right/pos, red left/neg, proportional to max-abs) auto-applied across introduction.Rmd + method/example article tables; rebuild docs/ | 2026-09-09 | 4d0a442 | [260909-mf1-add-diverging-in-cell-data-bars-to-the-a](./quick/260909-mf1-add-diverging-in-cell-data-bars-to-the-a/) |
-| 260910-0f8 | Redesign article/reference ToC layout (extra.css): centered minmax(0,900px) reading column with sticky "On this page" ToC in the right margin (@media >=1200px grid), tinytable overflow-x:auto so wide tables scroll in-box not page-wide; container 1600px + template-reference-topic covered; rebuild docs/. VISUAL confirm still pending (human/browser) | 2026-09-10 | 619ef12 | [260910-0f8-redesign-article-reference-toc-layout-in](./quick/260910-0f8-redesign-article-reference-toc-layout-in/) |
+- None blocking roadmap. Phase 30 carries the archival-reason retrieval as a within-phase dependency to resolve during planning.
 
 ## Deferred Items
 
@@ -139,18 +89,13 @@ Research flags for planning:
 | Independence | INDEP-01..03: native reimplementation of did/DIDmultiplegt/rugarch | Deferred | v0.50.0 init | v2 |
 | Scale | SCALE-01..03: streaming/data.table/sparse FE | Deferred | v0.50.0 init | v2 |
 | Advisor Pro | PRO-01..02: RAG corpus advisor + managed hosting | Deferred | v0.60.0 roadmap | future (waitlist-gated) |
-| Surfaces | SURF-01..02: MCP server + panel/intraday/synthetic diagnostics | Deferred | v0.60.0 roadmap | future |
-| Reporting | RPTX-01: report support for panel/intraday/synthetic-control tasks | Deferred | v0.64.0 roadmap | future (needs SURF-01/02) |
-| Reporting | RPTX-02: bootstrap-CI reporting | Deferred | v0.64.0 roadmap | future |
-| Reporting | RPTX-03: rich Word output via officedown | Deferred | v0.64.0 roadmap | future (if demand) |
-| Reporting | RPTC-01: user-supplied custom report templates | Deferred | v0.64.0 roadmap | future |
 
 ## Session Continuity
 
-Last session: 2026-09-10T19:17:12.525Z
-Stopped at: context exhaustion at 75% (2026-09-10)
+Last session: 2026-09-10T20:15:00.000Z
+Stopped at: v0.66.0 roadmap created (ROADMAP.md Phases 25–30, REQUIREMENTS.md traceability filled, STATE.md refreshed)
 Resume file: None
 
 ## Operator Next Steps
 
-- Review the roadmap, then plan the first phase with `/gsd-plan-phase 20`.
+- Review the roadmap, then plan the first phase with `/gsd-plan-phase 25`.

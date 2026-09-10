@@ -64,35 +64,33 @@ Explicitly excluded to prevent scope creep.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HYG-01 | TBD | Pending |
-| HYG-02 | TBD | Pending |
-| HYG-03 | TBD | Pending |
-| HYG-04 | TBD | Pending |
-| CORR-01 | TBD | Pending |
-| CORR-02 | TBD | Pending |
-| CORR-03 | TBD | Pending |
-| CORR-04 | TBD | Pending |
-| APIS-01 | TBD | Pending |
-| APIS-02 | TBD | Pending |
-| APIS-03 | TBD | Pending |
-| APIS-04 | TBD | Pending |
-| CI-01 | TBD | Pending |
-| CI-02 | TBD | Pending |
-| CRAN-01 | TBD | Pending |
-| CRAN-02 | TBD | Pending |
-| CRAN-03 | TBD | Pending |
-| CRAN-04 | TBD | Pending |
-| CRAN-05 | TBD | Pending |
+| HYG-01 | Phase 25 | Pending |
+| HYG-02 | Phase 25 | Pending |
+| HYG-03 | Phase 25 | Pending |
+| HYG-04 | Phase 25 | Pending |
+| CORR-01 | Phase 26 | Pending |
+| CORR-02 | Phase 26 | Pending |
+| CORR-03 | Phase 27 | Pending |
+| CORR-04 | Phase 27 | Pending |
+| APIS-01 | Phase 28 | Pending |
+| APIS-02 | Phase 28 | Pending |
+| APIS-03 | Phase 28 | Pending |
+| APIS-04 | Phase 28 | Pending |
+| CI-01 | Phase 29 | Pending |
+| CI-02 | Phase 29 | Pending |
+| CRAN-01 | Phase 30 | Pending |
+| CRAN-02 | Phase 30 | Pending |
+| CRAN-03 | Phase 30 | Pending |
+| CRAN-04 | Phase 30 | Pending |
+| CRAN-05 | Phase 30 | Pending |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 19 ⚠️
+- Mapped to phases: 19 (Phases 25–30)
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-10*
-*Last updated: 2026-09-10 after initial definition*
+*Last updated: 2026-09-10 after roadmap creation (Phases 25–30 mapped)*
