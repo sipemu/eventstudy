@@ -85,7 +85,8 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   3. No non-standard-file NOTE appears: the stale `EventStudy_0.62.0.tar.gz` is removed from the repo and a `tar.gz` ignore rule prevents recurrence.
   4. Every optional-package call site (explicitly `gridExtra` in `R/plotting.R`) is `requireNamespace()`-guarded and declared in Suggests; any unguarded/undeclared use is fixed.
   5. The full ~2359-test suite stays green and behavior on valid inputs is unchanged.
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 25-01-PLAN.md — Clear the 3 CRAN findings (non-ASCII escape sweep + baseline refresh, median/tail namespace-qualify, stale-tarball removal + ignore rules) and audit optional-package guards; verified against a clean `--as-cran` gate
 
 ### Phase 26: Formula Audit & Golden-Value Validation
 
@@ -163,7 +164,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 22. Report Aesthetics | v0.65.0 | 1/1 | Complete | 2026-09-09 |
 | 23. API & Message Polish | v0.65.0 | 3/3 | Complete | 2026-09-09 |
 | 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
-| 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 0/TBD | Not started | - |
+| 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 0/1 | Not started | - |
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 0/TBD | Not started | - |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 0/TBD | Not started | - |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 0/TBD | Not started | - |
