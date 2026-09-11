@@ -76,27 +76,143 @@ window.
 
 ### Market Adjusted Model
 
-*To be filled by Task 2.*
+The Market Adjusted (index) model treats the market index itself as the expected
+return: it fixes `alpha = 0` and `beta = 1` rather than estimating them, so the
+abnormal return is simply the firm return minus the index return. It is the
+restricted market model of MacKinlay (1997) sec. 4.4.2.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Whatever `firm_returns` / `index_returns` contain | Return-calculation strategy is orthogonal. |
+| Estimation | None -- `alpha = 0`, `beta = 1` fixed | No OLS parameters estimated. |
+| Abnormal return | `AR = R - Rm` | Firm return minus index return. |
+| Residual sigma | `sd(firm - index)` over the estimation window | Sample standard deviation of the market-adjusted residual series. |
+| Degrees of freedom | `m - 1` | One parameter consumed by the residual mean in `sd()`; `m` = estimation observations. |
+| Forecast-error correction | `sigma * sqrt(1 + 1/m)` | Constant-mean form -- no regression design, so no leverage term. Uses the finite-pair count (NA rows do not inflate `m`). |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The subtraction and constant-mean FEC
+match the restricted market model. Pinned in `test_golden_values.R` against a
+direct closed-form subtraction at absolute tolerance `1e-10`.
+
+*Citation:* MacKinlay, A. C. (1997). Event Studies in Economics and Finance.
+*Journal of Economic Literature*, 35(1), 13--39.
 
 ### Comparison Period Mean Adjusted Model
 
-*To be filled by Task 2.*
+The Comparison Period Mean (constant-mean-return) model uses the firm's own
+average return over the estimation window as the expected return. It is the
+constant-mean-return model of Brown & Warner (1985), also described in MacKinlay
+(1997) sec. 4.4.1.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Whatever `firm_returns` contains | Index returns are unused by this model. |
+| Estimation | `mean(firm_returns)` over the estimation window | One parameter (the mean) estimated. |
+| Abnormal return | `AR = R - mean(R_est)` | Firm return minus estimation-window mean. |
+| Residual sigma | `sd(firm - mean)` over the estimation window | Sample standard deviation of the demeaned residuals. |
+| Degrees of freedom | `m - 1` | The mean consumes one degree of freedom. |
+| Forecast-error correction | `sigma * sqrt(1 + 1/m)` | Constant-mean form. Uses the finite value count (NA rows do not inflate `m`). |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** AR, sigma, df, and FEC match the
+constant-mean-return model. Pinned in `test_golden_values.R` against a
+closed-form subtraction against the fixed estimation mean at absolute tolerance
+`1e-10`.
+
+*Citation:* Brown, S. J., & Warner, J. B. (1985). Using daily stock returns:
+The case of event studies. *Journal of Financial Economics*, 14(1), 3--31.
+MacKinlay (1997).
 
 ### Fama-French Three-Factor Model
 
-*To be filled by Task 2.*
+Regresses firm excess returns on the three Fama-French factors -- market excess
+(`market_excess`), size (`smb`), and value (`hml`) -- by OLS over the estimation
+window; the abnormal return is the residual in the event window. All factor
+models share the `LinearFactorModel` OLS core.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Excess returns (`excess_return` = firm minus risk-free) | Regressed on `market_excess + smb + hml`. |
+| Estimation | OLS via `lm(excess_return ~ market_excess + smb + hml)` | `k = 3` factors plus intercept. |
+| Abnormal return | `AR = excess_return - predicted` | `predicted` from the fitted OLS coefficients. |
+| Residual sigma | Residual standard error from `summary(lm)` | -- |
+| Degrees of freedom | `m - (k + 1) = m - 4` | Intercept plus three factor slopes. |
+| Forecast-error correction | `sigma * sqrt(1 + h_t)`, `h_t = x_t' (X'X)^{-1} x_t` | Full multi-factor hat-value (leverage) form using the estimation design matrix. |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The OLS fit and hat-value FEC match
+Fama-French (1993). Pinned in `test_golden_values.R` against an independent
+`lm()`/`predict()` derivation at absolute tolerance `1e-10`.
+
+*Citation:* Fama, E. F., & French, K. R. (1993). Common risk factors in the
+returns on stocks and bonds. *Journal of Financial Economics*, 33(1), 3--56.
 
 ### Fama-French Five-Factor Model
 
-*To be filled by Task 2.*
+Extends the three-factor model with profitability (`rmw`) and investment (`cma`)
+factors -- Fama & French (2015). Same OLS core, five factors.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Excess returns (`excess_return`) | Regressed on `market_excess + smb + hml + rmw + cma`. |
+| Estimation | OLS on five factors plus intercept | `k = 5`. |
+| Abnormal return | `AR = excess_return - predicted` | -- |
+| Residual sigma | Residual standard error | -- |
+| Degrees of freedom | `m - (k + 1) = m - 6` | -- |
+| Forecast-error correction | `sigma * sqrt(1 + h_t)` | Multi-factor hat-value form. |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** Pinned in `test_golden_values.R` against
+an independent `lm()`/`predict()` derivation at absolute tolerance `1e-10`.
+
+*Citation:* Fama, E. F., & French, K. R. (2015). A five-factor asset pricing
+model. *Journal of Financial Economics*, 116(1), 1--22.
 
 ### Carhart Four-Factor Model
 
-*To be filled by Task 2.*
+Extends the three-factor model with a momentum factor (`mom`) -- Carhart (1997).
+Same OLS core, four factors.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Excess returns (`excess_return`) | Regressed on `market_excess + smb + hml + mom`. |
+| Estimation | OLS on four factors plus intercept | `k = 4`. |
+| Abnormal return | `AR = excess_return - predicted` | -- |
+| Residual sigma | Residual standard error | -- |
+| Degrees of freedom | `m - (k + 1) = m - 5` | -- |
+| Forecast-error correction | `sigma * sqrt(1 + h_t)` | Multi-factor hat-value form. |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** Pinned in `test_golden_values.R` against
+an independent `lm()`/`predict()` derivation at absolute tolerance `1e-10`.
+
+*Citation:* Carhart, M. M. (1997). On persistence in mutual fund performance.
+*Journal of Finance*, 52(1), 57--82.
 
 ### Custom Model
 
-*To be filled by Task 2.*
+The Custom Model inherits the Market Model's OLS estimation but defines the
+abnormal return as `firm_returns - predict(user_model)`, plus an optional
+event-date adjustment `loss_market_cap` added only on the event date. There is
+no single published closed-form here -- the convention is deliberately
+"whatever the supplied model predicts."
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Whatever the supplied model consumes | User-defined. |
+| Estimation | Inherited from the Market Model (OLS) | The fitted object is user-supplied via the pipeline. |
+| Abnormal return | `AR = R - predict(model)` (+`loss_market_cap` on the event date) | The event-date term lets a user inject a known shock. |
+| Residual sigma / df | Inherited from the underlying OLS fit (`df = m - 2`) | -- |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: documented convention (no closed-form pin possible).** With
+`loss_market_cap = 0` the Custom Model reduces exactly to the Market Model; that
+identity is what `test_golden_values.R` pins (absolute `1e-10`). A general
+user-supplied prediction has no published reference value to pin against.
+
+*Citation:* Convention is user-defined; the reduction case cites MacKinlay
+(1997).
 
 ### BHAR Model
 
@@ -180,6 +296,12 @@ remove it is deferred (see the audit log).
 | Component | Result | Citation |
 |---|---|---|
 | Market Model + AR/CAR t | verified, no change | MacKinlay (1997) |
+| Market Adjusted Model | verified, no change | MacKinlay (1997) |
+| Comparison Period Mean Adjusted Model | verified, no change | Brown-Warner (1985); MacKinlay (1997) |
+| Fama-French Three-Factor Model | verified, no change | Fama-French (1993) |
+| Fama-French Five-Factor Model | verified, no change | Fama-French (2015) |
+| Carhart Four-Factor Model | verified, no change | Carhart (1997) |
+| Custom Model | documented convention (user-supplied prediction; reduces to Market Model when `loss_market_cap = 0`) | MacKinlay (1997) |
 | PermutationTest | unwired stub -- empty `compute()`, not on pipeline path; deferred | -- |
 
 *Later tasks append their rows here.*
