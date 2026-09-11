@@ -1,21 +1,21 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: "1.0"
 milestone: v0.66.0
 milestone_name: Stabilization & CRAN Resubmission
-current_phase: 27
-current_phase_name: Property & Numerical-Stability Tests
-status: in-progress
-stopped_at: Completed 27-01-PLAN.md
-last_updated: "2026-09-11T19:43:20.001Z"
+current_phase: 28
+current_phase_name: API Stabilization & Signature Lock
+status: planning
+stopped_at: Phase 27 complete, ready to plan Phase 28
+last_updated: "2026-09-11T19:47:07.906Z"
 last_activity: 2026-09-11
-last_activity_desc: Phase 27 Plan 01 complete — invariant + numerical-stability tests, suite green
-state_head: b2f97183249cc1b43cf5e9a8e1749a757a48bfaa
+last_activity_desc: Phase 27 complete, transitioned to Phase 28
+state_head: 64d5ccc60fa3ca79874eca1d74ae500f872805e6
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 3
   completed_plans: 3
-  percent: 33
+  percent: 50
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-09-10)
 
 ## Current Position
 
-Phase: 27 of 30 (Property & Numerical-Stability Tests)
-Plan: 01 of 01 complete
-Status: Phase 27 complete — CORR-03, CORR-04 delivered
-Last activity: 2026-09-11 — Phase 27 Plan 01 complete (invariant + numerical-stability tests, suite green)
+Phase: 28 of 30 (API Stabilization & Signature Lock)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-11 — Phase 27 complete, transitioned to Phase 28
 
-Progress: [███░░░░░░░] 33%
+Progress: [█████░░░░░] 50%
 
 ## Milestone Roadmap (v0.66.0 — Phases 25–30)
 
@@ -81,6 +81,7 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 - **Phase 25:** Non-ASCII sweep + CI baseline refresh; the CI non-ASCII guard is baseline-aware (fails only on NEW non-ASCII) — refresh baseline after the sweep (HYG-01).
 - **Phase 30 (open question):** The exact 2024-04-20 CRAN archival reason is not recorded in any planning artifact — must be retrieved (CRAN archive / maintainer records / check history) before `cran-comments.md` (CRAN-03) can be written. Within-phase dependency, not a blocker.
 - **Phase 30:** Report-render tests emit transient `file*.log` into `skeleton/` (not gitignored) — carried v0.65.0 hygiene item, fold into CRAN-policy compliance (CRAN-04) if it affects tarball cleanliness.
+- **Phase 27 code-review follow-up (non-blocking, 0 critical):** see `.planning/phases/27-property-numerical-stability-tests/27-REVIEW.md`. Worth applying: WR-01 — in `R/single_event_test_statistics.R` also NA the `car_t_dist` column inside the `if (any(car_overflow))` overflow block (currently only `corrected_car`/`car_t` are cleared, so `car_t_dist` retains a Student-t centred on Inf; no current consumer, but inconsistent with the guard's promise). Others (WR-02 test-coverage overstatement, IN-01..03) are informational. Apply WR-01 opportunistically, e.g. at the start of the next autonomous window before Phase 28 planning.
 
 ### Blockers/Concerns
 
@@ -100,8 +101,8 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 
 ## Session Continuity
 
-Last session: 2026-09-11T19:42:50.418Z
-Stopped at: Completed 27-01-PLAN.md
+Last session: 2026-09-11T19:44:35.024Z
+Stopped at: Phase 27 complete, ready to plan Phase 28
 Resume file: None
 
 ## Operator Next Steps
