@@ -66,7 +66,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 - **Phase 29 (Install-Tested CI)** gates on the *installed* package / `R CMD check`, catching "green under `load_all`, broken when installed" bugs.
 - **Phase 30 (CRAN Resubmission)** is the final gate; it depends on every prior phase being complete.
 
-- [ ] **Phase 25: CRAN Hygiene & Clean Check Baseline** - Non-ASCII sweep, undefined-globals fix, stale-tarball removal, optional-package guard audit — a clean `--as-cran` baseline before any test work
+- [x] **Phase 25: CRAN Hygiene & Clean Check Baseline** - Non-ASCII sweep, undefined-globals fix, stale-tarball removal, optional-package guard audit — a clean `--as-cran` baseline before any test work (completed 2026-09-11)
 - [ ] **Phase 26: Formula Audit & Golden-Value Validation** - Audit each model/statistic against its published formula, document conventions, fix discrepancies, then pin golden values against reference numbers
 - [ ] **Phase 27: Property & Numerical-Stability Tests** - Cross-cutting invariant/property tests plus numerical-stability guards on the sensitive numeric paths
 - [ ] **Phase 28: API Stabilization & Signature Lock** - Signature-consistency audit + return-shape contracts + deprecation lifecycle, then a structural API snapshot capturing the audited surface
@@ -105,7 +105,9 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   4. Each golden-value test annotates the exact conventions it assumes and uses an explicit tolerance — relative for cross-implementation comparisons, tight absolute for algebraic identities.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
 
-**Plans**: TBD
+**Plans**: 1 plan
+
+- [ ] 26-01-PLAN.md — Audit every return model (13+) and test statistic (8+) against its published formula, document conventions in a new CRAN-shipped `statistical-conventions.Rmd` vignette, fix genuine errors (fix precedes pin, locked by regression test), and pin key statistics to published/closed-form golden values (tracer-first: Market Model AR/CAR t, then the full matrix)
 
 ### Phase 27: Property & Numerical-Stability Tests
 
@@ -178,7 +180,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 22. Report Aesthetics | v0.65.0 | 1/1 | Complete | 2026-09-09 |
 | 23. API & Message Polish | v0.65.0 | 3/3 | Complete | 2026-09-09 |
 | 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
-| 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | In Progress|  |
+| 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 0/TBD | Not started | - |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 0/TBD | Not started | - |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 0/TBD | Not started | - |
