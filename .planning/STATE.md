@@ -2,20 +2,20 @@
 gsd_state_version: "1.0"
 milestone: v0.66.0
 milestone_name: Stabilization & CRAN Resubmission
-current_phase: 28
-current_phase_name: API Stabilization & Signature Lock
-status: verifying
-stopped_at: Completed 28-03-PLAN.md
-last_updated: "2026-09-11T22:43:33.262Z"
-last_activity: 2026-09-11
-last_activity_desc: Phase 28 execution started
-state_head: c547f9e110227d3be76a6c7b39de7cf10be7ab1d
+current_phase: 29
+current_phase_name: Install-Tested CI
+status: planning
+stopped_at: Phase 28 complete, ready to plan Phase 29
+last_updated: "2026-09-11T22:49:39.206Z"
+last_activity: 2026-09-12
+last_activity_desc: Phase 28 complete, transitioned to Phase 29
+state_head: 37c0d4ae02fb9689d09851055fa3c054751daac4
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 6
   completed_plans: 6
-  percent: 50
+  percent: 67
 ---
 
 # Project State
@@ -29,12 +29,12 @@ See: .planning/PROJECT.md (updated 2026-09-10)
 
 ## Current Position
 
-Phase: 28 (API Stabilization & Signature Lock) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-09-11 — Phase 28 execution started
+Phase: 29 — Install-Tested CI
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-09-12 — Phase 28 complete, transitioned to Phase 29
 
-Progress: [█████░░░░░] 50%
+Progress: [███████░░░] 67%
 
 ## Milestone Roadmap (v0.66.0 — Phases 25–30)
 
@@ -105,7 +105,7 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 ## Session Continuity
 
 Last session: 2026-09-11T22:43:18.497Z
-Stopped at: Completed 28-03-PLAN.md
+Stopped at: Phase 28 complete, ready to plan Phase 29
 Resume file: None
 
 ## Operator Next Steps
