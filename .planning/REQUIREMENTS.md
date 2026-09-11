@@ -25,7 +25,7 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 - [x] **APIS-01**: A signature-consistency audit reconciles inconsistent argument names/order/defaults across the public API; outliers are either aligned or scheduled for deprecation with a recorded rationale. (Runs before the snapshot is captured.)
 - [x] **APIS-02**: Return-shape contracts lock the column names/types/shapes of pipeline-returned tibbles in a new `R/shape_contracts.R` (sibling to `R/contract.R`), opt-in via an option and default-off, covering both valid and degenerate (`is_fitted = FALSE`) outputs.
-- [ ] **APIS-03**: API snapshot tests capture the full public signature surface (exports via `getNamespaceExports()`, `formals()` per function, registered S3 methods) using structural assertions — not rendered `print()` output — and are install-gated with `skip_if_not_installed("EventStudy")` so an accidental break fails CI.
+- [x] **APIS-03**: API snapshot tests capture the full public signature surface (exports via `getNamespaceExports()`, `formals()` per function, registered S3 methods) using structural assertions — not rendered `print()` output — and are install-gated with `skip_if_not_installed("EventStudy")` so an accidental break fails CI.
 - [x] **APIS-04**: A formal deprecation policy + lifecycle is documented and wired (warn, never silently break) using a base `.Deprecated()` / `lifecycle`-Suggests shim, with NEWS discipline, so future API changes have a backward-compatible path.
 
 ### Install-Tested CI
@@ -76,7 +76,7 @@ Explicitly excluded to prevent scope creep.
 | CORR-04 | Phase 27 | Complete |
 | APIS-01 | Phase 28 | Complete |
 | APIS-02 | Phase 28 | Complete |
-| APIS-03 | Phase 28 | Pending |
+| APIS-03 | Phase 28 | Complete |
 | APIS-04 | Phase 28 | Complete |
 | CI-01 | Phase 29 | Pending |
 | CI-02 | Phase 29 | Pending |

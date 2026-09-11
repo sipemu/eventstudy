@@ -139,7 +139,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   4. API snapshot tests capture the full public signature surface (`getNamespaceExports()`, `formals()` per function, registered S3 methods) using structural assertions — not rendered `print()` output — and are install-gated with `skip_if_not_installed("EventStudy")` so an accidental break fails CI.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 **Wave 1**
 
 - [x] 28-01-PLAN.md — Signature audit + in-place reconciliation with shims (APIS-01) + deprecation lifecycle policy (APIS-04)
@@ -150,7 +150,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 28-03-PLAN.md — Structural install-gated API snapshot pinning the reconciled surface (APIS-03)
+- [x] 28-03-PLAN.md — Structural install-gated API snapshot pinning the reconciled surface (APIS-03)
 
 ### Phase 29: Install-Tested CI
 
@@ -196,6 +196,6 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
-| 28. API Stabilization & Signature Lock | v0.66.0 | 2/3 | In Progress|  |
+| 28. API Stabilization & Signature Lock | v0.66.0 | 3/3 | In Progress|  |
 | 29. Install-Tested CI | v0.66.0 | 0/TBD | Not started | - |
 | 30. CRAN Resubmission | v0.66.0 | 0/TBD | Not started | - |
