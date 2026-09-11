@@ -9,22 +9,38 @@
 #' @param add_event_date Add vertical line for event date (TRUE/FALSE).
 #' @param max_symbols An integer specifying the maximum number of symbols
 #'   to display. Default is 6.
-#' @param do_sample A boolean specifying whether to randomly sample the
-#'   symbols if the number exceeds max_symbols. Default is TRUE.
+#' @param sample_symbols Logical; if \code{TRUE} (default), randomly sample
+#'   \code{max_symbols} symbols when the task contains more than
+#'   \code{max_symbols}. If \code{FALSE}, take the first \code{max_symbols}
+#'   in order.
+#' @param do_sample \lifecycle{deprecated} Renamed to \code{sample_symbols}
+#'   in EventStudy 0.66.0. Accepts the old name for backward compatibility.
 #'
 #' @return A plotly plot object.
 #' @family eventstudy-plots
 #' @export
 plot_stocks <- function(task,
-                        target_variable="firm_adjusted",
-                        add_event_date=FALSE,
-                        max_symbols=6,
-                        do_sample=TRUE) {
+                        target_variable  = "firm_adjusted",
+                        add_event_date   = FALSE,
+                        max_symbols      = 6,
+                        sample_symbols   = TRUE,
+                        do_sample        = NULL) {
+
+  # Backward-compatible shim: accept old arg name, forward to new name.
+  if (!is.null(do_sample)) {
+    sample_symbols <- .deprecate_arg(
+      old   = "do_sample",
+      new   = "sample_symbols",
+      value = do_sample,
+      fn    = "plot_stocks",
+      when  = "0.66.0"
+    )
+  }
 
   # Sample symbols
   symbols = task$symbols
   if (length(symbols) > max_symbols) {
-    if (do_sample) {
+    if (sample_symbols) {
       symbols = sample(symbols, max_symbols)
     } else {
       symbols = symbols[1:max_symbols]

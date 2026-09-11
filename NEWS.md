@@ -1,3 +1,26 @@
+# EventStudy 0.66.0
+
+## API Stabilization & Deprecation Lifecycle (Phase 28)
+
+This release completes a signature-consistency audit of the full public API and
+wires a formal deprecation lifecycle (base `.Deprecated()` + optional
+`lifecycle` shim). All deprecated argument names continue to work and emit
+exactly one deprecation warning pointing to the replacement.
+
+### Renamed Arguments (deprecated old names still work)
+
+* `plot_stocks()`: `do_sample` is deprecated in favour of `sample_symbols`
+  (#APIS-01). The new name is noun-first, consistent with the sibling parameter
+  `max_symbols`. Pass the old name and you receive one deprecation warning; the
+  result is identical. (#APIS-04)
+
+### Deprecation Infrastructure
+
+* New internal helper `.deprecate_arg()` in `R/deprecation.R`. Always calls
+  base `.Deprecated()` unconditionally; additionally calls
+  `lifecycle::deprecate_warn()` when `lifecycle` is installed (Suggests-only,
+  never a hard dependency). (#APIS-04)
+
 # EventStudy 0.65.0
 
 The "Polish" milestone lifts the *felt* quality of the package — brand identity,
