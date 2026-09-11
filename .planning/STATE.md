@@ -4,16 +4,16 @@ milestone: v0.66.0
 milestone_name: Stabilization & CRAN Resubmission
 current_phase: 29
 current_phase_name: Install-Tested CI
-status: planning
-stopped_at: Phase 28 complete, ready to plan Phase 29
-last_updated: "2026-09-11T22:49:39.206Z"
+status: executing
+stopped_at: context exhaustion at 75% (2026-09-11)
+last_updated: "2026-09-11T23:19:49.835Z"
 last_activity: 2026-09-12
 last_activity_desc: Phase 28 complete, transitioned to Phase 29
-state_head: 37c0d4ae02fb9689d09851055fa3c054751daac4
+state_head: 4c64d03ec3c167d095da94a0d6a21825e077d04a
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 6
+  total_plans: 7
   completed_plans: 6
   percent: 67
 ---
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-09-10)
 
 ## Current Position
 
-Phase: 29 — Install-Tested CI
+Phase: 29 (Install-Tested CI) — READY TO EXECUTE
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-09-12 — Phase 28 complete, transitioned to Phase 29
 
 Progress: [███████░░░] 67%
@@ -104,8 +104,8 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 
 ## Session Continuity
 
-Last session: 2026-09-11T22:43:18.497Z
-Stopped at: Phase 28 complete, ready to plan Phase 29
+Last session: 2026-09-11T23:18:29.742Z
+Stopped at: context exhaustion at 75% (2026-09-11)
 Resume file: None
 
 ## Operator Next Steps
