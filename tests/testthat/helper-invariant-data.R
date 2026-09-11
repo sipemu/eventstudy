@@ -301,6 +301,85 @@ invariant_alpha0_beta1_fixture <- function() {
 }
 
 # --------------------------------------------------------------------------
+# Statistic-layer invariant fixtures (Task 5)
+# --------------------------------------------------------------------------
+
+#' Multi-event fixture with r_bar == 0 (mutually orthogonal estimation SARs).
+#'
+#' Built on MarketAdjustedModel (AR = firm - index, no OLS fit) so the
+#' estimation-window abnormal returns are EXACTLY the fixed patterns below.
+#' The two events' estimation-window AR vectors are mean-zero and orthogonal
+#' (dot product 0), so their Pearson correlation -- and hence the KP average
+#' pairwise SAR correlation r_bar -- is exactly 0. At r_bar == 0 the
+#' Kolari-Pynnoenen adjustment kp_adj = sqrt((1-0)/(1+(n-1)*0)) = 1, so
+#' KolariPynnonenTest MUST reduce to BMPTest. The event window carries a
+#' non-degenerate cross-event AR spread so BMP/KP are finite (n_events == 2).
+#'
+#' @return list(data = per-event AR tibble, model = model tibble with sigma).
+invariant_rbar_zero_fixture <- function() {
+  n_est <- 8L
+  n_ev  <- 3L
+  # Mean-zero, mutually orthogonal estimation-window AR patterns (cor == 0).
+  patterns <- list(
+    E1 = c(1, -1, 1, -1, 1, -1, 1, -1) * 0.01,
+    E2 = c(1,  1, -1, -1, 1,  1, -1, -1) * 0.01
+  )
+  evt <- list(
+    E1 = list(idx = c(0.010, -0.005, 0.008), firm = c(0.030, -0.010, 0.020)),
+    E2 = list(idx = c(0.012, -0.004, 0.009), firm = c(0.025, -0.008, 0.018))
+  )
+
+  base <- do.call(rbind, lapply(names(patterns), function(nm) {
+    tibble::tibble(
+      event_id          = nm,
+      firm_symbol       = sub("E", "F", nm),
+      relative_index    = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+      # index == 0 on the estimation window so AR = firm = the orthogonal
+      # pattern exactly (MarketAdjusted: AR = firm - index).
+      index_returns     = c(rep(0, n_est), evt[[nm]]$idx),
+      firm_returns      = c(patterns[[nm]], evt[[nm]]$firm),
+      estimation_window = c(rep(1, n_est), rep(0, n_ev)),
+      event_window      = c(rep(0, n_est), rep(1, n_ev)),
+      event_date        = c(rep(0, n_est), 1, rep(0, n_ev - 1))
+    )
+  }))
+
+  model_tbl <- tibble::tibble(
+    event_id    = names(patterns),
+    firm_symbol = sub("E", "F", names(patterns)),
+    model = lapply(names(patterns), function(nm) {
+      m <- MarketAdjustedModel$new()
+      m$fit(base[base$event_id == nm, ])
+      m
+    })
+  )
+  data_ar <- do.call(rbind, lapply(names(patterns), function(nm) {
+    m <- model_tbl$model[[which(model_tbl$event_id == nm)]]
+    m$abnormal_returns(base[base$event_id == nm, ])
+  }))
+  # BMP/KP read a per-event sigma column off the model tibble.
+  model_tbl$sigma <- vapply(model_tbl$model,
+                            function(m) m$statistics$sigma, numeric(1))
+
+  list(data = data_ar, model = model_tbl)
+}
+
+#' Single-event slice of the golden multi-event fixture (n_events == 1).
+#'
+#' Used to assert the uniform STATS-04 invariant: every multi-event statistic
+#' returns NA for its z/t when only one event is present (a cross-sectional
+#' statistic is undefined with a single cross-sectional unit).
+#'
+#' @return list(data = single-event AR tibble, model = single-row model tibble).
+invariant_single_event_fixture <- function() {
+  fx <- golden_multi_event_fixture()
+  list(
+    data  = fx$data[fx$data$event_id == "E1", , drop = FALSE],
+    model = fx$model[fx$model$event_id == "E1", , drop = FALSE]
+  )
+}
+
+# --------------------------------------------------------------------------
 # Ill-conditioned (near-collinear) design fixture for the stability guard
 # --------------------------------------------------------------------------
 

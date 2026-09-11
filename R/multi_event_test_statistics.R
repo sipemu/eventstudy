@@ -309,7 +309,11 @@ GeneralizedSignTest <- R6Class("GeneralizedSignTest",
                                      dplyr::mutate(
                                        gsign_z = {
                                          denom <- sqrt(n_valid_events * p_hat * (1 - p_hat))
-                                         ifelse(is.finite(denom) & denom > 0,
+                                         # STATS-04: n_events == 1 gives a finite-but-invalid z
+                                         # (a sign-family test needs >= 2 observations to be
+                                         # meaningful). Require n_valid_events >= 2, matching
+                                         # SignTest, so the multi-event statistic set is uniform.
+                                         ifelse(n_valid_events >= 2 & is.finite(denom) & denom > 0,
                                                 (n_pos - n_valid_events * p_hat) / denom,
                                                 NA_real_)
                                        },
@@ -328,7 +332,8 @@ GeneralizedSignTest <- R6Class("GeneralizedSignTest",
                                        n_valid   = sum(!is.na(car)),
                                        cgsign_z  = {
                                          denom <- sqrt(n_valid * p_hat * (1 - p_hat))
-                                         ifelse(is.finite(denom) & denom > 0,
+                                         # STATS-04: same n >= 2 guard on the cumulative z.
+                                         ifelse(n_valid >= 2 & is.finite(denom) & denom > 0,
                                                 (n_pos_car - n_valid * p_hat) / denom,
                                                 NA_real_)
                                        },
@@ -556,13 +561,22 @@ CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
                                           # vectors directly so each day keeps its own
                                           # time-series t-statistic (WR bugfix).
                                           ts_ok <- is.finite(ts_sd) && ts_sd > 0
+                                          # STATS-04: a calendar-time PORTFOLIO test pools
+                                          # abnormal returns across events; with a single event
+                                          # (max n_events == 1) the cross-event portfolio
+                                          # degenerates to one firm's series and the statistic is
+                                          # not a valid multi-event test. Return NA uniformly with
+                                          # the rest of the multi-event set rather than a
+                                          # finite-but-invalid t. Cross-sectional (multi-event)
+                                          # validity requires n_events >= 2.
+                                          n_events_ok <- max(portfolio$n_events, na.rm = TRUE) >= 2
                                           portfolio <- portfolio %>%
                                             dplyr::mutate(
                                               caar = cumsum(dplyr::coalesce(aar, 0)),
                                               # Time-series t-stat: AAR_t / sd(AAR)
-                                              caltime_t = if (ts_ok) aar / ts_sd else NA_real_,
+                                              caltime_t = if (ts_ok && n_events_ok) aar / ts_sd else NA_real_,
                                               # CAAR t-stat: CAAR / (sd * sqrt(L))
-                                              ccaltime_t = if (ts_ok)
+                                              ccaltime_t = if (ts_ok && n_events_ok)
                                                 caar / (ts_sd * sqrt(seq_len(n_periods)))
                                               else NA_real_
                                             )

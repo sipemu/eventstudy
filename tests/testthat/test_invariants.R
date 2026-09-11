@@ -268,3 +268,98 @@ test_that("t-statistic is invariant to a positive rescale of returns (MarketMode
     info = "CAR t-stat invariant to positive return rescale"
   )
 })
+
+# ===========================================================================
+# Statistic-layer invariants (Phase 27 Task 5, CORR-03)
+# ===========================================================================
+#
+# Cross-cutting identities and guard-consistency invariants over the MULTI-EVENT
+# statistic matrix (complementing the per-stat contract/golden tests):
+#   * CAAR == cumsum(AAR) on the shared multi-event fixture.
+#   * Uniform STATS-04: with one event, EVERY multi-event statistic returns NA
+#     for its z/t (looped over the statistic set, registry-style).
+#   * KolariPynnonen reduces to BMP when the average pairwise SAR correlation
+#     r_bar == 0 (kp_adj == 1).
+
+test_that("CAAR == cumsum(AAR) on the shared multi-event fixture (CSectT / Patell)", {
+  fx <- golden_multi_event_fixture()
+
+  # CSectTTest: the cumulative average abnormal return is, by construction, the
+  # running sum of the per-index AAR. Exact cumulation identity -> 1e-10.
+  res_cs <- CSectTTest$new()$compute(fx$data, NULL)
+  res_cs <- res_cs[order(res_cs$relative_index), , drop = FALSE]
+  expect_equal(
+    res_cs$caar,
+    cumsum(res_cs$aar),
+    tolerance = 1e-10,           # CAAR == cumsum(AAR) exact cumulation
+    info = "CSectT CAAR == cumsum(AAR)"
+  )
+
+  # PatellZTest exposes the same aar/caar aggregation underneath its z; the
+  # caar == cumsum(aar) identity holds for the underlying aggregation
+  # (documented: the identity is over aar/caar, not the standardized z). 1e-10.
+  res_pz <- PatellZTest$new()$compute(fx$data, fx$model)
+  res_pz <- res_pz[order(res_pz$relative_index), , drop = FALSE]
+  expect_equal(
+    res_pz$caar,
+    cumsum(res_pz$aar),
+    tolerance = 1e-10,           # Patell underlying CAAR == cumsum(AAR)
+    info = "Patell CAAR == cumsum(AAR)"
+  )
+})
+
+test_that("STATS-04 uniform: single event -> NA z/t for every multi-event statistic", {
+  one <- invariant_single_event_fixture()
+
+  # Registry-style loop (not per-stat copy-paste): each entry names the statistic
+  # constructor, whether it consumes the model tibble, and its z/t output columns.
+  # With a single cross-sectional unit (n_events == 1) a cross-sectional /
+  # portfolio statistic is undefined, so every z/t column MUST be all-NA. This is
+  # an is.na() invariant across the statistic matrix -> no numeric tolerance.
+  stat_registry <- list(
+    list(name = "CSectTTest",                ctor = function() CSectTTest$new(),                use_model = FALSE, cols = c("aar_t", "caar_t")),
+    list(name = "PatellZTest",               ctor = function() PatellZTest$new(),               use_model = TRUE,  cols = c("aar_z", "caar_z")),
+    list(name = "BMPTest",                   ctor = function() BMPTest$new(),                   use_model = TRUE,  cols = c("bmp_t", "cbmp_t")),
+    list(name = "SignTest",                  ctor = function() SignTest$new(),                  use_model = FALSE, cols = c("sign_z", "csign_z")),
+    list(name = "GeneralizedSignTest",       ctor = function() GeneralizedSignTest$new(),       use_model = FALSE, cols = c("gsign_z", "cgsign_z")),
+    list(name = "KolariPynnonenTest",        ctor = function() KolariPynnonenTest$new(),        use_model = TRUE,  cols = c("kp_t", "ckp_t")),
+    list(name = "CalendarTimePortfolioTest", ctor = function() CalendarTimePortfolioTest$new(), use_model = FALSE, cols = c("caltime_t", "ccaltime_t"))
+  )
+
+  for (st in stat_registry) {
+    mdl <- if (st$use_model) one$model else NULL
+    res <- suppressWarnings(st$ctor()$compute(one$data, mdl))
+    for (col in st$cols) {
+      expect_true(
+        all(is.na(res[[col]])),
+        info = paste0("n_events==1 -> NA ", col, " for ", st$name)
+      )
+    }
+  }
+})
+
+test_that("KolariPynnonen reduces to BMP when r_bar == 0 (kp_adj == 1)", {
+  fx <- invariant_rbar_zero_fixture()
+
+  bmp <- BMPTest$new()$compute(fx$data, fx$model)
+  kp  <- KolariPynnonenTest$new()$compute(fx$data, fx$model)
+  bmp <- bmp[order(bmp$relative_index), , drop = FALSE]
+  kp  <- kp[order(kp$relative_index), , drop = FALSE]
+
+  # At r_bar == 0 the KP adjustment factor is sqrt((1-0)/(1+(n-1)*0)) = 1, so
+  # kp_t == bmp_t exactly. Cross-method reduction -> RELATIVE tolerance 1e-6
+  # (the reduction is algebraically exact; the relative bound absorbs the SAR
+  # correlation/aggregation re-accumulation).
+  expect_equal(
+    kp$kp_t,
+    bmp$bmp_t,
+    tolerance = 1e-6,            # KP -> BMP reduction at r_bar==0 (kp_adj==1)
+    info = "kp_t == bmp_t when r_bar == 0"
+  )
+  expect_equal(
+    kp$ckp_t,
+    bmp$cbmp_t,
+    tolerance = 1e-6,            # cumulative KP -> cumulative BMP at r_bar==0
+    info = "ckp_t == cbmp_t when r_bar == 0"
+  )
+})
