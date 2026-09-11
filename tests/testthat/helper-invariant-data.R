@@ -243,6 +243,64 @@ invariant_expected_car <- function(ev) {
 }
 
 # --------------------------------------------------------------------------
+# Cross-method-consistency fixtures (Task 3, representative subset)
+# --------------------------------------------------------------------------
+
+#' Fixed price series for return-calculation-strategy consistency.
+#'
+#' A deterministic price path with SMALL period-over-period moves so the
+#' first-order log ~ simple approximation (log(1+r) ~ r) holds to the
+#' documented relative tolerance. No set.seed -- fixed literals only.
+#'
+#' @return A tibble with an `adjusted` price column.
+invariant_price_series_fixture <- function() {
+  tibble::tibble(
+    adjusted = c(100.0, 100.5, 101.0, 100.7, 101.3, 101.9, 102.2, 101.8)
+  )
+}
+
+#' alpha==0 / beta==1 fixture where the benchmark IS the fitted line.
+#'
+#' Constructed so the true OLS parameters are exactly alpha = 0, beta = 1 with
+#' zero estimation residual: firm_returns == index_returns on the estimation
+#' window. On such a design MarketModel (fits alpha~0,beta~1),
+#' MarketAdjustedModel (imposes alpha=0,beta=1), and
+#' ComparisonPeriodMeanAdjustedModel (subtracts the estimation mean, which is
+#' the same reference when firm==index and the mean cancels) all reduce to the
+#' same abnormal return AR = firm - index on the event window. This is the
+#' representative-subset cross-method invariant: the models must coincide when
+#' the benchmark literally is the fitted line.
+#'
+#' @return A tibble for the OLS/adjusted-family models.
+invariant_alpha0_beta1_fixture <- function() {
+  n_est <- 8L
+  # Estimation window: firm == index exactly AND the estimation mean is exactly
+  # 0 (symmetric pattern) => MarketModel OLS gives alpha=0, beta=1 with zero
+  # residual variance; MarketAdjustedModel imposes alpha=0,beta=1; and
+  # ComparisonPeriodMeanAdjustedModel subtracts mean(est_firm)==0. All three
+  # therefore reduce to AR = firm - index on the event window.
+  est_index <- c(-0.02, -0.01, 0.005, 0.025, 0.02, 0.01, -0.005, -0.025)
+  est_firm  <- est_index
+  # Event window: index == 0 so that "subtract the index" (Market /
+  # Market-Adjusted, with beta=1,alpha=0) and "subtract the estimation mean"
+  # (Comparison-Mean, mean==0) are the SAME operation. firm_evt then equals the
+  # abnormal return under all three models. This is the exact condition under
+  # which the OLS/adjusted family coincides (benchmark == fitted line == 0).
+  evt_index <- c(0.0, 0.0, 0.0)
+  evt_firm  <- c(0.020, -0.004, 0.012)  # known AR under all three models
+  n_ev <- length(evt_index)
+
+  tibble::tibble(
+    firm_returns      = c(est_firm, evt_firm),
+    index_returns     = c(est_index, evt_index),
+    estimation_window = c(rep(1, n_est), rep(0, n_ev)),
+    event_window      = c(rep(0, n_est), rep(1, n_ev)),
+    relative_index    = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+    event_date        = c(rep(0, n_est), 1, rep(0, n_ev - 1))
+  )
+}
+
+# --------------------------------------------------------------------------
 # Ill-conditioned (near-collinear) design fixture for the stability guard
 # --------------------------------------------------------------------------
 
