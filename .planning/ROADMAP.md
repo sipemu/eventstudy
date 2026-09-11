@@ -140,8 +140,16 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   5. Behavior on valid inputs is unchanged and the full suite stays green.
 
 **Plans**: 3 plans
+**Wave 1**
+
 - [ ] 28-01-PLAN.md — Signature audit + in-place reconciliation with shims (APIS-01) + deprecation lifecycle policy (APIS-04)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 28-02-PLAN.md — Return-shape contracts in R/shape_contracts.R, option-gated/default-off, warn-only, covering single/multi-event + degenerate shapes (APIS-02)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 28-03-PLAN.md — Structural install-gated API snapshot pinning the reconciled surface (APIS-03)
 
 ### Phase 29: Install-Tested CI
