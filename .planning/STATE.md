@@ -4,8 +4,8 @@ milestone: v0.66.0
 milestone_name: Stabilization & CRAN Resubmission
 current_phase: 27
 current_phase_name: Property & Numerical-Stability Tests
-status: planning
-stopped_at: Completed 26-01-PLAN.md (gate green)
+status: ready-to-execute
+stopped_at: Phase 27 plan-check PASS-WITH-ADVISORIES (0 blockers, 3 advisories); 27-01-PLAN.md ready to execute (6 tasks, tracer-first). Execute one task at a time via single-task executors per the ~168k-token/context advisory.
 last_updated: "2026-09-11T13:12:56.317Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 26 complete, transitioned to Phase 27
