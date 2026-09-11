@@ -22,7 +22,7 @@ affects: [29-install-tested-ci, 30-cran-resubmission]
 actuals:
   tokens: 14868    # 59472 chars / 4 over the files changed
   tasks: 2
-  commits: 2
+  commits: 3       # MEASURED: git rev-list --count b4bb38a14edae3c0d809c6ed9ca9c5fc38996f4c..HEAD
   plan_head_before: b4bb38a14edae3c0d809c6ed9ca9c5fc38996f4c
 
 # Tech tracking
