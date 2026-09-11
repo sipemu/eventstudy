@@ -131,6 +131,71 @@ report_factor("FF5", excess_return ~ market_excess + smb + hml + rmw + cma)
 report_factor("Carhart4", excess_return ~ market_excess + smb + hml + mom)
 
 # --------------------------------------------------------------------------
+# 1d. Specialized / time-varying models -- closed form, no estudy2 (Task 3).
+#     BHAR (Barber-Lyon 1997), Volume, Volatility, Rolling-Window. GARCH/DCC are
+#     identity-pinned (skip-guarded on rugarch/rmgarch) so no fitted constant is
+#     derived here -- their AR is exactly firm - (mu + beta * index) for any fit.
+# --------------------------------------------------------------------------
+message("\n-- BHAR Model + BHARTTest (Barber-Lyon 1997) --")
+bhar_est_firm  <- c(0.020, 0.010, 0.030, 0.005, 0.015, 0.025)
+bhar_est_index <- c(0.010, 0.012, 0.020, 0.008, 0.010, 0.015)
+bhar_evt_firm  <- c(0.040, -0.010, 0.030)
+bhar_evt_index <- c(0.015, -0.005, 0.010)
+bhar_sigma <- sd(bhar_est_firm - bhar_est_index)            # df = m - 1 = 5
+bhar_ar <- cumprod(1 + bhar_evt_firm) - cumprod(1 + bhar_evt_index)
+bhar_se <- bhar_sigma * sqrt(seq_along(bhar_evt_firm))       # Lyon-Barber-Tsai sqrt(n)
+bhar_t  <- bhar_ar / bhar_se
+cat(sprintf("sigma = %.17g, df = %d\n", bhar_sigma, length(bhar_est_firm) - 1))
+cat("ar =", paste(sprintf("%.17g", bhar_ar), collapse = ", "), "\n")
+cat("se =", paste(sprintf("%.17g", bhar_se), collapse = ", "), "\n")
+cat("t  =", paste(sprintf("%.17g", bhar_t),  collapse = ", "), "\n")
+
+message("\n-- Volume Model (log-mean abnormal volume) --")
+vol_est <- c(1000, 1200, 900, 1100, 1050, 950)
+vol_evt <- c(2000, 800, 1500)
+vol_expected <- mean(log(vol_est + 1))                       # log_transform = TRUE
+vol_sigma <- sd(log(vol_est + 1) - vol_expected)            # df = m - 1 = 5
+vol_ar <- log(vol_evt + 1) - vol_expected
+cat(sprintf("expected = %.17g, sigma = %.17g, df = %d\n",
+            vol_expected, vol_sigma, length(vol_est) - 1))
+cat("ar =", paste(sprintf("%.17g", vol_ar), collapse = ", "), "\n")
+
+message("\n-- Volatility Model (squared-return / variance ratio) --")
+volat_est <- c(0.02, -0.01, 0.03, -0.02, 0.015, -0.005)
+volat_evt <- c(0.05, -0.04, 0.01)
+est_var <- var(volat_est)
+volat_sigma <- sd(volat_est^2 / est_var - 1)               # df = m - 1 = 5
+volat_ar <- volat_evt^2 / est_var - 1
+cat(sprintf("est_var = %.17g, sigma = %.17g, df = %d\n",
+            est_var, volat_sigma, length(volat_est) - 1))
+cat("ar =", paste(sprintf("%.17g", volat_ar), collapse = ", "), "\n")
+
+message("\n-- Rolling-Window Model (single-window OLS on m = 30 fixture) --")
+# window_size default 60, min_obs default 30; ws = min(60, 30) = 30 -> single
+# window = full-sample OLS; df = max(ws - 2, 1) = 28.
+n_est <- 30L
+rw_index <- seq(-0.03, 0.03, length.out = n_est)
+rw_resid <- rep(c(0.001, -0.001, 0.0015, -0.0015, 0.0005, -0.0005), length.out = n_est)
+rw_firm  <- 0.004 + 1.2 * rw_index + rw_resid
+rw_fit <- lm(rw_firm ~ rw_index)
+rw_alpha <- unname(coef(rw_fit)[1]); rw_beta <- unname(coef(rw_fit)[2])
+# model uses denom = max(ws - 2, 1); lm's residual SE uses n - 2 = 28 -> identical
+rw_sigma <- summary(rw_fit)$sigma
+rw_evt_index <- c(0.02, -0.01, 0.015)
+rw_evt_firm  <- c(0.050, 0.000, 0.040)
+rw_ar <- rw_evt_firm - (rw_alpha + rw_beta * rw_evt_index)
+cat(sprintf("alpha = %.17g, beta = %.17g, sigma = %.17g, df = %d\n",
+            rw_alpha, rw_beta, rw_sigma, max(min(60L, n_est) - 2L, 1L)))
+cat("ar =", paste(sprintf("%.17g", rw_ar), collapse = ", "), "\n")
+
+message(paste0(
+  "\nGARCH / DCC-GARCH: no fitted constant derived. Their abnormal return is the\n",
+  "exact identity AR = firm - (mu + beta * index) for ANY fitted coefficients,\n",
+  "so test_golden_values.R pins that identity guarded by\n",
+  "skip_if_not_installed('rugarch') / ('rmgarch') -- avoiding a version-fragile pin."
+))
+
+# --------------------------------------------------------------------------
 # 2. Optional estudy2 / eventstudies cross-checks (best-effort only).
 # --------------------------------------------------------------------------
 if (requireNamespace("estudy2", quietly = TRUE) ||

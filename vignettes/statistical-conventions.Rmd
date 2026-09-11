@@ -214,29 +214,163 @@ user-supplied prediction has no published reference value to pin against.
 *Citation:* Convention is user-defined; the reduction case cites MacKinlay
 (1997).
 
-### BHAR Model
+### BHAR Model (Barber-Lyon 1997)
 
-*To be filled by Task 3.*
+The Buy-and-Hold Abnormal Return (BHAR) model is for long-horizon studies where
+compounding matters. Instead of summing daily abnormal returns it compounds firm
+and benchmark returns separately over the event window and takes the difference.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Arithmetic returns compounded multiplicatively | `cumprod(1 + R)`. |
+| Estimation | None estimated for the AR itself; the benchmark is the index | sigma is estimated from the estimation window for the t-test. |
+| Abnormal return | `BHAR = cumprod(1 + firm) - cumprod(1 + index)` | Barber & Lyon (1997) buy-and-hold definition; compounded within each event window separately. |
+| Residual sigma | `sd(firm - index)` over the estimation window | Sample SD of the one-period market-adjusted residual series. |
+| Degrees of freedom | `m - 1` | Finite-pair count via `.finite_residual_df()` (NA rows do not inflate `m`). |
+| BHAR standard error | `sigma * sqrt(n)` | `n` is the day index within the event window -- the random-walk sqrt-of-horizon scaling of Lyon, Barber & Tsai (1999). |
+| BHAR t-statistic | `BHAR / (sigma * sqrt(n))` | Returns NA when `sigma == 0` (degenerate guard), never Inf/NaN. |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The compounded BHAR, the `sigma * sqrt(n)`
+scaling, and the constant-mean forecast-error correction match Barber-Lyon
+(1997) / Lyon-Barber-Tsai (1999). Pinned in `test_golden_values.R` against an
+independent closed-form compounding at absolute tolerance `1e-10`.
+
+*Citation:* Barber, B. M., & Lyon, J. D. (1997). Detecting long-run abnormal
+stock returns: The empirical power and specification of test statistics.
+*Journal of Financial Economics*, 43(3), 341--372. Lyon, J. D., Barber, B. M., &
+Tsai, C.-L. (1999). Improved methods for tests of long-run abnormal stock
+returns. *Journal of Finance*, 54(1), 165--201.
 
 ### Volume Model
 
-*To be filled by Task 3.*
+The Volume model runs an event study on trading volume rather than returns.
+Expected volume is the estimation-window mean of (optionally log-transformed)
+volume, and abnormal volume is the deviation from that mean. It writes abnormal
+volume into the `abnormal_returns` column so the standard test statistics apply.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Measure | `log(firm_volume + 1)` by default (`log_transform = TRUE`) | The `+1` avoids `log(0)`; set `log_transform = FALSE` for raw volume. |
+| Estimation | `mean(log(volume + 1))` over the estimation window | One parameter (the mean). |
+| Abnormal measure | `AR = log(volume + 1) - expected` | Deviation from the estimation-window log-mean. |
+| Residual sigma | `sd(residuals)` over the estimation window | -- |
+| Degrees of freedom | `m - 1` | Finite value count (NA/non-finite rows excluded). |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The log-mean expected volume, the
+deviation-from-mean abnormal volume, and `df = m - 1` match the standard
+abnormal-trading-volume convention. Pinned in `test_golden_values.R` against a
+direct log-mean subtraction at absolute tolerance `1e-10`.
+
+*Citation:* Convention follows the abnormal-trading-volume literature (e.g.
+Campbell & Wasley 1996, log relative volume); the mean-adjusted form is the
+volume analogue of the constant-mean-return model of Brown & Warner (1985).
 
 ### Volatility Model
 
-*To be filled by Task 3.*
+The Volatility model runs an event study on return variance. Expected variance
+is the estimation-window sample variance, and abnormal volatility is the ratio of
+each event-window squared return to that variance, minus one (so zero means
+"as expected"). It writes the measure into `abnormal_returns` for compatibility.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Measure | Squared return relative to estimation variance | -- |
+| Estimation | `est_var = var(estimation firm_returns)` | Sample variance, `df = m - 1`. |
+| Abnormal measure | `AR = firm_returns^2 / est_var - 1` | Zero when the squared return equals the expected variance. |
+| Residual sigma | `sd(residuals)` of the ratio series over the estimation window | -- |
+| Degrees of freedom | `m - 1` | Finite value count. |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The ratio-to-expected-variance abnormal
+measure and `df = m - 1` match the abnormal-volatility convention. Pinned in
+`test_golden_values.R` against a direct ratio computation at absolute tolerance
+`1e-10`.
+
+*Citation:* The squared-return / expected-variance ratio follows the
+event-induced-variance literature (Beaver 1968; Patell & Wolfson 1979), adapted
+to the constant-variance benchmark of the estimation window.
 
 ### Rolling-Window Model
 
-*To be filled by Task 3.*
+The Rolling-Window model captures parameter instability by estimating the market
+model over a rolling OLS window and using the LAST window's parameters to predict
+the event window. This yields a time-varying beta without a full GARCH model.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Estimation | Rolling OLS `firm ~ index` over windows of `window_size` (default 60), requiring `min_obs` (default 30) finite pairs | Last window's `alpha`, `beta` used for prediction. |
+| Effective window | `ws = min(window_size, n_est)` | When `n_est <= window_size` there is a single window equal to the full sample. |
+| Abnormal return | `AR = firm - (alpha_last + beta_last * index)` | Uses the most recent (last) rolling parameters. |
+| Residual sigma | Last-window residual SE, `denom = max(ws - 2, 1)` | -- |
+| Degrees of freedom | `max(ws - 2, 1)` | Uses the finite-pair effective window size (WR-04 fix: NA-heavy windows do not inflate df). |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The rolling OLS, last-window prediction,
+and `df = ws - 2` are internally consistent. Pinned in `test_golden_values.R` on
+a 30-observation fixture where `ws = min(60, 30) = 30` collapses to a single
+closed-form OLS, at absolute tolerance `1e-10`.
+
+*Citation:* Rolling-window / time-varying market-model estimation is standard
+practice for capturing beta instability (e.g. Fama & MacBeth 1973 rolling
+regressions); the underlying market model is MacKinlay (1997).
 
 ### GARCH Model
 
-*To be filled by Task 3.*
+The GARCH model fits a GARCH(1,1) mean-variance model to firm returns with the
+index return as an external regressor in the mean equation (via the optional
+**rugarch** package). The abnormal return is the mean-equation residual.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Backend | `rugarch::ugarchfit`, `sGARCH`, `garchOrder` default `c(1, 1)`, normal errors | Optional dependency, guarded by `requireNamespace`. |
+| Mean equation | `firm = mu + mxreg1 * index + e_t` | Index return as an external regressor. |
+| Abnormal return | `AR = firm - (mu + mxreg1 * index)` | The fitted mean-equation residual. |
+| Residual sigma | Mean conditional sigma from the GARCH fit | Falls back to `sd(residuals)` if non-finite. |
+| Degrees of freedom | `max(length(cond_sigma) - length(coefs), 1)` | -- |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change (identity-pinned).** Because rugarch is an
+optional dependency and its fitted coefficients vary across package and solver
+versions, pinning a raw fitted constant would be fragile (threat T-26-02). The
+documented golden-value choice is therefore to pin the STABLE ALGEBRAIC IDENTITY
+`AR = firm - (mu + mxreg1 * index)`, which holds for any fitted coefficients, in
+`test_golden_values.R` guarded by `skip_if_not_installed("rugarch")` -- locking
+the AR formula without a version-fragile number.
+
+*Citation:* Engle, R. F. (1982). Autoregressive conditional heteroscedasticity
+with estimates of the variance of United Kingdom inflation. *Econometrica*,
+50(4), 987--1007. Bollerslev, T. (1986). Generalized autoregressive conditional
+heteroskedasticity. *Journal of Econometrics*, 31(3), 307--327.
 
 ### DCC-GARCH Model
 
-*To be filled by Task 3.*
+The DCC-GARCH model (via the optional **rmgarch** package) fits a bivariate
+Dynamic Conditional Correlation GARCH to firm and market returns, yielding a
+time-varying beta `beta_t = Cov(firm, mkt)_t / Var(mkt)_t`. The last conditional
+beta predicts the event window.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Backend | `rmgarch::dccfit`, univariate `sGARCH(1,1)`, DCC order default `c(1, 1)`, multivariate normal | Optional dependency, guarded by `requireNamespace`. |
+| Time-varying beta | `beta_t = H[firm, mkt]_t / H[mkt, mkt]_t` | From the conditional covariance array; non-finite / zero-variance entries yield NA and fall back to the last valid beta. |
+| Intercept | `alpha_last = mean(firm - beta_last * index)` over the estimation window | Mean-equation intercept implied by the last beta. |
+| Abnormal return | `AR = firm - (alpha_last + beta_last * index)` | Uses the last conditional beta. |
+| Residual sigma | `mean(conditional firm sigma)` | -- |
+| Degrees of freedom | `max(n_t - 4, 1)` | -- |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change (identity-pinned).** As with GARCH, rmgarch
+is optional and non-deterministic across versions, so the documented golden-value
+choice is to pin the stable identity `AR = firm - (alpha_last + beta_last *
+index)` in `test_golden_values.R` guarded by `skip_if_not_installed("rmgarch")` /
+`("rugarch")`, rather than a fragile fitted constant.
+
+*Citation:* Bollerslev, T. (1990). Modelling the coherence in short-run nominal
+exchange rates: A multivariate generalized ARCH model. *Review of Economics and
+Statistics*, 72(3), 498--505. Engle, R. F. (2002). Dynamic conditional
+correlation. *Journal of Business & Economic Statistics*, 20(3), 339--350.
 
 ## Test statistics
 
@@ -302,6 +436,12 @@ remove it is deferred (see the audit log).
 | Fama-French Five-Factor Model | verified, no change | Fama-French (2015) |
 | Carhart Four-Factor Model | verified, no change | Carhart (1997) |
 | Custom Model | documented convention (user-supplied prediction; reduces to Market Model when `loss_market_cap = 0`) | MacKinlay (1997) |
+| BHAR Model + BHARTTest | verified, no change | Barber-Lyon (1997); Lyon-Barber-Tsai (1999) |
+| Volume Model | verified, no change | Campbell-Wasley (1996); Brown-Warner (1985) |
+| Volatility Model | verified, no change | Beaver (1968); Patell-Wolfson (1979) |
+| Rolling-Window Model | verified, no change | Fama-MacBeth (1973); MacKinlay (1997) |
+| GARCH Model | verified, no change (identity-pinned, skip-guarded on rugarch) | Engle (1982); Bollerslev (1986) |
+| DCC-GARCH Model | verified, no change (identity-pinned, skip-guarded on rmgarch) | Bollerslev (1990); Engle (2002) |
 | PermutationTest | unwired stub -- empty `compute()`, not on pipeline path; deferred | -- |
 
 *Later tasks append their rows here.*

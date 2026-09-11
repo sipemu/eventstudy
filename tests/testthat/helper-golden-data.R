@@ -160,3 +160,116 @@ golden_factor_model_fixture <- function() {
     event_date        = c(rep(0, 8), 1, 0, 0)
   )
 }
+
+#' Deterministic single-event fixture for the BHAR (buy-and-hold) model.
+#'
+#' Estimation window m = 6, event window L = 3, all returns fixed. BHAR compounds
+#' returns within each window: AR = cumprod(1 + firm) - cumprod(1 + index)
+#' (Barber-Lyon 1997). The model's residual sigma is sd(firm - index) over the
+#' estimation window with df = m - 1 = 5, and BHARTTest scales the compounded
+#' BHAR by sigma * sqrt(n) (Lyon-Barber-Tsai 1999). Constants are pinned in
+#' test_golden_values.R from the closed-form compounding.
+#'
+#' @return A tibble for BHARModel$fit() / abnormal_returns() / BHARTTest$compute().
+golden_bhar_fixture <- function() {
+  # Estimation window: m = 6.
+  est_firm  <- c(0.020, 0.010, 0.030, 0.005, 0.015, 0.025)
+  est_index <- c(0.010, 0.012, 0.020, 0.008, 0.010, 0.015)
+  # Event window: L = 3.
+  evt_firm  <- c(0.040, -0.010, 0.030)
+  evt_index <- c(0.015, -0.005, 0.010)
+
+  tibble::tibble(
+    firm_returns      = c(est_firm, evt_firm),
+    index_returns     = c(est_index, evt_index),
+    estimation_window = c(rep(1, length(est_firm)), rep(0, length(evt_firm))),
+    event_window      = c(rep(0, length(est_firm)), rep(1, length(evt_firm))),
+    relative_index    = c(seq(-length(est_firm), -1), seq(0, length(evt_firm) - 1)),
+    event_date        = c(rep(0, length(est_firm)), 1, rep(0, length(evt_firm) - 1))
+  )
+}
+
+#' Deterministic single-event fixture for the Volume model.
+#'
+#' Abnormal volume convention: AR = log(firm_volume + 1) - mean(log(est volume + 1))
+#' (log_transform = TRUE default). sigma = sd(log-volume residuals) over the
+#' estimation window with df = m - 1 = 5. firm_returns / index_returns are held
+#' constant (unused by the volume convention) so the pipeline shape is valid.
+#' Constants are pinned in test_golden_values.R from the closed-form log-mean
+#' subtraction.
+#'
+#' @return A tibble for VolumeModel$fit() / abnormal_returns().
+golden_volume_fixture <- function() {
+  # Estimation window: m = 6 volume levels.
+  est_vol <- c(1000, 1200, 900, 1100, 1050, 950)
+  # Event window: L = 3 volume levels (a spike, a drop, a rise).
+  evt_vol <- c(2000, 800, 1500)
+
+  tibble::tibble(
+    firm_volume       = c(est_vol, evt_vol),
+    firm_returns      = rep(0.01, length(est_vol) + length(evt_vol)),
+    index_returns     = rep(0.01, length(est_vol) + length(evt_vol)),
+    estimation_window = c(rep(1, length(est_vol)), rep(0, length(evt_vol))),
+    event_window      = c(rep(0, length(est_vol)), rep(1, length(evt_vol))),
+    relative_index    = c(seq(-length(est_vol), -1), seq(0, length(evt_vol) - 1)),
+    event_date        = c(rep(0, length(est_vol)), 1, rep(0, length(evt_vol) - 1))
+  )
+}
+
+#' Deterministic single-event fixture for the Volatility model.
+#'
+#' Abnormal volatility convention: AR = firm_returns^2 / est_var - 1, where
+#' est_var = var(estimation firm_returns). sigma = sd(ratio residuals) over the
+#' estimation window with df = m - 1 = 5. index_returns held constant (unused).
+#' Constants are pinned in test_golden_values.R from the closed-form ratio.
+#'
+#' @return A tibble for VolatilityModel$fit() / abnormal_returns().
+golden_volatility_fixture <- function() {
+  # Estimation window: m = 6 returns with non-zero variance.
+  est_firm <- c(0.02, -0.01, 0.03, -0.02, 0.015, -0.005)
+  # Event window: L = 3 (a big move, a big drop, a small move).
+  evt_firm <- c(0.05, -0.04, 0.01)
+
+  tibble::tibble(
+    firm_returns      = c(est_firm, evt_firm),
+    index_returns     = rep(0.01, length(est_firm) + length(evt_firm)),
+    estimation_window = c(rep(1, length(est_firm)), rep(0, length(evt_firm))),
+    event_window      = c(rep(0, length(est_firm)), rep(1, length(evt_firm))),
+    relative_index    = c(seq(-length(est_firm), -1), seq(0, length(evt_firm) - 1)),
+    event_date        = c(rep(0, length(est_firm)), 1, rep(0, length(evt_firm) - 1))
+  )
+}
+
+#' Deterministic single-event fixture for the Rolling-Window model.
+#'
+#' RollingWindowModel$new() defaults are window_size = 60, min_obs = 30, so the
+#' estimation window MUST have at least 30 observations. With m = 30 and
+#' window_size = 60, the effective window is ws = min(60, 30) = 30 -- a SINGLE
+#' rolling window equal to the full estimation sample, so the "time-varying" fit
+#' reduces to one closed-form OLS whose alpha/beta/sigma are exactly reproducible.
+#' The event-window AR = firm - (alpha_last + beta_last * index). df = ws - 2 = 28.
+#' Constants are pinned in test_golden_values.R from the closed-form single-window
+#' OLS.
+#'
+#' @return A tibble for RollingWindowModel$fit() / abnormal_returns().
+golden_rolling_window_fixture <- function() {
+  # Estimation window: m = 30 (meets the default min_obs = 30). Fixed index grid
+  # and a repeating fixed residual pattern keep alpha/beta/sigma exact.
+  n_est <- 30L
+  est_index <- seq(-0.03, 0.03, length.out = n_est)
+  resid_pat <- rep(c(0.001, -0.001, 0.0015, -0.0015, 0.0005, -0.0005),
+                   length.out = n_est)
+  est_firm  <- 0.004 + 1.2 * est_index + resid_pat
+  # Event window: L = 3.
+  evt_index <- c(0.02, -0.01, 0.015)
+  evt_firm  <- c(0.050, 0.000, 0.040)
+
+  tibble::tibble(
+    firm_returns      = c(est_firm, evt_firm),
+    index_returns     = c(est_index, evt_index),
+    estimation_window = c(rep(1, n_est), rep(0, length(evt_firm))),
+    event_window      = c(rep(0, n_est), rep(1, length(evt_firm))),
+    relative_index    = c(seq(-n_est, -1), seq(0, length(evt_firm) - 1)),
+    event_date        = c(rep(0, n_est), 1, rep(0, length(evt_firm) - 1))
+  )
+}

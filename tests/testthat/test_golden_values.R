@@ -217,3 +217,202 @@ test_that("Custom Model uses the user-supplied prediction (documented convention
   expect_equal(cm$statistics$sigma, mm$statistics$sigma, tolerance = 1e-10)
   expect_equal(cm$statistics$degree_of_freedom, 4L)
 })
+
+# --------------------------------------------------------------------------
+# Specialized / time-varying return models (Task 3).
+# --------------------------------------------------------------------------
+
+test_that("BHAR model + BHARTTest match the compounded closed form (Barber-Lyon 1997)", {
+  # Provenance: closed-form buy-and-hold compounding on golden_bhar_fixture --
+  #   BHAR = cumprod(1 + firm) - cumprod(1 + index) over the event window; sigma
+  #   = sd(firm - index) over the estimation window; bhar_se = sigma * sqrt(n).
+  #   Reproduced in data-raw/derive-golden-values.R. This is the buy-and-hold
+  #   abnormal-return convention of Barber & Lyon (1997) with the sqrt(n)
+  #   standard-error scaling of Lyon, Barber & Tsai (1999).
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, BHAR Model):
+  #   AR = cumprod(1 + firm) - cumprod(1 + index) (compounded, not summed);
+  #   sigma = sd(firm - index); df = m - 1 = 5; bhar_se = sigma * sqrt(n) where
+  #   n is the day index within the event window; two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent closed-form compounding on the same fixture.
+  d <- golden_bhar_fixture()
+  m <- BHARModel$new()
+  m$fit(d)
+
+  expect_equal(m$statistics$sigma, 0.0061318838867023568, tolerance = 1e-10)
+  expect_equal(m$statistics$degree_of_freedom, 5L)
+
+  ar <- m$abnormal_returns(d)
+  expect_equal(
+    ar$abnormal_returns[ar$event_window == 1],
+    c(0.025000000000000133, 0.019675000000000109, 0.040463750000000243),
+    tolerance = 1e-10
+  )
+
+  bt <- BHARTTest$new()$compute(ar, m)
+  expect_equal(
+    bt$bhar_se,
+    c(0.0061318838867023568, 0.0086717933554715208, 0.0106207344378814027),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    bt$bhar_t,
+    c(4.0770504565840353, 2.2688501897460513, 3.8098824743867570),
+    tolerance = 1e-10
+  )
+})
+
+test_that("Volume model abnormal volume matches the log-mean closed form", {
+  # Provenance: closed-form on golden_volume_fixture -- with log_transform = TRUE
+  #   the expected volume is mean(log(estimation firm_volume + 1)) and the
+  #   abnormal volume is log(firm_volume + 1) - expected. Reproduced in
+  #   data-raw/derive-golden-values.R. Standard abnormal-trading-volume
+  #   convention (log volume relative to the estimation-window mean).
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Volume
+  #   Model): measure = log(volume + 1); expected = estimation-window log-mean;
+  #   AR = log(volume + 1) - expected; sigma = sd(log residuals); df = m - 1 = 5;
+  #   two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and a direct log-mean subtraction.
+  d <- golden_volume_fixture()
+  m <- VolumeModel$new()
+  m$fit(d)
+
+  expect_equal(m$model, 6.9370259048580936, tolerance = 1e-10)  # log-volume mean
+  expect_equal(m$statistics$sigma, 0.10347034309378118, tolerance = 1e-10)
+  expect_equal(m$statistics$degree_of_freedom, 5L)
+
+  ar <- m$abnormal_returns(d)
+  expect_equal(
+    ar$abnormal_returns[ar$event_window == 1],
+    c(0.66437642972563982, -0.25116495778973391, 0.37686092677536820),
+    tolerance = 1e-10
+  )
+})
+
+test_that("Volatility model abnormal volatility matches the ratio closed form", {
+  # Provenance: closed-form on golden_volatility_fixture -- est_var =
+  #   var(estimation firm_returns) and AR = firm_returns^2 / est_var - 1.
+  #   Reproduced in data-raw/derive-golden-values.R. Standard abnormal-volatility
+  #   convention (squared return relative to the estimation-window variance).
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Volatility
+  #   Model): est_var = var(estimation firm_returns) (df = m - 1 sample
+  #   variance); AR = firm_returns^2 / est_var - 1; sigma = sd(ratio residuals);
+  #   df = m - 1 = 5; two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and a direct ratio computation.
+  d <- golden_volatility_fixture()
+  m <- VolatilityModel$new()
+  m$fit(d)
+
+  expect_equal(m$model, 0.00038000000000000002, tolerance = 1e-10)  # est_var
+  expect_equal(m$statistics$sigma, 0.82451474298735783, tolerance = 1e-10)
+  expect_equal(m$statistics$degree_of_freedom, 5L)
+
+  ar <- m$abnormal_returns(d)
+  expect_equal(
+    ar$abnormal_returns[ar$event_window == 1],
+    c(5.57894736842105399, 3.21052631578947345, -0.73684210526315796),
+    tolerance = 1e-10
+  )
+})
+
+test_that("Rolling-Window model reduces to a single closed-form OLS on a 30-obs fixture", {
+  # Provenance: closed-form on golden_rolling_window_fixture. The model defaults
+  #   are window_size = 60, min_obs = 30; with exactly m = 30 estimation
+  #   observations the effective window ws = min(60, 30) = 30 is a SINGLE window
+  #   equal to the full sample, so the rolling fit reduces to one OLS whose
+  #   alpha/beta/sigma are exact. AR = firm - (alpha_last + beta_last * index).
+  #   Reproduced in data-raw/derive-golden-values.R. The time-varying-beta
+  #   convention (last-window parameters used for event prediction) is documented
+  #   in the vignette; here the deterministic single-window case pins the OLS.
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Rolling-Window
+  #   Model): rolling OLS firm ~ index; last window's parameters predict the event
+  #   window; sigma = last-window residual SE with denom = ws - 2; df =
+  #   max(ws - 2, 1) = 28; two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent single-window OLS on the same fixture.
+  d <- golden_rolling_window_fixture()
+  m <- RollingWindowModel$new()
+  m$fit(d)
+
+  expect_equal(m$statistics$alpha, 0.0039999999999999992, tolerance = 1e-10)
+  expect_equal(m$statistics$beta, 1.1967741935483869, tolerance = 1e-10)
+  expect_equal(m$statistics$sigma, 0.0011164338756776096, tolerance = 1e-10)
+  expect_equal(m$statistics$degree_of_freedom, 28L)
+
+  ar <- m$abnormal_returns(d)
+  expect_equal(
+    ar$abnormal_returns[ar$event_window == 1],
+    c(0.0220645161290322633, 0.0079677419354838713, 0.0180483870967741988),
+    tolerance = 1e-10
+  )
+})
+
+test_that("GARCH model abnormal return is the mean-equation residual identity (Engle 1982; skip-guarded)", {
+  # Provenance: GARCH/DCC-GARCH depend on rugarch/rmgarch, which are OPTIONAL and
+  #   whose fitted coefficients vary across package/solver versions. Pinning a raw
+  #   fitted constant would flake across versions (threat T-26-02), so -- as the
+  #   documented golden-value choice (see vignettes/statistical-conventions.Rmd,
+  #   GARCH Model) -- we pin only the STABLE ALGEBRAIC IDENTITY that the model's
+  #   abnormal_returns() satisfies for ANY fitted coefficients:
+  #     AR = firm_returns - (mu + mxreg1 * index_returns),
+  #   where mu, mxreg1 are the fitted mean-equation coefficients. This is exact
+  #   regardless of the fitted numbers, so it locks the AR *formula* (Engle 1982
+  #   ARCH / sGARCH mean-equation convention) without a version-fragile constant.
+  # Assumed conventions: mean equation firm ~ mu + mxreg1 * index (index as an
+  #   external regressor); AR = firm - fitted mean; sigma = mean conditional
+  #   sigma; two-sided.
+  # Tolerance: absolute 1e-10 -- this is an exact identity, not a cross-impl
+  #   comparison.
+  skip_if_not_installed("rugarch")
+
+  d <- golden_market_model_fixture()  # any fixture with firm/index returns works
+  m <- GARCHModel$new()
+  m$fit(d)
+  skip_if_not(isTRUE(m$is_fitted), "GARCH fit did not converge on the fixture")
+
+  coefs  <- rugarch::coef(m$model)
+  mu     <- unname(coefs["mu"])
+  mxreg1 <- unname(coefs["mxreg1"])
+
+  ar <- m$abnormal_returns(d)
+  expect_equal(
+    ar$abnormal_returns,
+    d$firm_returns - (mu + mxreg1 * d$index_returns),
+    tolerance = 1e-10
+  )
+})
+
+test_that("DCC-GARCH model abnormal return is the time-varying-beta residual identity (Bollerslev 1990; skip-guarded)", {
+  # Provenance: like GARCH above, DCC-GARCH (rmgarch) is optional and
+  #   non-deterministic across versions, so we pin only the stable algebraic
+  #   IDENTITY its abnormal_returns() satisfies for ANY fitted parameters:
+  #     AR = firm_returns - (alpha_last + beta_last * index_returns),
+  #   where beta_last is the last conditional beta = Cov(firm, mkt)_t / Var(mkt)_t
+  #   and alpha_last is the mean-equation intercept. Documented as the golden-value
+  #   choice in vignettes/statistical-conventions.Rmd (DCC-GARCH Model). Cites the
+  #   dynamic-conditional-correlation / time-varying-beta convention (Bollerslev
+  #   1990; Engle 2002).
+  # Assumed conventions: time-varying beta from the DCC conditional covariance;
+  #   last conditional beta used for event prediction; AR = firm - (alpha + beta *
+  #   index); two-sided.
+  # Tolerance: absolute 1e-10 -- exact identity, not a cross-impl comparison.
+  skip_if_not_installed("rmgarch")
+  skip_if_not_installed("rugarch")
+
+  d <- golden_market_model_fixture()
+  m <- DCCGARCHModel$new()
+  m$fit(d)
+  skip_if_not(isTRUE(m$is_fitted), "DCC-GARCH fit did not converge on the fixture")
+
+  alpha_last <- m$statistics$alpha
+  beta_last  <- m$statistics$beta
+
+  ar <- m$abnormal_returns(d)
+  expect_equal(
+    ar$abnormal_returns,
+    d$firm_returns - (alpha_last + beta_last * d$index_returns),
+    tolerance = 1e-10
+  )
+})
