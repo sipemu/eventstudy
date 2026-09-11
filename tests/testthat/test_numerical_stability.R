@@ -77,3 +77,86 @@ test_that("rcond guard does not fire on a moderately-conditioned design", {
   expect_silent(mm$fit(data))
   expect_true(mm$is_fitted)
 })
+
+# --------------------------------------------------------------------------
+# Guard 2: bootstrap degenerate resample -> NA p-values (never spurious 0/1)
+# --------------------------------------------------------------------------
+
+test_that("bootstrap degenerate resample (single firm) -> NA p-values, never 0/1", {
+  # A single firm makes the cross-firm SD of AR undefined (sd of one value is
+  # NA), so the observed t is NA and the bootstrap p-value MUST be NA -- never a
+  # spurious 0 or 1 that would look like a real significance verdict. This path
+  # is already handled in R/bootstrap.R (obs t NA -> p NA); the test LOCKS it.
+  task <- create_fitted_mock_task(n_firms = 1)
+
+  result <- suppressWarnings(
+    bootstrap_test(task, n_boot = 19, seed = 42)
+  )
+  # No exact tolerance: this is an is.na()/set-membership invariant, not a
+  # numeric comparison. Every AAR p-value must be NA (single-firm SD undefined).
+  expect_true(all(is.na(result$boot_p_aar)))
+  expect_false(any(result$boot_p_aar %in% c(0, 1), na.rm = TRUE))
+})
+
+test_that("bootstrap positive control: multi-firm p-values are finite in [0,1]", {
+  # Positive control (valid-input behavior unchanged, SC5): with several firms
+  # the bootstrap produces ordinary finite p-values in [0,1]. The degenerate
+  # guard must NOT fire here.
+  task <- create_fitted_mock_task(n_firms = 5)
+  result <- bootstrap_test(task, n_boot = 49, seed = 7)
+
+  finite_p <- result$boot_p_aar[is.finite(result$boot_p_aar)]
+  expect_true(length(finite_p) > 0)
+  # p-values are probabilities: bounded in [0,1]. Bound check, no tolerance.
+  expect_true(all(finite_p >= 0 & finite_p <= 1))
+})
+
+# --------------------------------------------------------------------------
+# Guard 3: long-window CAR precision / overflow in CARTTest cumulation
+# --------------------------------------------------------------------------
+
+test_that("long-window CAR with large-but-finite returns stays finite; CAR==cumsum(AR)", {
+  # A long event window with large (but representable) abnormal returns must
+  # cumulate WITHOUT overflowing to Inf, and the additive identity CAR==cumsum(AR)
+  # must still hold. Relative tolerance 1e-8 (documented: long additive sum
+  # re-accumulation, so relative rather than the 1e-10 short-window absolute).
+  fake <- list(statistics = list(sigma = 0.01, degree_of_freedom = 100L))
+  n <- 500L
+  d <- tibble::tibble(
+    relative_index   = seq_len(n),
+    event_window     = rep(1L, n),
+    abnormal_returns = rep(1e3, n)          # large but far from overflow
+  )
+  res <- CARTTest$new()$compute(d, fake)
+  expect_true(all(is.finite(res$car)))
+  expect_true(all(is.finite(res$car_t)))
+  expect_equal(
+    res$car,
+    cumsum(d$abnormal_returns),
+    tolerance = 1e-8,        # long additive cumulation -> relative re-accumulation bound
+    info = "long-window CAR == cumsum(AR) without overflow"
+  )
+})
+
+test_that("CAR cumulation that overflows to Inf -> NA car_t + one warning, never a misleading Inf", {
+  # Overflow threshold: when the running cumsum exceeds the representable range
+  # (.Machine$double.xmax) it becomes Inf. A misleading Inf car_t (an apparently
+  # infinite test statistic) is exactly the silently-wrong-number failure this
+  # milestone forbids. The guard must return NA for the non-finite entries with
+  # exactly ONE warning naming the overflow.
+  fake <- list(statistics = list(sigma = 0.01, degree_of_freedom = 100L))
+  n <- 500L
+  d <- tibble::tibble(
+    relative_index   = seq_len(n),
+    event_window     = rep(1L, n),
+    abnormal_returns = rep(1e307, n)        # cumsum overflows to Inf mid-window
+  )
+  expect_warning(
+    res <- CARTTest$new()$compute(d, fake),
+    regexp = "overflow"
+  )
+  # Wherever CAR overflowed to Inf, car_t must be NA (not Inf/NaN).
+  inf_car <- !is.finite(res$car)
+  expect_true(any(inf_car))                 # the fixture does overflow
+  expect_true(all(is.na(res$car_t[inf_car])))
+})
