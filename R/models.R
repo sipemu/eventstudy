@@ -1266,11 +1266,26 @@ BHARModel <- R6Class("BHARModel",
                             data_tbl %>%
                               dplyr::group_by(event_window) %>%
                               dplyr::mutate(
-                                # Compound returns within each window separately
+                                # Compound returns within each window separately.
+                                # coalesce(NA, 0) lets a PARTIALLY-missing window
+                                # still compound (valid-input behavior, unchanged).
                                 cum_firm = cumprod(1 + dplyr::coalesce(firm_returns, 0)),
                                 cum_index = cumprod(1 + dplyr::coalesce(index_returns, 0)),
-                                abnormal_returns = cum_firm - cum_index
+                                abnormal_returns = cum_firm - cum_index,
+                                # Degenerate-boundary guard (Phase 27, additive):
+                                # a window whose firm AND index inputs are ENTIRELY
+                                # NA has no observable buy-and-hold path -- coalescing
+                                # it to 0 would fabricate a plausible BHAR == 0.
+                                # Return NA on that all-NA edge only. .all_na_window
+                                # is per-group (all()) so any window with >=1 finite
+                                # observation keeps its compounded value unchanged.
+                                .all_na_window = all(is.na(firm_returns)) &
+                                  all(is.na(index_returns)),
+                                abnormal_returns = dplyr::if_else(
+                                  .all_na_window, NA_real_, abnormal_returns
+                                )
                               ) %>%
+                              dplyr::select(-.all_na_window) %>%
                               dplyr::ungroup() %>%
                               dplyr::select(-cum_firm, -cum_index)
                           } else if (private$.degenerate_handled) {
