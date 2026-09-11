@@ -16,8 +16,8 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Correctness of Results
 
-- [ ] **CORR-01**: Each of the 13+ return models and 8+ test statistics is audited against its published academic formula, and its convention choices (return type, forecast-error correction, degrees of freedom, p-value sidedness, Patell denominator) are documented; any discrepancy is fixed with a regression test.
-- [ ] **CORR-02**: Golden-value regression tests pin the key statistics against reference values (published-table numbers and/or `estudy2`-derived constants), each test annotating the exact conventions it assumes and using an explicit tolerance (relative for cross-implementation, tight absolute for algebraic identities).
+- [x] **CORR-01**: Each of the 13+ return models and 8+ test statistics is audited against its published academic formula, and its convention choices (return type, forecast-error correction, degrees of freedom, p-value sidedness, Patell denominator) are documented; any discrepancy is fixed with a regression test.
+- [x] **CORR-02**: Golden-value regression tests pin the key statistics against reference values (published-table numbers and/or `estudy2`-derived constants), each test annotating the exact conventions it assumes and using an explicit tolerance (relative for cross-implementation, tight absolute for algebraic identities).
 - [ ] **CORR-03**: Property-based / invariant tests assert cross-cutting identities — e.g. `CAR == cumsum(AR)`, cross-method consistency, boundary/degenerate windows — across the model and statistic matrix.
 - [ ] **CORR-04**: Numerical-stability guards protect precision/overflow/conditioning in the sensitive paths (matrix ops, GARCH convergence, bootstrap, long-window CAR cumulation), with tests documenting chosen tolerances to avoid cross-platform CI flakiness.
 
@@ -70,8 +70,8 @@ Explicitly excluded to prevent scope creep.
 | HYG-02 | Phase 25 | Complete |
 | HYG-03 | Phase 25 | Complete |
 | HYG-04 | Phase 25 | Complete |
-| CORR-01 | Phase 26 | Pending |
-| CORR-02 | Phase 26 | Pending |
+| CORR-01 | Phase 26 | Complete |
+| CORR-02 | Phase 26 | Complete |
 | CORR-03 | Phase 27 | Pending |
 | CORR-04 | Phase 27 | Pending |
 | APIS-01 | Phase 28 | Pending |

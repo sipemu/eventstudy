@@ -1,7 +1,7 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v0.66.0",
+  "milestone": "v0.66.0 — Stabilization & CRAN Resubmission",
   "phases": [
     {
       "number": "20",
@@ -27,12 +27,42 @@
       "number": "24",
       "name": "Docs & Site Polish",
       "status": "complete"
+    },
+    {
+      "number": "25",
+      "name": "CRAN Hygiene & Clean Check Baseline",
+      "status": "complete"
+    },
+    {
+      "number": "26",
+      "name": "Formula Audit & Golden-Value Validation",
+      "status": "complete"
+    },
+    {
+      "number": "27",
+      "name": "Property & Numerical-Stability Tests",
+      "status": "pending"
+    },
+    {
+      "number": "28",
+      "name": "API Stabilization & Signature Lock",
+      "status": "pending"
+    },
+    {
+      "number": "29",
+      "name": "Install-Tested CI",
+      "status": "pending"
+    },
+    {
+      "number": "30",
+      "name": "CRAN Resubmission",
+      "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:discuss-phase",
-    "label": "Discuss the first phase",
-    "reason": "Project initialized — plan your first phase"
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step (plan phase 27)",
+    "reason": "Phase 27 of 6 — needs a plan"
   },
-  "updated_at": "2026-09-10T19:43:56.007Z"
+  "updated_at": "2026-09-11T12:59:05.622Z"
 }

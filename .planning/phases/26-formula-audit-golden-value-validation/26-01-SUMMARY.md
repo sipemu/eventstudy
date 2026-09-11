@@ -1,9 +1,57 @@
+---
+phase: 26-formula-audit-golden-value-validation
+plan: 01
+subsystem: statistics
+tags: [formula-audit, golden-values, regression-tests, conventions, vignette, cran, correctness]
+
+# Dependency graph
+requires:
+  - phase: 25-cran-hygiene-clean-check-baseline
+    provides: Clean R CMD check --as-cran baseline (0 ERROR / 0 WARNING / 1 new-submission NOTE); full suite green
+provides:
+  - Audited convention vignette (statistical-conventions.Rmd) citing a published source for every 13+ return model and 8+ test statistic
+  - Golden-value regression net (test_golden_values.R) pinning key statistics to closed-form / published constants with inline provenance
+  - Two genuine formula fixes (RankTest rank_z, CalendarTimePortfolioTest caltime_t/ccaltime_t) locked by fix-before-pin regression tests
+  - Non-shipped, .Rbuildignore'd estudy2 derivation script; DESCRIPTION free of estudy2/eventstudies
+affects: [27-property-tests, 28-api-lock, 29-install-tested-ci, 30-cran-resubmission]
+
+# Actuals
+actuals:
+  tokens: 118000
+  tasks: 6
+  commits: 6
+
+# Tech tracking
+tech-stack:
+  added: []
+  patterns:
+    - "Published-first golden pins: closed-form R algebra or published-table constant, never a value re-derived from the same code under test"
+    - "Fix-before-pin: a formula fix commit precedes its golden pin; each fix locked by a regression test asserting per-day values differ"
+    - "Skip-guarded identity pins for non-deterministic upstream (rugarch/rmgarch) so version drift cannot flake CI"
+
+key-files:
+  created:
+    - vignettes/statistical-conventions.Rmd
+    - tests/testthat/test_golden_values.R
+    - tests/testthat/helper-golden-data.R
+    - data-raw/derive-golden-values.R
+  modified:
+    - R/multi_event_test_statistics.R
+
+requirements-completed: [CORR-01, CORR-02]
+
+# Metrics
+duration: ~1h active (Task-6 gate re-run from clean HEAD)
+completed: 2026-09-11
+status: complete
+---
+
 # Phase 26: Formula Audit & Golden-Value Validation — Summary
 
 **Completed:** 2026-09-11
 **Plan:** 26-01-PLAN.md (single plan, wave 1, 6 tasks, tracer-first)
 **Requirements:** CORR-01, CORR-02
-**Status:** COMPLETE — gate green, 0 failures, no new CRAN finding
+**Status:** COMPLETE — gate green: full suite 0 failures (2429 pass), `R CMD check --as-cran` = 1 NOTE (matches Phase 25 baseline), tarball excludes the derivation script, DESCRIPTION free of estudy2/eventstudies
 
 ## Outcome
 
@@ -88,8 +136,14 @@ real package pipeline to <1e-14 / ~17 digits). No `R/` source changed for these.
   the derivation-only packages never entered DESCRIPTION and are never required at test time.
 - **Version:** DESCRIPTION stays `0.65.0` — docs + tests only, no valid-input behavior
   change beyond the 2 documented bug fixes.
-- No new NOTE/WARNING relative to the Phase 25 baseline (0 ERROR / 0 WARNING / 1 expected
-  new-submission NOTE).
+- **`R CMD check --as-cran` (with vignettes, `_R_CHECK_FORCE_SUGGESTS_=false`):**
+  `Status: 1 NOTE`, matching the Phase 25 baseline exactly (0 ERROR / 0 WARNING /
+  1 NOTE). The single NOTE is byte-identical to Phase 25 — the expected CRAN-incoming
+  feasibility NOTE (new submission / package archived 2024-04-20 / no prebuilt vignette
+  index). The check ran on a properly-built *with-vignettes* tarball so `inst/doc` is
+  populated; `checking package vignettes ... OK`, `checking re-building of vignette
+  outputs ... OK`, `checking tests ... OK` (48s, full testthat.R). No new NOTE/WARNING
+  relative to the Phase 25 baseline.
 
 ## Commits
 
@@ -98,15 +152,50 @@ real package pipeline to <1e-14 / ~17 digits). No `R/` source changed for these.
 3. `0b9687c` — specialized/time-varying return models
 4. `150faa3` — cross-sectional statistics (CSectT/Patell/BMP)
 5. `d777113` — nonparametric/correlation statistics (+ 2 bug fixes)
-6. (this) — Task 6 gate + SUMMARY
+6. `<gate-commit>` — Task 6 gate + this SUMMARY (`docs(26-01)`)
+
+## Threat Flags
+
+None — no new network endpoints, auth paths, file-access patterns, or schema changes.
+The two source changes are numeric bug fixes in existing statistic computations; the
+new files are tests, a vignette, and a `.Rbuildignore`'d dev-only derivation script.
+
+## Known Stubs
+
+`PermutationTest` remains an unwired stub (empty `compute()`, off the pipeline path) —
+documented honestly in the vignette audit log as deferred, not a Phase 26 defect. No
+data-flow stubs, no placeholder golden values.
+
+## Self-Check: PASSED
+
+- SUMMARY.md present on disk.
+- All four created artifacts present: `tests/testthat/test_golden_values.R`,
+  `tests/testthat/helper-golden-data.R`, `vignettes/statistical-conventions.Rmd`,
+  `data-raw/derive-golden-values.R`.
+- All five prior task commits present in git history: `9023fe0`, `ff384d3`, `0b9687c`,
+  `150faa3`, `d777113`.
+- Both source fixes confirmed in `R/multi_event_test_statistics.R` (plain-`if()` guards
+  on `S_rank` and `ts_sd` replacing the scalar-`ifelse` broadcast).
 
 ## Deviations
 
-- The Task 6 gate ran green, but two successive gate executors exhausted their context
-  on the final large SUMMARY write; verify outputs were captured to files and the
-  orchestrator composed and committed this SUMMARY from those results plus each task's
-  reported audit decisions. No verification was skipped — all `<verify>` commands ran
-  and are recorded above.
-- No `--as-cran` full-check was run inside the gate (mirrors Phase 25's scoped approach);
-  the vignette-inclusive `R CMD build` plus the Phase 25 clean baseline stand in, per the
-  Task 6 spec's slow-check fallback. A full `--as-cran` check is exercised in Phase 30.
+- Two earlier gate executors exhausted their context on the final large SUMMARY write;
+  a third gate run (this one) re-executed every `<verify>` command from a clean state
+  and completed the gate, including the full `--as-cran` check the earlier runs had
+  deferred. No verification was skipped — all `<verify>` commands ran and are recorded
+  above.
+- The plan's `<verify>` uses `devtools::test_local(reporter="summary")`, but
+  `test_local` is not exported in this devtools version (it errors `'test_local' is
+  not an exported object from 'namespace:devtools'`). Substituted the exported
+  equivalent `devtools::test(reporter="summary")` — same full-suite semantics — to
+  obtain `FAIL_TOTAL: 0` / `PASS_TOTAL: 2429`. Environment/tooling substitution only;
+  no behavior change. (Phase 25 hit and worked around the same `test_local` limitation.)
+- The full `--as-cran` check WAS run this gate (unlike the earlier deferred runs):
+  built a with-vignettes tarball so `inst/doc` is populated, then ran
+  `R CMD check --as-cran --no-manual` with `_R_CHECK_FORCE_SUGGESTS_=false`
+  (6 Suggests packages — rugarch, rmgarch, did, DIDmultiplegt, didimputation, DT —
+  are not installed locally; the check instructs this exact override). Result:
+  `Status: 1 NOTE`, identical to the Phase 25 baseline. An earlier `--no-build-vignettes`
+  attempt surfaced two `inst/doc`-empty vignette WARNINGs that were pure artifacts of the
+  skip-build flag (not real findings); rebuilding with vignettes eliminated them, so the
+  honest comparison against the Phase 25 with-vignettes baseline holds at 0/0/1.
