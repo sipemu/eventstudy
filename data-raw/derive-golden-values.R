@@ -269,6 +269,106 @@ cat("BMP bmp_t    =", paste(sprintf("%.17g", bmp_t),    collapse = ", "), "\n")
 cat("BMP cbmp_t   =", paste(sprintf("%.17g", cbmp_t),   collapse = ", "), "\n")
 
 # --------------------------------------------------------------------------
+# 1f. Nonparametric / correlation-robust statistics -- closed form (Task 5).
+#     Same three-event fixture (m = 8, L = 3, k = 2, N = 3). SignTest,
+#     GeneralizedSignTest (Cowan 1992), RankTest (Corrado 1989),
+#     CalendarTimePortfolioTest, KolariPynnonenTest (Kolari-Pynnonen 2010).
+#
+#     NOTE (audit finding, Task 5): RankTest$rank_z and
+#     CalendarTimePortfolioTest$caltime_t / ccaltime_t previously used base
+#     ifelse() with a SCALAR condition (S_rank / ts_sd), so the per-day z/t
+#     vector was silently collapsed to its first element and recycled across
+#     every event day. Both were fixed in R/multi_event_test_statistics.R to
+#     divide the vector directly (guarding the scalar denominator with a plain
+#     if()). The constants derived below are the CORRECT per-day values that the
+#     fixed code now returns, matched by the golden tests.
+# --------------------------------------------------------------------------
+message("\n-- Nonparametric / correlation-robust statistics (Task 5) --")
+ks_spec <- me_spec           # reuse the three-event fixture from section 1e
+ks_fit_ar <- function(s) {
+  est_firm <- s$alpha + s$beta * s$est_index + s$est_resid
+  fit <- lm(est_firm ~ s$est_index)
+  a <- unname(coef(fit)[1]); b <- unname(coef(fit)[2])
+  list(sigma = summary(fit)$sigma,
+       ar    = s$evt_firm - (a + b * s$evt_index),
+       est_ar = residuals(fit))     # estimation-window abnormal returns
+}
+ks_fits <- lapply(ks_spec, ks_fit_ar)
+ar_mat  <- sapply(ks_fits, function(f) f$ar)         # day x event (L = 3)
+Nk      <- ncol(ar_mat)
+days_k  <- 0:(nrow(ar_mat) - 1)
+
+# SignTest: n_pos = sum(AR > 0) (strict >, zeros counted as non-positive);
+# z = (n_pos - 0.5 N) / (0.5 sqrt(N)); N >= 2 guard.
+n_pos   <- apply(ar_mat, 1, function(x) sum(x > 0))
+n_val   <- rep(Nk, nrow(ar_mat))
+sign_z  <- (n_pos - 0.5 * n_val) / (0.5 * sqrt(n_val))
+car_mat <- apply(ar_mat, 2, cumsum)
+n_pos_c <- apply(car_mat, 1, function(x) sum(x > 0))
+csign_z <- (n_pos_c - 0.5 * n_val) / (0.5 * sqrt(n_val))
+cat("Sign sign_z  =", paste(sprintf("%.17g", sign_z),  collapse = ", "), "\n")
+cat("Sign csign_z =", paste(sprintf("%.17g", csign_z), collapse = ", "), "\n")
+
+# GeneralizedSignTest (Cowan 1992): p_hat = mean over firms of
+# mean(estimation AR > 0); z = (n_pos - N p_hat) / sqrt(N p_hat (1 - p_hat)).
+p_hat_firm <- sapply(ks_fits, function(f) mean(f$est_ar > 0))
+p_hat      <- mean(p_hat_firm)
+gsign_z    <- (n_pos   - n_val * p_hat) / sqrt(n_val * p_hat * (1 - p_hat))
+cgsign_z   <- (n_pos_c - n_val * p_hat) / sqrt(n_val * p_hat * (1 - p_hat))
+cat(sprintf("GSign p_hat = %.17g\n", p_hat))
+cat("GSign gsign_z  =", paste(sprintf("%.17g", gsign_z),  collapse = ", "), "\n")
+cat("GSign cgsign_z =", paste(sprintf("%.17g", cgsign_z), collapse = ", "), "\n")
+
+# RankTest (Corrado 1989): rank AR within each firm over the COMBINED
+# estimation+event window; centered rank K = rank / (T + 1) - 0.5; per relative
+# day take the cross-firm mean centered rank; S_rank = sd of the per-day mean
+# centered rank across ALL combined days; rank_z = mean_rank_day / S_rank.
+crank_by_event <- lapply(ks_fits, function(f) {
+  v <- c(f$est_ar, f$ar); Tt <- length(v)
+  rank(v) / (Tt + 1) - 0.5
+})
+# combined-window relative indices: estimation days then event days
+comb_rel <- c(seq(-8, -1), days_k)
+crank_mat <- sapply(crank_by_event, identity)        # combined_day x event
+mean_crank_day_all <- rowMeans(crank_mat)
+S_rank <- sd(mean_crank_day_all)
+mean_rank_evt <- rowMeans(tail(crank_mat, length(days_k)))
+rank_z <- mean_rank_evt / S_rank
+cat(sprintf("Rank S_rank = %.17g\n", S_rank))
+cat("Rank mean_rank =", paste(sprintf("%.17g", mean_rank_evt), collapse = ", "), "\n")
+cat("Rank rank_z    =", paste(sprintf("%.17g", rank_z),        collapse = ", "), "\n")
+
+# CalendarTimePortfolioTest: equal-weight portfolio AAR per day; time-series
+# t = AAR / sd(AAR) and CAAR / (sd(AAR) sqrt(L)); sd over the L portfolio days.
+aar_ct  <- rowMeans(ar_mat)
+caar_ct <- cumsum(aar_ct)
+ts_sd   <- sd(aar_ct)
+caltime_t  <- aar_ct  / ts_sd
+ccaltime_t <- caar_ct / (ts_sd * sqrt(seq_along(aar_ct)))
+cat(sprintf("CalTime ts_sd = %.17g\n", ts_sd))
+cat("CalTime caltime_t  =", paste(sprintf("%.17g", caltime_t),  collapse = ", "), "\n")
+cat("CalTime ccaltime_t =", paste(sprintf("%.17g", ccaltime_t), collapse = ", "), "\n")
+
+# KolariPynnonenTest (Kolari-Pynnonen 2010): BMP scaled by
+# kp_adj = sqrt((1 - r_bar) / (1 + (N - 1) r_bar)), r_bar = average pairwise
+# correlation of estimation-window SARs (SAR = AR / model sigma).
+sig_k    <- sapply(ks_fits, function(f) f$sigma)
+sar_evt  <- sweep(ar_mat, 2, sig_k, "/")
+mean_sar <- rowMeans(sar_evt)
+bmp_t    <- sqrt(Nk) * mean_sar / apply(sar_evt, 1, sd)
+csar_evt <- apply(sar_evt, 2, cumsum)
+cbmp_t   <- sqrt(Nk) * rowMeans(csar_evt) / apply(csar_evt, 1, sd)
+est_sar  <- sapply(ks_fits, function(f) f$est_ar / f$sigma)   # est_day x event
+cor_m    <- cor(est_sar, use = "pairwise.complete.obs")
+r_bar    <- (sum(cor_m) - Nk) / (Nk * (Nk - 1))
+kp_adj   <- sqrt((1 - r_bar) / (1 + (Nk - 1) * r_bar))
+kp_t     <- bmp_t  * kp_adj
+ckp_t    <- cbmp_t * kp_adj
+cat(sprintf("KP r_bar = %.17g, kp_adj = %.17g\n", r_bar, kp_adj))
+cat("KP kp_t  =", paste(sprintf("%.17g", kp_t),  collapse = ", "), "\n")
+cat("KP ckp_t =", paste(sprintf("%.17g", ckp_t), collapse = ", "), "\n")
+
+# --------------------------------------------------------------------------
 # 2. Optional estudy2 / eventstudies cross-checks (best-effort only).
 # --------------------------------------------------------------------------
 if (requireNamespace("estudy2", quietly = TRUE) ||

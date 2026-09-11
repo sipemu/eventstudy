@@ -402,8 +402,14 @@ RankTest <- R6Class("RankTest",
                             .groups = "drop"
                           ) %>%
                           dplyr::mutate(
-                            rank_z = ifelse(is.finite(S_rank) & S_rank > 0,
-                                            mean_rank / S_rank, NA_real_),
+                            # S_rank is a scalar; base ifelse() returns a result the
+                            # length of its (length-1) condition, silently collapsing
+                            # the per-day mean_rank / S_rank vector to its first element
+                            # and recycling it across every event day. Guard the scalar
+                            # denominator once, then divide the vector directly so each
+                            # day keeps its own Corrado (1989) rank z (WR bugfix).
+                            rank_z = if (is.finite(S_rank) && S_rank > 0)
+                              mean_rank / S_rank else NA_real_,
                             caar   = cumsum(dplyr::coalesce(aar, 0))
                           )
 
@@ -541,16 +547,24 @@ CalendarTimePortfolioTest <- R6Class("CalendarTimePortfolioTest",
                                           ts_sd <- sd(portfolio$aar, na.rm = TRUE)
                                           n_periods <- nrow(portfolio)
 
+                                          # ts_sd is a scalar; base ifelse() returns a
+                                          # result the length of its (length-1) condition,
+                                          # silently collapsing the per-day aar / ts_sd and
+                                          # caar / (ts_sd * sqrt(L)) vectors to their first
+                                          # element and recycling it across every event day.
+                                          # Guard the scalar denominator once, then divide the
+                                          # vectors directly so each day keeps its own
+                                          # time-series t-statistic (WR bugfix).
+                                          ts_ok <- is.finite(ts_sd) && ts_sd > 0
                                           portfolio <- portfolio %>%
                                             dplyr::mutate(
                                               caar = cumsum(dplyr::coalesce(aar, 0)),
                                               # Time-series t-stat: AAR_t / sd(AAR)
-                                              caltime_t = ifelse(is.finite(ts_sd) & ts_sd > 0,
-                                                                  aar / ts_sd, NA_real_),
+                                              caltime_t = if (ts_ok) aar / ts_sd else NA_real_,
                                               # CAAR t-stat: CAAR / (sd * sqrt(L))
-                                              ccaltime_t = ifelse(is.finite(ts_sd) & ts_sd > 0,
-                                                                   caar / (ts_sd * sqrt(seq_len(n_periods))),
-                                                                   NA_real_)
+                                              ccaltime_t = if (ts_ok)
+                                                caar / (ts_sd * sqrt(seq_len(n_periods)))
+                                              else NA_real_
                                             )
 
                                           portfolio$car_window <- stringr::str_c(

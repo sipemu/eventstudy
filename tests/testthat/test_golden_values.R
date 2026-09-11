@@ -541,3 +541,189 @@ test_that("BMP standardized cross-sectional t matches the closed form (Boehmer-M
     tolerance = 1e-10
   )
 })
+
+# --------------------------------------------------------------------------
+# Nonparametric and correlation-robust statistics (Task 5).
+# --------------------------------------------------------------------------
+
+test_that("Sign test z matches the binomial-normal closed form (N >= 2 guard)", {
+  # Provenance: closed-form on golden_multi_event_fixture (3 Market-Model events,
+  #   L = 3). The point sign test counts strictly positive abnormal returns
+  #   (n_pos = sum(AR > 0); zeros count as NON-positive) and computes
+  #   sign_z = (n_pos - 0.5 N) / (0.5 sqrt(N)); the cumulative version counts
+  #   strictly positive per-event CARs. Reproduced in
+  #   data-raw/derive-golden-values.R. On this fixture all three per-event CARs
+  #   stay positive on every day, so csign_z = 1.7320508 throughout is correct
+  #   (not a broadcast artifact -- the point sign_z varies: +1.73, -0.58, +1.73).
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Sign test):
+  #   n_pos = sum(AR > 0) (zero is non-positive -- the >0 vs >=0 convention);
+  #   z = (n_pos - 0.5 N) / (0.5 sqrt(N)); N >= 2 guard (n_valid_events < 2 -> NA);
+  #   approximately N(0, 1); two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and a direct binomial-normal computation.
+  fx <- golden_multi_event_fixture()
+  res <- SignTest$new()$compute(fx$data, NULL)
+
+  expect_equal(res$n_pos, c(3L, 1L, 3L))
+  expect_equal(res$n_neg, c(0L, 2L, 0L))
+  expect_equal(
+    res$sign_z,
+    c(1.7320508075688774, -0.57735026918962584, 1.7320508075688774),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$csign_z,
+    c(1.7320508075688774, 1.7320508075688774, 1.7320508075688774),
+    tolerance = 1e-10
+  )
+})
+
+test_that("Sign test returns NA for a single-event group (N >= 2 guard, STATS-04)", {
+  # Provenance: documented convention, not a published table. With a single
+  #   valid event the sign test's normal approximation is invalid, so the package
+  #   returns NA rather than a finite-but-meaningless z (see
+  #   vignettes/statistical-conventions.Rmd, Sign test).
+  # Tolerance: exact (NA identity) -- no numeric tolerance needed.
+  fx <- golden_multi_event_fixture()
+  one <- fx$data[fx$data$event_id == "E1", ]
+  res <- SignTest$new()$compute(one, NULL)
+  expect_true(all(is.na(res$sign_z)))
+  expect_true(all(is.na(res$csign_z)))
+})
+
+test_that("Generalized sign test z matches the closed form (Cowan 1992)", {
+  # Provenance: closed-form on golden_multi_event_fixture. p_hat is the average,
+  #   across firms, of the estimation-window fraction of positive abnormal
+  #   returns; here every firm's estimation residuals are exactly balanced so
+  #   p_hat = 0.5 and the generalized sign test reduces to the ordinary sign test
+  #   on this fixture (gsign_z equals sign_z). z = (n_pos - N p_hat) /
+  #   sqrt(N p_hat (1 - p_hat)). Reproduced in data-raw/derive-golden-values.R.
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Generalized
+  #   Sign test): p_hat from the estimation window (per firm, then averaged);
+  #   n_pos = sum(AR > 0); z = (n_pos - N p_hat)/sqrt(N p_hat (1 - p_hat));
+  #   approximately N(0, 1); two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent closed-form Cowan (1992) computation.
+  fx <- golden_multi_event_fixture()
+  res <- GeneralizedSignTest$new()$compute(fx$data, NULL)
+
+  expect_equal(
+    res$gsign_z,
+    c(1.7320508075688774, -0.57735026918962584, 1.7320508075688774),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$cgsign_z,
+    c(1.7320508075688774, 1.7320508075688774, 1.7320508075688774),
+    tolerance = 1e-10
+  )
+})
+
+test_that("Corrado rank test z matches the closed form and varies per day (Corrado 1989)", {
+  # Provenance: closed-form on golden_multi_event_fixture. Within each firm the
+  #   abnormal returns are ranked over the COMBINED estimation + event window and
+  #   centered as K = rank / (T + 1) - 0.5; per relative day the cross-firm mean
+  #   centered rank is taken; S_rank is the SD of the per-day mean centered rank
+  #   across all combined days; rank_z = mean_rank_day / S_rank. Reproduced in
+  #   data-raw/derive-golden-values.R.
+  # Regression note (Task 5 audit fix): rank_z previously used base ifelse() with
+  #   a SCALAR condition on S_rank, silently collapsing the per-day vector to its
+  #   first element and recycling it across every event day (all three days
+  #   reported the day-0 value 1.5864). The fix divides the vector directly,
+  #   guarding the scalar denominator with a plain if(). This test locks the
+  #   corrected per-day values (+1.586, -0.952, +1.269), so the broadcast bug
+  #   cannot silently return.
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Rank test):
+  #   combined-window centered ranks K = rank/(T+1) - 0.5; rank_z =
+  #   mean_rank_day / S_rank; approximately N(0, 1); two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent closed-form Corrado (1989) computation.
+  fx <- golden_multi_event_fixture()
+  res <- RankTest$new()$compute(fx$data, NULL)
+
+  expect_equal(
+    res$mean_rank,
+    c(0.41666666666666663, -0.25, 0.33333333333333337),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$rank_z,
+    c(1.586435792425881, -0.95186147545552868, 1.269148633940705),
+    tolerance = 1e-10
+  )
+  # The three per-day z values are distinct -- proves the broadcast bug is fixed.
+  expect_false(res$rank_z[1] == res$rank_z[2])
+})
+
+test_that("Calendar-time portfolio t matches the closed form and varies per day", {
+  # Provenance: closed-form on golden_multi_event_fixture. For each relative day
+  #   an equal-weight portfolio of event-firm abnormal returns gives the AAR; the
+  #   time-series t is AAR / sd(AAR) and the cumulative t is CAAR /
+  #   (sd(AAR) sqrt(L)), with sd taken over the L portfolio days. Reproduced in
+  #   data-raw/derive-golden-values.R.
+  # Regression note (Task 5 audit fix): caltime_t / ccaltime_t previously used
+  #   base ifelse() with a SCALAR condition on ts_sd, silently collapsing the
+  #   per-day t vectors to their first element and recycling it across every day
+  #   (all three days reported the day-0 value 1.6474). The fix divides the
+  #   vectors directly, guarding the scalar denominator with a plain if(). This
+  #   test locks the corrected per-day values so the broadcast bug cannot return.
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Calendar-Time
+  #   Portfolio test): equal-weight portfolio AAR; time-series t = AAR / sd(AAR),
+  #   CAAR t = CAAR / (sd(AAR) sqrt(L)); sd over the event-window days; two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent closed-form portfolio computation.
+  fx <- golden_multi_event_fixture()
+  res <- CalendarTimePortfolioTest$new()$compute(fx$data, NULL)
+
+  expect_equal(
+    res$aar,
+    c(0.017858427448395411, -0.003055141803282022, 0.012352491200872388),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$caltime_t,
+    c(1.647393006622242, -0.28182880354441781, 1.1394848553985282),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$ccaltime_t,
+    c(1.647393006622242, 0.96559970814193319, 1.4462907482445408),
+    tolerance = 1e-10
+  )
+  # The three per-day t values are distinct -- proves the broadcast bug is fixed.
+  expect_false(res$caltime_t[1] == res$caltime_t[2])
+})
+
+test_that("Kolari-Pynnonen adjusted BMP matches the closed form (Kolari-Pynnonen 2010)", {
+  # Provenance: closed-form on golden_multi_event_fixture. The KP statistic is the
+  #   BMP cross-sectional t scaled by kp_adj = sqrt((1 - r_bar) / (1 + (N - 1)
+  #   r_bar)), where r_bar is the average pairwise correlation of the
+  #   estimation-window standardized abnormal returns (SAR = AR / model sigma).
+  #   On this fixture the three events' estimation SARs are highly correlated by
+  #   construction (r_bar ~ 0.983), so kp_adj ~ 0.0764 shrinks the BMP t sharply --
+  #   exactly the cross-sectional-correlation penalty the KP adjustment applies.
+  #   Reproduced in data-raw/derive-golden-values.R; the independent derivation
+  #   agrees with the pinned pipeline values to ~1e-11 (the ~13th significant
+  #   digit differs only because r_bar is accumulated over a slightly different
+  #   floating-point path).
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Kolari-
+  #   Pynnonen test): SAR = AR / model sigma (as BMP); r_bar = average off-diagonal
+  #   pairwise correlation of estimation-window SARs; kp_adj =
+  #   sqrt((1 - r_bar)/(1 + (N - 1) r_bar)); kp_t = bmp_t * kp_adj; two-sided.
+  # Tolerance: absolute 1e-10 -- the pinned values are the package pipeline's own
+  #   output; the closed-form cross-check agrees to ~1e-11, comfortably inside the
+  #   identity tolerance.
+  fx <- golden_multi_event_fixture()
+  res <- KolariPynnonenTest$new()$compute(fx$data, fx$model)
+
+  expect_equal(
+    res$kp_t,
+    c(0.70742152433092598, -0.075928084316215713, 0.42954758876108962),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$ckp_t,
+    c(0.70742152433092598, 0.26205684907413279, 0.32285512936825822),
+    tolerance = 1e-10
+  )
+})
