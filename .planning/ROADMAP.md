@@ -122,8 +122,9 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   4. Any new test tooling (`patrick`, `hedgehog`) is Suggests-only and `requireNamespace()`-guarded; no new hard `Imports`.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
 
-**Plans**: 1 plan
-- [ ] 27-01-PLAN.md — Cross-cutting invariant tests (CAR==cumsum(AR), boundary/degenerate windows, monotonic growth, cross-method + statistic-layer consistency) across the model/statistic matrix, plus additive contract-routed numerical-stability guards (ill-conditioned OLS, bootstrap degeneracy, long-window CAR, GARCH non-convergence)
+**Plans**: 1/1 plans executed
+
+- [x] 27-01-PLAN.md — Cross-cutting invariant tests (CAR==cumsum(AR), boundary/degenerate windows, monotonic growth, cross-method + statistic-layer consistency) across the model/statistic matrix, plus additive contract-routed numerical-stability guards (ill-conditioned OLS, bootstrap degeneracy, long-window CAR, GARCH non-convergence)
 
 ### Phase 28: API Stabilization & Signature Lock
 
@@ -183,7 +184,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
 | 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
-| 27. Property & Numerical-Stability Tests | v0.66.0 | 0/TBD | Not started | - |
+| 27. Property & Numerical-Stability Tests | v0.66.0 | 1/1 | In Progress|  |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 0/TBD | Not started | - |
 | 29. Install-Tested CI | v0.66.0 | 0/TBD | Not started | - |
 | 30. CRAN Resubmission | v0.66.0 | 0/TBD | Not started | - |

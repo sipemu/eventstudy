@@ -4,18 +4,18 @@ milestone: v0.66.0
 milestone_name: Stabilization & CRAN Resubmission
 current_phase: 27
 current_phase_name: Property & Numerical-Stability Tests
-status: ready-to-execute
-stopped_at: Phase 27 plan-check PASS-WITH-ADVISORIES (0 blockers, 3 advisories); 27-01-PLAN.md ready to execute (6 tasks, tracer-first). Execute one task at a time via single-task executors per the ~168k-token/context advisory.
-last_updated: "2026-09-11T13:12:56.317Z"
+status: in-progress
+stopped_at: Completed 27-01-PLAN.md
+last_updated: "2026-09-11T19:43:20.001Z"
 last_activity: 2026-09-11
-last_activity_desc: Phase 26 complete, transitioned to Phase 27
-state_head: f27ab4241c92ba12c745125d5fc593186102ac6a
+last_activity_desc: Phase 27 Plan 01 complete — invariant + numerical-stability tests, suite green
+state_head: b2f97183249cc1b43cf5e9a8e1749a757a48bfaa
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 17
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -30,11 +30,11 @@ See: .planning/PROJECT.md (updated 2026-09-10)
 ## Current Position
 
 Phase: 27 of 30 (Property & Numerical-Stability Tests)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-11 — Phase 26 complete, transitioned to Phase 27
+Plan: 01 of 01 complete
+Status: Phase 27 complete — CORR-03, CORR-04 delivered
+Last activity: 2026-09-11 — Phase 27 Plan 01 complete (invariant + numerical-stability tests, suite green)
 
-Progress: [██░░░░░░░░] 17%
+Progress: [███░░░░░░░] 33%
 
 ## Milestone Roadmap (v0.66.0 — Phases 25–30)
 
@@ -60,6 +60,9 @@ Recent decisions affecting current work:
 - New tooling (`lifecycle`, `waldo`, `patrick`, `hedgehog`) is Suggests-only / `requireNamespace()`-guarded — no new hard Imports.
 - `estudy2`/`eventstudies` used only as source-level golden-value derivation tools; never added to DESCRIPTION (both are themselves archived on CRAN).
 - Deprecations are backward-compatible (warn, never silently break); API lock uses structural assertions, not byte-level `print()` snapshots.
+- [Phase 27]: Phase 27: numerical-stability guards are additive and route through the degenerate-input contract (NA+one warning lenient / stop strict); valid-input math untouched (SC5)
+- [Phase 27]: Phase 27: CAR overflow guard fires on is.infinite|is.nan ONLY, never plain NA, so it never emits a second contract warning on a legitimately-degenerate all-NA CAR (CONTRACT-04)
+- [Phase 27]: Phase 27: no new dependency — hand-rolled registry-driven parameterized tests in base testthat 3e (patrick/hedgehog stay absent, grep-asserted 0)
 
 ### v0.64.0/v0.65.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -97,8 +100,8 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 
 ## Session Continuity
 
-Last session: 2026-09-11T13:12:56.275Z
-Stopped at: Completed 26-01-PLAN.md (gate green)
+Last session: 2026-09-11T19:42:50.418Z
+Stopped at: Completed 27-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
@@ -110,3 +113,4 @@ Resume file: None
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 25 P01 | ~2h | 6 tasks | 41 files |
+| Phase 27 P01 | 40min | 6 tasks | 6 files |
