@@ -1,5 +1,3 @@
-#' EventStudy Deprecation Policy
-#'
 #' @name eventstudy-deprecation
 #' @title EventStudy Deprecation Policy
 #'

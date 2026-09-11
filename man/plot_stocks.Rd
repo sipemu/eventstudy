@@ -9,7 +9,8 @@ plot_stocks(
   target_variable = "firm_adjusted",
   add_event_date = FALSE,
   max_symbols = 6,
-  do_sample = TRUE
+  sample_symbols = TRUE,
+  do_sample = NULL
 )
 }
 \arguments{
@@ -23,8 +24,14 @@ to plot. Default is "firm_adjusted".}
 \item{max_symbols}{An integer specifying the maximum number of symbols
 to display. Default is 6.}
 
-\item{do_sample}{A boolean specifying whether to randomly sample the
-symbols if the number exceeds max_symbols. Default is TRUE.}
+\item{sample_symbols}{Logical; if \code{TRUE} (default), randomly sample
+\code{max_symbols} symbols when the task contains more than
+\code{max_symbols}. If \code{FALSE}, take the first \code{max_symbols}
+in order.}
+
+\item{do_sample}{\emph{Deprecated.} Renamed to \code{sample_symbols}
+in EventStudy 0.66.0. Accepts the old name for backward compatibility and
+emits one deprecation warning.}
 }
 \value{
 A plotly plot object.

@@ -13,8 +13,9 @@
 #'   \code{max_symbols} symbols when the task contains more than
 #'   \code{max_symbols}. If \code{FALSE}, take the first \code{max_symbols}
 #'   in order.
-#' @param do_sample \lifecycle{deprecated} Renamed to \code{sample_symbols}
-#'   in EventStudy 0.66.0. Accepts the old name for backward compatibility.
+#' @param do_sample \emph{Deprecated.} Renamed to \code{sample_symbols}
+#'   in EventStudy 0.66.0. Accepts the old name for backward compatibility and
+#'   emits one deprecation warning.
 #'
 #' @return A plotly plot object.
 #' @family eventstudy-plots
