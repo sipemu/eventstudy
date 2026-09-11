@@ -5,16 +5,16 @@ milestone_name: Stabilization & CRAN Resubmission
 current_phase: 28
 current_phase_name: API Stabilization & Signature Lock
 status: executing
-stopped_at: context exhaustion at 75% (2026-09-11)
-last_updated: "2026-09-11T21:40:17.419Z"
+stopped_at: Completed 28-01-PLAN.md
+last_updated: "2026-09-11T22:03:55.537Z"
 last_activity: 2026-09-11
-last_activity_desc: Phase 27 complete, transitioned to Phase 28
-state_head: f4801fc59a5a995bd4bc2b92c7891eef126a4492
+last_activity_desc: Phase 28 execution started
+state_head: 4e1b686d80a2dc0273c88fff1b802645eb1e0fac
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
   percent: 50
 ---
 
@@ -25,14 +25,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-10)
 
 **Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong. This milestone proves correctness numerically, locks the public API against accidental breakage, and gets the package back onto CRAN (archived 2024-04-20).
-**Current focus:** v0.66.0 roadmap created (Phases 25–30) — ready to plan Phase 25
+**Current focus:** Phase 28 — API Stabilization & Signature Lock
 
 ## Current Position
 
-Phase: 28 (API Stabilization & Signature Lock) — READY TO EXECUTE
-Plan: Not started
+Phase: 28 (API Stabilization & Signature Lock) — EXECUTING
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-09-11 — Phase 27 complete, transitioned to Phase 28
+Last activity: 2026-09-11 — Phase 28 execution started
 
 Progress: [█████░░░░░] 50%
 
@@ -63,6 +63,7 @@ Recent decisions affecting current work:
 - [Phase 27]: Phase 27: numerical-stability guards are additive and route through the degenerate-input contract (NA+one warning lenient / stop strict); valid-input math untouched (SC5)
 - [Phase 27]: Phase 27: CAR overflow guard fires on is.infinite|is.nan ONLY, never plain NA, so it never emits a second contract warning on a legitimately-degenerate all-NA CAR (CONTRACT-04)
 - [Phase 27]: Phase 27: no new dependency — hand-rolled registry-driven parameterized tests in base testthat 3e (patrick/hedgehog stay absent, grep-asserted 0)
+- [Phase 28]: Phase 28 plan 01: chosen tracer outlier was do_sample (plot_stocks) -> sample_symbols; 3 outliers scheduled-for-deprecation with rationale (bootstrap_test.statistic, export_results.which, options namespace); lifecycle stays Suggests-only
 
 ### v0.64.0/v0.65.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -101,8 +102,8 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 
 ## Session Continuity
 
-Last session: 2026-09-11T21:33:19.909Z
-Stopped at: context exhaustion at 75% (2026-09-11)
+Last session: 2026-09-11T22:03:50.598Z
+Stopped at: Completed 28-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
@@ -115,3 +116,4 @@ Resume file: None
 |------|----------|-------|-------|
 | Phase 25 P01 | ~2h | 6 tasks | 41 files |
 | Phase 27 P01 | 40min | 6 tasks | 6 files |
+| Phase 28 P01 | 18min | 3 tasks | 8 files |
