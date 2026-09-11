@@ -1,0 +1,185 @@
+---
+title: "Statistical Conventions and Formula Audit"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Statistical Conventions and Formula Audit}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Purpose
+
+Every event-study statistic embeds convention choices -- the return type, the
+forecast-error correction, the degrees of freedom, the p-value sidedness, the
+Patell denominator, and so on. Two implementations of "the same" test can differ
+in the last digits (or more) purely because they made different, equally
+defensible choices. This vignette documents, per return model and per test
+statistic, exactly which convention EventStudy uses and cites the published
+source for each. It is the reference that a golden-value regression test is
+pinned against: a documented convention here matches the assumption annotated in
+`tests/testthat/test_golden_values.R`.
+
+## Audit methodology
+
+Each model and statistic was audited against its published formula. Findings are
+classified with a strict two-bucket policy:
+
+- **Fix (genuine formula error).** If the code computes something no published
+  convention supports, it is a bug. It is fixed in the R source, the fix is
+  locked with a regression test, and the fix precedes the golden pin of that
+  statistic. Such fixes are logged in the "Audit log" section below.
+- **Document (defensible convention difference).** If the code matches a
+  published convention that merely differs from another implementation (for
+  example log vs simple returns, df = m - 2 vs m - 1, one- vs two-sided p), the
+  behavior is *not* changed -- it is documented here as the chosen convention
+  with its citation. Behavior on valid inputs is frozen for this milestone.
+
+When a discrepancy is ambiguous it is treated as a convention (documented, not
+changed), because silently altering a valid-input result is the higher-risk
+error.
+
+Tolerance policy for the golden tests: absolute `1e-10` for exact algebraic
+identities, absolute `1e-8` as the general default, and relative `1e-6` for any
+cross-implementation comparison. Each pinned assertion states its provenance,
+the conventions it assumes, and its tolerance rationale inline.
+
+## Return models
+
+### Market Model (MacKinlay 1997)
+
+The Market Model regresses firm returns on index returns over the estimation
+window by OLS and defines the abnormal return as the residual in the event
+window.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Return type | Arithmetic (simple) returns | The pipeline's return-calculation strategy is orthogonal; the model consumes whatever `firm_returns` / `index_returns` contain. |
+| Estimation | OLS: `firm_returns ~ index_returns` | `alpha`, `beta` from `lm()`. |
+| Abnormal return | `AR = R - (alpha + beta * Rm)` | MacKinlay (1997) eq. (5). |
+| Residual sigma | Residual standard error from `summary(lm)` | Uses `df = m - 2` (intercept + slope). |
+| Degrees of freedom | `m - 2` | `m` = estimation observations. |
+| AR t-statistic | `AR / sigma` | Per-day, constant-sigma approximation. |
+| CAR t-statistic | `CAR / (sqrt(L) * sigma)` | `L`-day cumulative, constant-sigma approximation, MacKinlay (1997). |
+| Forecast-error correction | `sigma * sqrt(1 + 1/m + (Rm_evt - mean(Rm_est))^2 / SS_market)` | Patell/MacKinlay prediction-error variance; `SS_market` is the estimation-window sum of squares of the index. Falls back to the constant-mean form `sigma * sqrt(1 + 1/m)` when the index is constant. |
+| p-value sidedness | Two-sided by default | `confidence_type = "two-sided"`. |
+
+**Audit result: verified, no change.** The implementation matches MacKinlay
+(1997). Pinned in `test_golden_values.R` against an independent closed-form
+`lm()` derivation at absolute tolerance `1e-10`.
+
+*Citation:* MacKinlay, A. C. (1997). Event Studies in Economics and Finance.
+*Journal of Economic Literature*, 35(1), 13--39.
+
+### Market Adjusted Model
+
+*To be filled by Task 2.*
+
+### Comparison Period Mean Adjusted Model
+
+*To be filled by Task 2.*
+
+### Fama-French Three-Factor Model
+
+*To be filled by Task 2.*
+
+### Fama-French Five-Factor Model
+
+*To be filled by Task 2.*
+
+### Carhart Four-Factor Model
+
+*To be filled by Task 2.*
+
+### Custom Model
+
+*To be filled by Task 2.*
+
+### BHAR Model
+
+*To be filled by Task 3.*
+
+### Volume Model
+
+*To be filled by Task 3.*
+
+### Volatility Model
+
+*To be filled by Task 3.*
+
+### Rolling-Window Model
+
+*To be filled by Task 3.*
+
+### GARCH Model
+
+*To be filled by Task 3.*
+
+### DCC-GARCH Model
+
+*To be filled by Task 3.*
+
+## Test statistics
+
+### AR / CAR t-tests (ARTTest, CARTTest)
+
+Documented above with the Market Model, since the tracer anchors them together.
+The AR t-test divides each event-day abnormal return by the model sigma; the CAR
+t-test divides the cumulative abnormal return by `sqrt(L) * sigma`. Both are
+distributed as Student's t with the model's residual degrees of freedom and are
+two-sided by default. *Citation:* MacKinlay (1997).
+
+### BHAR t-test (BHARTTest)
+
+*To be filled by Task 4.*
+
+### Cross-Sectional t-test (CSectTTest)
+
+*To be filled by Task 4.*
+
+### Patell Z-test (PatellZTest)
+
+*To be filled by Task 4.*
+
+### BMP test (BMPTest)
+
+*To be filled by Task 4.*
+
+### Sign test (SignTest)
+
+*To be filled by Task 5.*
+
+### Generalized Sign test (GeneralizedSignTest)
+
+*To be filled by Task 5.*
+
+### Rank test (RankTest)
+
+*To be filled by Task 5.*
+
+### Calendar-Time Portfolio test (CalendarTimePortfolioTest)
+
+*To be filled by Task 5.*
+
+### Kolari-Pynnonen test (KolariPynnonenTest)
+
+*To be filled by Task 5.*
+
+### PermutationTest (unwired stub)
+
+`PermutationTest` is exported but its `compute()` body is empty (returns `NULL`)
+and it is not wired into any statistics set or parameter set -- it is not on any
+pipeline path. It is recorded here for completeness; a decision to implement or
+remove it is deferred (see the audit log).
+
+## Audit log
+
+| Component | Result | Citation |
+|---|---|---|
+| Market Model + AR/CAR t | verified, no change | MacKinlay (1997) |
+| PermutationTest | unwired stub -- empty `compute()`, not on pipeline path; deferred | -- |
+
+*Later tasks append their rows here.*
