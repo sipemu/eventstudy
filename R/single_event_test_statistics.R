@@ -137,14 +137,18 @@ CARTTest <- R6Class("CARTTest",
                                           sigma = pmax(sqrt(event_window_length) * sigma, .Machine$double.eps)
                                         ))
 
-                        # Guard: long-window CAR cumulation overflow. When the
-                        # running cumsum exceeds the representable range it becomes
-                        # Inf/NaN, and car_t would report a MISLEADING infinite test
-                        # statistic. On any non-finite CAR entry, emit exactly one
-                        # warning (the statistics-layer NA+one-warning contract, mirroring
-                        # the model degenerate-input contract) and NA out the derived
-                        # statistics for those entries. Valid finite windows are untouched.
-                        car_overflow <- !is.finite(res$car)
+                        # Guard: long-window CAR cumulation OVERFLOW. When the running
+                        # cumsum exceeds the representable range it becomes Inf/NaN, and
+                        # car_t would report a MISLEADING infinite test statistic. On an
+                        # OVERFLOWED CAR entry (Inf or NaN only), emit exactly one warning
+                        # (the statistics-layer NA+one-warning contract) and NA out the
+                        # derived statistics for those entries.
+                        # IMPORTANT: plain NA is EXCLUDED -- an NA CAR is the legitimate
+                        # degenerate-model propagation (an unfitted model returns all-NA
+                        # abnormal returns, already warned once at fit time). Firing here on
+                        # NA would emit a SECOND contract warning, violating the one-warning
+                        # contract (CONTRACT-04). Valid finite windows are untouched (SC5).
+                        car_overflow <- is.infinite(res$car) | is.nan(res$car)
                         if (any(car_overflow)) {
                           warning(
                             "CARTest: CAR cumulation overflow -- ",
