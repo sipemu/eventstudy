@@ -68,7 +68,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 
 - [x] **Phase 25: CRAN Hygiene & Clean Check Baseline** - Non-ASCII sweep, undefined-globals fix, stale-tarball removal, optional-package guard audit — a clean `--as-cran` baseline before any test work (completed 2026-09-11)
 - [x] **Phase 26: Formula Audit & Golden-Value Validation** - Audit each model/statistic against its published formula, document conventions, fix discrepancies, then pin golden values against reference numbers (completed 2026-09-11)
-- [ ] **Phase 27: Property & Numerical-Stability Tests** - Cross-cutting invariant/property tests plus numerical-stability guards on the sensitive numeric paths
+- [x] **Phase 27: Property & Numerical-Stability Tests** - Cross-cutting invariant/property tests plus numerical-stability guards on the sensitive numeric paths (completed 2026-09-11)
 - [ ] **Phase 28: API Stabilization & Signature Lock** - Signature-consistency audit + return-shape contracts + deprecation lifecycle, then a structural API snapshot capturing the audited surface
 - [ ] **Phase 29: Install-Tested CI** - CI gates on the installed package / `R CMD check`, plus a load_all-vs-installed divergence audit of templates and examples
 - [ ] **Phase 30: CRAN Resubmission** - Clean `--as-cran`, multi-platform checks, archival-acknowledging cover letter, policy compliance, and submission
@@ -139,7 +139,10 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   4. API snapshot tests capture the full public signature surface (`getNamespaceExports()`, `formals()` per function, registered S3 methods) using structural assertions — not rendered `print()` output — and are install-gated with `skip_if_not_installed("EventStudy")` so an accidental break fails CI.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 28-01-PLAN.md — Signature audit + in-place reconciliation with shims (APIS-01) + deprecation lifecycle policy (APIS-04)
+- [ ] 28-02-PLAN.md — Return-shape contracts in R/shape_contracts.R, option-gated/default-off, warn-only, covering single/multi-event + degenerate shapes (APIS-02)
+- [ ] 28-03-PLAN.md — Structural install-gated API snapshot pinning the reconciled surface (APIS-03)
 
 ### Phase 29: Install-Tested CI
 
@@ -184,7 +187,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
 | 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
-| 27. Property & Numerical-Stability Tests | v0.66.0 | 1/1 | In Progress|  |
+| 27. Property & Numerical-Stability Tests | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 0/TBD | Not started | - |
 | 29. Install-Tested CI | v0.66.0 | 0/TBD | Not started | - |
 | 30. CRAN Resubmission | v0.66.0 | 0/TBD | Not started | - |
