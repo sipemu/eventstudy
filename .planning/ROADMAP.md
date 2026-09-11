@@ -122,7 +122,8 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   4. Any new test tooling (`patrick`, `hedgehog`) is Suggests-only and `requireNamespace()`-guarded; no new hard `Imports`.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
 
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 27-01-PLAN.md — Cross-cutting invariant tests (CAR==cumsum(AR), boundary/degenerate windows, monotonic growth, cross-method + statistic-layer consistency) across the model/statistic matrix, plus additive contract-routed numerical-stability guards (ill-conditioned OLS, bootstrap degeneracy, long-window CAR, GARCH non-convergence)
 
 ### Phase 28: API Stabilization & Signature Lock
 
