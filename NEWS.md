@@ -21,6 +21,20 @@ exactly one deprecation warning pointing to the replacement.
   `lifecycle::deprecate_warn()` when `lifecycle` is installed (Suggests-only,
   never a hard dependency). (#APIS-04)
 
+### Return-Shape Contracts (opt-in, default-off)
+
+* New `R/shape_contracts.R` provides an opt-in return-shape contract for the
+  pipeline's result tibbles. Enable with
+  `options(EventStudy.shape_contracts = TRUE)`. When enabled, the pipeline
+  checks that the column names and types of the single-event statistics tibbles
+  (`ART`, `CART`) and the multi-event AAR/CAAR tibble (`CSectT`) match the
+  canonical expected shapes. On any mismatch exactly one `warning()` is
+  emitted naming the context and the specific drift; the contract never calls
+  `stop()`. Correctly-shaped `is_fitted = FALSE` degenerate outputs (same
+  column names, `NA`-propagated values) are treated as valid shapes and produce
+  no warning. The option defaults to `FALSE` so valid-input behaviour and the
+  existing test suite are completely unaffected. (#APIS-02)
+
 # EventStudy 0.65.0
 
 The "Polish" milestone lifts the *felt* quality of the package — brand identity,
