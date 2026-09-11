@@ -12,7 +12,7 @@ Abstract base class for Grounded AI Advisor providers. Defines the
 
   `ProviderBase` itself is abstract: calling `complete()` on it errors. It
   stores only non-secret configuration (`model`, `base_url`); API keys are
-  NEVER read at construction \u2014 they are resolved at call time inside each
+  NEVER read at construction -- they are resolved at call time inside each
   concrete provider's `complete()`.
 }
 \seealso{
@@ -71,7 +71,7 @@ Other eventstudy-advisor:
 \if{html}{\out{<a id="method-ProviderBase-complete"></a>}}
 \if{latex}{\out{\hypertarget{method-ProviderBase-complete}{}}}
 \subsection{\code{ProviderBase$complete()}}{
-  Complete a prompt. Abstract on the base class \u2014 concrete
+  Complete a prompt. Abstract on the base class -- concrete
   providers override this.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}

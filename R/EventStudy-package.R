@@ -74,7 +74,7 @@ utils::globalVariables(c(
 #'   \item \code{\link{GeneralizedSignTest}} -- Generalized sign test (Cowan 1992)
 #'   \item \code{\link{RankTest}} -- Rank test (Corrado 1989)
 #'   \item \code{\link{BMPTest}} -- Boehmer, Musumeci & Poulsen (1991) test
-#'   \item \code{\link{KolariPynnonenTest}} -- Kolari-Pynn\u00f6nen adjusted BMP test
+#'   \item \code{\link{KolariPynnonenTest}} -- Kolari-Pynnoenen adjusted BMP test
 #'   \item \code{\link{CalendarTimePortfolioTest}} -- Calendar-time portfolio test
 #' }
 #'

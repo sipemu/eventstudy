@@ -50,8 +50,8 @@ to drive a complete multi-group event study (\code{prepare_event_study()} ->
 The event is the U.S. Environmental Protection Agency's Notice of Violation
 issued to Volkswagen on \strong{2015-09-18} (a Friday); the share-price crash
 lands on the following trading days. The dataset covers two groups: the
-"VW Group" (VOW.DE, PAH3.DE \u2014 directly implicated firms) and "Other"
-(BMW.DE, MBG.DE \u2014 peer automakers). The bundled window layout uses a
+"VW Group" (VOW.DE, PAH3.DE -- directly implicated firms) and "Other"
+(BMW.DE, MBG.DE -- peer automakers). The bundled window layout uses a
 250-trading-day estimation window ending 11 days before the event and an
 event window of \code{[-10, +10]} trading days.
 
@@ -64,10 +64,10 @@ after the disclosure, while the "Other" peer automakers show near-zero CAAR
 
 \strong{Firms:}
 \itemize{
-  \item \code{VOW.DE} \u2014 Volkswagen AG ordinary shares (Xetra), event_id = 1
-  \item \code{PAH3.DE} \u2014 Porsche Automobil Holding SE (Xetra), event_id = 2
-  \item \code{BMW.DE} \u2014 BMW AG (Xetra), event_id = 3
-  \item \code{MBG.DE} \u2014 Mercedes-Benz Group AG (Xetra), event_id = 4
+  \item \code{VOW.DE} -- Volkswagen AG ordinary shares (Xetra), event_id = 1
+  \item \code{PAH3.DE} -- Porsche Automobil Holding SE (Xetra), event_id = 2
+  \item \code{BMW.DE} -- BMW AG (Xetra), event_id = 3
+  \item \code{MBG.DE} -- Mercedes-Benz Group AG (Xetra), event_id = 4
 }
 \strong{Groups:} "VW Group" (VOW.DE, PAH3.DE) vs "Other" (BMW.DE, MBG.DE).
 \strong{Benchmark:} DAX performance index (ticker \code{^GDAXI}).

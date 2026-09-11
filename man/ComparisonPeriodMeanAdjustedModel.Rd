@@ -7,10 +7,10 @@
 The Comparison Period Mean Adjusted Model is another relatively simple
 approach used in event studies to estimate the expected returns of a stock
 and calculate its abnormal returns during an event window. This model is
-based on the assumption that a stock\u2019s expected return during the event
+based on the assumption that a stock's expected return during the event
 window is equal to its average return during a comparison period (typically
 a pre-event period). This model is particularly useful when researchers want
-to control for a stock\u2019s historical performance and do not wish to rely on
+to control for a stock's historical performance and do not wish to rely on
 market return data.
 }
 \seealso{

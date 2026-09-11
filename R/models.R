@@ -129,9 +129,9 @@ ModelBase <- R6Class("ModelBase",
 #' The Market Model is a widely used method in event studies to estimate the
 #' expected returns of a stock and calculate its abnormal returns during an
 #' event window. The model is based on a simple linear regression framework and
-#' captures the relationship between a stock\u2019s return and the return of a market
+#' captures the relationship between a stock's return and the return of a market
 #' index, such as the S&P 500 or the Dow Jones Industrial Average. The
-#' underlying assumption of the Market Model is that a stock\u2019s return is
+#' underlying assumption of the Market Model is that a stock's return is
 #' primarily influenced by market movements, along with a stock-specific
 #' idiosyncratic component.
 #'
@@ -341,7 +341,7 @@ MarketModel <- R6Class("MarketModel",
 #' The Market Adjusted Model is another simple approach used in event studies
 #' to estimate the expected returns of a stock and calculate its abnormal
 #' returns during an event window. This model is less complex than the Market
-#' Model, as it assumes that a stock\u2019s expected return is equal to the market
+#' Model, as it assumes that a stock's expected return is equal to the market
 #' return, without considering any stock-specific factors. The Market
 #' Adjusted Model is particularly useful in situations where the estimation of
 #' individual stock parameters (such as alpha and beta) is not feasible or
@@ -450,10 +450,10 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
 #' The Comparison Period Mean Adjusted Model is another relatively simple
 #' approach used in event studies to estimate the expected returns of a stock
 #' and calculate its abnormal returns during an event window. This model is
-#' based on the assumption that a stock\u2019s expected return during the event
+#' based on the assumption that a stock's expected return during the event
 #' window is equal to its average return during a comparison period (typically
 #' a pre-event period). This model is particularly useful when researchers want
-#' to control for a stock\u2019s historical performance and do not wish to rely on
+#' to control for a stock's historical performance and do not wish to rely on
 #' market return data.
 #'
 #' @family eventstudy-models

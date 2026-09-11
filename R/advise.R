@@ -139,7 +139,7 @@ KB_KEY_MAP <- list(
 #' on any failure (absent jsonlite, NA/empty text, invalid JSON, non-list result).
 #' Uses simplifyVector=FALSE to preserve list-of-lists structure.
 #'
-#' This is NOT the warning-emitting point for the grounding guard \u2014 only for
+#' This is NOT the warning-emitting point for the grounding guard -- only for
 #' parse failures. .validate_grounding() is the single guard-drop warning point.
 #'
 #' @param resp An es_provider_response with a $text field.
@@ -202,7 +202,7 @@ KB_KEY_MAP <- list(
 #'
 #' Drops the entire recommendation on any bad evidence entry.
 #' Emits exactly ONE warning when n_drop > 0 (this is the sole warning point
-#' for guard failures \u2014 mirrors .provider_failure() discipline).
+#' for guard failures -- mirrors .provider_failure() discipline).
 #' Appends a caveat recording N drops.
 #'
 #' Tolerance: abs(reported - actual) <= max(abs_tol, rel_tol * abs(actual)).
@@ -691,7 +691,7 @@ KB_KEY_MAP <- list(
 #'   6. Schema reminder
 #'
 #' For KB-grounded types (recommend_stat/flag_robustness with provider), the
-#' task instruction explicitly bounds the LLM to prose only \u2014 it must not invent
+#' task instruction explicitly bounds the LLM to prose only -- it must not invent
 #' new diagnostic keys, add/remove recommendations, or modify any evidence entry.
 #' This is the intent-preservation instruction; the guard is the enforcement backstop.
 #'
@@ -915,7 +915,7 @@ print.Advice <- function(x, ...) {
 #'
 #' Produces a grounded \code{Advice} S3 object by routing through a task-type
 #' dispatch, calling an optional LLM provider, parsing the JSON response, and
-#' running the runtime grounding guard \u2014 which drops any recommendation whose
+#' running the runtime grounding guard -- which drops any recommendation whose
 #' \code{evidence[]} cites a diagnostic key absent from the computed diagnostics
 #' or a value mismatching beyond numeric tolerance.
 #'
@@ -927,7 +927,7 @@ print.Advice <- function(x, ...) {
 #' \describe{
 #'   \item{\code{recommend_stat}, \code{flag_robustness}}{
 #'     No provider: returns the Phase 5 \code{es_advice} object (offline KB
-#'     path \u2014 deterministic, \code{is_deterministic = TRUE}).
+#'     path -- deterministic, \code{is_deterministic = TRUE}).
 #'     With provider: KB produces grounded evidence[], LLM adds prose;
 #'     returns an \code{Advice} object (\code{is_deterministic = FALSE}).
 #'   }
@@ -939,7 +939,7 @@ print.Advice <- function(x, ...) {
 #' }
 #'
 #' \strong{Failure discipline:} Any provider failure, malformed JSON, or empty
-#' response degrades to one \code{warning()} + an empty \code{Advice} object \u2014
+#' response degrades to one \code{warning()} + an empty \code{Advice} object --
 #' never a crash, never a fabricated result (mirrors \code{.handle_degenerate()}).
 #'
 #' @param diagnostics An \code{es_diagnostics} object returned by

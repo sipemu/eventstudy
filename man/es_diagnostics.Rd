@@ -51,7 +51,7 @@ A named list of class \code{"es_diagnostics"} with six sections:
 Extracts already-computed statistical signals from a fitted
 \code{EventStudyTask} into a flat, JSON-ready S3 list. This is the
 always-available grounding foundation for the knowledge base and offline
-advice layer \u2014 it recomputes nothing; all signals already exist in the
+advice layer -- it recomputes nothing; all signals already exist in the
 fitted task.
 }
 \seealso{

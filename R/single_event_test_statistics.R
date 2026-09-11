@@ -43,7 +43,7 @@ TestStatisticBase <- R6Class("TestStatisticBase",
 #' The AR t-test is a statistical method used to determine whether the abnormal
 #' return of a security on a specific day is significantly different from zero.
 #' This test helps researchers identify whether the event of interest has a
-#' significant impact on the security\u2019s return at a particular point in time.
+#' significant impact on the security's return at a particular point in time.
 #'
 #' See also \url{https://eventstudy.de/statistics/ar_car_statistics.html}
 #'
@@ -88,7 +88,7 @@ ARTTest <- R6Class("ARTTest",
 #' The CAR t-test is a statistical method used to determine whether the
 #' cumulative abnormal return of a security over an event window is
 #' significantly different from zero. This test helps researchers identify
-#' whether the event of interest has a significant impact on the security\u2019s
+#' whether the event of interest has a significant impact on the security's
 #' return over the entire event window, considering the cumulative effects of
 #' the event.
 #'

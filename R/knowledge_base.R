@@ -12,7 +12,7 @@
 #' Phase 7 LLM layer both evaluate against.
 #'
 #' \strong{KB-04 scope note:} Phase 5 delivers the KB data structure
-#' only \u2014 exported and serializable, ready for Phase 7 system-prompt
+#' only -- exported and serializable, ready for Phase 7 system-prompt
 #' injection. The actual prompt-injection behavior is a Phase 7
 #' deliverable and is deliberately out of scope here.
 #'
@@ -35,7 +35,7 @@
 #'
 #' @section Threshold notes:
 #' The following thresholds are literature-informed defaults and are marked
-#' \strong{[ASSUMED]} \u2014 they can be tuned without breaking the KB contract:
+#' \strong{[ASSUMED]} -- they can be tuned without breaking the KB contract:
 #' \itemize{
 #'   \item Shapiro-Wilk p-value threshold: 0.05
 #'   \item Proportion for normality-holds rule: \>= 70\% of events
@@ -408,7 +408,7 @@ EVENTSTUDY_KB <- list(
 #' exported here so that Phase 7 can inject its contents into an LLM
 #' system prompt without accessing an internal package object.
 #'
-#' \strong{KB-04 note:} This function delivers the \emph{structure} only \u2014
+#' \strong{KB-04 note:} This function delivers the \emph{structure} only --
 #' exported and serializable, ready for Phase 7 system-prompt injection.
 #' The actual prompt-injection behavior is a Phase 7 deliverable and is
 #' deliberately out of scope here.

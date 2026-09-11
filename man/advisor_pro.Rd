@@ -2,7 +2,7 @@
 % Please edit documentation in R/advisor_pro.R
 \name{advisor_pro}
 \alias{advisor_pro}
-\title{Advisor Pro \u2014 Future Retrieval-Grounded Paid Tier}
+\title{Advisor Pro -- Future Retrieval-Grounded Paid Tier}
 \description{
 \strong{Advisor Pro} is a planned premium add-on for the EventStudy package
 that will provide retrieval-augmented, evidence-grounded AI advice backed by
@@ -25,9 +25,9 @@ documents the waitlist mechanism.
 The current package already ships an offline advice layer based on a
 deterministic knowledge base:
 \itemize{
-  \item \code{\link{recommend_stat}()} \u2014 KB-based test-statistic recommendation
-  \item \code{\link{flag_robustness}()} \u2014 KB-based robustness flags
-  \item \code{\link{es_advise}()} \u2014 LLM-backed advice (requires provider)
+  \item \code{\link{recommend_stat}()} -- KB-based test-statistic recommendation
+  \item \code{\link{flag_robustness}()} -- KB-based robustness flags
+  \item \code{\link{es_advise}()} -- LLM-backed advice (requires provider)
 }
 }
 
@@ -38,7 +38,7 @@ To join the Advisor Pro waitlist, visit:
 
 To enable an optional footer reminder after printing advice objects:
 \preformatted{options(eventstudy.advisor_pro_footer = TRUE)}
-The footer is silent by default; enabling it appends a static URL \u2014 no
+The footer is silent by default; enabling it appends a static URL -- no
 network connection is made.
 }
 

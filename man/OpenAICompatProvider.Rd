@@ -7,7 +7,7 @@
 A provider that issues \code{POST {base_url}/chat/completions}
   with an OpenAI-shaped request body. Because the endpoint is selected purely
   by \code{base_url} + \code{model}, this single class covers OpenAI itself
-  AND every OpenAI-compatible backend \u2014 Ollama, LM Studio, or any gateway \u2014
+  AND every OpenAI-compatible backend -- Ollama, LM Studio, or any gateway --
   via a \code{base_url} override, with no code change.
 
   The API key is resolved at CALL time from \code{OPENAI_API_KEY} (never at
@@ -16,7 +16,7 @@ A provider that issues \code{POST {base_url}/chat/completions}
   header in every print/error path. A missing key, transport/timeout failure,
   non-2xx status, malformed body, or missing completion text each degrades to
   exactly one \code{warning()} plus an `es_provider_response` with
-  \code{text = NA_character_} \u2014 it never crashes the session and never returns
+  \code{text = NA_character_} -- it never crashes the session and never returns
   a fabricated completion.
 
   \code{httr2} is required only for this provider and is guarded by
@@ -29,7 +29,7 @@ A provider that issues \code{POST {base_url}/chat/completions}
 p <- OpenAICompatProvider$new(model = "gpt-4o")
 p$complete("Summarise these event-study diagnostics")
 
-# Any OpenAI-compatible endpoint works via a base_url override \u2014 e.g. a local
+# Any OpenAI-compatible endpoint works via a base_url override -- e.g. a local
 # Ollama server (no cloud key needed by the server, but OPENAI_API_KEY is still
 # read as the bearer token; set it to any non-empty value for local servers):
 p_local <- OpenAICompatProvider$new(

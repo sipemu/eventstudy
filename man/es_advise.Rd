@@ -50,7 +50,7 @@ For KB task types without a provider: an \code{es_advice} S3 object
 \description{
 Produces a grounded \code{Advice} S3 object by routing through a task-type
 dispatch, calling an optional LLM provider, parsing the JSON response, and
-running the runtime grounding guard \u2014 which drops any recommendation whose
+running the runtime grounding guard -- which drops any recommendation whose
 \code{evidence[]} cites a diagnostic key absent from the computed diagnostics
 or a value mismatching beyond numeric tolerance.
 }
@@ -63,7 +63,7 @@ is enforced in R, independent of the prompt (ADV-04).
 \describe{
   \item{\code{recommend_stat}, \code{flag_robustness}}{
     No provider: returns the Phase 5 \code{es_advice} object (offline KB
-    path \u2014 deterministic, \code{is_deterministic = TRUE}).
+    path -- deterministic, \code{is_deterministic = TRUE}).
     With provider: KB produces grounded evidence[], LLM adds prose;
     returns an \code{Advice} object (\code{is_deterministic = FALSE}).
   }
@@ -75,7 +75,7 @@ is enforced in R, independent of the prompt (ADV-04).
 }
 
 \strong{Failure discipline:} Any provider failure, malformed JSON, or empty
-response degrades to one \code{warning()} + an empty \code{Advice} object \u2014
+response degrades to one \code{warning()} + an empty \code{Advice} object --
 never a crash, never a fabricated result (mirrors \code{.handle_degenerate()}).
 }
 \examples{

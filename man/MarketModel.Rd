@@ -7,9 +7,9 @@
 The Market Model is a widely used method in event studies to estimate the
 expected returns of a stock and calculate its abnormal returns during an
 event window. The model is based on a simple linear regression framework and
-captures the relationship between a stock\u2019s return and the return of a market
+captures the relationship between a stock's return and the return of a market
 index, such as the S&P 500 or the Dow Jones Industrial Average. The
-underlying assumption of the Market Model is that a stock\u2019s return is
+underlying assumption of the Market Model is that a stock's return is
 primarily influenced by market movements, along with a stock-specific
 idiosyncratic component.
 }
