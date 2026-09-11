@@ -136,6 +136,27 @@ CARTTest <- R6Class("CARTTest",
                                           mu    = car,
                                           sigma = pmax(sqrt(event_window_length) * sigma, .Machine$double.eps)
                                         ))
+
+                        # Guard: long-window CAR cumulation overflow. When the
+                        # running cumsum exceeds the representable range it becomes
+                        # Inf/NaN, and car_t would report a MISLEADING infinite test
+                        # statistic. On any non-finite CAR entry, emit exactly one
+                        # warning (the statistics-layer NA+one-warning contract, mirroring
+                        # the model degenerate-input contract) and NA out the derived
+                        # statistics for those entries. Valid finite windows are untouched.
+                        car_overflow <- !is.finite(res$car)
+                        if (any(car_overflow)) {
+                          warning(
+                            "CARTest: CAR cumulation overflow -- ",
+                            sum(car_overflow),
+                            " cumulative abnormal return(s) are non-finite; ",
+                            "car_t set to NA (rather than a misleading Inf).",
+                            call. = FALSE
+                          )
+                          res$corrected_car[car_overflow] <- NA_real_
+                          res$car_t[car_overflow]         <- NA_real_
+                        }
+
                         res$car_window = stringr::str_c("[", res$relative_index[1], ", ", res$relative_index, "]")
                         res
                       }

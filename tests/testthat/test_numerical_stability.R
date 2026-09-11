@@ -160,3 +160,44 @@ test_that("CAR cumulation that overflows to Inf -> NA car_t + one warning, never
   expect_true(any(inf_car))                 # the fixture does overflow
   expect_true(all(is.na(res$car_t[inf_car])))
 })
+
+# --------------------------------------------------------------------------
+# Guard 4: GARCH / DCC-GARCH non-convergence -> NA + one contract warning
+# --------------------------------------------------------------------------
+# rugarch/rmgarch are Suggests-only and their fitted numbers are version-fragile,
+# so these are skip_if_not_installed-guarded and assert only the CONTRACT
+# (is_fitted == FALSE + NA abnormal returns on non-convergence), never a fitted
+# constant. The convergence guards already exist (R/models.R GARCHModel:
+# rugarch::convergence(res) != 0 -> NA + one warning; R/models_time_varying.R
+# DCCGARCHModel: non-finite rcov -> NA + one warning); these tests LOCK them so
+# removing a guard fails the suite.
+
+test_that("GARCH non-convergence -> is_fitted FALSE + NA abnormal returns (contract lock)", {
+  skip_if_not_installed("rugarch")
+
+  # Near-degenerate estimation data that drives ugarchfit away from convergence
+  # (an almost-constant series gives the GARCH recursion nothing to estimate).
+  d <- create_degenerate_model_data_insufficient(n_valid = 3)
+  m <- GARCHModel$new()
+  suppressWarnings(m$fit(d))
+
+  # Contract: on non-convergence / degenerate fit the model is not fitted and
+  # abnormal returns degrade to NA -- never a fabricated finite number. is.na()
+  # invariant, no numeric tolerance.
+  expect_false(isTRUE(m$is_fitted))
+  ar <- suppressWarnings(m$abnormal_returns(d))
+  expect_true(all(is.na(ar$abnormal_returns[ar$event_window == 1])))
+})
+
+test_that("DCC-GARCH non-finite covariance -> is_fitted FALSE + NA (contract lock)", {
+  skip_if_not_installed("rugarch")
+  skip_if_not_installed("rmgarch")
+
+  d <- create_degenerate_model_data_insufficient(n_valid = 3)
+  m <- DCCGARCHModel$new()
+  suppressWarnings(m$fit(d))
+
+  expect_false(isTRUE(m$is_fitted))
+  ar <- suppressWarnings(m$abnormal_returns(d))
+  expect_true(all(is.na(ar$abnormal_returns[ar$event_window == 1])))
+})
