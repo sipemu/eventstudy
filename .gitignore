@@ -8,3 +8,5 @@ EventStudy.Rcheck/
 inst/rmarkdown/templates/event_study_report/skeleton/*.log
 # built R source tarballs (never version these; the package ships via CRAN)
 *.tar.gz
+# local scratch workspace (GSD tracer notes, ad-hoc experiments)
+scratch/
