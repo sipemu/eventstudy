@@ -182,7 +182,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 23. API & Message Polish | v0.65.0 | 3/3 | Complete | 2026-09-09 |
 | 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
 | 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
-| 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | In Progress|  |
+| 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 0/TBD | Not started | - |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 0/TBD | Not started | - |
 | 29. Install-Tested CI | v0.66.0 | 0/TBD | Not started | - |
