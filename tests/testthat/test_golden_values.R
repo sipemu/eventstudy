@@ -416,3 +416,128 @@ test_that("DCC-GARCH model abnormal return is the time-varying-beta residual ide
     tolerance = 1e-10
   )
 })
+
+# --------------------------------------------------------------------------
+# Single-event and cross-sectional test statistics (Task 4).
+# --------------------------------------------------------------------------
+
+test_that("Cross-sectional AAR/CAAR t matches the closed form (Brown-Warner 1985)", {
+  # Provenance: closed-form on golden_multi_event_fixture (3 Market-Model events,
+  #   m = 8, L = 3). Per event day the abnormal returns across events give
+  #   aar = mean(AR), sd_ar = sd(AR) (sample SD, N - 1), and the cross-sectional t
+  #   is aar_t = sqrt(N) * aar / sd_ar; the cumulative version uses per-event CARs:
+  #   caar = mean(CAR), sd_caar = sd(CAR), caar_t = sqrt(N) * caar / sd_caar.
+  #   Reproduced in data-raw/derive-golden-values.R. This is the cross-sectional
+  #   t-test of Brown & Warner (1985), distributed t_{N-1}.
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd,
+  #   Cross-Sectional t-test): aar_t = sqrt(N) * aar / sd(AR); caar_t =
+  #   sqrt(N) * caar / sd(CAR); N = number of valid events; sd is the sample SD
+  #   (denominator N - 1); distributed t_{N-1}; two-sided by default.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent closed-form cross-sectional computation.
+  fx <- golden_multi_event_fixture()
+  res <- CSectTTest$new()$compute(fx$data, NULL)
+
+  expect_equal(res$n_events, c(3L, 3L, 3L))
+  expect_equal(
+    res$aar,
+    c(0.017858427448395411, -0.003055141803282022, 0.012352491200872388),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$aar_t,
+    c(12.785674729349529, -0.93664440956979689, 5.8589693453114027),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$caar,
+    c(0.017858427448395411, 0.014803285645113389, 0.027155776845985774),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$caar_t,
+    c(12.785674729349529, 3.3332365393903789, 4.1627875088073241),
+    tolerance = 1e-10
+  )
+})
+
+test_that("Patell standardized-residual Z matches the closed form (Patell 1976)", {
+  # Provenance: closed-form on golden_multi_event_fixture. Each event's abnormal
+  #   returns are standardized by its forecast-error-corrected sigma,
+  #   SAR = AR / fec_sigma; the Patell denominator is Q_total = sqrt(sum Q_i) with
+  #   Q_i = (m - k) / (m - k - 2) (here m = 8, k = 2 -> Q_i = 6/4 = 1.5); the AAR
+  #   Z is aar_z = sum(SAR) / Q_total. The cumulative version standardizes the
+  #   per-event cumulative SAR by sqrt(n * Q_i) and averages: caar_z =
+  #   (1/sqrt(N)) * sum(cumsum(SAR) / sqrt(n * Q_i)). Reproduced in
+  #   data-raw/derive-golden-values.R. Patell (1976) standardized-residual test.
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, Patell
+  #   Z-test): SAR = AR / forecast-error-corrected sigma; Q_i = (m - k)/(m - k - 2);
+  #   Q_total = sqrt(sum Q_i); aar_z = sum(SAR)/Q_total; approximately N(0, 1);
+  #   N >= 2 guard (aar_z / caar_z are NA for a single valid event); two-sided.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent closed-form Patell computation.
+  fx <- golden_multi_event_fixture()
+  res <- PatellZTest$new()$compute(fx$data, fx$model)
+
+  expect_equal(
+    res$aar_z,
+    c(17.404798533168357, -3.239085545200092, 12.231088522816789),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$caar_z,
+    c(17.404798533168361, 10.016671714134711, 15.240200457996872),
+    tolerance = 1e-10
+  )
+})
+
+test_that("Patell Z returns NA for a single-event group (N >= 2 guard, STATS-04)", {
+  # Provenance: documented convention, not a published table. The Patell
+  #   approximation requires N >= 2 for the cross-event variance to be estimable;
+  #   with a single valid event aar_z / caar_z are statistically invalid, so the
+  #   package returns NA rather than a finite-but-wrong number. This pins that
+  #   guard (see vignettes/statistical-conventions.Rmd, Patell Z-test).
+  # Tolerance: exact (NA identity) -- no numeric tolerance needed.
+  fx <- golden_multi_event_fixture()
+  one <- list(
+    data  = fx$data[fx$data$event_id == "E1", ],
+    model = fx$model[fx$model$event_id == "E1", ]
+  )
+  res <- PatellZTest$new()$compute(one$data, one$model)
+  expect_true(all(is.na(res$aar_z)))
+  expect_true(all(is.na(res$caar_z)))
+})
+
+test_that("BMP standardized cross-sectional t matches the closed form (Boehmer-Musumeci-Poulsen 1991)", {
+  # Provenance: closed-form on golden_multi_event_fixture. Each event's abnormal
+  #   returns are standardized by its MODEL sigma (not the FEC sigma),
+  #   SAR = AR / sigma; the BMP statistic is the cross-sectional t of the SARs:
+  #   bmp_t = sqrt(N) * mean(SAR) / sd(SAR) (sample SD, N - 1). The cumulative
+  #   version uses per-event cumulative SAR: cbmp_t = sqrt(N) * mean(cumsum(SAR)) /
+  #   sd(cumsum(SAR)). Reproduced in data-raw/derive-golden-values.R.
+  #   Boehmer, Musumeci & Poulsen (1991) standardized cross-sectional test,
+  #   robust to event-induced variance.
+  # Assumed conventions (see vignettes/statistical-conventions.Rmd, BMP test):
+  #   SAR = AR / model sigma; bmp_t = sqrt(N) * mean(SAR) / sd(SAR); distributed
+  #   approximately t_{N-1}; two-sided by default.
+  # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
+  #   pipeline and an independent closed-form BMP computation.
+  fx <- golden_multi_event_fixture()
+  res <- BMPTest$new()$compute(fx$data, fx$model)
+
+  expect_equal(
+    res$mean_sar,
+    c(13.478448984553861, -2.4691314518574581, 9.2773617814074072),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$bmp_t,
+    c(9.262881651878164, -0.99419205506945918, 5.6244379647718095),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    res$cbmp_t,
+    c(9.262881651878164, 3.431336898228547, 4.2274213480688871),
+    tolerance = 1e-10
+  )
+})

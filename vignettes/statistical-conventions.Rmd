@@ -384,19 +384,99 @@ two-sided by default. *Citation:* MacKinlay (1997).
 
 ### BHAR t-test (BHARTTest)
 
-*To be filled by Task 4.*
+The single-event buy-and-hold abnormal-return t-test. Documented above with the
+BHAR Model, since the model and its t-test share the same compounded definition
+and `sigma * sqrt(n)` scaling. In its general form the statistic is
+`bhar_t = BHAR / (sigma * sqrt(n))`, where `BHAR = cumprod(1 + firm) -
+cumprod(1 + index)` over the event window, `sigma = sd(firm - index)` over the
+estimation window, and `n` is the day index within the event window. It returns
+NA (never Inf/NaN) when `sigma == 0`. Two-sided by default. *Citation:* Barber &
+Lyon (1997); Lyon, Barber & Tsai (1999).
 
 ### Cross-Sectional t-test (CSectTTest)
 
-*To be filled by Task 4.*
+The cross-sectional t-test evaluates, at each relative event day, whether the
+average abnormal return across events is zero, using the cross-event dispersion
+of abnormal returns as the standard error. It is the workhorse parametric test
+of Brown & Warner (1985).
+
+| Convention | Choice | Note |
+|---|---|---|
+| Point statistic | `aar_t = sqrt(N) * aar / sd(AR)` | `aar` = mean AR across events; `sd(AR)` = cross-event sample SD (denominator `N - 1`). |
+| Cumulative statistic | `caar_t = sqrt(N) * caar / sd(CAR)` | `caar` = mean of per-event cumulative ARs; `sd(CAR)` = cross-event sample SD of the per-event CARs. |
+| Sample size | `N` = number of valid (non-NA) events at that day | NA abnormal returns are excluded from both the mean and the SD. |
+| Distribution | Student's t with `N - 1` degrees of freedom | -- |
+| Standardization | None -- raw abnormal returns | Unlike Patell/BMP, ARs are not divided by a per-event sigma; the cross-event SD is the only scale. |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The implementation computes
+`sqrt(n_valid_events) * aar / sd(AR)` for AAR and `sqrt(n_valid_events) * caar /
+sd(CAR)` for CAAR, with the cross-event sample SD, matching Brown & Warner
+(1985). Pinned in `test_golden_values.R` against an independent closed-form
+cross-sectional computation on a fixed three-event fixture at absolute tolerance
+`1e-10`.
+
+*Citation:* Brown, S. J., & Warner, J. B. (1985). Using daily stock returns: The
+case of event studies. *Journal of Financial Economics*, 14(1), 3--31.
 
 ### Patell Z-test (PatellZTest)
 
-*To be filled by Task 4.*
+The Patell (standardized-residual) test standardizes each event's abnormal
+return by its own forecast-error-corrected standard deviation before aggregating,
+which accounts for the fact that event-window prediction errors have larger
+variance than estimation-window residuals. The aggregate is approximately
+standard normal.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Standardization | `SAR = AR / forecast-error-corrected sigma` | Uses the per-event, per-day FEC sigma, not the raw model sigma (this is the defining feature vs. BMP). |
+| Patell denominator | `Q_total = sqrt(sum_i Q_i)`, `Q_i = (m - k) / (m - k - 2)` | `m` = estimation observations for event `i`, `k` = estimated parameters (2 for the Market Model). `Q_i` inflates the variance of the standardized sum for the estimation-error in each sigma. |
+| Q_i fallback | `Q_i = 1` when `m <= k + 2` | Insufficient observations for the adjustment; avoids a negative/undefined denominator. |
+| AAR statistic | `aar_z = sum_i SAR_i / Q_total` | Sum (not mean) of standardized abnormal returns over the Patell denominator. |
+| CAAR statistic | `caar_z = (1 / sqrt(N)) * sum_i (cumsum(SAR_i) / sqrt(n * Q_i))` | Per-event cumulative SAR scaled by `sqrt(n * Q_i)` where `n` is the day count, then averaged. |
+| Degenerate-event handling | Events with all-NA FEC sigma are excluded from `Q_total` (WR-01) | Prevents a `Q_i = 1` fallback from a degenerate event inflating the denominator and deflating valid-event z-scores. |
+| N >= 2 guard | `aar_z` / `caar_z` are NA when `n_valid_events <= 1` (STATS-04) | A single event gives a statistically invalid z; NA is returned rather than a finite-but-wrong number. |
+| Distribution | Approximately `N(0, 1)` | -- |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The standardization by the
+forecast-error-corrected sigma, the `Q_i = (m - k)/(m - k - 2)` denominator, the
+`Q_total = sqrt(sum Q_i)` aggregation, and the `N >= 2` guard all match Patell
+(1976). Pinned in `test_golden_values.R` against an independent closed-form Patell
+computation on a fixed three-event fixture (each event `Q_i = 6/4 = 1.5`) at
+absolute tolerance `1e-10`, plus a guard test confirming NA for a single-event
+group.
+
+*Citation:* Patell, J. M. (1976). Corporate forecasts of earnings per share and
+stock price behavior: Empirical tests. *Journal of Accounting Research*, 14(2),
+246--276.
 
 ### BMP test (BMPTest)
 
-*To be filled by Task 4.*
+The Boehmer, Musumeci & Poulsen (1991) standardized cross-sectional test
+combines Patell-style standardization with a cross-sectional variance estimate,
+making it robust to event-induced increases in return variance (which the plain
+Patell test does not accommodate). It standardizes abnormal returns by the model
+sigma, then applies a cross-sectional t-test to the standardized values.
+
+| Convention | Choice | Note |
+|---|---|---|
+| Standardization | `SAR = AR / model sigma` | Uses the per-event MODEL sigma (contrast: Patell uses the forecast-error-corrected sigma). |
+| Point statistic | `bmp_t = sqrt(N) * mean(SAR) / sd(SAR)` | Cross-sectional t of the standardized abnormal returns; `sd(SAR)` is the cross-event sample SD (this cross-sectional SD is what makes BMP robust to event-induced variance). |
+| Cumulative statistic | `cbmp_t = sqrt(N) * mean(cumsum(SAR)) / sd(cumsum(SAR))` | Same cross-sectional t applied to per-event cumulative SARs. |
+| Join key | `event_id` (one sigma per event) | A `firm_symbol` join would be many-to-many when a firm recurs across events. |
+| Distribution | Approximately `t_{N-1}` | -- |
+| p-value sidedness | Two-sided by default | -- |
+
+**Audit result: verified, no change.** The standardization by model sigma and
+the cross-sectional t `sqrt(N) * mean(SAR) / sd(SAR)` match Boehmer, Musumeci &
+Poulsen (1991). Pinned in `test_golden_values.R` against an independent
+closed-form BMP computation on a fixed three-event fixture at absolute tolerance
+`1e-10`.
+
+*Citation:* Boehmer, E., Musumeci, J., & Poulsen, A. B. (1991). Event-study
+methodology under conditions of event-induced variance. *Journal of Financial
+Economics*, 30(2), 253--272.
 
 ### Sign test (SignTest)
 
@@ -442,6 +522,11 @@ remove it is deferred (see the audit log).
 | Rolling-Window Model | verified, no change | Fama-MacBeth (1973); MacKinlay (1997) |
 | GARCH Model | verified, no change (identity-pinned, skip-guarded on rugarch) | Engle (1982); Bollerslev (1986) |
 | DCC-GARCH Model | verified, no change (identity-pinned, skip-guarded on rmgarch) | Bollerslev (1990); Engle (2002) |
+| AR / CAR t-tests (ARTTest, CARTTest) | verified, no change | MacKinlay (1997) |
+| BHAR t-test (BHARTTest) | verified, no change | Barber-Lyon (1997); Lyon-Barber-Tsai (1999) |
+| Cross-Sectional t-test (CSectTTest) | verified, no change | Brown-Warner (1985) |
+| Patell Z-test (PatellZTest) | verified, no change (FEC sigma, `Q_i = (m-k)/(m-k-2)`, N >= 2 guard) | Patell (1976) |
+| BMP test (BMPTest) | verified, no change | Boehmer-Musumeci-Poulsen (1991) |
 | PermutationTest | unwired stub -- empty `compute()`, not on pipeline path; deferred | -- |
 
 *Later tasks append their rows here.*

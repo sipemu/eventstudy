@@ -196,6 +196,79 @@ message(paste0(
 ))
 
 # --------------------------------------------------------------------------
+# 1e. Cross-sectional test statistics -- closed form, no estudy2 (Task 4).
+#     Three Market-Model events (m = 8, L = 3, k = 2). CSectT (Brown-Warner
+#     1985), Patell Z (Patell 1976), BMP (Boehmer-Musumeci-Poulsen 1991).
+# --------------------------------------------------------------------------
+message("\n-- Cross-sectional statistics (CSectT / Patell / BMP) --")
+me_spec <- list(
+  E1 = list(est_index = c(-0.02, -0.01, 0.00, 0.01, 0.02, 0.03, -0.015, 0.005),
+            est_resid = c(0.001, -0.001, 0.002, -0.002, 0.0015, -0.0015, 0.0005, -0.0005),
+            alpha = 0.004, beta = 1.2,
+            evt_index = c(0.015, -0.005, 0.010), evt_firm = c(0.040, 0.000, 0.030)),
+  E2 = list(est_index = c(-0.018, -0.008, 0.002, 0.012, 0.022, 0.028, -0.012, 0.008),
+            est_resid = c(0.0012, -0.0008, 0.0018, -0.0016, 0.0010, -0.0012, 0.0006, -0.0010),
+            alpha = 0.003, beta = 1.0,
+            evt_index = c(0.012, -0.004, 0.009), evt_firm = c(0.030, -0.010, 0.020)),
+  E3 = list(est_index = c(-0.025, -0.012, 0.001, 0.010, 0.020, 0.030, -0.010, 0.006),
+            est_resid = c(0.0008, -0.0012, 0.0016, -0.0014, 0.0012, -0.0010, 0.0004, -0.0004),
+            alpha = 0.005, beta = 1.4,
+            evt_index = c(0.018, -0.006, 0.011), evt_firm = c(0.050, -0.005, 0.035))
+)
+me_k <- 2L
+me_fit <- function(s) {
+  est_firm <- s$alpha + s$beta * s$est_index + s$est_resid
+  fit <- lm(est_firm ~ s$est_index)
+  a <- unname(coef(fit)[1]); b <- unname(coef(fit)[2])
+  sigma <- summary(fit)$sigma                 # df = m - 2 = 6
+  ar <- s$evt_firm - (a + b * s$evt_index)
+  m <- length(est_firm)
+  mean_rm <- mean(s$est_index)
+  ss_mkt <- sum((s$est_index - mean_rm)^2)
+  fec <- sigma * sqrt(1 + 1 / m + (s$evt_index - mean_rm)^2 / ss_mkt)
+  list(sigma = sigma, ar = ar, fec = fec, m = m)
+}
+me_fits <- lapply(me_spec, me_fit)
+N <- length(me_fits)
+
+# CSectT (Brown-Warner 1985)
+ar_by_day <- sapply(me_fits, function(f) f$ar)          # day x event
+aar   <- rowMeans(ar_by_day)
+sd_ar <- apply(ar_by_day, 1, sd)
+aar_t <- sqrt(N) * aar / sd_ar
+car_by_day <- apply(ar_by_day, 2, cumsum)
+caar   <- rowMeans(car_by_day)
+sd_caar <- apply(car_by_day, 1, sd)
+caar_t <- sqrt(N) * caar / sd_caar
+cat("CSectT aar   =", paste(sprintf("%.17g", aar),   collapse = ", "), "\n")
+cat("CSectT aar_t =", paste(sprintf("%.17g", aar_t), collapse = ", "), "\n")
+cat("CSectT caar  =", paste(sprintf("%.17g", caar),  collapse = ", "), "\n")
+cat("CSectT caar_t=", paste(sprintf("%.17g", caar_t),collapse = ", "), "\n")
+
+# Patell (1976): SAR = AR / fec_sigma; Q_i = (m-k)/(m-k-2); Q_total = sqrt(sum Q_i)
+sar_p <- sapply(seq_along(me_fits), function(j) me_fits[[j]]$ar / me_fits[[j]]$fec)
+Q_i <- sapply(me_fits, function(f) (f$m - me_k) / (f$m - me_k - 2))
+Q_total <- sqrt(sum(Q_i))
+aar_z <- rowSums(sar_p) / Q_total
+csar_p <- sapply(seq_along(me_fits), function(j) {
+  s <- cumsum(sar_p[, j]); n <- seq_along(s); s / sqrt(n * Q_i[j])
+})
+caar_z <- (1 / sqrt(N)) * rowSums(csar_p)
+cat("Patell Q_i   =", paste(sprintf("%.17g", Q_i), collapse = ", "), "\n")
+cat("Patell aar_z =", paste(sprintf("%.17g", aar_z),  collapse = ", "), "\n")
+cat("Patell caar_z=", paste(sprintf("%.17g", caar_z), collapse = ", "), "\n")
+
+# BMP (1991): SAR = AR / model sigma; bmp_t = sqrt(N)*mean(SAR)/sd(SAR)
+sar_b <- sapply(seq_along(me_fits), function(j) me_fits[[j]]$ar / me_fits[[j]]$sigma)
+mean_sar <- rowMeans(sar_b)
+bmp_t <- sqrt(N) * mean_sar / apply(sar_b, 1, sd)
+csar_b <- apply(sar_b, 2, cumsum)
+cbmp_t <- sqrt(N) * rowMeans(csar_b) / apply(csar_b, 1, sd)
+cat("BMP mean_sar =", paste(sprintf("%.17g", mean_sar), collapse = ", "), "\n")
+cat("BMP bmp_t    =", paste(sprintf("%.17g", bmp_t),    collapse = ", "), "\n")
+cat("BMP cbmp_t   =", paste(sprintf("%.17g", cbmp_t),   collapse = ", "), "\n")
+
+# --------------------------------------------------------------------------
 # 2. Optional estudy2 / eventstudies cross-checks (best-effort only).
 # --------------------------------------------------------------------------
 if (requireNamespace("estudy2", quietly = TRUE) ||

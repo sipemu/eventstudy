@@ -273,3 +273,85 @@ golden_rolling_window_fixture <- function() {
     event_date        = c(rep(0, n_est), 1, rep(0, length(evt_firm) - 1))
   )
 }
+
+#' Deterministic MULTI-EVENT fixture for the cross-sectional statistics (Task 4).
+#'
+#' Three events (E1, E2, E3), each fit by its own Market Model over an m = 8
+#' estimation window, with an L = 3 event window. Every index/firm return is a
+#' fixed literal (no set.seed), so each per-event OLS fit -- and therefore the
+#' cross-sectional AAR/CAAR t (CSectTTest), the standardized-residual Patell Z
+#' (PatellZTest), and the standardized cross-sectional BMP t (BMPTest) -- reduces
+#' to an exact closed-form constant. Each event's firm return is built as
+#' alpha + beta * index + a fixed residual pattern, so alpha/beta are clean and
+#' the residual sigma is small but positive (df = m - 2 = 6, k = 2).
+#'
+#' The builder returns BOTH the abnormal-return data_tbl (produced by the real
+#' MarketModel$abnormal_returns() path, keyed by event_id) AND the per-event
+#' model tibble (event_id, firm_symbol, model) that PatellZTest / BMPTest consume.
+#' Feeding these to the production compute() methods locks the real formulas, not
+#' a re-implementation. Constants are pinned in test_golden_values.R from the
+#' independent closed-form derivation in data-raw/derive-golden-values.R.
+#'
+#' @return A list with `data` (abnormal-return tibble across all three events)
+#'   and `model` (per-event model tibble) for CSectTTest / PatellZTest / BMPTest.
+golden_multi_event_fixture <- function() {
+  # Per-event specification: fixed estimation index + residual pattern, clean
+  # alpha/beta, and a fixed event window. m = 8, L = 3 for every event.
+  spec <- list(
+    E1 = list(
+      est_index = c(-0.02, -0.01, 0.00, 0.01, 0.02, 0.03, -0.015, 0.005),
+      est_resid = c(0.001, -0.001, 0.002, -0.002, 0.0015, -0.0015, 0.0005, -0.0005),
+      alpha = 0.004, beta = 1.2,
+      evt_index = c(0.015, -0.005, 0.010), evt_firm = c(0.040, 0.000, 0.030)
+    ),
+    E2 = list(
+      est_index = c(-0.018, -0.008, 0.002, 0.012, 0.022, 0.028, -0.012, 0.008),
+      est_resid = c(0.0012, -0.0008, 0.0018, -0.0016, 0.0010, -0.0012, 0.0006, -0.0010),
+      alpha = 0.003, beta = 1.0,
+      evt_index = c(0.012, -0.004, 0.009), evt_firm = c(0.030, -0.010, 0.020)
+    ),
+    E3 = list(
+      est_index = c(-0.025, -0.012, 0.001, 0.010, 0.020, 0.030, -0.010, 0.006),
+      est_resid = c(0.0008, -0.0012, 0.0016, -0.0014, 0.0012, -0.0010, 0.0004, -0.0004),
+      alpha = 0.005, beta = 1.4,
+      evt_index = c(0.018, -0.006, 0.011), evt_firm = c(0.050, -0.005, 0.035)
+    )
+  )
+  n_est <- 8L
+  n_ev  <- 3L
+
+  base <- do.call(rbind, lapply(names(spec), function(nm) {
+    s <- spec[[nm]]
+    est_firm <- s$alpha + s$beta * s$est_index + s$est_resid
+    tibble::tibble(
+      event_id          = nm,
+      firm_symbol       = sub("E", "F", nm),
+      relative_index    = c(seq(-n_est, -1), seq(0, n_ev - 1)),
+      index_returns     = c(s$est_index, s$evt_index),
+      firm_returns      = c(est_firm, s$evt_firm),
+      estimation_window = c(rep(1, n_est), rep(0, n_ev)),
+      event_window      = c(rep(0, n_est), rep(1, n_ev)),
+      event_date        = c(rep(0, n_est), 1, rep(0, n_ev - 1))
+    )
+  }))
+
+  # Per-event model tibble (one MarketModel fit per event), keyed by event_id --
+  # the exact shape PatellZTest / BMPTest expect.
+  model_tbl <- tibble::tibble(
+    event_id    = names(spec),
+    firm_symbol = sub("E", "F", names(spec)),
+    model = lapply(names(spec), function(nm) {
+      mm <- MarketModel$new()
+      mm$fit(base[base$event_id == nm, ])
+      mm
+    })
+  )
+
+  # Attach abnormal_returns via the real per-event path (pipeline behavior).
+  data_ar <- do.call(rbind, lapply(names(spec), function(nm) {
+    mm <- model_tbl$model[[which(model_tbl$event_id == nm)]]
+    mm$abnormal_returns(base[base$event_id == nm, ])
+  }))
+
+  list(data = data_ar, model = model_tbl)
+}
