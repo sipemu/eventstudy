@@ -215,6 +215,36 @@ MarketModel <- R6Class("MarketModel",
                              return(invisible(self))
                            }
 
+                           # --- Contract guard: ill-conditioned (near-collinear) design ---
+                           # The zero-variance guard above catches an exactly-constant
+                           # index; a finite-variance-but-severely-ill-conditioned design
+                           # (e.g. an index nearly perfectly collinear with the intercept,
+                           # so the reciprocal condition number of X'X is tiny) still
+                           # yields an unstable OLS fit rather than a clean contract
+                           # response. Detect it via rcond() of the model-matrix
+                           # cross-product and route through the same contract path.
+                           rc <- .design_rcond(self$formula, estimation_tbl)
+                           # Threshold: sqrt(.Machine$double.eps) ~ 1.49e-8. Below this
+                           # the design is numerically rank-deficient at working double
+                           # precision (loss of ~half the significant digits in the
+                           # normal equations), so the fit is untrustworthy. Chosen to
+                           # match the conventional half-precision conditioning cutoff;
+                           # a well-conditioned design has rcond ~ O(1e-1..1e-3) and is
+                           # never affected (SC5: valid-input behavior unchanged).
+                           if (is.finite(rc) && rc < sqrt(.Machine$double.eps)) {
+                             .handle_degenerate(
+                               mode        = mode,
+                               condition   = paste0("ill-conditioned design (rcond=",
+                                                    format(rc, scientific = TRUE, digits = 3), ")"),
+                               component   = self$model_name,
+                               event_id    = self$event_id,
+                               firm_symbol = self$firm_symbol,
+                               private_env = private
+                             )
+                             private$.is_fitted <- FALSE
+                             return(invisible(self))
+                           }
+
                            # --- Safe OLS execution ---
                            safe_mm <- purrr::safely(.f = .estimate_mm_model)
                            res <- safe_mm(self$formula, estimation_tbl)
@@ -1553,4 +1583,28 @@ VolatilityModel <- R6Class("VolatilityModel",
 
 .estimate_mm_model <- function(formula, data) {
   lm(formula, data=data)
+}
+
+#' Reciprocal condition number of an OLS design's normal-equations matrix
+#'
+#' Builds the same model matrix \code{lm()} would use for \code{formula} on the
+#' finite rows of \code{data} and returns \code{rcond(crossprod(X))}, the
+#' reciprocal condition number of X'X. A value near 1 is well-conditioned; a
+#' value approaching 0 signals near-collinearity. Returns \code{NA_real_} when
+#' the design cannot be formed (too few finite rows, non-finite entries), which
+#' the caller treats as "not ill-conditioned" (the pre-existing insufficient-obs
+#' guard has already fired for that case).
+#'
+#' @noRd
+.design_rcond <- function(formula, data) {
+  mf <- tryCatch(
+    stats::model.frame(formula, data = data, na.action = stats::na.omit),
+    error = function(e) NULL
+  )
+  if (is.null(mf) || nrow(mf) < 2L) return(NA_real_)
+  x <- tryCatch(stats::model.matrix(formula, mf), error = function(e) NULL)
+  if (is.null(x) || !all(is.finite(x))) return(NA_real_)
+  xtx <- crossprod(x)
+  # rcond() uses the 1-norm estimate; matches lm()'s tol-based rank test scale.
+  tryCatch(rcond(xtx), error = function(e) NA_real_)
 }
