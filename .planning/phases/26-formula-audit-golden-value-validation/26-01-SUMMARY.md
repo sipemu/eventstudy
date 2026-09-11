@@ -152,7 +152,7 @@ real package pipeline to <1e-14 / ~17 digits). No `R/` source changed for these.
 3. `0b9687c` — specialized/time-varying return models
 4. `150faa3` — cross-sectional statistics (CSectT/Patell/BMP)
 5. `d777113` — nonparametric/correlation statistics (+ 2 bug fixes)
-6. `<gate-commit>` — Task 6 gate + this SUMMARY (`docs(26-01)`)
+6. `efa8472` — Task 6 gate + this SUMMARY (`docs(26-01)`)
 
 ## Threat Flags
 

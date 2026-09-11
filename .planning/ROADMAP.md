@@ -105,7 +105,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   4. Each golden-value test annotates the exact conventions it assumes and uses an explicit tolerance — relative for cross-implementation comparisons, tight absolute for algebraic identities.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
 
-**Plans**: 1 plan
+**Plans**: 1/1 plans executed
 
 - [x] 26-01-PLAN.md — Audit every return model (13+) and test statistic (8+) against its published formula, document conventions in a new CRAN-shipped `statistical-conventions.Rmd` vignette, fix genuine errors (fix precedes pin, locked by regression test), and pin key statistics to published/closed-form golden values (tracer-first: Market Model AR/CAR t, then the full matrix)
 
@@ -181,7 +181,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 23. API & Message Polish | v0.65.0 | 3/3 | Complete | 2026-09-09 |
 | 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
 | 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
-| 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
+| 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | In Progress|  |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 0/TBD | Not started | - |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 0/TBD | Not started | - |
 | 29. Install-Tested CI | v0.66.0 | 0/TBD | Not started | - |
