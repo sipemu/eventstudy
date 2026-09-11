@@ -157,6 +157,17 @@ calculate_statistics = function(task, parameter_set) {
 
     task$data_tbl = cbind(task$data_tbl, stats_tbl) %>%
       dplyr::select(-statistics)
+
+    # Shape contract hook (default-off; no-op unless the option is set)
+    if (.resolve_shape_contract_mode()) {
+      stat_names_se <- names(stats_tbl)
+      for (sn in stat_names_se) {
+        stat_col <- task$data_tbl[[sn]]
+        if (!is.null(stat_col) && length(stat_col) > 0) {
+          .check_single_event_shape(stat_col[[1]], sn)
+        }
+      }
+    }
   }
 
   # Multiple events test statistic calculation
@@ -186,6 +197,17 @@ calculate_statistics = function(task, parameter_set) {
       as_tibble() -> stats_tbl
     task$aar_caar_tbl = cbind(task$aar_caar_tbl, stats_tbl) %>%
       dplyr::select(-statistics)
+
+    # Shape contract hook for multi-event results (default-off)
+    if (.resolve_shape_contract_mode()) {
+      stat_names_me <- names(stats_tbl)
+      for (sn in stat_names_me) {
+        stat_col <- task$aar_caar_tbl[[sn]]
+        if (!is.null(stat_col) && length(stat_col) > 0) {
+          .check_aar_caar_shape(stat_col[[1]], sn)
+        }
+      }
+    }
   }
 
   task
