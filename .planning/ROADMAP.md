@@ -50,6 +50,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 **Milestone Goal:** Make results *provably correct* and the public API *stable/locked* — backed by a durable regression net and install-tested CI — then use that hardened base to get EventStudy back onto CRAN (archived 2024-04-20). Ship-when-good minor; not a 1.0 gate.
 
 **Hard invariants (carried into every phase):**
+
 - Behavior on valid inputs must not change — this is correctness/robustness/API-lock plus a submission gate, not a redesign.
 - The existing ~2359-test suite stays green throughout.
 - New tooling (`lifecycle`, `waldo`, `patrick`, `hedgehog`) is Suggests-only, `requireNamespace()`-guarded — no new hard `Imports`.
@@ -80,13 +81,16 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 **Depends on**: Nothing (first phase of milestone)
 **Requirements**: HYG-01, HYG-02, HYG-03, HYG-04
 **Success Criteria** (what must be TRUE):
+
   1. `R CMD check --as-cran` emits no non-ASCII WARNING — every non-ASCII byte in `R/*.R` is a `\uXXXX` escape (or removed) — and the CI non-ASCII baseline guard is refreshed to match.
   2. The undefined-globals NOTE is gone: `median` and `tail` in `R/es_diagnostics.R` are namespace-qualified (or added to `importFrom`/`globalVariables`).
   3. No non-standard-file NOTE appears: the stale `EventStudy_0.62.0.tar.gz` is removed from the repo and a `tar.gz` ignore rule prevents recurrence.
   4. Every optional-package call site (explicitly `gridExtra` in `R/plotting.R`) is `requireNamespace()`-guarded and declared in Suggests; any unguarded/undeclared use is fixed.
   5. The full ~2359-test suite stays green and behavior on valid inputs is unchanged.
-**Plans**: 1 plan
-- [ ] 25-01-PLAN.md — Clear the 3 CRAN findings (non-ASCII escape sweep + baseline refresh, median/tail namespace-qualify, stale-tarball removal + ignore rules) and audit optional-package guards; verified against a clean `--as-cran` gate
+
+**Plans**: 1/1 plans executed
+
+- [x] 25-01-PLAN.md — Clear the 3 CRAN findings (non-ASCII escape sweep + baseline refresh, median/tail namespace-qualify, stale-tarball removal + ignore rules) and audit optional-package guards; verified against a clean `--as-cran` gate
 
 ### Phase 26: Formula Audit & Golden-Value Validation
 
@@ -94,11 +98,13 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 **Depends on**: Phase 25 (needs the clean check baseline)
 **Requirements**: CORR-01, CORR-02
 **Success Criteria** (what must be TRUE):
+
   1. Each of the 13+ return models and 8+ test statistics is audited against its published formula, and its convention choices (return type, forecast-error correction, degrees of freedom, p-value sidedness, Patell denominator) are documented in a durable reference.
   2. Any discrepancy found in the audit is fixed and locked with a regression test (the fix precedes the golden value being pinned).
   3. Golden-value regression tests pin the key statistics against reference values (published-table numbers and/or `estudy2`-derived constants), with `estudy2`/`eventstudies` used only as source-level derivation tools — not added to DESCRIPTION.
   4. Each golden-value test annotates the exact conventions it assumes and uses an explicit tolerance — relative for cross-implementation comparisons, tight absolute for algebraic identities.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
+
 **Plans**: TBD
 
 ### Phase 27: Property & Numerical-Stability Tests
@@ -107,11 +113,13 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 **Depends on**: Phase 26 (invariants and stability tests build on the audited, golden-pinned base)
 **Requirements**: CORR-03, CORR-04
 **Success Criteria** (what must be TRUE):
+
   1. Property-based / invariant tests assert cross-cutting identities — `CAR == cumsum(AR)`, cross-method consistency, boundary/degenerate windows — across the model and statistic matrix.
   2. Numerical-stability guards protect precision/overflow/conditioning in the sensitive paths: matrix ops, GARCH convergence, bootstrap, and long-window CAR cumulation.
   3. Every stability test documents its chosen tolerance so results are reproducible across platforms and CI does not flake.
   4. Any new test tooling (`patrick`, `hedgehog`) is Suggests-only and `requireNamespace()`-guarded; no new hard `Imports`.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
+
 **Plans**: TBD
 
 ### Phase 28: API Stabilization & Signature Lock
@@ -120,11 +128,13 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 **Depends on**: Phase 27 (API lock comes after correctness is proven; the signature audit APIS-01 and shape contracts APIS-02 must precede the snapshot APIS-03)
 **Requirements**: APIS-01, APIS-02, APIS-03, APIS-04
 **Success Criteria** (what must be TRUE):
+
   1. A signature-consistency audit reconciles inconsistent argument names/order/defaults across the public API; each outlier is either aligned or scheduled for deprecation with a recorded rationale — and this audit completes *before* the snapshot is captured.
   2. Return-shape contracts lock the column names/types/shapes of pipeline-returned tibbles in a new `R/shape_contracts.R` (sibling to `R/contract.R`), opt-in via an option and default-off, covering both valid and degenerate (`is_fitted = FALSE`) outputs.
   3. A formal deprecation policy + lifecycle is documented and wired (warn, never silently break) via a base `.Deprecated()` / `lifecycle`-Suggests shim, with NEWS discipline.
   4. API snapshot tests capture the full public signature surface (`getNamespaceExports()`, `formals()` per function, registered S3 methods) using structural assertions — not rendered `print()` output — and are install-gated with `skip_if_not_installed("EventStudy")` so an accidental break fails CI.
   5. Behavior on valid inputs is unchanged and the full suite stays green.
+
 **Plans**: TBD
 
 ### Phase 29: Install-Tested CI
@@ -133,10 +143,12 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 **Depends on**: Phase 28 (CI gates the audited, API-locked package)
 **Requirements**: CI-01, CI-02
 **Success Criteria** (what must be TRUE):
+
   1. CI gates on `R CMD check` / `rcmdcheck` against the *installed* package (not `devtools::load_all()`), so install-only divergence bugs fail CI.
   2. At least one CI job runs with `_R_CHECK_FORCE_SUGGESTS_` set to exercise Suggests-present behavior.
   3. `inst/rmarkdown/` templates and examples/vignettes are audited for bare internal calls and default network access, closing the load_all/installed divergence surface.
   4. The install-gated CI passes on the current package with the full suite green.
+
 **Plans**: TBD
 
 ### Phase 30: CRAN Resubmission
@@ -145,11 +157,13 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 **Depends on**: Phase 29 (final gate — depends on all prior phases: hygiene, correctness, API lock, and install-tested CI)
 **Requirements**: CRAN-01, CRAN-02, CRAN-03, CRAN-04, CRAN-05
 **Success Criteria** (what must be TRUE):
+
   1. `R CMD check --as-cran` is clean locally (0 ERRORs, 0 WARNINGs; only explainable NOTEs) with the full suite green.
   2. Multi-platform checks pass — `check_win_devel()` + `check_win_release()` and rhub v2 (and/or macOS) — with results captured.
   3. `cran-comments.md` is rewritten for v0.66.0 with an explicit archival acknowledgment, the exact 2024-04-20 reason, the fixes made, and the platform check results.
   4. Examples/tests/vignettes are CRAN-policy compliant — no network by default, no writing outside tempdir, no gratuitous `\dontrun{}`, example runtimes within policy.
   5. The package is submitted (`devtools::submit_cran()` / webform) and the maintainer email confirmation is completed.
+
 **Risk / Dependency**: The exact 2024-04-20 archival reason is not recorded in any planning artifact and must be retrieved (CRAN archive / maintainer records / package check history) *before* the cover letter (CRAN-03) can be written. This is a within-phase dependency to resolve during planning/execution, not a blocker to roadmap creation.
 **Plans**: TBD
 
@@ -164,7 +178,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 22. Report Aesthetics | v0.65.0 | 1/1 | Complete | 2026-09-09 |
 | 23. API & Message Polish | v0.65.0 | 3/3 | Complete | 2026-09-09 |
 | 24. Docs & Site Polish | v0.65.0 | 2/2 | Complete | 2026-09-09 |
-| 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 0/1 | Not started | - |
+| 25. CRAN Hygiene & Clean Check Baseline | v0.66.0 | 1/1 | In Progress|  |
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 0/TBD | Not started | - |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 0/TBD | Not started | - |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 0/TBD | Not started | - |

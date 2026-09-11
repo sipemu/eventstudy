@@ -1,8 +1,7 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v0.65.0 — Polish",
-  "milestone_status": "complete",
+  "milestone": "v0.66.0",
   "phases": [
     {
       "number": "20",
@@ -31,9 +30,9 @@
     }
   ],
   "next": {
-    "command": "/gsd-new-milestone",
-    "label": "Start next milestone",
-    "reason": "v0.65.0 shipped — 5/5 phases complete"
+    "command": "/gsd:discuss-phase",
+    "label": "Discuss the first phase",
+    "reason": "Project initialized — plan your first phase"
   },
-  "updated_at": "2026-09-09T08:00:00.000Z"
+  "updated_at": "2026-09-10T19:43:56.007Z"
 }

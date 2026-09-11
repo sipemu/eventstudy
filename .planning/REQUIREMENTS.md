@@ -9,10 +9,10 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### CRAN Hygiene (blocks all downstream check runs — must land first)
 
-- [ ] **HYG-01**: Every non-ASCII byte in `R/*.R` is replaced with a `\uXXXX` escape (or removed), so `R CMD check --as-cran` emits no non-ASCII WARNING; the CI non-ASCII baseline guard is refreshed to match.
-- [ ] **HYG-02**: `median` and `tail` in `R/es_diagnostics.R` are namespace-qualified (or added to `importFrom`/`globalVariables`), eliminating the undefined-globals NOTE.
-- [ ] **HYG-03**: The stale `EventStudy_0.62.0.tar.gz` is removed from the repo and a `tar.gz` ignore rule is added, so no non-standard-file NOTE appears.
-- [ ] **HYG-04**: All optional-package call sites are audited for `requireNamespace()` guarding + Suggests declaration (explicitly `gridExtra` in `R/plotting.R`); any unguarded/undeclared use is fixed.
+- [x] **HYG-01**: Every non-ASCII byte in `R/*.R` is replaced with a `\uXXXX` escape (or removed), so `R CMD check --as-cran` emits no non-ASCII WARNING; the CI non-ASCII baseline guard is refreshed to match.
+- [x] **HYG-02**: `median` and `tail` in `R/es_diagnostics.R` are namespace-qualified (or added to `importFrom`/`globalVariables`), eliminating the undefined-globals NOTE.
+- [x] **HYG-03**: The stale `EventStudy_0.62.0.tar.gz` is removed from the repo and a `tar.gz` ignore rule is added, so no non-standard-file NOTE appears.
+- [x] **HYG-04**: All optional-package call sites are audited for `requireNamespace()` guarding + Suggests declaration (explicitly `gridExtra` in `R/plotting.R`); any unguarded/undeclared use is fixed.
 
 ### Correctness of Results
 
@@ -66,10 +66,10 @@ Explicitly excluded to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HYG-01 | Phase 25 | Pending |
-| HYG-02 | Phase 25 | Pending |
-| HYG-03 | Phase 25 | Pending |
-| HYG-04 | Phase 25 | Pending |
+| HYG-01 | Phase 25 | Complete |
+| HYG-02 | Phase 25 | Complete |
+| HYG-03 | Phase 25 | Complete |
+| HYG-04 | Phase 25 | Complete |
 | CORR-01 | Phase 26 | Pending |
 | CORR-02 | Phase 26 | Pending |
 | CORR-03 | Phase 27 | Pending |
@@ -87,6 +87,7 @@ Explicitly excluded to prevent scope creep.
 | CRAN-05 | Phase 30 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 19 total
 - Mapped to phases: 19 (Phases 25–30)
 - Unmapped: 0 ✓
