@@ -40,6 +40,8 @@
 #' }
 #'
 #' @seealso \code{\link{degenerate-input-contract}}, \code{\link{ParameterSet}}
+#'
+#' @importFrom methods is
 NULL
 
 
