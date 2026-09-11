@@ -5,16 +5,16 @@ milestone_name: Stabilization & CRAN Resubmission
 current_phase: 28
 current_phase_name: API Stabilization & Signature Lock
 status: executing
-stopped_at: Completed 28-01-PLAN.md
-last_updated: "2026-09-11T22:03:55.537Z"
+stopped_at: Completed 28-02-PLAN.md
+last_updated: "2026-09-11T22:17:48.022Z"
 last_activity: 2026-09-11
 last_activity_desc: Phase 28 execution started
-state_head: 4e1b686d80a2dc0273c88fff1b802645eb1e0fac
+state_head: 44b160214aec6e61ce9d470a19d940fbb87efa2b
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 50
 ---
 
@@ -64,6 +64,7 @@ Recent decisions affecting current work:
 - [Phase 27]: Phase 27: CAR overflow guard fires on is.infinite|is.nan ONLY, never plain NA, so it never emits a second contract warning on a legitimately-degenerate all-NA CAR (CONTRACT-04)
 - [Phase 27]: Phase 27: no new dependency — hand-rolled registry-driven parameterized tests in base testthat 3e (patrick/hedgehog stay absent, grep-asserted 0)
 - [Phase 28]: Phase 28 plan 01: chosen tracer outlier was do_sample (plot_stocks) -> sample_symbols; 3 outliers scheduled-for-deprecation with rationale (bootstrap_test.statistic, export_results.which, options namespace); lifecycle stays Suggests-only
+- [Phase 28]: Plan 28-02: tracer over-delivered — multi-event hook + degenerate specs in Task 1; Task 2 zero-delta; unknown stat names silently skipped (additive-only)
 
 ### v0.64.0/v0.65.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -102,8 +103,8 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 
 ## Session Continuity
 
-Last session: 2026-09-11T22:03:50.598Z
-Stopped at: Completed 28-01-PLAN.md
+Last session: 2026-09-11T22:17:33.388Z
+Stopped at: Completed 28-02-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
@@ -117,3 +118,4 @@ Resume file: None
 | Phase 25 P01 | ~2h | 6 tasks | 41 files |
 | Phase 27 P01 | 40min | 6 tasks | 6 files |
 | Phase 28 P01 | 18min | 3 tasks | 8 files |
+| Phase 28 P02 | 10min | 3 tasks | 5 files |
