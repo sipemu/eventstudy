@@ -13,7 +13,7 @@
         {
           "type": "character",
           "attributes": {},
-          "value": ["ARTTest", "AnthropicProvider", "BHARModel", "BHARTTest", "BMPTest", "CARTTest", "CSectTTest", "CalendarTimePortfolioTest", "Carhart4FactorModel", "ComparisonPeriodMeanAdjustedModel", "CustomProvider", "DCCGARCHModel", "EventStudyTask", "FamaFrench3FactorModel", "FamaFrench5FactorModel", "GARCHModel", "GeneralizedSignTest", "IntradayEventStudyTask", "KolariPynnonenTest", "LinearFactorModel", "LogReturn", "MarketAdjustedModel", "MarketModel", "MultiEventStatisticsSet", "OpenAICompatProvider", "PanelEventStudyTask", "ParameterSet", "PatellZTest", "ProviderBase", "RankTest", "RollingWindowModel", "SignTest", "SimpleReturn", "SingleEventStatisticsSet", "StatisticsSetBase", "SyntheticControlTask", "VolatilityModel", "VolumeModel", "adjust_p_values", "bootstrap_test", "calculate_statistics", "car_by_group", "car_quantiles", "cross_sectional_regression", "download_factor_data", "download_risk_free_rate", "download_stock_data", "es_advise", "es_colours", "es_diagnostics", "es_kb", "es_report", "estimate_panel_event_study", "estimate_synthetic_control", "export_results", "fit_model", "flag_robustness", "generate_report", "model_diagnostics", "nonparametric_intraday_test", "plot_car_distribution", "plot_diagnostics", "plot_event_study", "plot_panel_event_study", "plot_stocks", "plot_synthetic_control", "prepare_event_study", "prepare_intraday_event_study", "pretrend_test", "provider", "recommend_stat", "run_event_study", "sc_placebo_test", "simulate_event_study", "theme_eventstudy", "tidy.EventStudyTask", "validate_task"]
+          "value": ["ARTTest", "AnthropicProvider", "BHARModel", "BHARTTest", "BMPTest", "CARTTest", "CSectTTest", "CalendarTimePortfolioTest", "Carhart4FactorModel", "ComparisonPeriodMeanAdjustedModel", "CustomProvider", "DCCGARCHModel", "EventStudyTask", "FamaFrench3FactorModel", "FamaFrench5FactorModel", "GARCHModel", "GeneralizedSignTest", "IntradayEventStudyTask", "KolariPynnonenTest", "LinearFactorModel", "LogReturn", "MarketAdjustedModel", "MarketModel", "MultiEventStatisticsSet", "OpenAICompatProvider", "PanelEventStudyTask", "ParameterSet", "PatellZTest", "ProviderBase", "RankTest", "RollingWindowModel", "SignTest", "SimpleReturn", "SingleEventStatisticsSet", "StatisticsSetBase", "SyntheticControlTask", "VolatilityModel", "VolumeModel", "adjust_p_values", "bootstrap_test", "calculate_statistics", "car_by_group", "car_quantiles", "cross_sectional_regression", "download_factor_data", "download_risk_free_rate", "download_stock_data", "es_advise", "es_colours", "es_diagnostics", "es_kb", "es_report", "estimate_panel_event_study", "estimate_synthetic_control", "export_results", "fit_model", "flag_robustness", "generate_report", "model_diagnostics", "nonparametric_intraday_test", "plot_car_distribution", "plot_diagnostics", "plot_event_study", "plot_panel_event_study", "plot_stocks", "plot_synthetic_control", "prepare_event_study", "prepare_intraday_event_study", "pretrend_test", "provider", "recommend_stat", "report_table", "run_event_study", "sc_placebo_test", "simulate_event_study", "theme_eventstudy", "tidy.EventStudyTask", "validate_task"]
         },
         {
           "type": "list",
@@ -21,7 +21,7 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["adjust_p_values", "bootstrap_test", "calculate_statistics", "car_by_group", "car_quantiles", "cross_sectional_regression", "download_factor_data", "download_risk_free_rate", "download_stock_data", "es_advise", "es_diagnostics", "es_kb", "es_report", "estimate_panel_event_study", "estimate_synthetic_control", "export_results", "fit_model", "flag_robustness", "generate_report", "model_diagnostics", "nonparametric_intraday_test", "plot_car_distribution", "plot_diagnostics", "plot_event_study", "plot_panel_event_study", "plot_stocks", "plot_synthetic_control", "prepare_event_study", "prepare_intraday_event_study", "pretrend_test", "provider", "recommend_stat", "run_event_study", "sc_placebo_test", "simulate_event_study", "theme_eventstudy", "tidy.EventStudyTask", "validate_task"]
+              "value": ["adjust_p_values", "bootstrap_test", "calculate_statistics", "car_by_group", "car_quantiles", "cross_sectional_regression", "download_factor_data", "download_risk_free_rate", "download_stock_data", "es_advise", "es_diagnostics", "es_kb", "es_report", "estimate_panel_event_study", "estimate_synthetic_control", "export_results", "fit_model", "flag_robustness", "generate_report", "model_diagnostics", "nonparametric_intraday_test", "plot_car_distribution", "plot_diagnostics", "plot_event_study", "plot_panel_event_study", "plot_stocks", "plot_synthetic_control", "prepare_event_study", "prepare_intraday_event_study", "pretrend_test", "provider", "recommend_stat", "report_table", "run_event_study", "sc_placebo_test", "simulate_event_study", "theme_eventstudy", "tidy.EventStudyTask", "validate_task"]
             }
           },
           "value": [
@@ -1074,6 +1074,38 @@
                   "type": "character",
                   "attributes": {},
                   "value": [""]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["NULL"]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": [""]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {
+                "names": {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["caption", "col.names", "digits", "x"]
+                }
+              },
+              "value": [
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["NULL"]
+                },
+                {
+                  "type": "character",
+                  "attributes": {},
+                  "value": ["NULL"]
                 },
                 {
                   "type": "character",

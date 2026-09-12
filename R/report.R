@@ -504,8 +504,8 @@ generate_report <- function(task,
 # ---------------------------------------------------------------------------
 # .tinytable_available() -- check if the tinytable package is installed
 #
-# Single mockable seam for the tinytable-vs-kable branch in .report_table().
-# tinytable is an optional Suggests dependency; when absent, .report_table()
+# Single mockable seam for the tinytable-vs-kable branch in report_table().
+# tinytable is an optional Suggests dependency; when absent, report_table()
 # degrades to knitr::kable().
 #
 # @return Logical scalar.
@@ -517,27 +517,31 @@ generate_report <- function(task,
 }
 
 
-# ---------------------------------------------------------------------------
-# .report_table() -- render a data frame as a styled table in all 4 formats
-#
-# When tinytable is available (see .tinytable_available()), renders via
-# tinytable::tt() with bold header, auto-aligned columns, and optional digits.
-# Falls back to knitr::kable() when tinytable is absent -- byte-identical to
-# the current scattered knitr::kable() calls.
-#
-# @param x         data.frame to render.
-# @param caption   Character scalar caption, or NULL.
-# @param col.names Character vector of display column names, or NULL. When
-#                  supplied, x is renamed before tt()/kable() so both paths
-#                  show the display names.
-# @param digits    Integer, or NULL. Passed to tt() and knitr::kable().
-#                  Pass NULL for pre-sprintf()-formatted tables (L130, L158,
-#                  L328 call sites) to stay byte-compatible.
-# @return invisible(NULL). Side-effect: prints the table via knit_print.
-# @noRd
-# ---------------------------------------------------------------------------
-
-.report_table <- function(x, caption = NULL, col.names = NULL, digits = NULL) {
+#' Render a data frame as a styled table (HTML / PDF / Word / Markdown)
+#'
+#' Internal rendering helper used by the event study report skeleton and
+#' \code{es_report()}. Exported so \code{inst/rmarkdown/} templates can call
+#' it without \code{:::}.
+#'
+#' When \pkg{tinytable} is available (see \code{.tinytable_available()}),
+#' renders via \code{tinytable::tt()} with a bold header, auto-aligned columns,
+#' and optional digit rounding. Falls back to \code{knitr::kable()} when
+#' \pkg{tinytable} is absent -- byte-identical to the prior scattered
+#' \code{knitr::kable()} call sites.
+#'
+#' @param x A data frame to render.
+#' @param caption Optional character scalar caption, or \code{NULL}.
+#' @param col.names Optional character vector of display column names, or
+#'   \code{NULL}. When supplied, \code{x} is renamed before
+#'   \code{tt()}/\code{kable()} so both rendering paths show the display names.
+#' @param digits Optional integer digit count, or \code{NULL}. Passed to
+#'   \code{tt()} and \code{knitr::kable()}. Pass \code{NULL} for
+#'   pre-\code{sprintf()}-formatted tables to preserve byte-compatible output.
+#' @return \code{invisible(NULL)}. Side-effect: prints the table via
+#'   \code{knit_print}.
+#' @keywords internal
+#' @export
+report_table <- function(x, caption = NULL, col.names = NULL, digits = NULL) {
   if (!is.null(col.names)) {
     x <- setNames(x, col.names)
   }

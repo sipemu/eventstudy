@@ -145,7 +145,7 @@ if (!is_panel && !is.null(task$data_tbl)) {
       stringsAsFactors = FALSE
     ))
   }
-  EventStudy:::.report_table(overview_tbl, caption = "Study design parameters",
+  EventStudy::report_table(overview_tbl, caption = "Study design parameters",
                 col.names = c("Parameter", "Value"))
   cat("\n")
 
