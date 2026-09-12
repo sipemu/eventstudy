@@ -17,14 +17,17 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: ubuntu-latest, r: 'release'}
-          - {os: macos-latest,  r: 'release'}
+          - {os: ubuntu-latest,  r: 'release'}
+          - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest, r: 'devel'}
+          - {os: ubuntu-latest,  r: 'devel'}
+          - {os: ubuntu-latest,  r: 'release', force_suggests: 'true'}  # CI-01: Suggests-present leg
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+      _R_CHECK_FORCE_SUGGESTS_: ${{ matrix.config.force_suggests == 'true' && 'true' || 'false' }}
+      NOT_CRAN: ${{ matrix.config.force_suggests == 'true' && 'true' || '' }}
 
     steps:
       - uses: actions/checkout@v4

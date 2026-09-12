@@ -531,13 +531,13 @@ test_that("CR-02: generate_report() passes distinct fig_path per format via rend
   for (p in unlist(result)) if (file.exists(p)) unlink(p)
 })
 
-test_that("VIZ-04: .report_table falls back to kable when tinytable absent", {
+test_that("VIZ-04: report_table falls back to kable when tinytable absent", {
   skip_if_not_installed("knitr")
 
   df <- data.frame(Event = "A", CAR = 0.0123, stringsAsFactors = FALSE)
   out <- with_mocked_bindings(
     .tinytable_available = function() FALSE,
-    capture.output(EventStudy:::.report_table(df, caption = "Test")),
+    capture.output(EventStudy::report_table(df, caption = "Test")),
     .package = "EventStudy"
   )
   txt <- paste(out, collapse = "\n")
@@ -548,14 +548,14 @@ test_that("VIZ-04: .report_table falls back to kable when tinytable absent", {
   expect_false(grepl("<table", txt, fixed = TRUE))
 })
 
-test_that("VIZ-04: .report_table col.names rename reaches kable output", {
+test_that("VIZ-04: report_table col.names rename reaches kable output", {
   skip_if_not_installed("knitr")
 
   df <- data.frame(sym = "AAPL", ret = 0.05, stringsAsFactors = FALSE)
   out <- with_mocked_bindings(
     .tinytable_available = function() FALSE,
     capture.output(
-      EventStudy:::.report_table(df, col.names = c("Firm", "Return"))
+      EventStudy::report_table(df, col.names = c("Firm", "Return"))
     ),
     .package = "EventStudy"
   )
