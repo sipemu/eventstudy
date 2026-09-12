@@ -4,18 +4,18 @@ milestone: v0.66.0
 milestone_name: Stabilization & CRAN Resubmission
 current_phase: 30
 current_phase_name: CRAN Resubmission
-status: planning
-stopped_at: Phase 29 complete, ready to plan Phase 30
-last_updated: "2026-09-12T10:19:50.150Z"
+status: executing
+stopped_at: Completed 30-01-PLAN.md
+last_updated: "2026-09-12T20:50:39.677Z"
 last_activity: 2026-09-12
-last_activity_desc: Phase 29 complete, transitioned to Phase 30
-state_head: df2c4a5370acb8b3f10258e7088a42d5e3c4325c
+last_activity_desc: Phase 30 execution started
+state_head: 27416f6ffb34378dad98876c87b5ed7975d41010
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 7
-  completed_plans: 7
-  percent: 67
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 8
+  percent: 50
 ---
 
 # Project State
@@ -25,16 +25,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-10)
 
 **Core value:** Trustworthy numbers, trustworthy interpretation — the pipeline is never silently wrong. This milestone proves correctness numerically, locks the public API against accidental breakage, and gets the package back onto CRAN (archived 2024-04-20).
-**Current focus:** Phase 29 — Install-Tested CI
+**Current focus:** Phase 30 — CRAN Resubmission
 
 ## Current Position
 
-Phase: 30 — CRAN Resubmission
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-12 — Phase 29 complete, transitioned to Phase 30
+Phase: 30 (CRAN Resubmission) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-09-12 — Phase 30 execution started
 
-Progress: [███████░░░] 67%
+Progress: [█████░░░░░] 50%
 
 ## Milestone Roadmap (v0.66.0 — Phases 25–30)
 
@@ -68,6 +68,7 @@ Recent decisions affecting current work:
 - [Phase 28]: Phase 28 plan 03: structural API snapshot via expect_snapshot_value(style='json2'), install-gated, sorted exports+formals+S3; skips on CRAN, runs with NOT_CRAN=true on CI — Drift detection proven: snapshot mismatch on fake_perturb_fn injection; auto-fixed methods import NOTE from plan 28-02
 - [Phase 29]: Phase 29-01: renamed .report_table -> report_table + @export to close ::: in inst/ skeleton (Option A from research); additive surface change only
 - [Phase 29]: Phase 29-01: matrix.config.force_suggests ternary pattern keeps default CI legs Suggests-absent; only new leg forces Suggests (Pitfall 1 avoided)
+- [Phase 30]: CRAN v0.66.0: converted \dontrun examples must be self-contained (bundled dieselgate + tempdir) because --as-cran runs \donttest
 
 ### v0.64.0/v0.65.0 invariants that MUST NOT regress (carried into every phase)
 
@@ -106,8 +107,8 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 
 ## Session Continuity
 
-Last session: 2026-09-12T10:15:33.955Z
-Stopped at: Phase 29 complete, ready to plan Phase 30
+Last session: 2026-09-12T20:50:39.606Z
+Stopped at: Completed 30-01-PLAN.md
 Resume file: None
 
 ## Operator Next Steps
@@ -124,3 +125,4 @@ Resume file: None
 | Phase 28 P02 | 10min | 3 tasks | 5 files |
 | Phase 28 P03 | 22min | 2 tasks | 5 files |
 | Phase 29 P01 | 39 | 4 tasks | 8 files |
+| Phase 30 P01 | 22 | 4 tasks | 16 files |

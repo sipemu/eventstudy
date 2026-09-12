@@ -51,7 +51,7 @@
     {
       "number": "29",
       "name": "Install-Tested CI",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "30",
@@ -61,8 +61,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step (verify)",
-    "reason": "Phase 29 of 6 · 50% · ready to verify"
+    "label": "Advance to the next step",
+    "reason": "Phase 30 of 6 · 50% · executing"
   },
-  "updated_at": "2026-09-12T10:15:33.340Z"
+  "updated_at": "2026-09-12T20:50:38.758Z"
 }

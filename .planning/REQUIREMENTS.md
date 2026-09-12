@@ -35,10 +35,10 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### CRAN Resubmission
 
-- [ ] **CRAN-01**: `R CMD check --as-cran` is clean (0 ERRORs, 0 WARNINGs; only explainable NOTEs) on the local environment with the full suite green.
-- [ ] **CRAN-02**: Multi-platform checks pass — `devtools::check_win_devel()` + `check_win_release()` and rhub v2 (and/or macOS) — with results captured.
-- [ ] **CRAN-03**: The exact 2024-04-20 archival reason is retrieved and `cran-comments.md` is rewritten for v0.66.0 with an explicit archival acknowledgment, the reason, the fixes made, and the platform check results.
-- [ ] **CRAN-04**: Examples/tests/vignettes are CRAN-policy compliant — no network by default, no writing outside tempdir, no gratuitous `\dontrun{}`, example runtimes within policy — verified before submission.
+- [x] **CRAN-01**: `R CMD check --as-cran` is clean (0 ERRORs, 0 WARNINGs; only explainable NOTEs) on the local environment with the full suite green.
+- [x] **CRAN-02**: Multi-platform checks pass — `devtools::check_win_devel()` + `check_win_release()` and rhub v2 (and/or macOS) — with results captured.
+- [x] **CRAN-03**: The exact 2024-04-20 archival reason is retrieved and `cran-comments.md` is rewritten for v0.66.0 with an explicit archival acknowledgment, the reason, the fixes made, and the platform check results.
+- [x] **CRAN-04**: Examples/tests/vignettes are CRAN-policy compliant — no network by default, no writing outside tempdir, no gratuitous `\dontrun{}`, example runtimes within policy — verified before submission.
 - [ ] **CRAN-05**: The package is submitted to CRAN (`devtools::submit_cran()` / webform) and the maintainer email confirmation is completed.
 
 ## Future Requirements
@@ -80,10 +80,10 @@ Explicitly excluded to prevent scope creep.
 | APIS-04 | Phase 28 | Complete |
 | CI-01 | Phase 29 | Complete |
 | CI-02 | Phase 29 | Complete |
-| CRAN-01 | Phase 30 | Pending |
-| CRAN-02 | Phase 30 | Pending |
-| CRAN-03 | Phase 30 | Pending |
-| CRAN-04 | Phase 30 | Pending |
+| CRAN-01 | Phase 30 | Complete |
+| CRAN-02 | Phase 30 | Complete |
+| CRAN-03 | Phase 30 | Complete |
+| CRAN-04 | Phase 30 | Complete |
 | CRAN-05 | Phase 30 | Pending |
 
 **Coverage:**
