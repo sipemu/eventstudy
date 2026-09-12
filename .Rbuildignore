@@ -16,3 +16,4 @@
 ^vignettes/articles
 ^EventStudy_.*\.tar\.gz$
 ^scratch$
+^inst/rmarkdown/templates/event_study_report/skeleton/.*\.log$
