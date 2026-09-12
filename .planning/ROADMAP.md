@@ -164,8 +164,9 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   3. `inst/rmarkdown/` templates and examples/vignettes are audited for bare internal calls and default network access, closing the load_all/installed divergence surface.
   4. The install-gated CI passes on the current package with the full suite green.
 
-**Plans**: 1 plan
-- [ ] 29-01-PLAN.md — export report_table + fix skeleton :::, add Suggests-present CI leg, tarball/vignette hygiene audit
+**Plans**: 1/1 plans executed
+
+- [x] 29-01-PLAN.md — export report_table + fix skeleton :::, add Suggests-present CI leg, tarball/vignette hygiene audit
 
 ### Phase 30: CRAN Resubmission
 
@@ -198,5 +199,5 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 3/3 | Complete    | 2026-09-12 |
-| 29. Install-Tested CI | v0.66.0 | 0/TBD | Not started | - |
+| 29. Install-Tested CI | v0.66.0 | 1/1 | In Progress|  |
 | 30. CRAN Resubmission | v0.66.0 | 0/TBD | Not started | - |

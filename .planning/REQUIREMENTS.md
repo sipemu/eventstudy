@@ -30,8 +30,8 @@ Requirements for this milestone. Each maps to exactly one roadmap phase.
 
 ### Install-Tested CI
 
-- [ ] **CI-01**: CI gates on `R CMD check` / `rcmdcheck` against the *installed* package (not `devtools::load_all()`), so "green in dev, broken when installed" bugs (the `.report_table()` class) fail CI; at least one job runs with `_R_CHECK_FORCE_SUGGESTS_` set to exercise Suggests-present behavior.
-- [ ] **CI-02**: `inst/rmarkdown/` templates and examples/vignettes are audited for bare internal calls and default network access, closing the load_all/installed divergence surface.
+- [x] **CI-01**: CI gates on `R CMD check` / `rcmdcheck` against the *installed* package (not `devtools::load_all()`), so "green in dev, broken when installed" bugs (the `.report_table()` class) fail CI; at least one job runs with `_R_CHECK_FORCE_SUGGESTS_` set to exercise Suggests-present behavior.
+- [x] **CI-02**: `inst/rmarkdown/` templates and examples/vignettes are audited for bare internal calls and default network access, closing the load_all/installed divergence surface.
 
 ### CRAN Resubmission
 
@@ -78,8 +78,8 @@ Explicitly excluded to prevent scope creep.
 | APIS-02 | Phase 28 | Complete |
 | APIS-03 | Phase 28 | Complete |
 | APIS-04 | Phase 28 | Complete |
-| CI-01 | Phase 29 | Pending |
-| CI-02 | Phase 29 | Pending |
+| CI-01 | Phase 29 | Complete |
+| CI-02 | Phase 29 | Complete |
 | CRAN-01 | Phase 30 | Pending |
 | CRAN-02 | Phase 30 | Pending |
 | CRAN-03 | Phase 30 | Pending |
