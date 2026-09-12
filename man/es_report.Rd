@@ -76,13 +76,15 @@ format loop. When \code{provider = NULL} (default), the report is fully
 offline with no network or API key required.
 }
 \examples{
-\dontrun{
-task <- run_event_study(my_task, ParameterSet$new())
-# Offline single-format (default)
-path <- es_report(task)
-# Multi-format with AI provider
-paths <- es_report(task, format = c("html", "md"), provider = my_provider)
-paths[["html"]]
+\donttest{
+data(dieselgate)
+task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+task <- run_event_study(task, ParameterSet$new())
+
+# Offline single-format report written to a temporary directory
+out  <- file.path(tempdir(), "event_study_report.html")
+path <- es_report(task, output_file = out, format = "html")
+path[["html"]]
 }
 
 }

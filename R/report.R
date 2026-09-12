@@ -43,13 +43,15 @@
 #'   both resolve.
 #'
 #' @examples
-#' \dontrun{
-#' task <- run_event_study(my_task, ParameterSet$new())
-#' # Offline single-format (default)
-#' path <- es_report(task)
-#' # Multi-format with AI provider
-#' paths <- es_report(task, format = c("html", "md"), provider = my_provider)
-#' paths[["html"]]
+#' \donttest{
+#' data(dieselgate)
+#' task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+#' task <- run_event_study(task, ParameterSet$new())
+#'
+#' # Offline single-format report written to a temporary directory
+#' out  <- file.path(tempdir(), "event_study_report.html")
+#' path <- es_report(task, output_file = out, format = "html")
+#' path[["html"]]
 #' }
 #'
 #' @seealso \code{\link{generate_report}}, \code{\link{es_diagnostics}},
@@ -164,13 +166,15 @@ es_report <- function(task,
 #'   single-path callers).
 #'
 #' @examples
-#' \dontrun{
-#' task <- run_event_study(my_task, ParameterSet$new())
-#' # Single format (backward-compatible)
-#' path <- generate_report(task, format = "html")
-#' # Multi-format
-#' paths <- generate_report(task, format = c("html", "pdf"))
-#' paths[["html"]]
+#' \donttest{
+#' data(dieselgate)
+#' task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+#' task <- run_event_study(task, ParameterSet$new())
+#'
+#' # Single HTML format written to a temporary directory
+#' out  <- file.path(tempdir(), "event_study_report.html")
+#' path <- generate_report(task, output_file = out, format = "html")
+#' path[["html"]]
 #' }
 #'
 #' @family eventstudy-export

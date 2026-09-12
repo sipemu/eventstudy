@@ -51,8 +51,10 @@ are the always-available offline grounding layer (ADV-08). The returned
 flagged \code{is_deterministic = TRUE} and \code{source = "offline_kb"}.
 }
 \examples{
-\dontrun{
-task <- run_event_study(my_task, ParameterSet$new())
+\donttest{
+data(dieselgate)
+task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+task <- run_event_study(task, ParameterSet$new())
 advice <- recommend_stat(task)
 print(advice)
 }

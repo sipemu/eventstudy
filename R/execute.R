@@ -24,8 +24,14 @@
 #'   a fitted \code{EventStudyTask} in both paths.
 #'
 #' @examples
-#' \dontrun{
-#' task <- run_event_study(my_task, ParameterSet$new(), report = TRUE)
+#' \donttest{
+#' data(dieselgate)
+#' task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+#'
+#' # Run the pipeline and render a report to a temporary directory
+#' out  <- file.path(tempdir(), "event_study_report.html")
+#' task <- run_event_study(task, ParameterSet$new(), report = TRUE,
+#'                         report_args = list(output_file = out))
 #' attr(task, "report_path")  # path to the rendered HTML
 #' }
 #'

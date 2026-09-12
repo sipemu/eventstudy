@@ -88,13 +88,15 @@ The narrative is assembled ONCE before the format loop -- \code{es_advise} is
 never called per format (NARR-01).
 }
 \examples{
-\dontrun{
-task <- run_event_study(my_task, ParameterSet$new())
-# Single format (backward-compatible)
-path <- generate_report(task, format = "html")
-# Multi-format
-paths <- generate_report(task, format = c("html", "pdf"))
-paths[["html"]]
+\donttest{
+data(dieselgate)
+task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+task <- run_event_study(task, ParameterSet$new())
+
+# Single HTML format written to a temporary directory
+out  <- file.path(tempdir(), "event_study_report.html")
+path <- generate_report(task, output_file = out, format = "html")
+path[["html"]]
 }
 
 }

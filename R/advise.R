@@ -974,15 +974,18 @@ print.Advice <- function(x, ...) {
 #'   \code{\link{run_event_study}}
 #'
 #' @examples
-#' \dontrun{
-#' task    <- run_event_study(my_task, ParameterSet$new())
+#' # Offline KB path (no LLM, no network, no credentials):
+#' \donttest{
+#' data(dieselgate)
+#' task    <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+#' task    <- run_event_study(task, ParameterSet$new())
 #' diag    <- es_diagnostics(task)
-#'
-#' # Offline KB path (no LLM):
 #' advice_kb <- es_advise(diag, task_type = "recommend_stat")
 #' print(advice_kb)   # es_advice S3
+#' }
 #'
-#' # LLM-grounded path:
+#' # LLM-grounded path (requires a network connection and provider credentials):
+#' \dontrun{
 #' p         <- provider("openai")
 #' advice    <- es_advise(diag, task_type = "recommend_stat", provider = p)
 #' print(advice)      # Advice S3 with grounding guarantee

@@ -33,8 +33,10 @@
 #'   \code{\link{es_kb}}
 #'
 #' @examples
-#' \dontrun{
-#' task <- run_event_study(my_task, ParameterSet$new())
+#' \donttest{
+#' data(dieselgate)
+#' task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+#' task <- run_event_study(task, ParameterSet$new())
 #' advice <- recommend_stat(task)
 #' print(advice)
 #' }
@@ -94,8 +96,10 @@ recommend_stat.es_diagnostics <- function(x, provider = NULL, ...) {
 #'   \code{\link{es_kb}}
 #'
 #' @examples
-#' \dontrun{
-#' task <- run_event_study(my_task, ParameterSet$new())
+#' \donttest{
+#' data(dieselgate)
+#' task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+#' task <- run_event_study(task, ParameterSet$new())
 #' advice <- flag_robustness(task)
 #' print(advice)
 #' }
