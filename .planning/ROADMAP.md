@@ -182,14 +182,14 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
   5. The package is submitted (`devtools::submit_cran()` / webform) and the maintainer email confirmation is completed.
 
 **Risk / Dependency**: The exact 2024-04-20 archival reason is not recorded in any planning artifact and must be retrieved (CRAN archive / maintainer records / package check history) *before* the cover letter (CRAN-03) can be written. Resolved during planning: archived 2024-04-20 at v0.39.2, stated reason "issues were not corrected despite reminders" (captured in 30-CONTEXT.md / 30-RESEARCH.md).
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans executed
 **Wave 1** (autonomous prep)
 
 - [x] 30-01-PLAN.md — Version bump to 0.66.0, CRAN-policy example compliance (`\dontrun`→`\donttest`), clean `--as-cran` on the built tarball + full suite green, win-builder dispatch, and the archival-acknowledging `cran-comments.md` rewrite (CRAN-01..04)
 
 **Wave 2** (human-gated submission handoff, blocked on Wave 1)
 
-- [ ] 30-02-PLAN.md — Capture win-builder results into `cran-comments.md`, write the operator submission runbook, and hand off at a blocking human-action checkpoint; the agent never fires `submit_cran()` (CRAN-02 result-capture, CRAN-05)
+- [x] 30-02-PLAN.md — Capture win-builder results into `cran-comments.md`, write the operator submission runbook, and hand off at a blocking human-action checkpoint; the agent never fires `submit_cran()` (CRAN-02 result-capture, CRAN-05)
 
 ## Progress
 
@@ -207,4 +207,4 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 3/3 | Complete    | 2026-09-12 |
 | 29. Install-Tested CI | v0.66.0 | 1/1 | Complete    | 2026-09-12 |
-| 30. CRAN Resubmission | v0.66.0 | 1/2 | In Progress|  |
+| 30. CRAN Resubmission | v0.66.0 | 2/2 | In Progress|  |
