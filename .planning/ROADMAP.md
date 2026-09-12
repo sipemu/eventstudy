@@ -70,7 +70,7 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 - [x] **Phase 26: Formula Audit & Golden-Value Validation** - Audit each model/statistic against its published formula, document conventions, fix discrepancies, then pin golden values against reference numbers (completed 2026-09-11)
 - [x] **Phase 27: Property & Numerical-Stability Tests** - Cross-cutting invariant/property tests plus numerical-stability guards on the sensitive numeric paths (completed 2026-09-11)
 - [x] **Phase 28: API Stabilization & Signature Lock** - Signature-consistency audit + return-shape contracts + deprecation lifecycle, then a structural API snapshot capturing the audited surface (completed 2026-09-12)
-- [ ] **Phase 29: Install-Tested CI** - CI gates on the installed package / `R CMD check`, plus a load_all-vs-installed divergence audit of templates and examples
+- [x] **Phase 29: Install-Tested CI** - CI gates on the installed package / `R CMD check`, plus a load_all-vs-installed divergence audit of templates and examples (completed 2026-09-12)
 - [ ] **Phase 30: CRAN Resubmission** - Clean `--as-cran`, multi-platform checks, archival-acknowledging cover letter, policy compliance, and submission
 
 ## Phase Details
@@ -199,5 +199,5 @@ Milestone audit PASSED (30/30 requirements, 5/5 phases). Suite green (2359 pass 
 | 26. Formula Audit & Golden-Value Validation | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 27. Property & Numerical-Stability Tests | v0.66.0 | 1/1 | Complete    | 2026-09-11 |
 | 28. API Stabilization & Signature Lock | v0.66.0 | 3/3 | Complete    | 2026-09-12 |
-| 29. Install-Tested CI | v0.66.0 | 1/1 | In Progress|  |
+| 29. Install-Tested CI | v0.66.0 | 1/1 | Complete    | 2026-09-12 |
 | 30. CRAN Resubmission | v0.66.0 | 0/TBD | Not started | - |
