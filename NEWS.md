@@ -35,6 +35,34 @@ exactly one deprecation warning pointing to the replacement.
   no warning. The option defaults to `FALSE` so valid-input behaviour and the
   existing test suite are completely unaffected. (#APIS-02)
 
+## Install-Tested Multi-OS CI (Phase 29)
+
+* The GitHub Actions workflow now runs `rcmdcheck` against the *installed*
+  package (not `load_all`) across multiple operating systems, catching
+  install-vs-`load_all` divergence in NAMESPACE/imports before it reaches CRAN.
+* A dedicated CI leg runs with `_R_CHECK_FORCE_SUGGESTS_` forced on, exercising
+  every optional-Suggests code path so the `requireNamespace()` guards are
+  verified end-to-end.
+* `report_table()` is now an exported function; the public API snapshot accepts
+  it.
+* Vignette and example audits confirm no default network access and no writes
+  outside `tempdir()`.
+
+## CRAN Resubmission Preparation (Phase 30)
+
+* DESCRIPTION version bumped to 0.66.0 in preparation for CRAN resubmission
+  (the package was archived on 2024-04-20; v0.66.0 is a complete ground-up
+  rewrite).
+* CRAN example-policy compliance: the six data-dependent / slow-but-safe
+  examples (`es_report`, `generate_report`, `run_event_study`, `recommend_stat`,
+  `flag_robustness`, `nonparametric_intraday_test`) were converted from
+  `\dontrun{}` to `\donttest{}` and made self-contained (bundled `dieselgate`
+  data, `tempdir()`-only output). Only the genuine network + credentials
+  provider examples remain `\dontrun{}`.
+* `R CMD check --as-cran` on the built source tarball is clean (0 errors,
+  0 warnings; the only NOTE is the expected archived-package incoming-feasibility
+  acknowledgement), and win-builder R-devel / R-release checks were dispatched.
+
 # EventStudy 0.65.0
 
 The "Polish" milestone lifts the *felt* quality of the package — brand identity,
