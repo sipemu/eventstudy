@@ -73,13 +73,52 @@ to the maintainer (sm@data-zoo.de) and will be pasted here once received.
 
 ### Windows (win-builder R-release)
 
+Checked on win-builder with R version 4.6.1 (2026-06-24 ucrt); total check time
+~227s.
+
 ```
-[PENDING win-builder email -- filled in Plan 02]
+0 errors | 0 warnings | 1 note
 ```
 
-Dispatched via `devtools::check_win_release()`; results are emailed
-asynchronously to the maintainer (sm@data-zoo.de) and will be pasted here once
-received.
+The single NOTE is the expected **CRAN incoming feasibility** NOTE for a
+resubmission of a previously-archived package:
+
+```
+* checking CRAN incoming feasibility ... NOTE
+Maintainer: 'Simon Mueller <sm@data-zoo.de>'
+
+New submission
+
+Package was archived on CRAN
+
+Possibly misspelled words in DESCRIPTION:
+  BMP (17:34)
+  DCC (16:5)
+
+CRAN repository db overrides:
+  X-CRAN-Comment: Archived on 2024-04-20 as issues were not corrected
+    despite reminders.
+
+Found the following (possibly) invalid file URIs:
+  URI: example-earnings.html
+    From: inst/doc/gallery.html
+  URI: example-regulatory.html
+    From: inst/doc/gallery.html
+  URI: example-ma.html
+    From: inst/doc/gallery.html
+```
+
+The "New submission" / "Package was archived on CRAN" lines are expected for a
+resubmission and are addressed by the Resubmission section above. The remaining
+sub-items are benign:
+
+* **Possibly misspelled words** `BMP` and `DCC` are domain acronyms (Boehmer-
+  Musumeci-Poulsen test statistic and Dynamic Conditional Correlation GARCH),
+  not misspellings.
+* **Possibly invalid file URIs** (`example-earnings.html`,
+  `example-regulatory.html`, `example-ma.html`) are relative cross-links within
+  the pkgdown-built `inst/doc/gallery.html` gallery page; they resolve at their
+  install location and are not broken references.
 
 ## Test suite
 
