@@ -64,12 +64,18 @@ tests without them.
 
 ### Windows (win-builder R-devel)
 
+Checked on win-builder with R Under development (unstable) (2026-09-10 r90519
+ucrt); total check time ~214s.
+
 ```
-[PENDING win-builder email -- filled in Plan 02]
+0 errors | 0 warnings | 1 note
 ```
 
-Dispatched via `devtools::check_win_devel()`; results are emailed asynchronously
-to the maintainer (sm@data-zoo.de) and will be pasted here once received.
+The single NOTE is the expected **CRAN incoming feasibility** NOTE for a
+resubmission of a previously-archived package (the same "New submission" /
+"Package was archived on CRAN" NOTE, with the benign domain-acronym misspelling
+and relative-URI sub-items, as detailed in the R-release block below). It is
+addressed by the Resubmission section above.
 
 ### Windows (win-builder R-release)
 
