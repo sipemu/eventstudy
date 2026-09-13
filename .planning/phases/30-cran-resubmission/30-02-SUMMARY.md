@@ -36,8 +36,8 @@ key-decisions:
   - "Did NOT re-dispatch win-builder — already dispatched in Plan 01 (30-01-SUMMARY.md D4)."
   - "Task 3 is a CONTEXT-locked blocking human-action checkpoint: submit_cran() was NOT called and no CRAN confirmation email was touched. The agent stops submission-ready and hands the operator the runbook."
 
-requirements-completed: []
-requirements-partial: [CRAN-02, CRAN-05]
+requirements-completed: [CRAN-02, CRAN-05]
+requirements-partial: []
 
 # Metrics
 duration: 4min
@@ -45,6 +45,23 @@ completed: 2026-09-12
 status: complete
 plan_head_before: 3c29cc0784b75bf58d7b28f728f5003c247a1cca
 ---
+
+> **Post-checkpoint resolution (2026-09-13).** Both win-builder result emails
+> arrived at sm@data-zoo.de and were captured verbatim into `cran-comments.md`,
+> clearing every PENDING placeholder:
+> - **R-release** (R 4.6.1, ~227s): `0 errors | 0 warnings | 1 note` — commit `449d150`.
+> - **R-devel** (r90519, ~214s): `0 errors | 0 warnings | 1 note` — commit `6deebbe`.
+>
+> The single NOTE in each is the expected incoming-feasibility NOTE for a
+> previously-archived resubmission (benign misspelled-acronym / relative-URI
+> sub-items). **CRAN-02 is now COMPLETE** (`grep -c 'PENDING win-builder' = 0`).
+>
+> The operator then fired `devtools::submit_cran()` and clicked the CRAN
+> confirmation email at sm@data-zoo.de (resume signal: "submitted"). **CRAN-05 is
+> now COMPLETE** — the irreversible outward-facing action was performed by the
+> human maintainer, never the agent, exactly as the CONTEXT-locked boundary
+> required. EventStudy 0.66.0 is submitted to CRAN and pending review (~1–10
+> business days).
 
 # Phase 30 Plan 02: CRAN Resubmission (Operator Handoff Half) Summary
 
