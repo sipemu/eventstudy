@@ -7,6 +7,7 @@
 ^LICENSE$
 ^\.gitignore$
 ^\.claude$
+^\.claude-plugin$
 ^\.planning$
 ^\.gsd$
 ^data-raw$
@@ -17,3 +18,4 @@
 ^EventStudy_.*\.tar\.gz$
 ^scratch$
 ^inst/rmarkdown/templates/event_study_report/skeleton/.*\.log$
+^CRAN-SUBMISSION$

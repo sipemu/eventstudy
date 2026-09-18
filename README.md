@@ -9,6 +9,7 @@
 [![R-CMD-check](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg)](https://codecov.io/gh/sipemu/eventstudy)
 [![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://sipemu.github.io/eventstudy/)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-AI_skills_plugin-8A2BE2)](#claude-code-skills)
 
 <p align="center">
   <img src="man/figures/logo.png" height="160" alt="EventStudy logo" />
@@ -34,6 +35,26 @@ EventStudy is part of the [eventstudy.de](https://eventstudy.de) toolkit -- "Eve
 install.packages("devtools")
 devtools::install_github("sipemu/eventstudy")
 ```
+
+#### Claude Code Skills
+
+Two [Claude Code](https://claude.com/claude-code) Agent Skills ship with this repo as
+an installable plugin, giving your AI assistant grounded knowledge of the package API:
+
+- **`es-capabilities`** -- discover the full API surface: return models, test
+  statistics, task types, function signatures, and method-for-task routing.
+- **`es-advisor`** -- run the grounded *load -> run -> diagnose -> advise -> re-run ->
+  compare* loop (offline degrade path, never fabricates a number).
+
+Install via the built-in plugin marketplace:
+
+```
+/plugin marketplace add sipemu/eventstudy
+/plugin install eventstudy@eventstudy
+```
+
+The skills are then auto-invoked from their descriptions, or callable as
+`/eventstudy:es-capabilities` and `/eventstudy:es-advisor`.
 
 ## Features
 

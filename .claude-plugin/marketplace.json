@@ -1,0 +1,20 @@
+{
+  "name": "eventstudy",
+  "description": "Claude Code plugin marketplace for EventStudy — financial event study analysis in R. Ships the es-capabilities and es-advisor Agent Skills.",
+  "owner": {
+    "name": "Simon Müller",
+    "email": "sm@data-zoo.de",
+    "url": "https://github.com/sipemu/eventstudy"
+  },
+  "plugins": [
+    {
+      "name": "eventstudy",
+      "source": "./.claude",
+      "description": "EventStudy Agent Skills: es-capabilities (discover the full API surface — 13+ return models, 10+ test statistics, task types, function signatures, method-for-task) and es-advisor (grounded load -> run -> diagnose -> advise -> re-run -> compare loop with offline degrade path).",
+      "version": "0.66.0",
+      "homepage": "https://sipemu.github.io/eventstudy/",
+      "license": "AGPL-3.0",
+      "keywords": ["event-study", "eventstudy", "finance", "statistics", "r", "skills"]
+    }
+  ]
+}
