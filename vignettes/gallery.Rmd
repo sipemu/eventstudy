@@ -186,19 +186,19 @@ vignette: >
 
 <div class="es-gallery">
 
-<a class="es-gallery-item" href="example-earnings.html">
+<a class="es-gallery-item" href="https://sipemu.github.io/eventstudy/articles/example-earnings.html">
   <div class="es-gallery-thumb"><img src="../reference/figures/card-example-earnings.svg" alt="Earnings Surprise Analysis"></div>
   <div class="es-gallery-title">Earnings Surprise Analysis</div>
   <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>
 </a>
 
-<a class="es-gallery-item" href="example-regulatory.html">
+<a class="es-gallery-item" href="https://sipemu.github.io/eventstudy/articles/example-regulatory.html">
   <div class="es-gallery-thumb"><img src="../reference/figures/card-example-regulatory.svg" alt="Regulatory Shock Analysis"></div>
   <div class="es-gallery-title">Regulatory Shock Analysis</div>
   <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>
 </a>
 
-<a class="es-gallery-item" href="example-ma.html">
+<a class="es-gallery-item" href="https://sipemu.github.io/eventstudy/articles/example-ma.html">
   <div class="es-gallery-thumb"><img src="../reference/figures/card-example-ma.svg" alt="M&amp;A Deal Announcements"></div>
   <div class="es-gallery-title">M&amp;A Deal Announcements</div>
   <div class="es-gallery-tags"><span class="es-tag es-tag-examples">Worked Examples</span></div>

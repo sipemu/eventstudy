@@ -1,3 +1,27 @@
+## Resubmission (2026-09-18 -- addressing reviewer feedback)
+
+Thank you for the review. The previous submission was flagged for invalid file
+URIs in the Gallery vignette:
+
+```
+Found the following (possibly) invalid file URIs:
+  URI: example-earnings.html
+    From: inst/doc/gallery.html
+  URI: example-regulatory.html
+    From: inst/doc/gallery.html
+  URI: example-ma.html
+    From: inst/doc/gallery.html
+```
+
+These three links pointed to pkgdown-only "articles" that are not built as
+package vignettes, so the target HTML files do not exist under `inst/doc/`. They
+have been changed to absolute URLs on the package website
+(`https://sipemu.github.io/eventstudy/articles/...`), which resolve correctly
+both in the installed vignette and on the pkgdown site. Local
+`R CMD check --as-cran` now reports `0 errors | 0 warnings | 1 note` with no
+invalid-URI findings; the sole remaining NOTE is the expected "New submission" /
+"Package was archived on CRAN" incoming-feasibility NOTE.
+
 ## Resubmission (previously archived 2024-04-20)
 
 This package was archived on CRAN on **2024-04-20** at version **0.39.2**. The
@@ -104,27 +128,22 @@ Possibly misspelled words in DESCRIPTION:
 CRAN repository db overrides:
   X-CRAN-Comment: Archived on 2024-04-20 as issues were not corrected
     despite reminders.
-
-Found the following (possibly) invalid file URIs:
-  URI: example-earnings.html
-    From: inst/doc/gallery.html
-  URI: example-regulatory.html
-    From: inst/doc/gallery.html
-  URI: example-ma.html
-    From: inst/doc/gallery.html
 ```
+
+> **Note:** The win-builder blocks above record the *previous* submission's
+> results, which included the invalid-file-URI findings for
+> `example-earnings.html`, `example-regulatory.html`, and `example-ma.html`.
+> Those cross-links have been corrected (see the top Resubmission section) and no
+> longer appear in the local `--as-cran` check of the current tarball;
+> win-builder will be re-run on the corrected tarball before submission.
 
 The "New submission" / "Package was archived on CRAN" lines are expected for a
 resubmission and are addressed by the Resubmission section above. The remaining
-sub-items are benign:
+sub-item is benign:
 
 * **Possibly misspelled words** `BMP` and `DCC` are domain acronyms (Boehmer-
   Musumeci-Poulsen test statistic and Dynamic Conditional Correlation GARCH),
   not misspellings.
-* **Possibly invalid file URIs** (`example-earnings.html`,
-  `example-regulatory.html`, `example-ma.html`) are relative cross-links within
-  the pkgdown-built `inst/doc/gallery.html` gallery page; they resolve at their
-  install location and are not broken references.
 
 ## Test suite
 
