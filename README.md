@@ -9,11 +9,7 @@
 [![R-CMD-check](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg)](https://codecov.io/gh/sipemu/eventstudy)
 [![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://sipemu.github.io/eventstudy/)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-AI_skills_plugin-8A2BE2)](#claude-code-skills)
-
-<p align="center">
-  <img src="man/figures/logo.png" height="160" alt="EventStudy logo" />
-</p>
+[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-AI_skills_plugin-8A2BE2)](#-claude-code-skills-ai-pair-programming)
 
 A comprehensive, modular R package for financial event study analysis. Implements the classical methodology (MacKinlay 1997) and extends it with modern multi-factor models, long-horizon methods, panel (DiD) event studies, and more.
 
@@ -36,7 +32,7 @@ install.packages("devtools")
 devtools::install_github("sipemu/eventstudy")
 ```
 
-#### Claude Code Skills
+## 🤖 Claude Code Skills (AI pair-programming)
 
 Two [Claude Code](https://claude.com/claude-code) Agent Skills ship with this repo as
 an installable plugin, giving your AI assistant grounded knowledge of the package API:
@@ -58,9 +54,9 @@ The skills are then auto-invoked from their descriptions, or callable as
 
 ## Features
 
-- **AI Advisor** (new in 0.60.0): Grounded, LLM-agnostic advice via `es_advise()` plus offline `es_diagnostics()`. Interprets only package-computed numbers and never fabricates results. Works fully offline with no API key required; optional LLM providers (Anthropic, OpenAI-compatible, custom) can be supplied via `provider()`.
+- **AI Advisor**: Grounded, LLM-agnostic advice via `es_advise()` plus offline `es_diagnostics()`. Interprets only package-computed numbers and never fabricates results. Works fully offline with no API key required; optional LLM providers (Anthropic, OpenAI-compatible, custom) can be supplied via `provider()`.
 
-- **One-Call Reporting** (new in 0.64.0): Generate a complete, multi-format event study report in a single call: `es_report(task)` -- deep-clones the task, harvests diagnostics, and renders HTML/PDF/Word/Markdown with a grounded narrative (offline by default). Also available as `run_event_study(..., report = TRUE)`.
+- **One-Call Reporting**: Generate a complete, multi-format event study report in a single call: `es_report(task)` -- deep-clones the task, harvests diagnostics, and renders HTML/PDF/Word/Markdown with a grounded narrative (offline by default). Also available as `run_event_study(..., report = TRUE)`.
 
 - **15+ Return Models**: Market Model, Market Adjusted, Mean Adjusted, Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), DCC-GARCH, Rolling-Window, Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.
 
