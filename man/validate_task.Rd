@@ -17,7 +17,10 @@ validate_task(
 \item{parameter_set}{The parameter set that defines the event study.}
 
 \item{min_estimation_obs}{Minimum number of observations required in the
-estimation window. Default is 30.}
+\emph{whole} per-event estimation window (a task-level validation
+threshold checked once per event). Default is 30. Distinct from
+\code{RollingWindowModel$min_obs}, which bounds each individual
+sub-window inside a single event's rolling-window fit.}
 
 \item{verbose}{Logical; if FALSE, suppress informational messages. Default
 \code{getOption("eventstudy.verbose", TRUE)}. Warnings are never gated.}

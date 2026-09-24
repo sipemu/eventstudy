@@ -25,6 +25,12 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                .target = 'adjusted',
                                #' @field .request_file_columns The necessary
                                #'   column names of the request dataframe.
+                               #'   \code{estimation_window_length} here is an
+                               #'   input count (number of trading days before
+                               #'   the event window); it is distinct from the
+                               #'   derived 0/1 \code{estimation_window} flag
+                               #'   column that \code{prepare_event_study()}
+                               #'   later adds to each event's nested data.
                                .request_file_columns = c("event_id", "firm_symbol", "index_symbol", "event_date",
                                                          "group", "event_window_start", "event_window_end",
                                                          "shift_estimation_window", "estimation_window_length"),

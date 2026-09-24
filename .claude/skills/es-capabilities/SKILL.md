@@ -58,8 +58,8 @@ The whole package composes three steps; `run_event_study()` runs all three.
 | `prepare_event_study` | `(task, parameter_set)` | Returns, windows, factor joins |
 | `fit_model` | `(task, parameter_set)` | Estimate return model, compute abnormal returns |
 | `calculate_statistics` | `(task, parameter_set)` | Single- + multi-event test statistics |
-| `run_event_study` | `(task, parameter_set = ParameterSet$new(), report = FALSE, ...)` | All three, end to end |
-| `validate_task` | `(task)` | Structural validation of a task |
+| `run_event_study` | `(task, parameter_set = ParameterSet$new(), report = FALSE, report_args = list(), verbose = getOption("eventstudy.verbose", TRUE))` | All three, end to end |
+| `validate_task` | `(task, parameter_set = NULL, min_estimation_obs = 30, verbose = getOption("eventstudy.verbose", TRUE))` | Structural validation of a task |
 
 **Task constructors** (choose by study design):
 

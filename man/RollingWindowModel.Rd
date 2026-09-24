@@ -66,7 +66,11 @@ Other eventstudy-models:
     \if{html}{\out{<div class="arguments">}}
     \describe{
       \item{\code{window_size}}{Size of the rolling window.}
-      \item{\code{min_obs}}{Minimum observations for a valid window.}
+      \item{\code{min_obs}}{Minimum valid (complete-pair) observations
+required inside each individual rolling sub-window for that
+sub-window to be fit. Distinct from \code{validate_task()}'s
+\code{min_estimation_obs}, which is a whole-estimation-window
+advisory threshold checked once per event, not per sub-window.}
     }
     \if{html}{\out{</div>}}
   }

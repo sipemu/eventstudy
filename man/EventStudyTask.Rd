@@ -38,7 +38,13 @@ CAAR test statistics.}
     \item{\code{.target}}{The price column name.}
 
     \item{\code{.request_file_columns}}{The necessary
-column names of the request dataframe.}
+column names of the request dataframe.
+\code{estimation_window_length} here is an
+input count (number of trading days before
+the event window); it is distinct from the
+derived 0/1 \code{estimation_window} flag
+column that \code{prepare_event_study()}
+later adds to each event's nested data.}
 
     \item{\code{factor_tbl}}{Optional factor data for multi-factor models
 (Fama-French, Carhart). Must contain a \code{date} column.}

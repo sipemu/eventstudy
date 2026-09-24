@@ -9,7 +9,10 @@
 #' @param task The event study task.
 #' @param parameter_set The parameter set that defines the event study.
 #' @param min_estimation_obs Minimum number of observations required in the
-#'   estimation window. Default is 30.
+#'   \emph{whole} per-event estimation window (a task-level validation
+#'   threshold checked once per event). Default is 30. Distinct from
+#'   \code{RollingWindowModel$min_obs}, which bounds each individual
+#'   sub-window inside a single event's rolling-window fit.
 #' @param verbose Logical; if FALSE, suppress informational messages. Default
 #'   \code{getOption("eventstudy.verbose", TRUE)}. Warnings are never gated.
 #'

@@ -20,7 +20,11 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                  #' Create a new RollingWindowModel.
                                  #'
                                  #' @param window_size Size of the rolling window.
-                                 #' @param min_obs Minimum observations for a valid window.
+                                 #' @param min_obs Minimum valid (complete-pair) observations
+                                 #'   required inside each individual rolling sub-window for that
+                                 #'   sub-window to be fit. Distinct from \code{validate_task()}'s
+                                 #'   \code{min_estimation_obs}, which is a whole-estimation-window
+                                 #'   advisory threshold checked once per event, not per sub-window.
                                  initialize = function(window_size = 60L, min_obs = 30L) {
                                    self$window_size <- as.integer(window_size)
                                    self$min_obs <- as.integer(min_obs)
