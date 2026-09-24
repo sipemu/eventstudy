@@ -45,11 +45,82 @@ cross_sectional_regression <- function(task, formula, data,
       class = c("eventstudy_error_missing_column", "eventstudy_error"))
   }
 
+  # A5 (2026-09-24): duplicated event_id in `data` silently corrupts the
+  # join (many-to-many inflation) -- error instead of proceeding.
+  dup_ids <- unique(data$event_id[duplicated(data$event_id)])
+  if (length(dup_ids) > 0) {
+    rlang::abort(
+      paste0("`data` contains duplicated event_id value(s): ",
+             paste(dup_ids, collapse = ", ")),
+      class = c("eventstudy_error_bad_argument", "eventstudy_error"))
+  }
+
+  # A5: car_window extending outside the available event window of ANY
+  # event is an error (not a silently-empty or NA CAR).
+  if (!is.null(car_window)) {
+    event_ranges <- purrr::map2_dfr(
+      task$data_tbl$event_id, task$data_tbl$data,
+      function(eid, d) {
+        ew <- d %>% dplyr::filter(event_window == 1)
+        tibble::tibble(
+          event_id = eid,
+          min_ri = suppressWarnings(min(ew$relative_index, na.rm = TRUE)),
+          max_ri = suppressWarnings(max(ew$relative_index, na.rm = TRUE))
+        )
+      }
+    )
+    out_of_range <- event_ranges %>%
+      dplyr::filter(car_window[1] < min_ri | car_window[2] > max_ri)
+    if (nrow(out_of_range) > 0) {
+      finite_ranges <- event_ranges %>%
+        dplyr::filter(is.finite(min_ri), is.finite(max_ri))
+      avail_min <- suppressWarnings(min(finite_ranges$min_ri))
+      avail_max <- suppressWarnings(max(finite_ranges$max_ri))
+      rlang::abort(
+        paste0("car_window = c(", car_window[1], ", ", car_window[2],
+               ") extends outside the available event window [",
+               avail_min, ", ", avail_max, "] for event_id(s): ",
+               paste(out_of_range$event_id, collapse = ", ")),
+        class = c("eventstudy_error_bad_argument", "eventstudy_error"))
+    }
+  }
+
   # Extract CARs for each event
   cars <- .extract_cars(task, car_window)
 
+  # A5: task events without a matching row in `data` are dropped with one
+  # warning (before the inner_join silently drops them).
+  unmatched <- setdiff(cars$event_id, data$event_id)
+  if (length(unmatched) > 0) {
+    warning(
+      "cross_sectional_regression: ", length(unmatched),
+      " task event(s) have no matching row in `data` and were dropped ",
+      "(event_id: ", paste(unmatched, collapse = ", "), ").",
+      call. = FALSE
+    )
+  }
+
   # Merge with firm characteristics
   merged <- dplyr::inner_join(cars, data, by = "event_id")
+
+  if (nrow(merged) == 0) {
+    stop("No matching event_id values between task and data.")
+  }
+
+  # A5: an event whose CAR is NA (a missing AR inside car_window --
+  # .extract_cars() no longer na.rm's the window sum) is excluded from the
+  # regression with one warning listing the event_id(s), rather than being
+  # silently included as an NA row (which lm() would drop unexplained).
+  na_car_events <- merged$event_id[is.na(merged$car)]
+  if (length(na_car_events) > 0) {
+    warning(
+      "cross_sectional_regression: ", length(na_car_events),
+      " event(s) excluded because an abnormal return inside car_window is ",
+      "missing (event_id: ", paste(na_car_events, collapse = ", "), ").",
+      call. = FALSE
+    )
+    merged <- merged %>% dplyr::filter(!is.na(car))
+  }
 
   if (nrow(merged) == 0) {
     stop("No matching event_id values between task and data.")
@@ -167,8 +238,14 @@ cross_sectional_regression <- function(task, formula, data,
                         relative_index <= car_window[2])
       }
 
+      # A5 (2026-09-24): NO na.rm -- ANY missing AR inside the window makes
+      # the CAR for that event NA (not the sum of the finite subset). This
+      # is the shared .extract_cars() convention inherited by
+      # cross_sectional_regression() (which excludes+warns), car_by_group(),
+      # car_quantiles() and plot_car_distribution() (which silently propagate
+      # the NA per their existing na.rm=TRUE summary statistics).
       ar_vals <- event_data$abnormal_returns
-      car_val <- if (all(is.na(ar_vals))) NA_real_ else sum(ar_vals, na.rm = TRUE)
+      car_val <- if (length(ar_vals) == 0) NA_real_ else sum(ar_vals)
       tibble::tibble(
         event_id = eid,
         firm_symbol = sym,
