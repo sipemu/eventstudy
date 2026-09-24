@@ -630,6 +630,7 @@ test_that("BHARModel fits and calculates compound AR", {
 # --- Volume Model tests ---
 
 test_that("VolumeModel fits and calculates abnormal volume", {
+  set.seed(261556)  # C7 (2026-09-24): deterministic seed
   data <- create_mock_model_data()
   data$firm_volume <- abs(rnorm(nrow(data), mean = 1e6, sd = 2e5))
 
@@ -753,8 +754,12 @@ test_that("Carhart4FactorModel with HAC works", {
 })
 
 
-test_that("HAC SEs differ from OLS SEs", {
+test_that("HAC SEs equal sandwich::NeweyWest-based values (C2, 2026-09-24)", {
   skip_if_not_installed("sandwich")
+  # The implementation calls sandwich::NeweyWest() (a Bartlett-kernel member
+  # of the vcovHAC family) directly on the underlying lm() fit, with the
+  # model's own hac_lag (NULL -> automatic bandwidth selection). Assert
+  # against that exact estimator rather than merely "differs from OLS".
   data <- create_mock_model_data()
   mm_ols <- MarketModel$new(use_hac = FALSE)
   mm_hac <- MarketModel$new(use_hac = TRUE)
@@ -762,11 +767,18 @@ test_that("HAC SEs differ from OLS SEs", {
   mm_ols$fit(data)
   mm_hac$fit(data)
 
-  # HAC SEs should differ from OLS SEs
+  est_data <- data %>% dplyr::filter(estimation_window == 1)
+  lm_fit <- lm(firm_returns ~ index_returns, data = est_data)
+  expected_vcov <- sandwich::NeweyWest(lm_fit)
+  expected_se <- sqrt(diag(expected_vcov))
+
+  expect_equal(unname(diag(mm_hac$statistics$vcov_hac)), unname(diag(expected_vcov)),
+               tolerance = 1e-12)
+  expect_equal(unname(mm_hac$statistics$se_hac), unname(expected_se), tolerance = 1e-12)
+
+  # HAC SEs should differ from OLS SEs (still true, kept as a sanity check).
   ols_se <- sqrt(diag(vcov(mm_ols$model)))
-  hac_se <- mm_hac$statistics$se_hac
-  # They should be different (not guaranteed to be larger/smaller)
-  expect_false(identical(ols_se, hac_se))
+  expect_false(identical(ols_se, mm_hac$statistics$se_hac))
 })
 
 
@@ -856,6 +868,7 @@ test_that("ComparisonPeriodMeanAdjustedModel uses constant-mean FEC", {
 
 
 test_that("VolumeModel uses constant-mean FEC", {
+  set.seed(261782)  # C7 (2026-09-24): deterministic seed
   data <- create_mock_model_data(n_estimation = 60, n_event = 5)
   data$firm_volume <- abs(rnorm(nrow(data), mean = 1e6, sd = 2e5))
   vm <- VolumeModel$new(log_transform = FALSE)
@@ -915,11 +928,10 @@ test_that("VolatilityModel residuals match abnormal_returns formula (r^2/V - 1)"
 
 # --- Regression: LinearFactorModel multi-factor FEC ---
 
-test_that("LinearFactorModel FEC uses hat matrix (X'X)^{-1} for correction", {
-  # Bug: LinearFactorModel used 1/T scalar correction instead of leveraging the
-  # full hat matrix from the regression, which captures how far each event-window
-  # day's factor values are from the estimation-window mean.
-  # Fix: FEC = sigma * sqrt(1 + h_t) where h_t = x_t'(X'X)^{-1}x_t
+test_that("LinearFactorModel FEC equals hand-computed hat-matrix formula (C2, 2026-09-24)", {
+  # Fix: FEC = sigma * sqrt(1 + h_t) where h_t = x_t'(X'X)^{-1}x_t. Verify the
+  # EXACT value by rebuilding the estimation design matrix independently and
+  # computing h_t by hand, rather than only checking loose bounds.
   data <- create_mock_factor_model_data(n_estimation = 120, n_event = 11)
   ff3 <- FamaFrench3FactorModel$new()
   ff3$fit(data)
@@ -927,16 +939,21 @@ test_that("LinearFactorModel FEC uses hat matrix (X'X)^{-1} for correction", {
   stats <- ff3$statistics
   fec <- stats$forecast_error_corrected_sigma
 
-  # FEC should be a vector (one per event-window day), NOT a scalar replicated
   expect_length(fec, 11)
-  # Each day's FEC depends on its own factor values, so they should NOT all be identical
-  # (unless by extreme coincidence)
   expect_false(all(fec == fec[1]))
 
-  # Verify the formula: FEC = sigma * sqrt(1 + h_t)
-  sigma <- stats$sigma
-  # All FEC values should be >= sigma (since h_t >= 0)
-  expect_true(all(fec >= sigma * 0.999))  # small tolerance for floating point
+  est_data <- data %>% dplyr::filter(estimation_window == 1)
+  event_data <- data %>% dplyr::filter(event_window == 1)
+  lm_fit <- lm(excess_return ~ market_excess + smb + hml, data = est_data)
+
+  X_est <- stats::model.matrix(lm_fit)
+  XtX_inv <- solve(crossprod(X_est))
+  X_evt <- stats::model.matrix(excess_return ~ market_excess + smb + hml,
+                                data = event_data)
+  hat_vals <- rowSums((X_evt %*% XtX_inv) * X_evt)
+  expected_fec <- summary(lm_fit)$sigma * sqrt(1 + hat_vals)
+
+  expect_equal(fec, expected_fec, tolerance = 1e-12)
 })
 
 

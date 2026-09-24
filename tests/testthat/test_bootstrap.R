@@ -184,19 +184,105 @@ test_that("bootstrap_test returns NA boot_p_caar when statistic='aar'", {
 
 # --- Regression: bootstrap clusters by firm_symbol, not event_id ---
 
-test_that("bootstrap_test clusters weights by firm_symbol", {
-  # Bug: Wild bootstrap assigned independent weights per event_id instead of
-  # per firm_symbol. When the same firm has multiple events, this violates the
-  # cross-sectional dependence assumption (all events from the same firm must
-  # share the same bootstrap weight).
-  #
-  # For the standard case (one event per firm), the fix is functionally
-  # equivalent but produces different seeds since names(w) changed.
-  task <- create_fitted_mock_task()
-  result <- bootstrap_test(task, n_boot = 49, seed = 42)
+test_that("bootstrap_test clusters weights by firm_symbol (hand replication, C2/A12c 2026-09-24)", {
+  # A12c (REVISED 2026-09-24): weights STAY clustered by firm_symbol
+  # (deliberate: coarser firm clusters are robust to cross-event correlation
+  # of a recurring firm). Lock this numerically: build a task with a firm
+  # that recurs across two events, reproduce the exact wild-bootstrap
+  # algorithm by hand using ONE weight per unique firm_symbol shared by all
+  # of that firm's events, and assert it reproduces the package's output
+  # exactly. Then show that an event_id-level clustering (one weight per
+  # event) would generally have produced a DIFFERENT result on the same
+  # seed -- confirming the package really does cluster by firm, not by event.
+  symbols <- c("FIRM_A", "FIRM_A", "FIRM_B", "FIRM_B")
+  firm_data <- create_mock_firm_data(symbols = unique(symbols))
+  index_data <- create_mock_index_data()
 
-  # Basic sanity: p-values should be valid
+  n_days <- 300
+  start_date <- as.Date("2020-01-01")
+  dates <- seq(start_date, by = "day", length.out = n_days)
+  dates <- dates[!weekdays(dates) %in% c("Saturday", "Sunday")]
+  event_date <- format(dates[180], "%d.%m.%Y")
 
-  expect_true(all(result$boot_p_aar >= 0 & result$boot_p_aar <= 1))
-  expect_true(all(result$boot_p_caar >= 0 & result$boot_p_caar <= 1))
+  request <- tibble::tibble(
+    event_id = 1:4,
+    firm_symbol = symbols,
+    index_symbol = "INDEX_1",
+    event_date = event_date,
+    group = "TestGroup",
+    event_window_start = -5,
+    event_window_end = 5,
+    shift_estimation_window = -6,
+    estimation_window_length = 120
+  )
+
+  task <- EventStudyTask$new(firm_data, index_data, request)
+  ps <- ParameterSet$new()
+  task <- run_event_study(task, ps)
+
+  n_boot <- 25L
+  seed <- 777L
+  result <- bootstrap_test(task, n_boot = n_boot, seed = seed,
+                            weight_type = "rademacher", statistic = "aar")
+
+  ar_data <- task$data_tbl %>%
+    dplyr::select(event_id, firm_symbol, data) %>%
+    tidyr::unnest(data) %>%
+    dplyr::filter(event_window == 1) %>%
+    dplyr::select(event_id, firm_symbol, relative_index, abnormal_returns)
+
+  firm_ids <- unique(ar_data$firm_symbol)
+  expect_equal(length(firm_ids), 2L)  # FIRM_A, FIRM_B -- the clustering unit
+
+  observed <- ar_data %>%
+    dplyr::group_by(relative_index) %>%
+    dplyr::summarise(aar = mean(abnormal_returns, na.rm = TRUE),
+                     sd_aar = stats::sd(abnormal_returns, na.rm = TRUE),
+                     n = sum(!is.na(abnormal_returns)), .groups = "drop") %>%
+    dplyr::mutate(aar_t = ifelse(is.finite(sd_aar) & sd_aar > 0,
+                                 sqrt(n) * aar / sd_aar, NA_real_))
+  obs_aar_t <- observed$aar_t
+
+  .replicate_boot_p_aar <- function(cluster_ids) {
+    set.seed(seed)
+    n_cluster <- length(cluster_ids)
+    exceed <- rep(0L, nrow(observed))
+    valid  <- rep(0L, nrow(observed))
+    id_col <- if (identical(sort(cluster_ids), sort(unique(ar_data$firm_symbol)))) {
+      "firm_symbol"
+    } else {
+      "event_id"
+    }
+    for (b in seq_len(n_boot)) {
+      w <- sample(c(-1, 1), n_cluster, replace = TRUE)
+      names(w) <- as.character(cluster_ids)
+      boot_ar <- ar_data %>%
+        dplyr::mutate(boot_ar = abnormal_returns * w[as.character(.data[[id_col]])])
+      boot_stats <- boot_ar %>%
+        dplyr::group_by(relative_index) %>%
+        dplyr::summarise(boot_aar = mean(boot_ar, na.rm = TRUE),
+                         sd_boot = stats::sd(boot_ar, na.rm = TRUE),
+                         n = sum(!is.na(boot_ar)), .groups = "drop") %>%
+        dplyr::mutate(boot_aar_t = ifelse(is.finite(sd_boot) & sd_boot > 0,
+                                           sqrt(n) * boot_aar / sd_boot, NA_real_))
+      draw_finite <- is.finite(boot_stats$boot_aar_t)
+      comparison <- draw_finite & (abs(boot_stats$boot_aar_t) >= abs(obs_aar_t))
+      comparison[is.na(comparison)] <- FALSE
+      exceed <- exceed + as.integer(comparison)
+      valid  <- valid + as.integer(draw_finite)
+    }
+    p <- (exceed + 1) / (valid + 1)
+    p[is.na(obs_aar_t) | valid == 0] <- NA_real_
+    p
+  }
+
+  boot_p_aar_firm  <- .replicate_boot_p_aar(firm_ids)
+  event_ids <- unique(ar_data$event_id)
+  boot_p_aar_event <- .replicate_boot_p_aar(event_ids)
+
+  # The package's output matches FIRM-level clustering exactly.
+  expect_equal(result$boot_p_aar, boot_p_aar_firm, tolerance = 1e-12)
+  # ...and differs from what event-level clustering would have produced
+  # (same seed, same data, different weight-assignment granularity).
+  expect_false(isTRUE(all.equal(boot_p_aar_firm, boot_p_aar_event)))
 })
