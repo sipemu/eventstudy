@@ -8,6 +8,7 @@
 # ============================================================================
 
 test_that("CSectTTest with single event produces NA for sd-based stats", {
+  set.seed(260934)  # C7 (2026-09-24): deterministic seed
   data = tibble::tibble(
     event_id = "E1",
     firm_symbol = "F1",
@@ -29,6 +30,7 @@ test_that("CSectTTest with single event produces NA for sd-based stats", {
 
 
 test_that("SignTest with single event returns NA for sign_z (STATS-04)", {
+  set.seed(260955)  # C7 (2026-09-24): deterministic seed
   # A sign test with n == 1 is statistically invalid — the z-score is
   # ±1 regardless of data, providing no information. Per STATS-04, the
   # guard now requires n_valid_events >= 2; with n == 1 sign_z is NA.
@@ -53,6 +55,7 @@ test_that("SignTest with single event returns NA for sign_z (STATS-04)", {
 
 
 test_that("GeneralizedSignTest with all positive estimation returns (p_hat=1)", {
+  set.seed(260979)  # C7 (2026-09-24): deterministic seed
   n_est = 50
   n_ev = 11
   data = tibble::tibble(
@@ -75,6 +78,7 @@ test_that("GeneralizedSignTest with all positive estimation returns (p_hat=1)", 
 
 
 test_that("RankTest with single event does not crash", {
+  set.seed(261001)  # C7 (2026-09-24): deterministic seed
   n_est = 50
   n_ev = 11
   data = tibble::tibble(
@@ -115,7 +119,12 @@ test_that("CSectTTest handles NA abnormal returns gracefully", {
   data$abnormal_returns[data$firm_symbol == "F2"] = NA_real_
 
   csect = CSectTTest$new()
-  result = csect$compute(data, NULL)
+  # A2 (2026-09-24): F2's event-window ARs are entirely NA, so it is excluded
+  # from the multi-event statistic with exactly one contract warning.
+  expect_warning(
+    result <- csect$compute(data, NULL),
+    "excluded from multi-event statistics"
+  )
 
   expect_equal(nrow(result), 11)
   # n_valid_events should be 2 (F1 and F3), not 3
@@ -159,7 +168,12 @@ test_that("BMPTest handles NA abnormal returns", {
   data$abnormal_returns[data$firm_symbol == "F2" & data$event_window == 1] = NA_real_
 
   bmp = BMPTest$new()
-  result = bmp$compute(data, model_tbl)
+  # A2 (2026-09-24): F2's event-window ARs are entirely NA -> excluded with
+  # exactly one contract warning.
+  expect_warning(
+    result <- bmp$compute(data, model_tbl),
+    "excluded from multi-event statistics"
+  )
 
   expect_equal(nrow(result), n_ev)
   # Should not crash
@@ -305,7 +319,9 @@ test_that("PatellZTest with very short estimation window (m <= 4)", {
     firm_symbol = paste0("F", 1:3),
     model = lapply(1:3, function(i) {
       mm = MarketModel$new()
-      mm$fit(data[data$firm_symbol == paste0("F", i), ])
+      # C10 (2026-09-24): m=4 is INTENTIONALLY short (this test targets
+      # Patell's own m<=4 degenerate branch, not the model's advisory).
+      muffle_short_window(mm$fit(data[data$firm_symbol == paste0("F", i), ]))
       mm
     })
   )
@@ -458,7 +474,12 @@ test_that("CalendarTimePortfolioTest with constant AARs across time", {
   }))
 
   ct = CalendarTimePortfolioTest$new()
-  result = ct$compute(data, NULL)
+  # A7 (2026-09-24): no estimation_window rows at all in this fixture -> the
+  # Brown-Warner time-series sd is undefined, reported once via the contract.
+  expect_warning(
+    result <- ct$compute(data, NULL),
+    "insufficient estimation-window AAR observations"
+  )
 
   expect_equal(nrow(result), 11)
   # ts_sd = sd(constant) = 0 → caltime_t guarded to NA
@@ -471,6 +492,7 @@ test_that("CalendarTimePortfolioTest with constant AARs across time", {
 # ============================================================================
 
 test_that("CSectTTest with empty event window returns 0-row result", {
+  set.seed(261397)  # C7 (2026-09-24): deterministic seed
   data = tibble::tibble(
     event_id = "E1",
     firm_symbol = "F1",
@@ -826,10 +848,16 @@ test_that("cross_sectional .extract_cars returns NA for all-NA abnormal returns"
     x = c(1.0, 2.0)
   )
 
-  # Should warn (not error); the first event (all NA) is excluded
+  # Should warn (not error); the first event (all NA) is excluded. With only
+  # 1 event left, the design is also rank-deficient (a second, independent
+  # warning) -- capture both explicitly rather than leaving the second one
+  # to leak (C10, 2026-09-24).
   expect_warning(
-    result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE),
-    "missing"
+    expect_warning(
+      result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE),
+      "missing"
+    ),
+    "rank-deficient"
   )
   car_data <- result$car_data
   # First event (all NA) is excluded entirely
@@ -859,6 +887,7 @@ test_that("MarketAdjustedModel sd(residuals) uses na.rm=TRUE", {
 # --- Regression: FEC handles constant market returns without division by zero ---
 
 test_that("forecast_error_correction handles constant market returns", {
+  set.seed(261785)  # C7 (2026-09-24): deterministic seed
   # Bug: When all estimation-window market returns were constant,
   # sum((x - mean(x))^2) = 0 caused division by zero -> NaN in FEC sigma.
   # Test the base class method directly since MarketModel's lm() drops
@@ -913,6 +942,7 @@ test_that("BHARModel degree_of_freedom equals nrow(estimation_tbl) - 1", {
 # --- Regression: VolatilityModel handles zero-variance estimation window ---
 
 test_that("VolatilityModel warns and skips fitting when estimation returns are constant", {
+  set.seed(261839)  # C7 (2026-09-24): deterministic seed
   # Bug: When var(estimation_tbl$firm_returns) == 0 (constant returns),
   # division by zero in r^2/var produced Inf/NaN residuals.
   model <- VolatilityModel$new()
@@ -935,6 +965,7 @@ test_that("VolatilityModel warns and skips fitting when estimation returns are c
 # --- Regression: RollingWindowModel rejects effective window size < 3 ---
 
 test_that("RollingWindowModel warns when effective window size < 3", {
+  set.seed(261861)  # C7 (2026-09-24): deterministic seed
   # Bug: When ws < 3, sigma = sqrt(sum(resid^2) / (ws-2)) caused division
   # by zero (ws=2 -> denominator=0).
   skip_if_not_installed("sandwich")
@@ -1023,17 +1054,18 @@ test_that("MarketModel FEC uses effective obs count excluding NAs", {
 
   model$fit(data_tbl)
 
-  if (model$is_fitted) {
-    fec <- model$statistics$forecast_error_corrected_sigma
-    sigma <- model$statistics$sigma
+  # C5 (2026-09-24): n_valid = 110 >= n_params+1, so the model always fits;
+  # assert unconditionally instead of hiding the assertions behind a guard.
+  expect_true(model$is_fitted)
+  fec <- model$statistics$forecast_error_corrected_sigma
+  sigma <- model$statistics$sigma
 
-    # FEC should use n_valid = 110 (not n_total = 120)
-    # With 110 obs: correction factor sqrt(1 + 1/110 + ...) is larger
-    # than with 120 obs: sqrt(1 + 1/120 + ...)
-    # So FEC / sigma > sqrt(1 + 1/120) for all event days
-    min_ratio <- min(fec / sigma)
-    expect_gt(min_ratio, sqrt(1 + 1 / 120))
-  }
+  # FEC should use n_valid = 110 (not n_total = 120)
+  # With 110 obs: correction factor sqrt(1 + 1/110 + ...) is larger
+  # than with 120 obs: sqrt(1 + 1/120 + ...)
+  # So FEC / sigma > sqrt(1 + 1/120) for all event days
+  min_ratio <- min(fec / sigma)
+  expect_gt(min_ratio, sqrt(1 + 1 / 120))
 })
 
 
@@ -1055,7 +1087,9 @@ test_that("ARTTest/CARTTest with df=0 do not crash (dist_student_t guard)", {
   task <- EventStudyTask$new(firm_data, index_data, request)
   ps <- ParameterSet$new()
   task <- prepare_event_study(task, ps)
-  task <- fit_model(task, ps)
+  # C10 (2026-09-24): 3 estimation obs is INTENTIONALLY minimal (this test
+  # targets the df=0 dist_student_t guard, not the short-window advisory).
+  task <- muffle_short_window(fit_model(task, ps))
 
   model <- task$data_tbl$model[[1]]
   # With 3 obs and 2 params (intercept + slope), df should be 1
@@ -1168,6 +1202,7 @@ test_that("RollingWindowModel with NA data uses na.rm and validates params", {
 
 
 test_that("Bootstrap exceed counter handles NA comparisons", {
+  set.seed(262094)  # C7 (2026-09-24): deterministic seed
   task <- create_mock_task(n_firms = 2)
   ps <- ParameterSet$new()
   task <- run_event_study(task, ps)
@@ -1506,6 +1541,7 @@ test_that("LinearFactorModel maps p-values by name not position", {
 # ============================================================================
 
 test_that("ARTTest handles NULL sigma from unfitted model gracefully", {
+  set.seed(262432)  # C7 (2026-09-24): deterministic seed
   data <- create_mock_model_data(n_estimation = 50, n_event = 5)
   # Add abnormal_returns column (normally added by fit_model pipeline)
   data$abnormal_returns <- rnorm(nrow(data), 0, 0.01)
@@ -1517,6 +1553,7 @@ test_that("ARTTest handles NULL sigma from unfitted model gracefully", {
 })
 
 test_that("CARTTest handles NULL sigma from unfitted model gracefully", {
+  set.seed(262443)  # C7 (2026-09-24): deterministic seed
   data <- create_mock_model_data(n_estimation = 50, n_event = 5)
   data$abnormal_returns <- rnorm(nrow(data), 0, 0.01)
   unfitted <- MarketModel$new()
@@ -1645,6 +1682,7 @@ test_that("BHARModel warns with < 2 estimation obs", {
 })
 
 test_that("VolumeModel warns with < 2 estimation obs", {
+  set.seed(262571)  # C7 (2026-09-24): deterministic seed
   data <- create_mock_model_data(n_estimation = 1, n_event = 5)
   data$firm_volume <- abs(rnorm(nrow(data), 1000, 100))
   model <- VolumeModel$new()
