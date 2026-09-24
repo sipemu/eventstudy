@@ -264,6 +264,7 @@ test_that("synthetic control with no treatment effect has ATT near zero", {
 
 
 test_that("synthetic control handles unsorted treated_data correctly", {
+  set.seed(261190)  # C7 (2026-09-24): deterministic seed
   d <- create_sc_test_data(n_donors = 3, n_periods = 30, treatment_time = 16)
 
   # Shuffle the treated data rows (unsorted by time)
@@ -434,6 +435,7 @@ test_that("solve.QP failure (via mock) produces named warning and falls back to 
 
 
 test_that("empty donor pool (.solve_sc_optim n==0) warns and does not crash from max()", {
+  set.seed(261360)  # C7 (2026-09-24): deterministic seed
   # Directly exercise the empty-donor-pool guard in .solve_sc_optim via :::
   # Empty X: 10 rows, 0 columns (zero donors)
   y <- rnorm(10)
@@ -460,6 +462,7 @@ test_that("empty donor pool (.solve_sc_optim n==0) warns and does not crash from
 # --- CR-02 regression: empty donor pool at estimate_synthetic_control level ---
 
 test_that("estimate_synthetic_control: empty donor pool warns and returns invisible(NULL)", {
+  set.seed(261386)  # C7 (2026-09-24): deterministic seed
   # CR-02 regression: without the early guard, X_all %*% rep(NA, 0) yields a
   # zero vector so y_synth=0 and att = mean(y_treated[post]) — the raw treated
   # outcome level (maximally wrong plausible-looking result).

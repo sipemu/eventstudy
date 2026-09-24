@@ -100,6 +100,7 @@ test_that("plot_car_distribution with by_group", {
 })
 
 test_that("print.es_cross_sectional works", {
+  set.seed(261026)  # C7 (2026-09-24): deterministic seed
   task <- create_mock_task(n_firms = 4)
   ps <- ParameterSet$new()
   task <- run_event_study(task, ps)
@@ -184,9 +185,14 @@ test_that("cross_sectional_regression with car_window", {
 test_that("cross_sectional_regression errors on non-matching event_ids", {
   task <- create_fitted_mock_task()
   bad_data <- tibble::tibble(event_id = c(999, 998), x = c(1, 2))
-  expect_error(
-    cross_sectional_regression(task, ~ x, bad_data),
-    "No matching"
+  # A5 (2026-09-24): the unmatched-event warning fires before the "No
+  # matching" error (every task event is unmatched here).
+  expect_warning(
+    expect_error(
+      cross_sectional_regression(task, ~ x, bad_data),
+      "No matching"
+    ),
+    "no matching row"
   )
 })
 
@@ -236,6 +242,7 @@ test_that("singular design: emits at least one warning (not just a crash)", {
 
 
 test_that("sandwich absent: emits warning() naming robust SEs and OLS fallback", {
+  set.seed(261162)  # C7 (2026-09-24): deterministic seed
   # When sandwich is unavailable, the function must emit a warning (not
   # message) that names the lost capability.  We simulate absence by mocking
   # base::requireNamespace so that calls from cross_sectional.R see sandwich

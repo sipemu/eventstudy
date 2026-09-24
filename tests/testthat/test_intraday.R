@@ -67,9 +67,13 @@ test_that("IntradayEventStudyTask creates correctly", {
 })
 
 test_that("IntradayEventStudyTask errors on missing timestamp", {
+  set.seed(260993)  # C7 (2026-09-24): deterministic seed
+  # C7 (2026-09-24): fixed POSIXct fixture (UTC) instead of Sys.time(), so
+  # this test is deterministic regardless of when/where it runs.
+  fixed_time <- as.POSIXct("2024-01-15 09:30:00", tz = "UTC")
   firm <- tibble::tibble(
     symbol = "FIRM_A",
-    date = Sys.time() + 1:10,
+    date = fixed_time + 1:10,
     price = 100 + rnorm(10)
   )
   index <- create_mock_intraday_index()
@@ -82,9 +86,12 @@ test_that("IntradayEventStudyTask errors on missing timestamp", {
 })
 
 test_that("IntradayEventStudyTask errors on non-POSIXct timestamp", {
+  set.seed(261008)  # C7 (2026-09-24): deterministic seed
+  # C7 (2026-09-24): fixed POSIXct fixture (UTC) instead of Sys.time().
+  fixed_time <- as.POSIXct("2024-01-15 09:30:00", tz = "UTC")
   firm <- tibble::tibble(
     symbol = "FIRM_A",
-    timestamp = as.character(Sys.time() + 1:10),
+    timestamp = as.character(fixed_time + 1:10),
     price = 100 + rnorm(10)
   )
   index <- create_mock_intraday_index()
