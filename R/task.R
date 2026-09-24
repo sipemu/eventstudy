@@ -327,8 +327,17 @@ EventStudyTask = R6::R6Class(classname = "EventStudyTask",
                                  request_tbl %>%
                                    dplyr::select(event_id, group, firm_symbol, index_symbol) -> request_join_idx_tbl
 
+                                 # relationship = "many-to-many" (2026-09-24, C10 final gate): a
+                                 # firm_symbol recurring across multiple events (multiple request
+                                 # rows, one firm) genuinely produces a many-to-many join here --
+                                 # each of the firm's price rows must be duplicated once per event
+                                 # it belongs to, matching the many-to-many relationship dplyr's
+                                 # >=1.1.0 join diagnostics now warn about by default. This has
+                                 # always been the intended join shape (A4/GH#7); declaring it
+                                 # explicitly silences the diagnostic without changing any row.
                                  firm_tbl %>%
-                                   dplyr::left_join(request_join_idx_tbl, by = "firm_symbol") %>%
+                                   dplyr::left_join(request_join_idx_tbl, by = "firm_symbol",
+                                                     relationship = "many-to-many") %>%
                                    dplyr::left_join(reference_tbl, by = c("index_symbol", "date"))
                                }
                              )
