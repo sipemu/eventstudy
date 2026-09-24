@@ -35,4 +35,3 @@ and optional digit rounding. Falls back to \code{knitr::kable()} when
 \pkg{tinytable} is absent -- byte-identical to the prior scattered
 \code{knitr::kable()} call sites.
 }
-\keyword{internal}

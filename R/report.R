@@ -543,7 +543,6 @@ generate_report <- function(task,
 #'   pre-\code{sprintf()}-formatted tables to preserve byte-compatible output.
 #' @return \code{invisible(NULL)}. Side-effect: prints the table via
 #'   \code{knit_print}.
-#' @keywords internal
 #' @export
 report_table <- function(x, caption = NULL, col.names = NULL, digits = NULL) {
   if (!is.null(col.names)) {
