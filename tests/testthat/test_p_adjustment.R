@@ -129,3 +129,105 @@ test_that("adjust_p_values errors on unknown stat_name", {
   task <- create_fitted_mock_task()
   expect_error(adjust_p_values(task, stat_name = "NonExistent"), "not found")
 })
+
+
+# ============================================================
+# C1 (2026-09-24): explicit-formula tests for the KP, generalized-sign,
+# rank and calendar-time branches of adjust_p_values().
+# ============================================================
+
+test_that("C1: adjust_p_values KP branch matches explicit 2*pt(-abs(t), df)", {
+  set.seed(261101)
+  task <- create_mock_task(n_firms = 5)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(KolariPynnonenTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+  result <- adjust_p_values(task, method = "BH", stat_name = "KP")
+
+  df <- pmax(result$n_valid_events - 1, 1)
+  expected_p_raw_aar <- 2 * stats::pt(-abs(result$kp_t), df = df)
+  expected_p_raw_caar <- 2 * stats::pt(-abs(result$ckp_t), df = df)
+
+  expect_equal(result$p_raw_aar, expected_p_raw_aar, tolerance = 1e-12)
+  expect_equal(result$p_raw_caar, expected_p_raw_caar, tolerance = 1e-12)
+  expect_equal(result$p_adj_aar, stats::p.adjust(expected_p_raw_aar, method = "BH"),
+               tolerance = 1e-12)
+  expect_equal(result$p_adj_caar, stats::p.adjust(expected_p_raw_caar, method = "BH"),
+               tolerance = 1e-12)
+})
+
+
+test_that("C1: adjust_p_values GeneralizedSignTest branch matches explicit 2*pnorm(-abs(z))", {
+  set.seed(261102)
+  task <- create_mock_task(n_firms = 5)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(GeneralizedSignTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+  result <- adjust_p_values(task, method = "BH", stat_name = "GSignT")
+
+  expected_p_raw_aar <- 2 * stats::pnorm(-abs(result$gsign_z))
+  expected_p_raw_caar <- 2 * stats::pnorm(-abs(result$cgsign_z))
+
+  expect_equal(result$p_raw_aar, expected_p_raw_aar, tolerance = 1e-12)
+  expect_equal(result$p_raw_caar, expected_p_raw_caar, tolerance = 1e-12)
+  expect_equal(result$p_adj_aar, stats::p.adjust(expected_p_raw_aar, method = "BH"),
+               tolerance = 1e-12)
+  expect_equal(result$p_adj_caar, stats::p.adjust(expected_p_raw_caar, method = "BH"),
+               tolerance = 1e-12)
+})
+
+
+test_that("C1: adjust_p_values RankTest branch matches explicit 2*pnorm(-abs(z)); p_raw_caar is NA", {
+  set.seed(261103)
+  task <- create_mock_task(n_firms = 5)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(RankTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+  result <- adjust_p_values(task, method = "BH", stat_name = "RankT")
+
+  expected_p_raw_aar <- 2 * stats::pnorm(-abs(result$rank_z))
+
+  expect_equal(result$p_raw_aar, expected_p_raw_aar, tolerance = 1e-12)
+  expect_true(all(is.na(result$p_raw_caar)))
+  expect_equal(result$p_adj_aar, stats::p.adjust(expected_p_raw_aar, method = "BH"),
+               tolerance = 1e-12)
+})
+
+
+test_that("C1: adjust_p_values CalendarTimePortfolioTest branch matches explicit 2*pt(-abs(t), caltime_df)", {
+  set.seed(261104)
+  task <- create_mock_task(n_firms = 5)
+  ps <- ParameterSet$new(
+    multi_event_statistics = MultiEventStatisticsSet$new(
+      tests = list(CalendarTimePortfolioTest$new())
+    )
+  )
+  task <- run_event_study(task, ps)
+
+  # A7 (2026-09-24): caltime_df comes from attr(stat_tbl, "caltime_df"), the
+  # Brown-Warner estimation-window degrees of freedom -- read it directly
+  # from the un-adjusted CalTimeT result stored on the task, not re-derived.
+  caltime_tbl <- task$aar_caar_tbl$CalTimeT[[1]]
+  df <- max(attr(caltime_tbl, "caltime_df"), 1)
+
+  result <- adjust_p_values(task, method = "BH", stat_name = "CalTimeT")
+
+  expected_p_raw_aar <- 2 * stats::pt(-abs(result$caltime_t), df = df)
+  expected_p_raw_caar <- 2 * stats::pt(-abs(result$ccaltime_t), df = df)
+
+  expect_equal(result$p_raw_aar, expected_p_raw_aar, tolerance = 1e-12)
+  expect_equal(result$p_raw_caar, expected_p_raw_caar, tolerance = 1e-12)
+  expect_equal(result$p_adj_aar, stats::p.adjust(expected_p_raw_aar, method = "BH"),
+               tolerance = 1e-12)
+  expect_equal(result$p_adj_caar, stats::p.adjust(expected_p_raw_caar, method = "BH"),
+               tolerance = 1e-12)
+})
