@@ -35,7 +35,10 @@ utils::globalVariables(c(
   # Phase 4 (04-02): bootstrap n_car NSE column in bootstrap_test()
   "n_car",
   # 2026-09-24 re-evaluation fixes (A2/A3/A5/A6): new NSE columns
-  "m", "n_finite", "min_ri", "max_ri", "observed_caar"
+  "m", "n_finite", "min_ri", "max_ri", "observed_caar",
+  # 2026-09-24 re-evaluation fixes (A12): bootstrap_test() observed_car_stats
+  # select(..., caar_t) NSE column, missed alongside observed_caar above
+  "caar_t"
 ))
 
 #' @title EventStudy: Event Study Analysis in R
