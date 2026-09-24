@@ -183,6 +183,46 @@ test_that("export multiple CSVs creates all files", {
 })
 
 
+test_that("C8: export CSV AR/CAR/AAR round-trip preserves exact task values (2026-09-24)", {
+  task <- create_fitted_mock_task(n_firms = 3)
+  tmp_ar <- tempfile(fileext = ".csv")
+  tmp_car <- tempfile(fileext = ".csv")
+  tmp_aar <- tempfile(fileext = ".csv")
+  on.exit(unlink(c(tmp_ar, tmp_car, tmp_aar)), add = TRUE)
+
+  export_results(task, tmp_ar, which = "ar")
+  export_results(task, tmp_car, which = "car")
+  export_results(task, tmp_aar, which = "aar", stat_name = "CSectT")
+
+  ar_csv <- read.csv(tmp_ar)
+  car_csv <- read.csv(tmp_car)
+  aar_csv <- read.csv(tmp_aar)
+
+  first_event_id <- task$data_tbl$event_id[1]
+  first_event <- task$data_tbl$data[[1]] %>% dplyr::filter(event_window == 1)
+  first_event <- first_event[order(first_event$relative_index), ]
+
+  # AR: exported abnormal_returns exactly match the task's own event-window data.
+  ar_e1 <- ar_csv[ar_csv$event_id == first_event_id, ]
+  ar_e1 <- ar_e1[order(ar_e1$relative_index), ]
+  expect_equal(ar_e1$abnormal_returns, first_event$abnormal_returns, tolerance = 1e-10)
+
+  # CAR: exported car equals cumsum(AR) for the same event, exactly (CSV
+  # round-trips at ~15 significant digits).
+  car_e1 <- car_csv[car_csv$event_id == first_event_id, ]
+  car_e1 <- car_e1[order(car_e1$relative_index), ]
+  expect_equal(car_e1$car, cumsum(first_event$abnormal_returns), tolerance = 1e-10)
+
+  # AAR: exported CSectT aar/caar/caar_t equal the task's own aar_caar_tbl.
+  task_csect <- task$aar_caar_tbl$CSectT[[1]]
+  aar_ordered <- aar_csv[order(aar_csv$relative_index), ]
+  task_ordered <- task_csect[order(task_csect$relative_index), ]
+  expect_equal(aar_ordered$aar, task_ordered$aar, tolerance = 1e-10)
+  expect_equal(aar_ordered$caar, task_ordered$caar, tolerance = 1e-10)
+  expect_equal(aar_ordered$caar_t, task_ordered$caar_t, tolerance = 1e-10)
+})
+
+
 # --- Tidy edge cases (issue #3, gap #16) ---
 
 test_that("tidy AR with MarketAdjustedModel has sigma", {
