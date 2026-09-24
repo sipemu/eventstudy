@@ -106,7 +106,10 @@ test_that("PanelEventStudyTask print reports correct treated unit count", {
   expect_output(print(task), "10 unit\\(s\\)")
 })
 
-test_that("static_twfe estimates treatment effect", {
+test_that("static_twfe estimates treatment effect (golden check vs direct lm, C3 2026-09-24)", {
+  # C3 (2026-09-24): tighten the loose "within 1.0 of the true effect" bound
+  # to an exact golden check against a direct lm() fit on the same
+  # deterministic seeded fixture (create_mock_panel_data() seeds internally).
   panel <- create_mock_panel_data()
   task <- PanelEventStudyTask$new(panel)
 
@@ -116,11 +119,25 @@ test_that("static_twfe estimates treatment effect", {
   expect_equal(task$results$method, "static_twfe")
   coefs <- task$results$coefficients
   expect_true("estimate" %in% names(coefs))
-  # ATT should be close to the true effect of 2.0
-  expect_lt(abs(coefs$estimate[1] - 2.0), 1.0)
+
+  fit <- lm(outcome ~ treated + factor(unit_id) + factor(time_id), data = panel)
+  expected_estimate <- unname(stats::coef(fit)["treated"])
+  expect_equal(unname(coefs$estimate[1]), expected_estimate, tolerance = 1e-8)
+
+  # std.error depends on the optional sandwich package (cluster-robust SEs);
+  # pin it against sandwich::vcovCL() on the same fit when available.
+  skip_if_not_installed("sandwich")
+  expected_vcov <- sandwich::vcovCL(fit, cluster = panel$unit_id)
+  expected_se <- unname(sqrt(diag(expected_vcov))["treated"])
+  expect_equal(unname(coefs$std.error[1]), expected_se, tolerance = 1e-8)
 })
 
-test_that("dynamic_twfe produces event-time coefficients", {
+test_that("dynamic_twfe produces event-time coefficients matching direct lm (golden check, C3 2026-09-24)", {
+  # C3 (2026-09-24): tighten the loose bounds (< 3, mean > 0) to an exact
+  # golden check: hand-build the same event-time dummy design (leads=3,
+  # lags=3, base period -1) the package builds internally and compare every
+  # non-base coefficient to a direct lm() fit, on the deterministic seeded
+  # fixture create_mock_panel_data() produces.
   panel <- create_mock_panel_data()
   task <- PanelEventStudyTask$new(panel)
 
@@ -139,13 +156,34 @@ test_that("dynamic_twfe produces event-time coefficients", {
   base <- coefs %>% dplyr::filter(relative_time == -1)
   expect_equal(base$estimate, 0)
 
-  # Pre-treatment coefficients should be close to 0
-  pre <- coefs %>% dplyr::filter(relative_time < -1)
-  expect_true(all(abs(pre$estimate) < 3))
+  panel2 <- panel %>%
+    dplyr::mutate(
+      .rel_time = ifelse(is.na(treatment_time), NA_real_, time_id - treatment_time),
+      .rel_time_binned = dplyr::case_when(
+        is.na(.rel_time) ~ NA_real_,
+        .rel_time < -3 ~ -3,
+        .rel_time > 3 ~ 3,
+        TRUE ~ .rel_time
+      )
+    )
+  event_times <- sort(setdiff(unique(panel2$.rel_time_binned[!is.na(panel2$.rel_time_binned)]), -1))
+  for (k in event_times) {
+    col <- paste0(".D_", ifelse(k < 0, "m", "p"), abs(k))
+    panel2[[col]] <- ifelse(!is.na(panel2$.rel_time_binned) & panel2$.rel_time_binned == k, 1, 0)
+  }
+  dummy_names <- paste0(".D_", ifelse(event_times < 0, "m", "p"), abs(event_times))
+  fml <- stats::as.formula(paste(
+    "outcome ~", paste(c(dummy_names, "factor(unit_id)", "factor(time_id)"), collapse = " + ")
+  ))
+  fit <- lm(fml, data = panel2)
 
-  # Post-treatment should be positive (true effect = 2)
-  post <- coefs %>% dplyr::filter(relative_time >= 0)
-  expect_true(mean(post$estimate) > 0)
+  for (i in seq_along(event_times)) {
+    k <- event_times[i]
+    dn <- dummy_names[i]
+    expected <- unname(stats::coef(fit)[dn])
+    actual <- coefs$estimate[coefs$relative_time == k]
+    expect_equal(actual, expected, tolerance = 1e-8, label = paste("relative_time", k))
+  }
 })
 
 test_that("sun_abraham produces event-time coefficients with staggered treatment", {

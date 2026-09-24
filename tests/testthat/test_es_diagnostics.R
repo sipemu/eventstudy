@@ -143,17 +143,36 @@ test_that("DIAG-06: default max_events=20 on small task shows all events with NU
 })
 
 test_that("DIAG-06: degenerate (unfitted) event always appears in shown events regardless of CAR", {
-  # Build a 4-event task and corrupt one firm so its model doesn't fit
-  task_4 <- create_fitted_mock_task(n_firms = 4)
-  # Force one event to be unfitted by setting is_fitted indirectly:
-  # Create a task with 3 good events + 1 degenerate — use degenerate data helpers
-  # Build manually: create 4-firm task, run full pipeline, then corrupt one model
-  # Since R6 is mutable, set private$.is_fitted=FALSE on model[[1]] via test reflection
-  # We test the scoring logic: the model for event 1 will NOT be fitted,
-  # so anomaly_score = Inf and it must appear first
-  # Simpler: build task where 1 event has insufficient obs by patching its estimation data
-  # We can verify the ranking function works via a smaller unit test of the score
-  skip("Cannot mutate R6 private field externally; covered by score=Inf via is_fitted check in .rank_events_for_cap")
+  # C4 (2026-09-24): real test of .rank_events_for_cap -- build a 4-event
+  # task, then re-fit event 1's model on a degenerate (insufficient
+  # observations) estimation window so it is genuinely unfitted, expecting
+  # its single contract warning explicitly. The unfitted event's anomaly
+  # score must be Inf, so it is ALWAYS included in a capped top-N selection
+  # regardless of its (NA) CAR magnitude.
+  task <- create_fitted_mock_task(n_firms = 4)
+
+  degenerate_data <- create_degenerate_model_data_insufficient(n_valid = 1, n_event = 11)
+  mm <- MarketModel$new()
+  expect_warning(mm$fit(degenerate_data), "insufficient estimation observations")
+  expect_false(mm$is_fitted)
+
+  task$data_tbl$model[[1]] <- mm
+  # Its abnormal returns propagate to NA, matching a genuinely degenerate event.
+  task$data_tbl$data[[1]]$abnormal_returns <- NA_real_
+
+  ranking <- EventStudy:::.rank_events_for_cap(task)
+  expect_equal(ranking$anomaly_score[1], Inf)
+  expect_equal(ranking$row_idx[1], 1L)
+
+  # With a cap smaller than n_events, the unfitted event must still be
+  # included in the top-N selection.
+  cap <- 2L
+  top_idx <- ranking$row_idx[seq_len(cap)]
+  expect_true(1L %in% top_idx)
+
+  # And es_diagnostics() itself surfaces this via meta$event_ids_shown.
+  result <- es_diagnostics(task, max_events = cap)
+  expect_true(task$data_tbl$event_id[1] %in% result$meta$event_ids_shown)
 })
 
 test_that("DIAG-06: n_events_summarized equals n_total - n_events_shown", {
