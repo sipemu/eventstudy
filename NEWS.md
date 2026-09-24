@@ -148,6 +148,72 @@ for the full audit log and citations.
   structure (`n_events`, `per_event`, `mean_r_squared`, etc.) that did not
   exist on the returned object.
 
+## Testing (2026-09-24 re-evaluation)
+
+Test-suite quality hardening so vacuous or always-skip tests no longer mask
+regressions, and so the full `NOT_CRAN=true` suite runs with `WARN 0`
+(every warning a test triggers is now explicitly expected by class/regexp,
+or muffled at its source when the fixture is intentionally short).
+
+* **C1 -- `adjust_p_values()`** gains explicit-formula tests for its
+  KolariPynnonenTest, GeneralizedSignTest, RankTest and
+  CalendarTimePortfolioTest branches, comparing against
+  `2*pt(-abs(t), df)`/`2*pnorm(-abs(z))` directly.
+* **C2 -- Vacuous regression tests made real:** the bootstrap firm-clustering
+  test now hand-replicates the wild-bootstrap algorithm (one weight per
+  unique `firm_symbol`) and shows it differs from an event-level clustering
+  alternative on the same seed; the two Patell `Q_i` tests now assert the
+  exact `aar_z` from an independent hand computation (`k=2` and `k=4`); the
+  `LinearFactorModel` FEC test now asserts the exact hat-matrix value
+  `sigma*sqrt(1+h_t)`; the HAC-SE test now asserts equality with
+  `sandwich::NeweyWest()` on the same `lm()` fit.
+* **C3 -- Panel TWFE tests tightened to golden checks** against a direct
+  `lm()` two-way-fixed-effects fit on the same deterministic seeded fixture
+  (`static_twfe` estimate + cluster-robust SE; `dynamic_twfe` every
+  non-base event-time coefficient), replacing the previous loose numeric
+  bounds.
+* **C4 -- `.rank_events_for_cap()` real test:** an event genuinely unfitted
+  via a degenerate estimation window (with its one contract warning
+  asserted explicitly) is shown to always rank first (anomaly score `Inf`)
+  and always survive a `max_events` cap, replacing the previous
+  unconditional `skip()`.
+* **C5 -- DCC-GARCH / MarketModel FEC tests de-guarded:** the DCC-GARCH test
+  no longer swallows errors in a `tryCatch()`-to-`TRUE` handler; it now
+  asserts `is_fitted` unconditionally and skips ONLY on a narrowly-matched
+  non-convergence warning. The `MarketModel` FEC "effective obs count" test
+  no longer hides its assertions behind `if (is_fitted)`.
+* **C6 -- `.try_download()` narrowed** to convert only network/HTTP-style
+  failures into `skip()` (by condition class when available, otherwise a
+  narrow message pattern); any other error (a parse/logic bug) now fails
+  the test. Covered by two new direct tests of the helper itself.
+* **C7 -- Every `test_that()` block that draws random numbers without its
+  own seed now has one**, across `test_edge_cases.R`, `test_models.R`,
+  `test_multi_event_statistics.R`, `test_cross_sectional.R`,
+  `test_synthetic_control.R` and `test_intraday.R`; `test_intraday.R`'s
+  `Sys.time()`-based fixtures were replaced with fixed UTC `POSIXct`
+  literals.
+* **C8 -- High-value numeric assertions added** to `test_execute.R` (each
+  exercised model's `AR`/`alpha`/`beta` checked against a direct `lm()` or
+  arithmetic computation) and `test_export.R` (exported CSV `AR`/`CAR`/`AAR`
+  values checked to equal the task's own values, round-tripped through the
+  file).
+* **C9 -- Test-file organization:** the full-pipeline
+  `CalendarTimePortfolioTest` case moved from `test_bhar_test_statistics.R`
+  to `test_multi_event_statistics.R` (it is not a BHAR test); the
+  `browser()`-source-grep check in `test_aar_test_statistics.R` replaced
+  with a behavioural `PatellZTest$compute()` test against a hand
+  computation; the single weak test in `test_caar_test_statistics.R` folded
+  into a real numeric `CSectTTest` check.
+* **C10 -- No leaked warnings.** Every warning a test triggers is now either
+  asserted explicitly (`expect_warning(..., regexp =` / nested for multiple
+  independent warnings) or muffled by class via the new
+  `muffle_short_window()` helper (`tests/testthat/helper-warnings.R`) for
+  fixtures whose short estimation window is intentional (golden/invariant/
+  numerical-stability fixtures, never a blanket `suppressWarnings()`). A new
+  `test_execute.R` test locks that `fit_model()` collapses N short-window
+  events into exactly ONE `eventstudy_short_estimation_window` warning
+  listing the event ids.
+
 # EventStudy 0.66.0
 
 ## API Stabilization & Deprecation Lifecycle (Phase 28)
