@@ -184,12 +184,17 @@ MarketModel <- R6Class("MarketModel",
                            mode <- .resolve_degenerate_mode(self$degenerate_mode)
 
                            # --- Contract guard: insufficient estimation observations ---
+                           # A6 (2026-09-24): require n_valid >= n_params + 1, not a flat
+                           # 2. n_params is read from the formula (intercept + slope = 2
+                           # for the default MarketModel formula); sigma needs df >= 1.
+                           n_params <- .formula_n_params(self$formula)
                            n_valid <- sum(!is.na(estimation_tbl$firm_returns) &
                                            !is.na(estimation_tbl$index_returns))
-                           if (n_valid < 2) {
+                           if (n_valid < n_params + 1) {
                              .handle_degenerate(
                                mode        = mode,
-                               condition   = paste0("insufficient estimation observations (", n_valid, " valid, need 2)"),
+                               condition   = paste0("insufficient estimation observations (",
+                                                    n_valid, " valid, need ", n_params + 1, ")"),
                                component   = self$model_name,
                                event_id    = self$event_id,
                                firm_symbol = self$firm_symbol,
@@ -251,6 +256,20 @@ MarketModel <- R6Class("MarketModel",
                            if (is.null(res$error)) {
                              private$.fitted_model <- res$result
                              private$.is_fitted <- TRUE
+
+                             # A6 (2026-09-24): advisory (not degenerate) warning when the
+                             # model DOES fit but with fewer than the recommended minimum
+                             # estimation observations. Fires in BOTH modes -- it is not a
+                             # contract condition, just a plain warning() about reliability.
+                             if (n_valid < .MIN_ESTIMATION_OBS_RECOMMENDED) {
+                               ctx <- self$model_name
+                               if (!is.null(self$event_id))    ctx <- paste0(ctx, " [event_id=", self$event_id, "]")
+                               if (!is.null(self$firm_symbol)) ctx <- paste0(ctx, " [firm=", self$firm_symbol, "]")
+                               warning(ctx, ": estimation window has only ", n_valid,
+                                       " valid observations (recommended minimum ",
+                                       .MIN_ESTIMATION_OBS_RECOMMENDED,
+                                       "); estimates may be unreliable", call. = FALSE)
+                             }
 
                              # Calculate statistics
                              private$calculate_statistics(data_tbl)
@@ -315,6 +334,9 @@ MarketModel <- R6Class("MarketModel",
                            names(f_stat) <- NULL
                            private$.statistics$f_stat = f_stat
                            private$.statistics$degree_of_freedom = private$.fitted_model$df.residual
+                           # A6 (2026-09-24): number of estimated parameters (intercept +
+                           # slope), consumed by PatellZTest's Q_i adjustment.
+                           private$.statistics$n_params = length(private$.fitted_model$coefficients)
 
                            # HAC (Newey-West) standard errors
                            if (self$use_hac) {
@@ -349,12 +371,15 @@ MarketModel <- R6Class("MarketModel",
                            estimation_tbl = data_tbl %>% filter(estimation_window == 1)
                            event_window_tbl = data_tbl %>% filter(event_window == 1)
                            event_market_returns = event_window_tbl$index_returns
-                           estimation_market_returns = estimation_tbl$index_returns
-                           # Use actual non-NA obs count (lm drops NAs via na.omit)
-                           estimation_window_length = sum(
-                             !is.na(estimation_tbl$firm_returns) &
-                               !is.na(estimation_tbl$index_returns)
-                           )
+                           # A6 (2026-09-24): restrict to COMPLETE PAIRS only, so
+                           # mean(Rm_est) and SS_market use exactly the rows lm() used
+                           # (an incomplete-pair row -- firm NA, index finite -- was
+                           # previously still included in estimation_market_returns,
+                           # biasing the mean/SS away from what na.omit() dropped).
+                           complete_pairs = !is.na(estimation_tbl$firm_returns) &
+                             !is.na(estimation_tbl$index_returns)
+                           estimation_market_returns = estimation_tbl$index_returns[complete_pairs]
+                           estimation_window_length = sum(complete_pairs)
 
                            private$calculate_forecast_error_correction(modell_summary$sigma,
                                                                        estimation_window_length,
@@ -459,16 +484,20 @@ MarketAdjustedModel <- R6Class("MarketAdjustedModel",
                                    sigma = sd(residuals, na.rm = TRUE)
                                    private$.statistics$sigma = sigma
                                    private$.statistics$degree_of_freedom = sum(!is.na(residuals)) - 1
+                                   # A8 (2026-09-24): MarketAdjustedModel estimates NOTHING
+                                   # from the estimation window (abnormal return is purely
+                                   # arithmetic: firm - index), so 0 parameters are estimated.
+                                   private$.statistics$n_params = 0
 
-                                   # Constant-mean forecast error correction (no regression parameters estimated)
-                                   # Use finite-pair count (not nrow) so NA rows don't inflate denominator
-                                   # and understate the correction factor \u2014 WR-03 / MODELS-04 fix.
+                                   # A8 (2026-09-24): nothing is estimated, so the forecast
+                                   # error correction factor is exactly 1 --
+                                   # forecast_error_corrected_sigma == sigma. The previous
+                                   # sigma * sqrt(1 + 1/m) formula wrongly applied the
+                                   # constant-MEAN correction (which DOES estimate one
+                                   # parameter, the mean) to a model that estimates none.
                                    event_window_tbl = data_tbl %>% filter(event_window == 1)
                                    n_event = nrow(event_window_tbl)
-                                   n_valid_fec <- max(sum(!is.na(estimation_tbl$firm_returns) &
-                                                            !is.na(estimation_tbl$index_returns)), 1L)
-                                   correction = sigma * sqrt(1 + 1 / n_valid_fec)
-                                   private$.statistics$forecast_error_corrected_sigma = rep(correction, n_event)
+                                   private$.statistics$forecast_error_corrected_sigma = rep(sigma, n_event)
                                    private$.statistics$forecast_error_corrected_sigma_car = rep(0, n_event)
                                  }
                                )
@@ -571,6 +600,9 @@ ComparisonPeriodMeanAdjustedModel <- R6Class("ComparisonPeriodMeanAdjustedModel"
                                                  sigma = sd(residuals, na.rm = TRUE)
                                                  private$.statistics$sigma = sigma
                                                  private$.statistics$degree_of_freedom = sum(!is.na(residuals)) - 1
+                                                 # A6/A8 (2026-09-24): exactly one parameter is estimated
+                                                 # from the estimation window (the comparison-period mean).
+                                                 private$.statistics$n_params = 1
 
                                                  # Constant-mean forecast error correction (no regression)
                                                  # Use finite value count (not nrow) so NA rows don't inflate
@@ -669,14 +701,17 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                   mode <- .resolve_degenerate_mode(self$degenerate_mode)
 
                                   # --- Contract guard: insufficient estimation observations ---
+                                  # A6 (2026-09-24): require n_valid >= n_params + 1 (FF3 5,
+                                  # Carhart4 6, FF5 7), not a flat 2.
+                                  n_params <- .formula_n_params(self$formula)
                                   n_valid <- sum(stats::complete.cases(
                                     estimation_tbl[self$required_columns]
                                   ))
-                                  if (n_valid < 2) {
+                                  if (n_valid < n_params + 1) {
                                     .handle_degenerate(
                                       mode        = mode,
                                       condition   = paste0("insufficient estimation observations (",
-                                                           n_valid, " valid, need 2)"),
+                                                           n_valid, " valid, need ", n_params + 1, ")"),
                                       component   = self$model_name,
                                       event_id    = self$event_id,
                                       firm_symbol = self$firm_symbol,
@@ -695,6 +730,19 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                   if (is.null(res$error)) {
                                     private$.fitted_model <- res$result
                                     private$.is_fitted <- TRUE
+
+                                    # A6 (2026-09-24): advisory short-window warning (both
+                                    # modes), mirroring MarketModel.
+                                    if (n_valid < .MIN_ESTIMATION_OBS_RECOMMENDED) {
+                                      ctx <- self$model_name
+                                      if (!is.null(self$event_id))    ctx <- paste0(ctx, " [event_id=", self$event_id, "]")
+                                      if (!is.null(self$firm_symbol)) ctx <- paste0(ctx, " [firm=", self$firm_symbol, "]")
+                                      warning(ctx, ": estimation window has only ", n_valid,
+                                              " valid observations (recommended minimum ",
+                                              .MIN_ESTIMATION_OBS_RECOMMENDED,
+                                              "); estimates may be unreliable", call. = FALSE)
+                                    }
+
                                     private$calculate_statistics(data_tbl)
                                   } else {
                                     # lm() failure (e.g. full rank deficiency) is a
@@ -772,6 +820,9 @@ LinearFactorModel <- R6Class("LinearFactorModel",
                                   names(f_stat) <- NULL
                                   private$.statistics$f_stat <- f_stat
                                   private$.statistics$degree_of_freedom <- mod$df.residual
+                                  # A6 (2026-09-24): number of fitted coefficients (FF3 4,
+                                  # Carhart4 5, FF5 6), consumed by PatellZTest's Q_i.
+                                  private$.statistics$n_params <- length(coefs)
 
                                   # HAC (Newey-West) standard errors
                                   if (self$use_hac) {
@@ -1179,6 +1230,11 @@ GARCHModel <- R6Class("GARCHModel",
                            private$.statistics$garch_sigma <- cond_sigma
                            private$.statistics$degree_of_freedom <-
                              max(length(cond_sigma) - length(coefs), 1)
+                           # A6 (2026-09-24): the mean equation estimates 2 parameters
+                           # (mu, mxreg1 -- intercept + market-return coefficient); the
+                           # GARCH variance-equation parameters are not counted here as
+                           # they do not enter the Patell m-vs-k adjustment.
+                           private$.statistics$n_params <- 2
 
                            # Residuals
                            residuals <- as.numeric(rugarch::residuals(garch_fit))
@@ -1320,6 +1376,10 @@ BHARModel <- R6Class("BHARModel",
                           sigma <- sd(estimation_tbl$firm_returns -
                                         estimation_tbl$index_returns, na.rm = TRUE)
                           private$.statistics$sigma <- sigma
+                          # A6 (2026-09-24): BHARModel estimates nothing from the
+                          # estimation window (arithmetic firm-minus-index compounding,
+                          # like MarketAdjustedModel), so 0 parameters are estimated.
+                          private$.statistics$n_params <- 0
                           # Use .finite_residual_df() to count only non-NA rows (MODELS-03)
                           # nrow(estimation_tbl) would include NA rows, inflating df incorrectly.
                           bhar_residuals_finite <- estimation_tbl$firm_returns - estimation_tbl$index_returns
@@ -1464,6 +1524,9 @@ VolumeModel <- R6Class("VolumeModel",
                             sigma <- sd(residuals, na.rm = TRUE)
                             private$.statistics$sigma <- sigma
                             private$.statistics$degree_of_freedom <- sum(is.finite(residuals)) - 1
+                            # A6 (2026-09-24): VolumeModel estimates 1 parameter
+                            # from the estimation window (the expected/mean volume).
+                            private$.statistics$n_params <- 1
 
                             # Constant-mean forecast error correction (no regression)
                             event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)
@@ -1583,6 +1646,9 @@ VolatilityModel <- R6Class("VolatilityModel",
                                 sigma <- sd(residuals, na.rm = TRUE)
                                 private$.statistics$sigma <- sigma
                                 private$.statistics$degree_of_freedom <- sum(is.finite(residuals)) - 1
+                                # A6 (2026-09-24): VolatilityModel estimates 1
+                                # parameter (the expected/estimation variance).
+                                private$.statistics$n_params <- 1
 
                                 # Constant-mean forecast error correction (no regression)
                                 event_window_tbl <- data_tbl %>% dplyr::filter(event_window == 1)

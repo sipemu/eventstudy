@@ -81,34 +81,58 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                    alphas <- numeric(n_windows)
                                    betas <- numeric(n_windows)
                                    sigmas <- numeric(n_windows)
+                                   n_completes <- integer(n_windows)
 
                                    for (i in seq_len(n_windows)) {
                                      start <- i
                                      end <- i + ws - 1
-                                     y <- firm_ret[start:end]
-                                     x <- idx_ret[start:end]
+                                     y_win <- firm_ret[start:end]
+                                     x_win <- idx_ret[start:end]
 
-                                     x_bar <- mean(x, na.rm = TRUE)
-                                     y_bar <- mean(y, na.rm = TRUE)
-                                     ss_xx <- sum((x - x_bar)^2, na.rm = TRUE)
-                                     ss_xy <- sum((x - x_bar) * (y - y_bar), na.rm = TRUE)
+                                     # A1 (2026-09-24): restrict to COMPLETE PAIRS only
+                                     # (both firm and index finite) before computing
+                                     # x_bar/y_bar/ss_xx/ss_xy/residuals/sigma. Computing
+                                     # x_bar/ss_xx from ALL x values -- including rows
+                                     # where y is NA -- silently biases beta whenever the
+                                     # NA-y rows are not missing-at-random in x (e.g. an
+                                     # index outlier co-occurring with a missing firm
+                                     # return). This matches what lm(firm ~ index) would
+                                     # do on the same window (na.omit of incomplete rows).
+                                     complete <- is.finite(y_win) & is.finite(x_win)
+                                     y <- y_win[complete]
+                                     x <- x_win[complete]
+                                     n_complete <- length(x)
+                                     n_completes[i] <- n_complete
 
-                                     if (ss_xx > 0) {
-                                       betas[i] <- ss_xy / ss_xx
-                                       alphas[i] <- y_bar - betas[i] * x_bar
-                                       resid <- y - (alphas[i] + betas[i] * x)
-                                       n_valid_resid <- sum(!is.na(resid))
-                                       denom <- max(n_valid_resid - 2, 1)
-                                       sigmas[i] <- sqrt(sum(resid^2, na.rm = TRUE) / denom)
+                                     if (n_complete >= 3) {
+                                       x_bar <- mean(x)
+                                       y_bar <- mean(y)
+                                       ss_xx <- sum((x - x_bar)^2)
+                                       ss_xy <- sum((x - x_bar) * (y - y_bar))
+
+                                       if (ss_xx > 0) {
+                                         betas[i] <- ss_xy / ss_xx
+                                         alphas[i] <- y_bar - betas[i] * x_bar
+                                         resid <- y - (alphas[i] + betas[i] * x)
+                                         # sigma denominator = n_complete_pairs - 2, matching
+                                         # summary(lm())$sigma on the same complete-pair window.
+                                         denom <- max(n_complete - 2, 1)
+                                         sigmas[i] <- sqrt(sum(resid^2) / denom)
+                                       } else {
+                                         betas[i] <- NA_real_
+                                         alphas[i] <- y_bar
+                                         sigmas[i] <- stats::sd(y)
+                                       }
                                      } else {
                                        betas[i] <- NA_real_
-                                       alphas[i] <- y_bar
-                                       sigmas[i] <- stats::sd(y, na.rm = TRUE)
+                                       alphas[i] <- NA_real_
+                                       sigmas[i] <- NA_real_
                                      }
                                    }
 
                                    private$.rolling_params <- list(
-                                     alphas = alphas, betas = betas, sigmas = sigmas
+                                     alphas = alphas, betas = betas, sigmas = sigmas,
+                                     n_completes = n_completes, ws = ws
                                    )
 
                                    alpha_last <- utils::tail(alphas, 1)
@@ -170,18 +194,27 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                    private$.statistics$alpha <- alpha_last
                                    private$.statistics$beta <- beta_last
                                    private$.statistics$sigma <- sigma_last
-                                   # Residuals from last window
+                                   # A6 (2026-09-24): RollingWindowModel always estimates
+                                   # 2 parameters (alpha, beta) via OLS.
+                                   private$.statistics$n_params <- 2
+
+                                   # A1 (2026-09-24): use the SAME complete-pair count that
+                                   # produced the LAST window's alpha/beta/sigma in fit() --
+                                   # not a freshly recomputed n_valid_est/ws, which could
+                                   # disagree with the actual last-window row span (fit()'s
+                                   # window is a fixed ROW span of estimation_tbl, not a
+                                   # valid-count span) and silently mismatch the df used for
+                                   # the reported sigma.
                                    estimation_tbl <- data_tbl %>%
                                      dplyr::filter(estimation_window == 1)
-                                   # Use finite pair count (not nrow) so NA-heavy estimation windows
-                                   # do not inflate df and produce overly permissive t-statistics.
-                                   # fit() already uses n_valid for the min-obs guard; calculate_statistics()
-                                   # must match to stay consistent \u2014 WR-04 fix.
-                                   n_valid_est <- sum(!is.na(estimation_tbl$firm_returns) &
-                                                        !is.na(estimation_tbl$index_returns))
-                                   ws <- min(self$window_size, n_valid_est)
-                                   private$.statistics$degree_of_freedom <- max(ws - 2L, 1L)
-                                   last_window <- utils::tail(estimation_tbl, ws)
+                                   ws <- private$.rolling_params$ws
+                                   n_complete_last <- utils::tail(private$.rolling_params$n_completes, 1)
+                                   private$.statistics$degree_of_freedom <- max(n_complete_last - 2L, 1L)
+
+                                   last_window_full <- utils::tail(estimation_tbl, ws)
+                                   complete <- is.finite(last_window_full$firm_returns) &
+                                     is.finite(last_window_full$index_returns)
+                                   last_window <- last_window_full[complete, ]
                                    residuals <- last_window$firm_returns -
                                      (alpha_last + beta_last * last_window$index_returns)
                                    private$add_residuals(residuals)
@@ -189,11 +222,11 @@ RollingWindowModel <- R6Class("RollingWindowModel",
                                      private$first_order_autocorrelation(residuals)
                                    }
 
-                                   # Forecast error correction
+                                   # Forecast error correction (complete-pair last window)
                                    event_window_tbl <- data_tbl %>%
                                      dplyr::filter(event_window == 1)
                                    private$calculate_forecast_error_correction(
-                                     sigma_last, ws,
+                                     sigma_last, n_complete_last,
                                      last_window$index_returns,
                                      event_window_tbl$index_returns
                                    )
@@ -449,6 +482,10 @@ DCCGARCHModel <- R6Class("DCCGARCHModel",
                                private$.statistics$beta <- beta_last
                                private$.statistics$sigma <- mean(sigma_t, na.rm = TRUE)
                                private$.statistics$degree_of_freedom <- max(n_t - 4, 1)
+                               # A6 (2026-09-24): the mean equation is alpha + beta * index
+                               # (2 parameters); the DCC-GARCH variance/correlation
+                               # parameters are not counted here (see GARCHModel).
+                               private$.statistics$n_params <- 2
                                private$.statistics$beta_t <- beta_t
                                private$.statistics$sigma_t <- sigma_t
 
