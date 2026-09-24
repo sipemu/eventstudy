@@ -83,18 +83,44 @@ fit_model = function(task, parameter_set) {
   # call.  purrr::pmap-inside-dplyr::mutate is forbidden per plan (NSE
   # evaluation is untested in this context); the explicit seq_len approach is
   # deterministic and avoids NSE ambiguity.
-  task$data_tbl$model <- purrr::map(
-    seq_len(nrow(task$data_tbl)),
-    function(i) {
-      .initialize_and_fit_model(
-        task$data_tbl$data[[i]],
-        parameter_set$return_model,
-        degenerate_mode = mode,
-        event_id        = task$data_tbl$event_id[[i]],
-        firm_symbol     = task$data_tbl$firm_symbol[[i]]
-      )
+  # Per-event short-estimation-window advisories are collected and re-issued
+  # as ONE summary warning, so N short events give one warning, not N.
+  short_events <- list()
+  task$data_tbl$model <- withCallingHandlers(
+    purrr::map(
+      seq_len(nrow(task$data_tbl)),
+      function(i) {
+        .initialize_and_fit_model(
+          task$data_tbl$data[[i]],
+          parameter_set$return_model,
+          degenerate_mode = mode,
+          event_id        = task$data_tbl$event_id[[i]],
+          firm_symbol     = task$data_tbl$firm_symbol[[i]]
+        )
+      }
+    ),
+    eventstudy_short_estimation_window = function(w) {
+      short_events[[length(short_events) + 1L]] <<- w
+      invokeRestart("muffleWarning")
     }
   )
+  if (length(short_events) == 1L) {
+    warning(short_events[[1L]])
+  } else if (length(short_events) > 1L) {
+    ids   <- vapply(short_events, function(w) as.character(w$event_id %||% NA), character(1))
+    n_min <- min(vapply(short_events, function(w) as.numeric(w$n_valid), numeric(1)))
+    shown <- utils::head(ids, 10L)
+    msg <- paste0(length(short_events), " event(s) have fewer than ",
+                  .MIN_ESTIMATION_OBS_RECOMMENDED,
+                  " valid estimation observations (minimum ", n_min,
+                  "); estimates may be unreliable (event_id: ",
+                  paste(shown, collapse = ", "),
+                  if (length(ids) > length(shown)) ", ..." else "", ")")
+    warning(structure(
+      class = c("eventstudy_short_estimation_window", "warning", "condition"),
+      list(message = msg, call = NULL, event_id = ids, n_valid = n_min)
+    ))
+  }
 
   # Calculate abnormal returns for each event
   task$data_tbl = task$data_tbl %>%

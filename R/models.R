@@ -261,15 +261,9 @@ MarketModel <- R6Class("MarketModel",
                              # model DOES fit but with fewer than the recommended minimum
                              # estimation observations. Fires in BOTH modes -- it is not a
                              # contract condition, just a plain warning() about reliability.
-                             if (n_valid < .MIN_ESTIMATION_OBS_RECOMMENDED) {
-                               ctx <- self$model_name
-                               if (!is.null(self$event_id))    ctx <- paste0(ctx, " [event_id=", self$event_id, "]")
-                               if (!is.null(self$firm_symbol)) ctx <- paste0(ctx, " [firm=", self$firm_symbol, "]")
-                               warning(ctx, ": estimation window has only ", n_valid,
-                                       " valid observations (recommended minimum ",
-                                       .MIN_ESTIMATION_OBS_RECOMMENDED,
-                                       "); estimates may be unreliable", call. = FALSE)
-                             }
+                             if (n_valid < .MIN_ESTIMATION_OBS_RECOMMENDED)
+                               .warn_short_estimation_window(self$model_name, n_valid,
+                                                             self$event_id, self$firm_symbol)
 
                              # Calculate statistics
                              private$calculate_statistics(data_tbl)
@@ -733,15 +727,9 @@ LinearFactorModel <- R6Class("LinearFactorModel",
 
                                     # A6 (2026-09-24): advisory short-window warning (both
                                     # modes), mirroring MarketModel.
-                                    if (n_valid < .MIN_ESTIMATION_OBS_RECOMMENDED) {
-                                      ctx <- self$model_name
-                                      if (!is.null(self$event_id))    ctx <- paste0(ctx, " [event_id=", self$event_id, "]")
-                                      if (!is.null(self$firm_symbol)) ctx <- paste0(ctx, " [firm=", self$firm_symbol, "]")
-                                      warning(ctx, ": estimation window has only ", n_valid,
-                                              " valid observations (recommended minimum ",
-                                              .MIN_ESTIMATION_OBS_RECOMMENDED,
-                                              "); estimates may be unreliable", call. = FALSE)
-                                    }
+                                    if (n_valid < .MIN_ESTIMATION_OBS_RECOMMENDED)
+                                      .warn_short_estimation_window(self$model_name, n_valid,
+                                                                    self$event_id, self$firm_symbol)
 
                                     private$calculate_statistics(data_tbl)
                                   } else {

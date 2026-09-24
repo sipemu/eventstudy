@@ -79,6 +79,26 @@ NULL
 #' @noRd
 .MIN_ESTIMATION_OBS_RECOMMENDED <- 30L
 
+# A6 advisory: a model fitted on fewer than the recommended number of valid
+# estimation observations. Signalled with a class so fit_model() can collapse
+# the per-event warnings into ONE summary warning, and tests can expect it by
+# class rather than by message.
+#' @noRd
+.warn_short_estimation_window <- function(model_name, n_valid,
+                                          event_id = NULL, firm_symbol = NULL) {
+  ctx <- model_name
+  if (!is.null(event_id))    ctx <- paste0(ctx, " [event_id=", event_id, "]")
+  if (!is.null(firm_symbol)) ctx <- paste0(ctx, " [firm=", firm_symbol, "]")
+  msg <- paste0(ctx, ": estimation window has only ", n_valid,
+                " valid observations (recommended minimum ",
+                .MIN_ESTIMATION_OBS_RECOMMENDED, "); estimates may be unreliable")
+  cond <- structure(
+    class = c("eventstudy_short_estimation_window", "warning", "condition"),
+    list(message = msg, call = NULL, event_id = event_id, n_valid = n_valid)
+  )
+  warning(cond)
+}
+
 
 #' Number of estimated parameters implied by an OLS formula
 #'
