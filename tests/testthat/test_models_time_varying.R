@@ -135,27 +135,41 @@ test_that("RollingWindowModel degree_of_freedom is window_size - 2", {
 })
 
 
-test_that("DCCGARCHModel requires rmgarch", {
+test_that("DCCGARCHModel fits and produces finite statistics on valid data (C5, 2026-09-24)", {
   skip_if_not_installed("rmgarch")
   skip_if_not_installed("rugarch")
 
+  # C5 (2026-09-24): no tryCatch()-swallowed error, no `if (is_fitted)` guard.
+  # Capture warnings (not errors) with withCallingHandlers; skip ONLY when the
+  # fit did not converge AND a captured condition narrowly matches a
+  # non-convergence pattern. Any other error fails the test.
   data <- create_mock_model_data(n_estimation = 200)
   dcc <- DCCGARCHModel$new()
 
-  tryCatch({
-    dcc$fit(data)
-    if (dcc$is_fitted) {
-      expect_false(is.null(dcc$statistics$beta))
-      expect_false(is.null(dcc$statistics$beta_t))
-      expect_true(length(dcc$statistics$beta_t) > 0)
-
-      result <- dcc$abnormal_returns(data)
-      expect_true("abnormal_returns" %in% names(result))
+  captured_msgs <- character(0)
+  withCallingHandlers(
+    dcc$fit(data),
+    warning = function(w) {
+      captured_msgs <<- c(captured_msgs, conditionMessage(w))
+      invokeRestart("muffleWarning")
     }
-  }, error = function(e) {
-    # DCC fitting can fail with small/synthetic data
-    expect_true(TRUE)
-  })
+  )
+
+  if (!dcc$is_fitted) {
+    convergence_msgs <- captured_msgs[grepl("converg", captured_msgs, ignore.case = TRUE)]
+    if (length(convergence_msgs) > 0) {
+      skip(paste("DCCGARCHModel did not converge:", convergence_msgs[1]))
+    }
+  }
+
+  expect_true(dcc$is_fitted)
+  expect_false(is.null(dcc$statistics$beta))
+  expect_false(is.null(dcc$statistics$beta_t))
+  expect_true(length(dcc$statistics$beta_t) > 0)
+
+  result <- dcc$abnormal_returns(data)
+  expect_true("abnormal_returns" %in% names(result))
+  expect_true(any(is.finite(result$abnormal_returns[data$event_window == 1])))
 })
 
 
