@@ -41,36 +41,7 @@ test_that("BHARModel calculates compound returns correctly", {
   expect_equal(nrow(result), nrow(data))
 })
 
-test_that("CalendarTimePortfolioTest computes portfolio test", {
-  task <- create_mock_task(n_firms = 3)
-  ps <- ParameterSet$new()
-  task <- run_event_study(task, ps)
-
-  # Get unnested event window data
-  data_tbl <- task$data_tbl %>%
-    dplyr::select(event_id, group, firm_symbol, data) %>%
-    tidyr::unnest(data)
-
-  # Get model tibble
-  model_tbl <- task$data_tbl %>%
-    dplyr::select(event_id, group, firm_symbol, model) %>%
-    dplyr::group_by(group) %>%
-    tidyr::nest() %>%
-    dplyr::rename(model = data)
-
-  group_data <- data_tbl %>%
-    dplyr::group_by(group) %>%
-    tidyr::nest()
-
-  caltime <- CalendarTimePortfolioTest$new()
-  result <- caltime$compute(group_data$data[[1]], model_tbl$model[[1]])
-
-  expect_true("aar" %in% names(result))
-  expect_true("caar" %in% names(result))
-  expect_true("caltime_t" %in% names(result))
-  expect_true("ccaltime_t" %in% names(result))
-  expect_true("car_window" %in% names(result))
-
-  expect_true(all(is.finite(result$aar)))
-  expect_true(all(is.finite(result$caar)))
-})
+# C9 (2026-09-24): the full-pipeline "CalendarTimePortfolioTest computes
+# portfolio test" case that used to live here was moved to
+# test_multi_event_statistics.R (alongside the other CalendarTimePortfolioTest
+# coverage) since it is not a BHAR test.
