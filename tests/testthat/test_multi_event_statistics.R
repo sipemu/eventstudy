@@ -156,6 +156,7 @@ test_that("PatellZTest computes correctly", {
 
 
 test_that("PatellZTest uses forecast-error-corrected sigma for standardization (GH #6)", {
+  set.seed(261082)  # C7 (2026-09-24): deterministic seed
   # Construct minimal 2-firm data with known ARs and per-day FEC sigmas
   n_est = 20
   n_ev = 3
@@ -295,6 +296,46 @@ test_that("CalendarTimePortfolioTest computes correctly", {
 })
 
 
+# C9 (2026-09-24): relocated from test_bhar_test_statistics.R (it is not a
+# BHAR test; it belongs with the rest of the CalendarTimePortfolioTest
+# coverage). Not a duplicate of the compute() test directly above: this one
+# exercises the test through the FULL run_event_study() pipeline (real
+# estimation-window ARs from a fitted model, not a hand-built fixture).
+test_that("CalendarTimePortfolioTest computes portfolio test (full pipeline)", {
+  task <- create_mock_task(n_firms = 3)
+  ps <- ParameterSet$new()
+  task <- run_event_study(task, ps)
+
+  # Get unnested event window data
+  data_tbl <- task$data_tbl %>%
+    dplyr::select(event_id, group, firm_symbol, data) %>%
+    tidyr::unnest(data)
+
+  # Get model tibble
+  model_tbl <- task$data_tbl %>%
+    dplyr::select(event_id, group, firm_symbol, model) %>%
+    dplyr::group_by(group) %>%
+    tidyr::nest() %>%
+    dplyr::rename(model = data)
+
+  group_data <- data_tbl %>%
+    dplyr::group_by(group) %>%
+    tidyr::nest()
+
+  caltime <- CalendarTimePortfolioTest$new()
+  result <- caltime$compute(group_data$data[[1]], model_tbl$model[[1]])
+
+  expect_true("aar" %in% names(result))
+  expect_true("caar" %in% names(result))
+  expect_true("caltime_t" %in% names(result))
+  expect_true("ccaltime_t" %in% names(result))
+  expect_true("car_window" %in% names(result))
+
+  expect_true(all(is.finite(result$aar)))
+  expect_true(all(is.finite(result$caar)))
+})
+
+
 test_that("KolariPynnonenTest name is correct", {
   expect_equal(KolariPynnonenTest$new()$name, "KP")
 })
@@ -341,8 +382,12 @@ test_that("KolariPynnonenTest with 1 firm does not error", {
   kp = KolariPynnonenTest$new()
 
   # With 1 firm, BMP itself produces NaN (sd of single value),
-  # so KP will also produce NaN — the key is it doesn't error
-  expect_no_error(result <- kp$compute(md$data, md$model))
+  # so KP will also produce NaN — the key is it doesn't error. A3 (2026-09-24):
+  # fewer than 2 usable events also emits exactly one contract warning.
+  expect_warning(
+    expect_no_error(result <- kp$compute(md$data, md$model)),
+    "fewer than 2 usable events"
+  )
   expect_equal(nrow(result), 11)
   expect_true("kp_t" %in% names(result))
   expect_true("ckp_t" %in% names(result))
@@ -387,9 +432,44 @@ test_that("KolariPynnonenTest works in full pipeline", {
 
 # --- Regression: PatellZTest Q_i adapts to model parameters ---
 
-test_that("PatellZTest Q_i uses correct k for MarketModel (k=2)", {
+#' Hand-computed Patell aar_z, independent of PatellZTest$compute()'s own
+#' code path (C2, 2026-09-24). Reads only the fitted task's per-event
+#' estimation-window abnormal returns, forecast-error-corrected sigma and
+#' `k` (number of estimated parameters), and applies
+#' Q_i = (m - k) / (m - k - 2), aar_z = sum_i(sar_i) / sqrt(sum_i(Q_i)).
+.hand_patell_aar_z <- function(task, k) {
+  events <- task$data_tbl
+  per_event <- lapply(seq_len(nrow(events)), function(i) {
+    d   <- events$data[[i]]
+    mdl <- events$model[[i]]
+    m   <- sum(is.finite(d$abnormal_returns[d$estimation_window == 1]))
+    Q_i <- if (m > k + 2) (m - k) / (m - k - 2) else 1
+    fec <- mdl$statistics$forecast_error_corrected_sigma
+    ev  <- d[d$event_window == 1, ]
+    ev  <- ev[order(ev$relative_index), ]
+    sar <- ev$abnormal_returns / fec
+    list(relative_index = ev$relative_index, sar = sar, Q_i = Q_i)
+  })
+
+  Q_total <- sqrt(sum(vapply(per_event, function(x) x$Q_i, numeric(1))))
+  all_ri <- sort(unique(unlist(lapply(per_event, function(x) x$relative_index))))
+  aar_z <- vapply(all_ri, function(ri) {
+    total <- sum(vapply(per_event, function(x) {
+      idx <- match(ri, x$relative_index)
+      if (is.na(idx)) return(0)
+      s <- x$sar[idx]
+      if (is.na(s)) 0 else s
+    }, numeric(1)))
+    total / Q_total
+  }, numeric(1))
+
+  tibble::tibble(relative_index = all_ri, aar_z = aar_z)
+}
+
+
+test_that("PatellZTest Q_i uses correct k for MarketModel (k=2) — hand computation (C2, 2026-09-24)", {
   # Bug: Q_i was hardcoded as (m-2)/(m-4), correct only for k=2.
-  # Fix: Now extracts k from model degree_of_freedom.
+  # Fix: Now extracts k from model$statistics$n_params.
   task <- create_mock_task(n_firms = 3)
   ps <- ParameterSet$new(
     multi_event_statistics = MultiEventStatisticsSet$new(
@@ -401,11 +481,20 @@ test_that("PatellZTest Q_i uses correct k for MarketModel (k=2)", {
   patell <- task$aar_caar_tbl$PatellZ[[1]]
   expect_true("aar_z" %in% names(patell))
   expect_true(all(is.finite(patell$aar_z)))
+
+  # Every fitted event's model reports n_params == 2 (MarketModel).
+  n_params <- vapply(task$data_tbl$model, function(m) m$statistics$n_params, numeric(1))
+  expect_true(all(n_params == 2))
+
+  expected <- .hand_patell_aar_z(task, k = 2)
+  merged <- dplyr::inner_join(patell, expected, by = "relative_index", suffix = c("", "_hand"))
+  expect_equal(nrow(merged), nrow(patell))
+  expect_equal(merged$aar_z, merged$aar_z_hand, tolerance = 1e-10)
 })
 
 
-test_that("PatellZTest Q_i adapts for multi-factor models (k>2)", {
-  # For FF3 (k=4), Q_i should be (m-4)/(m-6) instead of (m-2)/(m-4)
+test_that("PatellZTest Q_i adapts for multi-factor models (k=4) — hand computation (C2, 2026-09-24)", {
+  # For FF3 (k=4), Q_i = (m-4)/(m-6) instead of (m-2)/(m-4).
   task <- create_mock_task_with_factors(n_firms = 3)
   ps <- ParameterSet$new(
     return_model = FamaFrench3FactorModel$new(),
@@ -418,9 +507,15 @@ test_that("PatellZTest Q_i adapts for multi-factor models (k>2)", {
   patell <- task$aar_caar_tbl$PatellZ[[1]]
   expect_true("aar_z" %in% names(patell))
   expect_true(all(is.finite(patell$aar_z)))
-  # With k=4 and typical m~120, Q_i = (120-4)/(120-6) ≈ 1.0175
-  # vs old Q_i = (120-2)/(120-4) ≈ 1.0172 -- similar but different
   expect_true(all(is.finite(patell$caar_z)))
+
+  n_params <- vapply(task$data_tbl$model, function(m) m$statistics$n_params, numeric(1))
+  expect_true(all(n_params == 4))
+
+  expected <- .hand_patell_aar_z(task, k = 4)
+  merged <- dplyr::inner_join(patell, expected, by = "relative_index", suffix = c("", "_hand"))
+  expect_equal(nrow(merged), nrow(patell))
+  expect_equal(merged$aar_z, merged$aar_z_hand, tolerance = 1e-10)
 })
 
 
@@ -459,7 +554,12 @@ test_that("CalendarTimePortfolioTest uses caltime_t/ccaltime_t column names", {
   }))
 
   ct <- CalendarTimePortfolioTest$new()
-  result <- ct$compute(data, NULL)
+  # A7 (2026-09-24): no estimation_window rows in this fixture -> the
+  # Brown-Warner time-series sd is undefined, reported once via the contract.
+  expect_warning(
+    result <- ct$compute(data, NULL),
+    "insufficient estimation-window AAR observations"
+  )
 
   # New column names should be present
 
@@ -803,6 +903,7 @@ test_that("STATS-03: SignTest mid-window NA gap does not corrupt post-gap CAAR",
 # ============================================================
 
 test_that("WR-01: PatellZTest Q_total excludes degenerate events — degenerate events must not change valid-event z-scores", {
+  set.seed(261729)  # C7 (2026-09-24): deterministic seed
   # Build a 2-firm dataset where E1 is valid and E2 is degenerate (all-NA fec_sigma).
   # Before WR-01 fix, E2's Q_i = 1 (fallback) inflates Q_total and deflates E1's z-score.
   # After fix, Q_total is computed from valid events only, so the z-score for the valid
@@ -857,7 +958,12 @@ test_that("WR-01: PatellZTest Q_total excludes degenerate events — degenerate 
                                    residuals = NULL, degree_of_freedom = NA_real_)))
     )
   )
-  result_mixed <- PatellZTest$new()$compute(d_mixed, model_mixed)
+  # A2 (2026-09-24): E3's event-window ARs are entirely NA -> excluded with
+  # exactly one contract warning naming it.
+  expect_warning(
+    result_mixed <- PatellZTest$new()$compute(d_mixed, model_mixed),
+    "excluded from multi-event statistics"
+  )
 
   # After WR-01 fix, valid-event z-scores must match the valid-only result
   day0_valid <- result_valid_only[result_valid_only$relative_index == 0L, ]
