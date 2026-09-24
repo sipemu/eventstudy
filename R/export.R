@@ -362,7 +362,14 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
       t_dist_cols <- c("aar_t", "bmp_t", "kp_t", "caltime_t",
                         "caar_t", "cbmp_t", "ckp_t", "ccaltime_t")
 
-      .compute_pval <- function(stat_vals, col_name, n_valid) {
+      # A7 (2026-09-24): caltime_t/ccaltime_t use the Brown-Warner
+      # ESTIMATION-window df (attr(tbl, "caltime_df")), not the cross-sectional
+      # n_valid - 1 used by every other t-distributed statistic.
+      .compute_pval <- function(stat_vals, col_name, n_valid, stat_tbl = NULL) {
+        if (col_name %in% c("caltime_t", "ccaltime_t")) {
+          df <- .get_caltime_df(stat_tbl)
+          return(2 * stats::pt(abs(stat_vals), df = df, lower.tail = FALSE))
+        }
         if (col_name %in% t_dist_cols) {
           df <- pmax(n_valid - 1, 1)  # guard: df must be >= 1 for pt()
           2 * stats::pt(abs(stat_vals), df = df, lower.tail = FALSE)
@@ -381,12 +388,12 @@ tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
           } else NA_real_,
           statistic = if (length(t_col) > 0) .data[[t_col[1]]] else NA_real_,
           p.value   = if (length(t_col) > 0) {
-            .compute_pval(.data[[t_col[1]]], t_col[1], n_valid_events)
+            .compute_pval(.data[[t_col[1]]], t_col[1], n_valid_events, tbl)
           } else NA_real_,
           caar      = caar,
           caar_statistic = if (length(ct_col) > 0) .data[[ct_col[1]]] else NA_real_,
           caar_p.value   = if (length(ct_col) > 0) {
-            .compute_pval(.data[[ct_col[1]]], ct_col[1], n_valid_events)
+            .compute_pval(.data[[ct_col[1]]], ct_col[1], n_valid_events, tbl)
           } else NA_real_
         )
     }

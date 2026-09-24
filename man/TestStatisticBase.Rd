@@ -14,9 +14,15 @@ Base class for Event Study test statistics
     \item{\code{confidence_level}}{The chosen confidence
 level.}
 
-    \item{\code{confidence_type}}{Type of the test. Defaults
-to 'two-sided'. Alternatives are 'less' or
-greater'.}
+    \item{\code{confidence_type}}{Side of the test. One of
+\code{"two-sided"} (default), \code{"less"} or
+\code{"greater"}. A10 (2026-09-24): every p-value
+computed anywhere in EventStudy is currently
+two-sided; a non-default value is validated but
+has NO effect on any computed statistic -- it is
+stored and a one-time warning is emitted at
+construction. One-sided p-values are not
+implemented.}
   }
   \if{html}{\out{</div>}}
 }
@@ -46,7 +52,12 @@ greater' or 'two-sided')
       \item{\code{confidence_level}}{The confidence level for
 the confidence band. Must be anumber between 0
 and 1.}
-      \item{\code{confidence_type}}{Side of the test statistic.}
+      \item{\code{confidence_type}}{Side of the test statistic:
+\code{"two-sided"} (default), \code{"less"} or
+\code{"greater"}. Every p-value in EventStudy is
+currently two-sided; supplying \code{"less"} or
+\code{"greater"} emits one warning that the value
+is stored but ignored by every compute() method.}
     }
     \if{html}{\out{</div>}}
   }

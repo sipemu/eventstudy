@@ -1,3 +1,24 @@
+#' Degrees of freedom for the Calendar-Time Portfolio Test
+#'
+#' A7 (2026-09-24): \code{\link{CalendarTimePortfolioTest}} attaches the
+#' Brown-Warner estimation-window degrees of freedom as
+#' \code{attr(result, "caltime_df")}. This helper reads it, floored at 1 for
+#' \code{stats::pt()}. A CalTime result tibble created before this attribute
+#' was introduced (e.g. constructed by hand in an older script/cache) falls
+#' back to the LEGACY cross-sectional \code{nrow(stat_tbl) - 1} so old code
+#' does not error -- new code always has the attribute set.
+#'
+#' @param stat_tbl A CalTimeT result tibble (single group).
+#' @noRd
+.get_caltime_df <- function(stat_tbl) {
+  df <- attr(stat_tbl, "caltime_df")
+  if (!is.null(df) && length(df) == 1 && is.finite(df)) {
+    return(max(df, 1))
+  }
+  max(nrow(stat_tbl) - 1, 1)
+}
+
+
 #' Adjust P-Values for Multiple Testing
 #'
 #' Computes adjusted p-values for AAR and CAAR test statistics across the
@@ -94,9 +115,10 @@ adjust_p_values <- function(task, method = "BH", stat_name = "CSectT",
       p_raw_aar <- 2 * stats::pnorm(abs(stat_col), lower.tail = FALSE)
       p_raw_caar <- rep(NA_real_, length(stat_col))
     } else if ("caltime_t" %in% names(stat_tbl)) {
-      # CalTimeT uses time-series df (n_periods - 1), not cross-sectional df
-      n_periods <- nrow(stat_tbl)
-      df <- pmax(n_periods - 1, 1)
+      # A7 (2026-09-24): CalTimeT uses the Brown-Warner ESTIMATION-window
+      # time-series df (attr(stat_tbl, "caltime_df")), not a cross-sectional
+      # or event-window-derived df.
+      df <- .get_caltime_df(stat_tbl)
       stat_col <- stat_tbl$caltime_t
       p_raw_aar <- 2 * stats::pt(abs(stat_col), df = df, lower.tail = FALSE)
       caar_col <- stat_tbl$ccaltime_t
