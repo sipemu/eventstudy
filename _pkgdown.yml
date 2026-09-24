@@ -98,6 +98,7 @@ reference:
       R6 model classes for estimating normal returns and computing abnormal
       returns, plus return-calculation strategy classes.
     contents:
+      - ModelBase
       - MarketModel
       - MarketAdjustedModel
       - ComparisonPeriodMeanAdjustedModel
@@ -111,6 +112,7 @@ reference:
       - BHARModel
       - VolumeModel
       - VolatilityModel
+      - ReturnCalculation
       - SimpleReturn
       - LogReturn
 
@@ -119,6 +121,7 @@ reference:
       Single-event (AR/CAR) and multi-event (AAR/CAAR) test statistic classes
       and their container sets.
     contents:
+      - TestStatisticBase
       - ARTTest
       - CARTTest
       - BHARTTest
@@ -192,6 +195,7 @@ reference:
       - export_results
       - es_report
       - generate_report
+      - report_table
       - tidy.EventStudyTask
 
   - title: "Plotting"
@@ -216,14 +220,20 @@ reference:
       - download_stock_data
       - download_factor_data
       - download_risk_free_rate
-      - has_keyword("datasets")
+      - dieselgate
+      - earnings_surprises
+
+  - title: "Contracts & Lifecycle"
+    desc: >
+      Shared degenerate-input handling contract, structural shape contracts,
+      and the package's deprecation policy.
+    contents:
+      - degenerate-input-contract
+      - eventstudy-shape-contracts
+      - eventstudy-deprecation
 
   - title: internal
     contents:
-      - ModelBase
-      - ReturnCalculation
-      - TestStatisticBase
-      - degenerate-input-contract
       - starts_with("print.")
       - starts_with("format.")
 
@@ -234,6 +244,7 @@ articles:
       advanced designs — with formulas, assumptions, and references.
     contents:
       - articles/smoke-test
+      - statistical-conventions
       - articles/methods-return-models
       - articles/methods-test-statistics
       - articles/methods-panel-did

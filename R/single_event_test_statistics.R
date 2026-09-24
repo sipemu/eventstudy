@@ -1,4 +1,30 @@
-#' Base class for Event Study test statistics
+#' @title TestStatisticBase
+#' @description Base (abstract) class for single-event and multi-event test
+#' statistics. Subclass this to plug a custom test statistic into
+#' \code{calculate_statistics()} / \code{run_event_study()}.
+#'
+#' A subclass must implement \code{compute(data_tbl, model)}:
+#' \itemize{
+#'   \item \code{data_tbl} -- a single event's rows with an
+#'     \code{abnormal_returns} column already populated by the fitted model.
+#'   \item \code{model} -- the fitted \code{ModelBase} (or list-mock)
+#'     instance for that event; its \code{statistics} field carries
+#'     \code{sigma}, \code{degree_of_freedom}, \code{residuals} and (since
+#'     2026-09-24) \code{n_params}.
+#' }
+#' \code{compute()} returns a tibble with the statistic's result columns for
+#' that event; multi-event subclasses (see \code{R/multi_event_test_statistics.R})
+#' aggregate across all events in a group.
+#'
+#' \code{confidence_level} and \code{confidence_type} are validated and
+#' stored at construction (\code{confidence_type} must be one of
+#' \code{"two-sided"} (default), \code{"less"} or \code{"greater"}); every
+#' p-value computed anywhere in EventStudy is currently two-sided, so a
+#' non-default \code{confidence_type} is accepted but ignored, with one
+#' warning at construction (A10, 2026-09-24).
+#'
+#' @family eventstudy-statistics
+#' @export
 TestStatisticBase <- R6Class("TestStatisticBase",
                                     public = list(
                                       #' @field name Short code of the test statistic.

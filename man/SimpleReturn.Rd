@@ -19,6 +19,8 @@ Other eventstudy-models:
 \code{\link{LogReturn}},
 \code{\link{MarketAdjustedModel}},
 \code{\link{MarketModel}},
+\code{\link{ModelBase}},
+\code{\link{ReturnCalculation}},
 \code{\link{RollingWindowModel}},
 \code{\link{VolatilityModel}},
 \code{\link{VolumeModel}}

@@ -2,10 +2,38 @@
 % Please edit documentation in R/return_calculation.R
 \name{ReturnCalculation}
 \alias{ReturnCalculation}
-\title{R6 base class for return calculation}
+\title{ReturnCalculation}
 \description{
-R6 base class for return calculation
+Base (abstract) class for return calculation strategies.
+Subclass this to plug a custom return calculation into
+\code{prepare_event_study()} / \code{EventStudyTask$new()} via
+\code{ParameterSet$return_calculation}.
+
+A subclass must implement \code{calculate_return(tbl, in_column, out_column)}:
+given a tibble of prices in \code{in_column}, add a column named
+\code{out_column} with the calculated return (e.g. simple or log return).
+See \code{SimpleReturn} and \code{LogReturn} for reference implementations.
 }
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{ComparisonPeriodMeanAdjustedModel}},
+\code{\link{DCCGARCHModel}},
+\code{\link{FamaFrench3FactorModel}},
+\code{\link{FamaFrench5FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketAdjustedModel}},
+\code{\link{MarketModel}},
+\code{\link{ModelBase}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolatilityModel}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

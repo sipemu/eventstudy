@@ -4,14 +4,55 @@
 \alias{ModelBase}
 \title{ModelBase}
 \description{
-Base model class for event study. Each single event study will
-get its own model initialization and fitting. Therefore, the input DataFrame
-contains the data for a single Event Study. For custom models, except the
-child modles of the market model, several statistics must be included, namely
-sigma, degree_of_freedom, first_order_auto_correlation, residuals,
-forecast_error_corrected_sigma, and forecast_error_corrected_sigma_car. Part
-of these statistics are necessary for calculating the Event Study statistics.
+Base (abstract) class for return models used inside an
+EventStudyTask. Each single event gets its own model instance, fitted on
+that event's estimation-window data alone. Subclass this to plug a custom
+return model into \code{run_event_study()} / \code{fit_model()}.
+
+A subclass must implement two methods:
+\itemize{
+  \item \code{fit(data_tbl)} -- fit the model on \code{data_tbl} (a single
+    event's rows, estimation and event window together) and populate
+    \code{private$.statistics} plus set \code{private$.is_fitted}.
+  \item \code{abnormal_returns(data_tbl)} -- return \code{data_tbl} with an
+    \code{abnormal_returns} column added for the event window.
 }
+
+The \code{statistics} active binding exposes a named list consumed by the
+test statistics layer. At minimum a subclass should populate:
+\code{sigma}, \code{degree_of_freedom}, \code{residuals},
+\code{forecast_error_corrected_sigma} and
+\code{forecast_error_corrected_sigma_car}. Since 2026-09-24, a model may
+also set \code{statistics$n_params} (the number of parameters estimated
+from the estimation window); \code{PatellZTest} reads this field for its
+Q_i adjustment and falls back to 2 when a subclass does not report it.
+
+Degenerate-input handling: subclasses that implement the shared contract
+(see \code{R/contract.R}) read \code{self$degenerate_mode},
+\code{self$event_id} and \code{self$firm_symbol}, which are threaded onto
+the cloned model instance by \code{fit_model()} before \code{fit()} is
+called.
+}
+\seealso{
+Other eventstudy-models:
+\code{\link{BHARModel}},
+\code{\link{Carhart4FactorModel}},
+\code{\link{ComparisonPeriodMeanAdjustedModel}},
+\code{\link{DCCGARCHModel}},
+\code{\link{FamaFrench3FactorModel}},
+\code{\link{FamaFrench5FactorModel}},
+\code{\link{GARCHModel}},
+\code{\link{LinearFactorModel}},
+\code{\link{LogReturn}},
+\code{\link{MarketAdjustedModel}},
+\code{\link{MarketModel}},
+\code{\link{ReturnCalculation}},
+\code{\link{RollingWindowModel}},
+\code{\link{SimpleReturn}},
+\code{\link{VolatilityModel}},
+\code{\link{VolumeModel}}
+}
+\concept{eventstudy-models}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

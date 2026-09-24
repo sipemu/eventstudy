@@ -43,6 +43,7 @@ Other eventstudy-statistics:
 \code{\link{SignTest}},
 \code{\link{SingleEventStatisticsSet}},
 \code{\link{StatisticsSetBase}},
+\code{\link{TestStatisticBase}},
 \code{\link[=bootstrap_test]{bootstrap_test()}},
 \code{\link[=car_by_group]{car_by_group()}},
 \code{\link[=car_quantiles]{car_quantiles()}},

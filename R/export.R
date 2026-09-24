@@ -253,6 +253,7 @@ export_results <- function(task,
 #'
 #' @family eventstudy-export
 #' @export
+#' @rawNamespace S3method(generics::tidy,EventStudyTask)
 tidy.EventStudyTask <- function(x, type = c("ar", "car", "aar", "model"),
                                 stat_name = "CSectT", ...) {
   type <- match.arg(type)

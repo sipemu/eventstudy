@@ -22,6 +22,7 @@ Other eventstudy-statistics:
 \code{\link{RankTest}},
 \code{\link{SignTest}},
 \code{\link{StatisticsSetBase}},
+\code{\link{TestStatisticBase}},
 \code{\link[=adjust_p_values]{adjust_p_values()}},
 \code{\link[=bootstrap_test]{bootstrap_test()}},
 \code{\link[=car_by_group]{car_by_group()}},

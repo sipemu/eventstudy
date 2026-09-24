@@ -1,4 +1,16 @@
-#' R6 base class for return calculation
+#' @title ReturnCalculation
+#' @description Base (abstract) class for return calculation strategies.
+#' Subclass this to plug a custom return calculation into
+#' \code{prepare_event_study()} / \code{EventStudyTask$new()} via
+#' \code{ParameterSet$return_calculation}.
+#'
+#' A subclass must implement \code{calculate_return(tbl, in_column, out_column)}:
+#' given a tibble of prices in \code{in_column}, add a column named
+#' \code{out_column} with the calculated return (e.g. simple or log return).
+#' See \code{SimpleReturn} and \code{LogReturn} for reference implementations.
+#'
+#' @family eventstudy-models
+#' @export
 ReturnCalculation <- R6Class("ReturnCalculation",
                              public = list(
                                #' @field name Name of the return calculation.

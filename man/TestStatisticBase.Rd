@@ -2,10 +2,59 @@
 % Please edit documentation in R/single_event_test_statistics.R
 \name{TestStatisticBase}
 \alias{TestStatisticBase}
-\title{Base class for Event Study test statistics}
+\title{TestStatisticBase}
 \description{
-Base class for Event Study test statistics
+Base (abstract) class for single-event and multi-event test
+statistics. Subclass this to plug a custom test statistic into
+\code{calculate_statistics()} / \code{run_event_study()}.
+
+A subclass must implement \code{compute(data_tbl, model)}:
+\itemize{
+  \item \code{data_tbl} -- a single event's rows with an
+    \code{abnormal_returns} column already populated by the fitted model.
+  \item \code{model} -- the fitted \code{ModelBase} (or list-mock)
+    instance for that event; its \code{statistics} field carries
+    \code{sigma}, \code{degree_of_freedom}, \code{residuals} and (since
+    2026-09-24) \code{n_params}.
 }
+\code{compute()} returns a tibble with the statistic's result columns for
+that event; multi-event subclasses (see \code{R/multi_event_test_statistics.R})
+aggregate across all events in a group.
+
+\code{confidence_level} and \code{confidence_type} are validated and
+stored at construction (\code{confidence_type} must be one of
+\code{"two-sided"} (default), \code{"less"} or \code{"greater"}); every
+p-value computed anywhere in EventStudy is currently two-sided, so a
+non-default \code{confidence_type} is accepted but ignored, with one
+warning at construction (A10, 2026-09-24).
+}
+\seealso{
+Other eventstudy-statistics:
+\code{\link{ARTTest}},
+\code{\link{BHARTTest}},
+\code{\link{BMPTest}},
+\code{\link{CARTTest}},
+\code{\link{CSectTTest}},
+\code{\link{CalendarTimePortfolioTest}},
+\code{\link{GeneralizedSignTest}},
+\code{\link{KolariPynnonenTest}},
+\code{\link{MultiEventStatisticsSet}},
+\code{\link{PatellZTest}},
+\code{\link{RankTest}},
+\code{\link{SignTest}},
+\code{\link{SingleEventStatisticsSet}},
+\code{\link{StatisticsSetBase}},
+\code{\link[=adjust_p_values]{adjust_p_values()}},
+\code{\link[=bootstrap_test]{bootstrap_test()}},
+\code{\link[=car_by_group]{car_by_group()}},
+\code{\link[=car_quantiles]{car_quantiles()}},
+\code{\link[=cross_sectional_regression]{cross_sectional_regression()}},
+\code{\link[=model_diagnostics]{model_diagnostics()}},
+\code{\link[=pretrend_test]{pretrend_test()}},
+\code{\link[=simulate_event_study]{simulate_event_study()}},
+\code{\link[=validate_task]{validate_task()}}
+}
+\concept{eventstudy-statistics}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}
   \describe{

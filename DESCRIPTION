@@ -47,6 +47,7 @@ Suggests:
     testthat (>= 3.0.0),
     withr,
     lifecycle,
+    generics,
     gridExtra,
     knitr,
     rmarkdown,
