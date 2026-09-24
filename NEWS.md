@@ -1,3 +1,105 @@
+# EventStudy 0.66.0.9000
+
+## Statistical correctness fixes (2026-09-24 re-evaluation)
+
+The 2026-09-24 package re-evaluation found twelve silent-wrong-statistic
+defects across return models, multi-event test statistics, bootstrap
+inference, and cross-sectional regression. Every fix ships with a
+failing-first regression test in `tests/testthat/test_reeval_statistical_fixes.R`
+and, where the fix redefines a valid-input result, a re-pinned golden value in
+`tests/testthat/test_golden_values.R`. See `vignettes/statistical-conventions.Rmd`
+for the full audit log and citations.
+
+* **A1 -- RollingWindowModel now restricts each rolling window to COMPLETE
+  PAIRS** (both firm and index finite) before computing `x_bar`/`ss_xx`/
+  residuals/sigma. Previously, rows where the firm return was NA but the
+  index was not still contributed to `x_bar`/`ss_xx`, biasing beta whenever
+  NA-firm rows co-occur with index outliers. `fit()` and
+  `calculate_statistics()` now share the same complete-pair count for df/FEC.
+* **A2 -- A fully-degenerate event (zero finite event-window abnormal
+  returns) is now EXCLUDED from every CAR-based multi-event statistic**
+  (`CSectTTest`, `PatellZTest`, `SignTest`, `GeneralizedSignTest`, `BMPTest`,
+  `KolariPynnonenTest`), applied once per group (at most one warning per
+  group, not one per configured statistic). Previously it was coalesced to 0
+  and silently understated cross-event dispersion. The pre-existing STATS-03
+  convention (a partial gap contributes 0 to that event's own CAR) is
+  unchanged.
+* **A3 -- KolariPynnonenTest never falls back to an adjustment factor of 1.**
+  A degenerate (constant or too-short) estimation-window SAR series is now
+  excluded from the `r_bar` cross-sectional correlation estimate (reported
+  once); if fewer than 2 usable events remain, `kp_t`/`ckp_t` are `NA` instead
+  of silently reporting the unadjusted BMP value. The per-day KP adjustment
+  now uses THAT DAY's `n_valid_events` instead of the first day's count
+  applied uniformly to every day.
+* **A4 -- RankTest and GeneralizedSignTest now group by `event_id`, not
+  `firm_symbol`,** for ranking/centering and `p_hat` estimation. Previously a
+  firm recurring across multiple events had its data silently pooled across
+  those events.
+* **A5 -- `cross_sectional_regression()` sample-integrity hardening.**
+  Duplicated `event_id`s in the `data` argument now error; a `car_window`
+  extending outside any event's available event window now errors; task
+  events with no matching `data` row are dropped with one warning; an event
+  whose CAR is `NA` because an abnormal return inside `car_window` is missing
+  is excluded with one warning (`.extract_cars()` no longer sums with
+  `na.rm = TRUE`, so ANY missing AR in the window makes the whole CAR `NA`;
+  `car_by_group()`/`car_quantiles()`/`plot_car_distribution()` inherit this
+  NA-CAR semantics without an additional warning).
+* **A6 -- OLS insufficient-observations guard is now `n_params`-based, not a
+  flat threshold,** for `MarketModel` and every `LinearFactorModel` subclass
+  (FF3, FF5, Carhart4); a model that fits with fewer than 30 valid estimation
+  observations (the same recommended minimum as `validate_task()`'s default)
+  now emits one advisory warning in both modes. `PatellZTest`'s `k` is now
+  read explicitly from each model's `statistics$n_params` (MarketModel 2,
+  FF3 4, Carhart4 5, FF5 6, CPMA 1, MarketAdjusted 0) instead of being derived
+  as `length(resid) - df` (which was silently wrong whenever `df` reflected
+  an unrelated correction); `m` now counts finite estimation-window abnormal
+  returns instead of the raw row count. `MarketModel`'s forecast-error
+  correction now uses complete pairs only for `mean(Rm_est)`/`SS_market`,
+  matching exactly the rows `lm()` used.
+* **A7 -- `CalendarTimePortfolioTest` denominator redefined to the
+  Brown-Warner (1980, 1985) estimation-window AAR standard deviation.**
+  Previously `ts_sd` was computed from the event-window portfolio series
+  itself (self-referential with the numerator, so a larger event-day shock
+  inflated both). `caltime_t`/`ccaltime_t` now use degrees of freedom
+  `n_estimation_days - 1`, exposed as `attr(result, "caltime_df")` and read by
+  both `adjust_p_values()` and `tidy()`. **This is a valid-input redefinition:**
+  `caltime_t`/`ccaltime_t` values differ from 0.66.0; golden values are
+  re-pinned.
+* **A8 -- `MarketAdjustedModel`'s forecast-error correction is now
+  `forecast_error_corrected_sigma == sigma` exactly** (correction factor 1),
+  because the model estimates nothing from the estimation window. Previously
+  it wrongly reused the constant-MEAN correction formula
+  (`sigma * sqrt(1 + 1/m)`), which is only valid for a model that DOES
+  estimate one parameter (a mean), like `ComparisonPeriodMeanAdjustedModel`
+  (unchanged). **This is a valid-input redefinition;** golden values are
+  re-pinned.
+* **A9 -- Sign convention unified to strict `n_pos = sum(AR > 0)` /
+  `n_neg = sum(AR <= 0)`** in `CSectTTest`, `PatellZTest`, and
+  `CalendarTimePortfolioTest` (previously `>= 0`/`< 0`), matching the
+  pre-existing `SignTest` convention. An abnormal return of exactly 0 now
+  counts as non-positive everywhere.
+* **A10 -- `TestStatisticBase$confidence_type` is now validated** with
+  `match.arg(c("two-sided", "less", "greater"))` (an invalid value errors) and
+  emits one warning at construction when a non-default value is supplied,
+  stating that every p-value in EventStudy is currently two-sided and the
+  value has no effect. No p-value formula changed; one-sided p-values are not
+  implemented.
+* **A11 -- `BMPTest` roxygen documentation corrected (docs-only, no formula
+  change).** The docstring incorrectly claimed standardization by the
+  forecast-error-corrected sigma; both `BMPTest` and `KolariPynnonenTest`
+  standardize by the MODEL sigma (`model$statistics$sigma`), which is what the
+  code always computed.
+* **A12 -- `bootstrap_test()` observed/draw construction aligned; NA draws
+  excluded from the p-value denominator.** `observed_caar` now uses the SAME
+  per-event `coalesce`-to-0 CAR construction as the bootstrap draws (matches
+  `cumsum(observed_aar)` exactly on NA-free input, but differs from it under a
+  partial-window gap, where the per-event construction is correct). A
+  bootstrap draw whose statistic is `NA` (e.g. a sign-flip combination that
+  zeroes the cross-sectional SD) is now excluded from BOTH the exceedance
+  count and the denominator, instead of being counted as "did not exceed"
+  while still inflating `n_boot + 1`. The bootstrap weight clustering unit
+  (`firm_symbol`) is confirmed correct and unchanged.
+
 # EventStudy 0.66.0
 
 ## API Stabilization & Deprecation Lifecycle (Phase 28)

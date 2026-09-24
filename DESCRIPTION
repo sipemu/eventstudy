@@ -1,8 +1,8 @@
 Package: EventStudy
 Type: Package
 Title: Event Study Analysis
-Version: 0.66.0
-Date: 2026-09-12
+Version: 0.66.0.9000
+Date: 2026-09-24
 Authors@R:
     c(person(given = "Simon",
            family = "Mueller",

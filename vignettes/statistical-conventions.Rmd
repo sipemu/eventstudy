@@ -60,16 +60,28 @@ window.
 | Return type | Arithmetic (simple) returns | The pipeline's return-calculation strategy is orthogonal; the model consumes whatever `firm_returns` / `index_returns` contain. |
 | Estimation | OLS: `firm_returns ~ index_returns` | `alpha`, `beta` from `lm()`. |
 | Abnormal return | `AR = R - (alpha + beta * Rm)` | MacKinlay (1997) eq. (5). |
-| Residual sigma | Residual standard error from `summary(lm)` | Uses `df = m - 2` (intercept + slope). |
-| Degrees of freedom | `m - 2` | `m` = estimation observations. |
+| Residual sigma | Residual standard error from `summary(lm)` | Uses `df = m - 2` (intercept + slope), `m` = COMPLETE-PAIR estimation observations. |
+| Degrees of freedom | `m - 2` | `m` = estimation observations with both `firm_returns` and `index_returns` finite. |
+| Minimum observations | `n_valid >= n_params + 1 = 3` | Fewer valid observations route through the degenerate-input contract (NA + one warning, or error in strict mode) rather than fitting an unstable/undefined `sigma` (needs `df >= 1`). |
+| Short-window advisory | One plain warning when `2 < n_valid < 30` | Advisory only (not a degenerate/contract condition) -- the model still fits; 30 is the same recommended minimum as `validate_task()`'s default. |
+| `statistics$n_params` | `2` (intercept + slope) | Consumed by `PatellZTest`'s `Q_i` adjustment (see below). |
 | AR t-statistic | `AR / sigma` | Per-day, constant-sigma approximation. |
 | CAR t-statistic | `CAR / (sqrt(L) * sigma)` | `L`-day cumulative, constant-sigma approximation, MacKinlay (1997). |
-| Forecast-error correction | `sigma * sqrt(1 + 1/m + (Rm_evt - mean(Rm_est))^2 / SS_market)` | Patell/MacKinlay prediction-error variance; `SS_market` is the estimation-window sum of squares of the index. Falls back to the constant-mean form `sigma * sqrt(1 + 1/m)` when the index is constant. |
+| Forecast-error correction | `sigma * sqrt(1 + 1/m + (Rm_evt - mean(Rm_est))^2 / SS_market)` | Patell/MacKinlay prediction-error variance; `mean(Rm_est)` and `SS_market` (the estimation-window sum of squares of the index) are computed over COMPLETE PAIRS ONLY, matching exactly the rows `lm()` used (2026-09-24 re-evaluation item A6: previously included incomplete-pair rows, biasing the mean/SS). Falls back to the constant-mean form `sigma * sqrt(1 + 1/m)` when the index is constant. |
 | p-value sidedness | Two-sided by default | `confidence_type = "two-sided"`. |
 
-**Audit result: verified, no change.** The implementation matches MacKinlay
-(1997). Pinned in `test_golden_values.R` against an independent closed-form
-`lm()` derivation at absolute tolerance `1e-10`.
+**Audit result: verified against MacKinlay (1997); two silent-wrong defects
+fixed 2026-09-24 (items A6).** The core OLS/AR/CAR formulas match MacKinlay.
+The 2026-09-24 re-evaluation found the insufficient-observations guard used a
+flat `n_valid < 2` threshold (too permissive for a 2-parameter OLS fit to be
+meaningful) and the forecast-error correction's `mean(Rm_est)`/`SS_market`
+included estimation rows where `firm_returns` was NA but `index_returns` was
+not -- rows `lm()` silently drops via `na.omit()` but which the correction
+formula still summed over, biasing the correction away from the fitted
+model's own estimation sample. Both are fixed; pinned in
+`test_golden_values.R` and `test_reeval_statistical_fixes.R` against an
+independent closed-form `lm()` derivation restricted to complete pairs, at
+absolute tolerance `1e-10`/`1e-12`.
 
 *Citation:* MacKinlay, A. C. (1997). Event Studies in Economics and Finance.
 *Journal of Economic Literature*, 35(1), 13--39.
@@ -88,12 +100,20 @@ restricted market model of MacKinlay (1997) sec. 4.4.2.
 | Abnormal return | `AR = R - Rm` | Firm return minus index return. |
 | Residual sigma | `sd(firm - index)` over the estimation window | Sample standard deviation of the market-adjusted residual series. |
 | Degrees of freedom | `m - 1` | One parameter consumed by the residual mean in `sd()`; `m` = estimation observations. |
-| Forecast-error correction | `sigma * sqrt(1 + 1/m)` | Constant-mean form -- no regression design, so no leverage term. Uses the finite-pair count (NA rows do not inflate `m`). |
+| `statistics$n_params` | `0` | Nothing is estimated (alpha/beta are FIXED at 0/1, not fitted). |
+| Forecast-error correction | `forecast_error_corrected_sigma == sigma` (correction factor exactly 1) | No regression, no leverage term, and -- since nothing is estimated -- no prediction-error inflation either (2026-09-24 re-evaluation item A8). |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The subtraction and constant-mean FEC
-match the restricted market model. Pinned in `test_golden_values.R` against a
-direct closed-form subtraction at absolute tolerance `1e-10`.
+**Audit result: one silent-wrong defect fixed 2026-09-24 (item A8).** The
+subtraction `AR = R - Rm` matches the restricted market model. The 2026-09-24
+re-evaluation found the forecast-error correction wrongly reused the
+constant-MEAN formula `sigma * sqrt(1 + 1/m)` -- which is only valid when ONE
+parameter (a mean) is estimated from the estimation window, as in the
+Comparison Period Mean Adjusted Model below. MarketAdjustedModel estimates
+NOTHING (alpha/beta are fixed, not fitted), so its correction factor is
+exactly 1: `forecast_error_corrected_sigma == sigma`. Re-pinned in
+`test_golden_values.R` and locked in `test_reeval_statistical_fixes.R` at
+absolute tolerance `1e-10`/`1e-12`.
 
 *Citation:* MacKinlay, A. C. (1997). Event Studies in Economics and Finance.
 *Journal of Economic Literature*, 35(1), 13--39.
@@ -112,7 +132,8 @@ constant-mean-return model of Brown & Warner (1985), also described in MacKinlay
 | Abnormal return | `AR = R - mean(R_est)` | Firm return minus estimation-window mean. |
 | Residual sigma | `sd(firm - mean)` over the estimation window | Sample standard deviation of the demeaned residuals. |
 | Degrees of freedom | `m - 1` | The mean consumes one degree of freedom. |
-| Forecast-error correction | `sigma * sqrt(1 + 1/m)` | Constant-mean form. Uses the finite value count (NA rows do not inflate `m`). |
+| `statistics$n_params` | `1` | One parameter estimated (the comparison-period mean). |
+| Forecast-error correction | `sigma * sqrt(1 + 1/m)` | Constant-mean form. Uses the finite value count (NA rows do not inflate `m`). Unlike MarketAdjustedModel (A8), this model DOES estimate one parameter, so the constant-mean correction is the correct form here. |
 | p-value sidedness | Two-sided by default | -- |
 
 **Audit result: verified, no change.** AR, sigma, df, and FEC match the
@@ -138,10 +159,14 @@ models share the `LinearFactorModel` OLS core.
 | Abnormal return | `AR = excess_return - predicted` | `predicted` from the fitted OLS coefficients. |
 | Residual sigma | Residual standard error from `summary(lm)` | -- |
 | Degrees of freedom | `m - (k + 1) = m - 4` | Intercept plus three factor slopes. |
+| Minimum observations | `n_valid >= n_params + 1 = 5` | `n_params = length(all.vars(formula)) = 4` (response + 3 factors, i.e. intercept + 3 slopes); fewer valid observations route through the degenerate-input contract (2026-09-24 item A6). |
+| Short-window advisory | One plain warning when `4 < n_valid < 30` | Same advisory convention as the Market Model. |
+| `statistics$n_params` | `4` | Consumed by `PatellZTest`'s `Q_i` adjustment. |
 | Forecast-error correction | `sigma * sqrt(1 + h_t)`, `h_t = x_t' (X'X)^{-1} x_t` | Full multi-factor hat-value (leverage) form using the estimation design matrix. |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The OLS fit and hat-value FEC match
+**Audit result: verified, no change (guard strengthened 2026-09-24, item A6).**
+The OLS fit and hat-value FEC match
 Fama-French (1993). Pinned in `test_golden_values.R` against an independent
 `lm()`/`predict()` derivation at absolute tolerance `1e-10`.
 
@@ -160,10 +185,13 @@ factors -- Fama & French (2015). Same OLS core, five factors.
 | Abnormal return | `AR = excess_return - predicted` | -- |
 | Residual sigma | Residual standard error | -- |
 | Degrees of freedom | `m - (k + 1) = m - 6` | -- |
+| Minimum observations | `n_valid >= n_params + 1 = 7` | `n_params = 6` (intercept + 5 factors); 2026-09-24 item A6. |
+| `statistics$n_params` | `6` | Consumed by `PatellZTest`'s `Q_i` adjustment. |
 | Forecast-error correction | `sigma * sqrt(1 + h_t)` | Multi-factor hat-value form. |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** Pinned in `test_golden_values.R` against
+**Audit result: verified, no change (guard strengthened 2026-09-24, item A6).**
+Pinned in `test_golden_values.R` against
 an independent `lm()`/`predict()` derivation at absolute tolerance `1e-10`.
 
 *Citation:* Fama, E. F., & French, K. R. (2015). A five-factor asset pricing
@@ -181,10 +209,13 @@ Same OLS core, four factors.
 | Abnormal return | `AR = excess_return - predicted` | -- |
 | Residual sigma | Residual standard error | -- |
 | Degrees of freedom | `m - (k + 1) = m - 5` | -- |
+| Minimum observations | `n_valid >= n_params + 1 = 6` | `n_params = 5` (intercept + 4 factors); 2026-09-24 item A6. |
+| `statistics$n_params` | `5` | Consumed by `PatellZTest`'s `Q_i` adjustment. |
 | Forecast-error correction | `sigma * sqrt(1 + h_t)` | Multi-factor hat-value form. |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** Pinned in `test_golden_values.R` against
+**Audit result: verified, no change (guard strengthened 2026-09-24, item A6).**
+Pinned in `test_golden_values.R` against
 an independent `lm()`/`predict()` derivation at absolute tolerance `1e-10`.
 
 *Citation:* Carhart, M. M. (1997). On persistence in mutual fund performance.
@@ -301,16 +332,22 @@ the event window. This yields a time-varying beta without a full GARCH model.
 | Convention | Choice | Note |
 |---|---|---|
 | Estimation | Rolling OLS `firm ~ index` over windows of `window_size` (default 60), requiring `min_obs` (default 30) finite pairs | Last window's `alpha`, `beta` used for prediction. |
-| Effective window | `ws = min(window_size, n_est)` | When `n_est <= window_size` there is a single window equal to the full sample. |
+| Effective window | `ws = min(window_size, n_est)` | When `n_est <= window_size` there is a single window equal to the full sample; `n_est` is the estimation window's ROW span (not a valid-pair count). |
+| Within-window pairs | Each `ws`-row window restricts `x_bar`/`y_bar`/`ss_xx`/`ss_xy`/residuals/sigma to COMPLETE PAIRS (both firm and index finite) | 2026-09-24 re-evaluation item A1: previously `x_bar`/`ss_xx` were computed from ALL index values in the window, including rows where the firm return was NA -- if those NA-firm rows are not missing-at-random in the index (e.g. an index outlier co-occurring with a missing firm observation), this silently biases beta away from what `lm()` on the complete-pair subset would produce. |
 | Abnormal return | `AR = firm - (alpha_last + beta_last * index)` | Uses the most recent (last) rolling parameters. |
-| Residual sigma | Last-window residual SE, `denom = max(ws - 2, 1)` | -- |
-| Degrees of freedom | `max(ws - 2, 1)` | Uses the finite-pair effective window size (WR-04 fix: NA-heavy windows do not inflate df). |
+| Residual sigma | Last-window residual SE, `denom = max(n_complete_last - 2, 1)` | `n_complete_last` = complete pairs in the LAST window (not a freshly recomputed valid-count that could disagree with the actual last-window row span). |
+| Degrees of freedom | `max(n_complete_last - 2, 1)` | `fit()` and `calculate_statistics()` share the SAME complete-pair count (stored in `private$.rolling_params$n_completes`), so the reported df always matches the sigma that was actually estimated. |
+| `statistics$n_params` | `2` (alpha, beta) | Consumed by `PatellZTest`'s `Q_i` adjustment. |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The rolling OLS, last-window prediction,
-and `df = ws - 2` are internally consistent. Pinned in `test_golden_values.R` on
-a 30-observation fixture where `ws = min(60, 30) = 30` collapses to a single
-closed-form OLS, at absolute tolerance `1e-10`.
+**Audit result: one silent-wrong defect fixed 2026-09-24 (item A1).** The
+rolling OLS, last-window prediction, and `df = n_complete - 2` are internally
+consistent once restricted to complete pairs. Pinned in `test_golden_values.R`
+on a 30-observation fixture where `ws = min(60, 30) = 30` collapses to a single
+closed-form OLS, and in `test_reeval_statistical_fixes.R` on a 150-day window
+with firm-return NAs co-occurring with index outliers every 3rd day (beta,
+alpha, sigma, and df all match `lm()` on the complete-pair subset within
+`1e-10`).
 
 *Citation:* Rolling-window / time-varying market-model estimation is standard
 practice for capturing beta instability (e.g. Fama & MacBeth 1973 rolling
@@ -374,13 +411,40 @@ correlation. *Journal of Business & Economic Statistics*, 20(3), 339--350.
 
 ## Test statistics
 
+### Multi-event all-NA exclusion (2026-09-24 re-evaluation, item A2)
+
+Every CAR-based multi-event statistic (`CSectTTest`, `PatellZTest`, `SignTest`,
+`GeneralizedSignTest`, `BMPTest`, `KolariPynnonenTest`) shares one exclusion
+rule, implemented once in `R/contract.R` (`.exclude_all_na_events()`) and
+applied centrally by `calculate_statistics()` before any configured statistic
+runs (so N statistics in one group produce AT MOST ONE warning, not N), and
+defensively again at the top of each `compute()` for direct/standalone calls:
+an event with **zero finite event-window abnormal returns** is EXCLUDED from
+the group entirely -- not NA-propagated and coalesced to 0 -- because
+cumulating a fully-degenerate event's abnormal returns as 0 would silently
+understate the true cross-sectional dispersion (an entirely different failure
+mode from a normal 0 abnormal return). Excluded events whose model already
+emitted the one contract warning guaranteed by CONTRACT-04 (an unfitted
+`ModelBase` instance) are dropped SILENTLY; any other excluded event is
+reported once, naming the `event_id`(s) (strict mode errors instead). This
+exclusion leaves the pre-existing STATS-03 convention for a PARTIAL gap
+unchanged: an event with at least one finite event-window abnormal return, but
+a missing value on some individual day, still contributes 0 to THAT EVENT's
+own CAR on the missing day(s) via `coalesce(abnormal_returns, 0)`.
+
 ### AR / CAR t-tests (ARTTest, CARTTest)
 
 Documented above with the Market Model, since the tracer anchors them together.
 The AR t-test divides each event-day abnormal return by the model sigma; the CAR
 t-test divides the cumulative abnormal return by `sqrt(L) * sigma`. Both are
 distributed as Student's t with the model's residual degrees of freedom and are
-two-sided by default. *Citation:* MacKinlay (1997).
+two-sided by default. Every return model also computes
+`forecast_error_corrected_sigma_car` (the FEC's per-event covariance/hat-value
+term), but `ARTTest`/`CARTTest` INTENTIONALLY do not use it -- they keep the
+simpler constant-sigma approximation (item A11, documented convention, no
+formula change); `forecast_error_corrected_sigma_car` exists for consumers that
+need the full prediction-error covariance structure. *Citation:* MacKinlay
+(1997).
 
 ### BHAR t-test (BHARTTest)
 
@@ -407,14 +471,21 @@ of Brown & Warner (1985).
 | Sample size | `N` = number of valid (non-NA) events at that day | NA abnormal returns are excluded from both the mean and the SD. |
 | Distribution | Student's t with `N - 1` degrees of freedom | -- |
 | Standardization | None -- raw abnormal returns | Unlike Patell/BMP, ARs are not divided by a per-event sigma; the cross-event SD is the only scale. |
+| Positive count | `n_pos = sum(AR > 0)` -- STRICT inequality | 2026-09-24 item A9: an AR exactly 0 counts as NON-positive (`n_neg = sum(AR <= 0)`), matching the `SignTest` convention. |
+| All-NA event exclusion | An event with ZERO finite event-window ARs is excluded from every multi-event statistic (once per group, one contract warning/error) | 2026-09-24 item A2; see "Multi-event all-NA exclusion" below. A PARTIAL gap (one missing AR mid-window in an otherwise-valid event) still contributes 0 to that event's own CAR (STATS-03, unchanged). |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The implementation computes
-`sqrt(n_valid_events) * aar / sd(AR)` for AAR and `sqrt(n_valid_events) * caar /
-sd(CAR)` for CAAR, with the cross-event sample SD, matching Brown & Warner
-(1985). Pinned in `test_golden_values.R` against an independent closed-form
-cross-sectional computation on a fixed three-event fixture at absolute tolerance
-`1e-10`.
+**Audit result: verified against Brown & Warner (1985); two silent-wrong
+defects fixed 2026-09-24 (items A2, A9).** The core
+`sqrt(n_valid_events) * aar / sd(AR)` / `caar / sd(CAR)` construction matches
+Brown & Warner. The 2026-09-24 re-evaluation found `n_pos` used `>= 0` (so a
+zero AR silently counted as "positive") and that a fully-degenerate event (all
+event-window ARs NA, e.g. an unfitted model) was not excluded from the
+cumulative CAR-based statistics -- its `coalesce(AR, 0)` silently understated
+cross-event dispersion instead of being excluded. Both are fixed; pinned in
+`test_golden_values.R` and `test_reeval_statistical_fixes.R` against an
+independent closed-form cross-sectional computation at absolute tolerance
+`1e-10`/`1e-12`.
 
 *Citation:* Brown, S. J., & Warner, J. B. (1985). Using daily stock returns: The
 case of event studies. *Journal of Financial Economics*, 14(1), 3--31.
@@ -430,22 +501,28 @@ standard normal.
 | Convention | Choice | Note |
 |---|---|---|
 | Standardization | `SAR = AR / forecast-error-corrected sigma` | Uses the per-event, per-day FEC sigma, not the raw model sigma (this is the defining feature vs. BMP). |
-| Patell denominator | `Q_total = sqrt(sum_i Q_i)`, `Q_i = (m - k) / (m - k - 2)` | `m` = estimation observations for event `i`, `k` = estimated parameters (2 for the Market Model). `Q_i` inflates the variance of the standardized sum for the estimation-error in each sigma. |
+| Patell denominator | `Q_total = sqrt(sum_i Q_i)`, `Q_i = (m - k) / (m - k - 2)` | `m` = number of FINITE estimation-window abnormal returns for event `i` (2026-09-24 item A6: NOT the raw row count -- NA rows in the estimation window must not inflate `m`). `k` = event `i`'s model's `statistics$n_params` (MarketModel 2, FF3 4, Carhart4 5, FF5 6, CPMA 1, MarketAdjusted 0), read explicitly rather than derived as `length(resid) - df` (the pre-2026-09-24 derivation silently produced the WRONG `k` whenever `df` already reflected an unrelated correction, e.g. HAC). `Q_i` inflates the variance of the standardized sum for the estimation-error in each sigma. |
 | Q_i fallback | `Q_i = 1` when `m <= k + 2` | Insufficient observations for the adjustment; avoids a negative/undefined denominator. |
 | AAR statistic | `aar_z = sum_i SAR_i / Q_total` | Sum (not mean) of standardized abnormal returns over the Patell denominator. |
 | CAAR statistic | `caar_z = (1 / sqrt(N)) * sum_i (cumsum(SAR_i) / sqrt(n * Q_i))` | Per-event cumulative SAR scaled by `sqrt(n * Q_i)` where `n` is the day count, then averaged. |
-| Degenerate-event handling | Events with all-NA FEC sigma are excluded from `Q_total` (WR-01) | Prevents a `Q_i = 1` fallback from a degenerate event inflating the denominator and deflating valid-event z-scores. |
+| Positive count | `n_pos = sum(AR > 0)` -- STRICT inequality | 2026-09-24 item A9: matches `SignTest`/`CSectTTest`. |
+| Degenerate-event handling | Events with all-NA FEC sigma are excluded from `Q_total` (WR-01); events with ZERO finite event-window ARs are excluded from the WHOLE statistic (2026-09-24 item A2) | Prevents a `Q_i = 1` fallback (or a coalesced-to-0 CAR contribution) from a degenerate event distorting valid-event z-scores. |
 | N >= 2 guard | `aar_z` / `caar_z` are NA when `n_valid_events <= 1` (STATS-04) | A single event gives a statistically invalid z; NA is returned rather than a finite-but-wrong number. |
 | Distribution | Approximately `N(0, 1)` | -- |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The standardization by the
-forecast-error-corrected sigma, the `Q_i = (m - k)/(m - k - 2)` denominator, the
-`Q_total = sqrt(sum Q_i)` aggregation, and the `N >= 2` guard all match Patell
-(1976). Pinned in `test_golden_values.R` against an independent closed-form Patell
-computation on a fixed three-event fixture (each event `Q_i = 6/4 = 1.5`) at
-absolute tolerance `1e-10`, plus a guard test confirming NA for a single-event
-group.
+**Audit result: verified against Patell (1976); three silent-wrong defects
+fixed 2026-09-24 (items A2, A6, A9).** The standardization by the
+forecast-error-corrected sigma and the `Q_total = sqrt(sum Q_i)` aggregation
+match Patell. The 2026-09-24 re-evaluation found: (1) `k` was derived as
+`length(resid) - df` instead of read from each model's own `n_params`, silently
+using the WRONG `k` whenever `df` reflected an unrelated adjustment; (2) `m`
+used the raw estimation-window row count instead of the finite-observation
+count; (3) `n_pos` used `>= 0`; and (4) an all-NA event was not excluded from
+the statistic. All four are fixed; re-pinned in `test_golden_values.R` and
+locked in `test_reeval_statistical_fixes.R` against an independent closed-form
+Patell computation at absolute tolerance `1e-10`, plus a guard test confirming
+NA for a single-event group.
 
 *Citation:* Patell, J. M. (1976). Corporate forecasts of earnings per share and
 stock price behavior: Empirical tests. *Journal of Accounting Research*, 14(2),
@@ -465,14 +542,20 @@ sigma, then applies a cross-sectional t-test to the standardized values.
 | Point statistic | `bmp_t = sqrt(N) * mean(SAR) / sd(SAR)` | Cross-sectional t of the standardized abnormal returns; `sd(SAR)` is the cross-event sample SD (this cross-sectional SD is what makes BMP robust to event-induced variance). |
 | Cumulative statistic | `cbmp_t = sqrt(N) * mean(cumsum(SAR)) / sd(cumsum(SAR))` | Same cross-sectional t applied to per-event cumulative SARs. |
 | Join key | `event_id` (one sigma per event) | A `firm_symbol` join would be many-to-many when a firm recurs across events. |
+| All-NA event exclusion | An event with ZERO finite event-window ARs is excluded (2026-09-24 item A2) | See "Multi-event all-NA exclusion" below. |
 | Distribution | Approximately `t_{N-1}` | -- |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The standardization by model sigma and
-the cross-sectional t `sqrt(N) * mean(SAR) / sd(SAR)` match Boehmer, Musumeci &
-Poulsen (1991). Pinned in `test_golden_values.R` against an independent
-closed-form BMP computation on a fixed three-event fixture at absolute tolerance
-`1e-10`.
+**Audit result: verified, no change (all-NA exclusion added 2026-09-24, item
+A2; roxygen documentation corrected, item A11).** The standardization by MODEL
+sigma (not the forecast-error-corrected sigma -- this is the defining
+contrast with `PatellZTest`/`KolariPynnonenTest`) and the cross-sectional t
+`sqrt(N) * mean(SAR) / sd(SAR)` match Boehmer, Musumeci & Poulsen (1991). The
+2026-09-24 re-evaluation found the roxygen documentation itself INCORRECTLY
+described the standardization as using the forecast-error-corrected sigma; the
+formula was always right, only the docstring was fixed (item A11, docs-only).
+Pinned in `test_golden_values.R` against an independent closed-form BMP
+computation on a fixed three-event fixture at absolute tolerance `1e-10`.
 
 *Citation:* Boehmer, E., Musumeci, J., & Poulsen, A. B. (1991). Event-study
 methodology under conditions of event-induced variance. *Journal of Financial
@@ -490,10 +573,12 @@ count of positive abnormal returns is Binomial(N, 0.5), approximated by a normal
 | Point statistic | `sign_z = (n_pos - 0.5 N) / (0.5 sqrt(N))` | Binomial-normal approximation with `p = 0.5`; `N` = valid events at that day. |
 | Cumulative statistic | `csign_z = (n_pos_car - 0.5 N) / (0.5 sqrt(N))` | Same form applied to the count of positive per-event CARs. |
 | N >= 2 guard | `sign_z` / `csign_z` are NA when `n_valid_events < 2` (STATS-04, WR-02) | A single observation gives a finite-but-meaningless z; NA is returned instead. |
+| All-NA event exclusion | An event with ZERO finite event-window ARs is excluded (2026-09-24 item A2) | See "Multi-event all-NA exclusion" below. |
 | Distribution | Approximately `N(0, 1)` | -- |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The `(n_pos - 0.5 N)/(0.5 sqrt(N))`
+**Audit result: verified, no change (all-NA exclusion added 2026-09-24, item
+A2).** The `(n_pos - 0.5 N)/(0.5 sqrt(N))`
 statistic, the strict `> 0` positive-count convention, and the `N >= 2` guard
 match the standard sign test. Pinned in `test_golden_values.R` against a direct
 binomial-normal computation on the fixed three-event fixture at absolute
@@ -511,20 +596,29 @@ distribution.
 
 | Convention | Choice | Note |
 |---|---|---|
-| Expected proportion | `p_hat = mean over firms of mean(estimation AR > 0)` | Estimated per firm from the estimation window, then averaged; replaces the ordinary test's fixed 0.5. |
+| Expected proportion | `p_hat = mean over EVENTS of mean(estimation AR > 0)` | Estimated PER EVENT from the estimation window, then averaged (2026-09-24 item A4: previously grouped by `firm_symbol`, which silently pooled a recurring firm's estimation windows ACROSS its distinct events -- each event is fit independently, so this mixed unrelated data). Replaces the ordinary test's fixed 0.5. |
 | Positive count | `n_pos = sum(AR > 0)` | Same strict `> 0` convention as the sign test. |
 | Point statistic | `gsign_z = (n_pos - N p_hat) / sqrt(N p_hat (1 - p_hat))` | Cowan (1992) generalized sign statistic. |
 | Cumulative statistic | `cgsign_z = (n_pos_car - N p_hat) / sqrt(N p_hat (1 - p_hat))` | Same form on positive per-event CAR counts. |
 | Degenerate guard | NA when the denominator is non-finite or zero (`p_hat` in {0, 1}) | -- |
+| All-NA event exclusion | An event with ZERO finite event-window ARs is excluded (2026-09-24 item A2) | See "Multi-event all-NA exclusion" below. |
 | Distribution | Approximately `N(0, 1)` | -- |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The estimation-window `p_hat`, the
-`(n_pos - N p_hat)/sqrt(N p_hat (1 - p_hat))` statistic, and the degenerate-
-denominator guard match Cowan (1992). Pinned in `test_golden_values.R` against an
-independent closed-form computation on the three-event fixture (where the
-balanced estimation residuals give `p_hat = 0.5`, so the generalized test reduces
-to the ordinary sign test) at absolute tolerance `1e-10`.
+**Audit result: one silent-wrong defect fixed 2026-09-24 (item A4; all-NA
+exclusion added, item A2).** The
+`(n_pos - N p_hat)/sqrt(N p_hat (1 - p_hat))` statistic and the degenerate-
+denominator guard match Cowan (1992). The 2026-09-24 re-evaluation found
+`p_hat` was estimated by grouping the estimation window by `firm_symbol`
+rather than `event_id`: when a firm recurs across multiple events, its
+estimation-window abnormal returns from DIFFERENT events were silently pooled
+into one `p_hat`, instead of estimating one `p_hat` per event and averaging
+those. Fixed to group by `event_id`; pinned in `test_golden_values.R` against
+an independent closed-form computation on the three-event fixture (where the
+balanced estimation residuals give `p_hat = 0.5`, so the generalized test
+reduces to the ordinary sign test) at absolute tolerance `1e-10`, and locked
+in `test_reeval_statistical_fixes.R` (identical results whether a firm recurs
+across events or every event has a distinct firm).
 
 *Citation:* Cowan, A. R. (1992). Nonparametric event study tests. *Review of
 Quantitative Finance and Accounting*, 2(4), 343--358.
@@ -538,7 +632,7 @@ to non-normality and to event-induced variance.
 
 | Convention | Choice | Note |
 |---|---|---|
-| Ranking scope | Ranks computed within each firm over the COMBINED estimation + event window | `ar_rank = rank(AR)`, `T` = combined observations for that firm. |
+| Ranking scope | Ranks computed within each EVENT over the COMBINED estimation + event window | `ar_rank = rank(AR)`, `T` = combined observations for that event (2026-09-24 item A4: previously grouped by `firm_symbol`, silently pooling a recurring firm's ranks ACROSS its distinct events). |
 | Centered rank | `K = rank / (T + 1) - 0.5` | Corrado's mean-zero centered rank; `na.last = "keep"` so missing ARs do not receive a rank. |
 | Rank SD | `S_rank = sd(per-day mean centered rank across ALL combined days)` | The scale is estimated from the full combined window, not just the event window. |
 | Point statistic | `rank_z = mean_rank_day / S_rank` | Per event day, the cross-firm mean centered rank divided by `S_rank`. |
@@ -560,6 +654,12 @@ regression test (`test_golden_values.R`) locks the corrected per-day values
 (`+1.586, -0.952, +1.269`) and asserts they are distinct, preventing the
 broadcast from silently returning. The fix precedes the golden pin.
 
+**2026-09-24 re-evaluation (item A4):** ranking/centering was also found to
+group by `firm_symbol` instead of `event_id`, silently pooling a recurring
+firm's ranks across its distinct events. Fixed to group by `event_id`; locked
+in `test_reeval_statistical_fixes.R` (identical results whether a firm recurs
+across events or every event has a distinct firm).
+
 *Citation:* Corrado, C. J. (1989). A nonparametric test for abnormal
 security-price performance in event studies. *Journal of Financial Economics*,
 23(2), 385--395.
@@ -575,23 +675,51 @@ in calendar time.
 | Convention | Choice | Note |
 |---|---|---|
 | Portfolio | Equal-weighted mean abnormal return per relative day (`aar`) | -- |
-| Time-series scale | `ts_sd = sd(aar)` over the event-window days | The dispersion of the portfolio AAR series is the standard error. |
-| Point statistic | `caltime_t = aar / ts_sd` | Time-series t of the portfolio AAR under `H0: E[AAR] = 0`. |
+| Time-series scale | `ts_sd = sd(aar)` over the ESTIMATION-window days | 2026-09-24 item A7 (Brown-Warner crude-dependence adjustment): `ts_sd` is the standard deviation of the cross-event AAR series computed OVER THE ESTIMATION WINDOW, not over the (much shorter, event-specific) event window. This makes the denominator independent of the event window and of any event-day shock magnitude. |
+| Estimation-window AAR days | `n_estimation_days` = number of FINITE estimation-window AAR observations | Exposed as `attr(result, "caltime_df")`. |
+| Point statistic | `caltime_t = aar / ts_sd` | Time-series t of the portfolio AAR under `H0: E[AAR] = 0`; `aar` is still the EVENT-window per-day portfolio mean. |
 | Cumulative statistic | `ccaltime_t = caar / (ts_sd sqrt(L))` | `L` = day index within the event window; random-walk sqrt-of-horizon scaling of the cumulative portfolio return. |
-| Degenerate guard | Both t's are NA when `ts_sd` is non-finite or zero | Guarded once on the scalar `ts_sd`, then the per-day vectors are divided directly. |
+| Degrees of freedom | `n_estimation_days - 1` | Brown-Warner time-series df, NOT a cross-sectional `N - 1`; `adjust_p_values()` and `tidy()` both read `attr(result, "caltime_df")` rather than deriving a df of their own. |
+| Positive count | `n_pos = sum(AR > 0)` -- STRICT inequality | 2026-09-24 item A9: matches `SignTest`/`CSectTTest`. |
+| Degenerate guard | Both t's are NA when `ts_sd` is non-finite/zero or `n_estimation_days < 2` | One contract warning/error (not a silent NA) when the estimation-window AAR series cannot support a standard deviation. |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: FIXED (broadcast bug), then verified.** The equal-weight
-portfolio and time-series t construction match the calendar-time portfolio
-approach. As with the rank test, the audit found a genuine broadcast error:
-`caltime_t` and `ccaltime_t` used base `ifelse(is.finite(ts_sd) & ts_sd > 0,
-...)` with the scalar `ts_sd` as the condition, so the per-day t vectors were
-collapsed to their first element and recycled across every event day. It was
-fixed to guard the scalar `ts_sd` once with a plain `if()` and divide the vectors
-directly; a regression test locks the corrected per-day values and asserts they
-are distinct. The fix precedes the golden pin.
+**Audit result: FIXED (broadcast bug; then Brown-Warner denominator
+redefinition, item A7; then A9).** The equal-weight portfolio construction
+matches the calendar-time portfolio approach. Three issues were found across
+two audit rounds:
 
-*Citation:* The calendar-time portfolio approach is due to Jaffe (1974) and
+1. **Broadcast bug (original audit).** `caltime_t` / `ccaltime_t` used base
+   `ifelse(is.finite(ts_sd) & ts_sd > 0, ...)` with the scalar `ts_sd` as the
+   condition, collapsing the per-day t vectors to their first element and
+   recycling it across every event day. Fixed by guarding the scalar once with
+   a plain `if()` and dividing the vectors directly.
+2. **Self-referential denominator (2026-09-24 re-evaluation, item A7).**
+   `ts_sd` was computed from the EVENT-WINDOW portfolio AAR series itself --
+   the same series `aar` that appears in the numerator -- so a larger
+   event-day shock inflated BOTH the numerator and (via the window's own
+   dispersion) the denominator, and the statistic was not independent of the
+   event window's length or contents. This is REDEFINED (not merely a bug fix
+   in the narrow sense) to the Brown-Warner (1980, 1985) crude-dependence
+   adjustment: `ts_sd` is now the ESTIMATION-window AAR series's standard
+   deviation, with `df = n_estimation_days - 1` exposed via
+   `attr(result, "caltime_df")` and threaded through to `adjust_p_values()`
+   and `tidy()`. This is a genuine convention change (not a silent-input-only
+   fix) -- valid-input `caltime_t`/`ccaltime_t` values differ from the prior
+   release; see NEWS.md. Locked in `test_reeval_statistical_fixes.R`: doubling
+   a pure event-day shock exactly doubles `caltime_t` on that day (proving the
+   denominator no longer depends on the event window).
+3. **Sign convention (item A9).** `n_pos` used `>= 0`; fixed to strict `> 0`.
+
+A regression test locks the corrected per-day broadcast values and asserts
+they are distinct; the golden values were RE-PINNED for the A7 redefinition
+(see `test_golden_values.R`, "re-pinned 2026-09-24: A7").
+
+*Citation:* Brown, S. J., & Warner, J. B. (1980). Measuring security price
+performance. *Journal of Financial Economics*, 8(3), 205--258. Brown, S. J., &
+Warner, J. B. (1985). Using daily stock returns: The case of event studies.
+*Journal of Financial Economics*, 14(1), 3--31. The calendar-time portfolio
+approach is also due to Jaffe (1974) and
 Mandelker (1974), popularized for long-horizon studies by Fama (1998) and Mitchell
 & Stafford (2000) as a control for cross-sectional dependence.
 
@@ -606,22 +734,34 @@ statistic down by a factor derived from the average pairwise correlation.
 | Convention | Choice | Note |
 |---|---|---|
 | Base statistic | BMP cross-sectional t (`SAR = AR / model sigma`, `bmp_t = sqrt(N) mean(SAR)/sd(SAR)`) | Identical to `BMPTest`; KP scales it. |
-| Average correlation | `r_bar` = average off-diagonal pairwise correlation of estimation-window SARs | `r_bar = (sum(cor) - n) / (n (n - 1))`; events (not firms) are the cross-sectional units, so the SAR matrix is pivoted by `event_id`. |
-| Adjustment factor | `kp_adj = sqrt((1 - r_bar) / (1 + (N - 1) r_bar))` | Kolari-Pynnonen (2010) correction; `kp_adj < 1` when `r_bar > 0`, shrinking the statistic toward zero. |
-| Point statistic | `kp_t = bmp_t * kp_adj` | -- |
-| Cumulative statistic | `ckp_t = cbmp_t * kp_adj` | -- |
-| Degenerate guard | `kp_adj = 1` when the correction is undefined (`denom <= 0`, non-finite, or `< 2` events) | Falls back to the unadjusted BMP. |
+| Usable events | An event contributes to `r_bar` only if its estimation-window SAR series has `>= 2` finite values, a finite model sigma, AND a strictly positive (non-constant) SAR standard deviation | 2026-09-24 item A3: a NON-usable event is excluded (once, with a contract warning/error naming it) -- never silently folded into the correlation matrix as a degenerate (constant or all-NA) series. |
+| Average correlation | `r_bar` = average off-diagonal pairwise correlation of estimation-window SARs, over the USABLE events only | `r_bar = (sum(cor) - n_usable) / (n_usable (n_usable - 1))`; events (not firms) are the cross-sectional units, so the SAR matrix is pivoted by `event_id`. Numerically identical to the pre-2026-09-24 formula when every event is usable. |
+| Adjustment factor | `kp_adj_t = sqrt((1 - r_bar) / (1 + (n_t - 1) r_bar))` PER DAY | Kolari-Pynnonen (2010) correction; `n_t` is THAT DAY's `n_valid_events` (2026-09-24 item A3: previously a single scalar `n <- aar_stats$n_valid_events[1]` -- the FIRST day's count -- was applied uniformly to every day, silently wrong whenever the per-day valid-event count varies). `kp_adj < 1` when `r_bar > 0`, shrinking the statistic toward zero. |
+| Point statistic | `kp_t = bmp_t * kp_adj_t` | -- |
+| Cumulative statistic | `ckp_t = cbmp_t * kp_adj_t'` | `kp_adj_t'` uses the cumulative SAR's own per-day `n_valid` (from `cum_sar`), not the AAR-level `n_valid_events`. |
+| Degenerate guard | `kp_t`/`ckp_t` are NA (NEVER `kp_adj = 1`) when fewer than 2 usable events remain, an off-diagonal correlation is non-finite, or the adjustment's numerator/denominator is invalid | 2026-09-24 item A3: the pre-fix fallback silently substituted `kp_adj = 1` (i.e. the UNADJUSTED BMP value) whenever the correction was undefined -- indistinguishable from "no correlation correction needed" when it actually meant "the correction could not be computed". Exactly one warning/error per `compute()` call covers both the usable-event exclusion and this NA substitution (never two). |
+| All-NA event exclusion | An event with ZERO finite event-window ARs is excluded from the whole statistic (2026-09-24 item A2) | See "Multi-event all-NA exclusion" below; distinct from the estimation-window "usable events" check above (A3) -- an event can have valid event-window ARs but a non-usable estimation-window SAR series, or vice versa. |
 | Distribution | Approximately `t_{N-1}` | -- |
 | p-value sidedness | Two-sided by default | -- |
 
-**Audit result: verified, no change.** The BMP base statistic, the average
-pairwise-correlation `r_bar`, and the `sqrt((1 - r_bar)/(1 + (N - 1) r_bar))`
-adjustment factor match Kolari & Pynnonen (2010). Pinned in
-`test_golden_values.R` against the package pipeline's own output on the
-three-event fixture (where the events' estimation SARs are highly correlated by
-construction, `r_bar ~ 0.983`, so `kp_adj ~ 0.076` shrinks the BMP t sharply);
-an independent closed-form derivation in `data-raw/derive-golden-values.R` agrees
-to ~`1e-11`, comfortably inside the absolute `1e-10` identity tolerance.
+**Audit result: verified against Kolari & Pynnonen (2010); two silent-wrong
+defects fixed 2026-09-24 (items A2, A3).** The BMP base statistic and the
+`sqrt((1 - r_bar)/(1 + (n_t - 1) r_bar))` adjustment formula match
+Kolari-Pynnonen. The 2026-09-24 re-evaluation found: (1) a degenerate
+(all-NA or constant) event's estimation-window SAR series was silently folded
+into the `r_bar` correlation matrix instead of being excluded, and when the
+adjustment was undefined the code fell back to `kp_adj = 1` -- silently
+reporting the UNADJUSTED BMP value as if it were KP-corrected; and (2) the
+per-day window-size term used only the FIRST day's `n_valid_events`, applied
+uniformly to every day, instead of that day's own count. Both are fixed;
+re-pinned in `test_golden_values.R` against the package pipeline's own output
+on the three-event fixture (where the events' estimation SARs are highly
+correlated by construction, `r_bar ~ 0.983`, so `kp_adj ~ 0.076` shrinks the
+BMP t sharply -- unaffected here since all three events remain usable and
+`n_valid_events` is constant across days in this fixture), and locked in
+`test_reeval_statistical_fixes.R` against a 6-event fixture with one
+constant-estimation-window (non-usable) event and a per-day varying
+`n_valid_events`, at absolute tolerance `1e-8`.
 
 *Citation:* Kolari, J. W., & Pynnonen, S. (2010). Event study testing with
 cross-sectional correlation of abnormal returns. *Review of Financial Studies*,
@@ -634,53 +774,163 @@ and it is not wired into any statistics set or parameter set -- it is not on any
 pipeline path. It is recorded here for completeness; a decision to implement or
 remove it is deferred (see the audit log).
 
+### TestStatisticBase `confidence_type` (2026-09-24 re-evaluation, item A10)
+
+Every `TestStatisticBase` subclass accepts `confidence_level` and
+`confidence_type` at construction, but `confidence_type` was never read by any
+`compute()` method -- every p-value computed anywhere in EventStudy is
+two-sided. `initialize()` now validates `confidence_type` with
+`match.arg(c("two-sided", "less", "greater"))` (an invalid value errors) and
+emits ONE warning at construction when a non-default value ("less" or
+"greater") is supplied, stating that it is currently ignored. The value is
+still stored (for forward compatibility) but has no effect; one-sided p-values
+are NOT implemented by this fix. This is a documented convention (no p-value
+formula changed) with an added validation/warning surface.
+
+### Cross-sectional regression (2026-09-24 re-evaluation, item A5)
+
+`cross_sectional_regression()` regresses per-event CARs on user-supplied firm
+characteristics. Prior to 2026-09-24 it silently tolerated three sample-
+integrity hazards:
+
+| Hazard | Behavior now |
+|---|---|
+| Duplicated `event_id` in the `data` argument | Errors (`eventstudy_error_bad_argument`) naming the duplicated id(s) -- a duplicate would otherwise inflate the join many-to-many. |
+| `car_window` extending outside the event window of any event | Errors (`eventstudy_error_bad_argument`) naming the window, the available range, and the offending event(s), instead of silently summing over rows that do not exist for that event. |
+| A task event with no matching row in `data` | One warning listing the count/ids, then dropped (unchanged: an empty match set still errors). |
+| A missing abnormal return inside `car_window` for an otherwise-matched event | That event's CAR is `NA` (`.extract_cars()` no longer uses `na.rm = TRUE`, so ANY missing AR in the window makes the whole-window CAR `NA`, not the sum of the finite subset) and it is excluded from the regression with one warning listing the event(s). `car_by_group()`, `car_quantiles()`, and `plot_car_distribution()` inherit the same NA-CAR semantics from the shared `.extract_cars()` helper WITHOUT an additional warning (their own `na.rm = TRUE` summary statistics already tolerate NA rows silently, as documented). |
+
+This is a sample-integrity fix (T-sfl-02 in the threat register), not a
+formula change: the OLS regression itself, robust-SE handling, and CAR
+extraction for a fully-matched, non-degenerate window are unchanged.
+
+### Wild bootstrap inference (2026-09-24 re-evaluation, item A12)
+
+`bootstrap_test()` computes bootstrap p-values for AAR/CAAR test statistics.
+Two silent-wrong defects were found and fixed:
+
+- **A12a: observed-vs-draw construction mismatch.** `observed_caar` /
+  `caar_t` were previously built as `cumsum()` of the cross-event DAILY mean
+  AR (`na.rm = TRUE`), while each bootstrap draw built its CAAR as the MEAN
+  over events of each event's own `cumsum(coalesce(AR, 0))`. The two
+  constructions coincide only when every event has a fully-observed event
+  window; with a partial gap in ONE event (but not all), they diverge, and
+  only the per-event-CAR-mean construction is the correct STATS-03-consistent
+  comparison for what the bootstrap draws compute. Fixed so `observed_caar`
+  and `caar_t` use the SAME per-event `coalesce`-to-0 CAR construction as the
+  draws; on NA-free input this is numerically identical to the old
+  `cumsum(aar)` form.
+- **A12b: NA draws counted as "did not exceed".** A bootstrap draw whose
+  cross-sectional statistic is `NA` (e.g. a Rademacher sign-flip combination
+  that zeroes the cross-sectional SD) was previously counted as "did not
+  exceed the observed statistic" while still inflating the `n_boot + 1`
+  denominator -- silently biasing the p-value toward significance (too small)
+  whenever NA draws are common. Fixed to track the number of VALID (finite)
+  draws per day and use `p = (exceed + 1) / (n_valid_draws + 1)`, with `NA`
+  when the observed statistic is `NA` or no draw produced a finite statistic.
+- **A12c: bootstrap clustering unit (REVISED, no change).** The bootstrap
+  weights are clustered by `firm_symbol` (one weight per unique firm per
+  draw, shared across that firm's events) -- a deliberate prior fix; firm-level
+  clusters are the coarser, correlation-robust choice when a firm recurs
+  across multiple events. The 2026-09-24 re-evaluation confirmed this is
+  intentional and made NO change; it is locked with a hand-replication test
+  (`test_bootstrap.R`).
+
 ## Audit log
 
 | Component | Result | Citation |
 |---|---|---|
-| Market Model + AR/CAR t | verified, no change | MacKinlay (1997) |
-| Market Adjusted Model | verified, no change | MacKinlay (1997) |
+| Market Model + AR/CAR t | **FIXED 2026-09-24** (A6: insufficient-obs guard now `n_params`-based; FEC restricted to complete pairs) | MacKinlay (1997) |
+| Market Adjusted Model | **FIXED 2026-09-24** (A8: FEC == sigma exactly, correction factor 1) | MacKinlay (1997) |
 | Comparison Period Mean Adjusted Model | verified, no change | Brown-Warner (1985); MacKinlay (1997) |
-| Fama-French Three-Factor Model | verified, no change | Fama-French (1993) |
-| Fama-French Five-Factor Model | verified, no change | Fama-French (2015) |
-| Carhart Four-Factor Model | verified, no change | Carhart (1997) |
+| Fama-French Three-Factor Model | **FIXED 2026-09-24** (A6: insufficient-obs guard strengthened) | Fama-French (1993) |
+| Fama-French Five-Factor Model | **FIXED 2026-09-24** (A6: insufficient-obs guard strengthened) | Fama-French (2015) |
+| Carhart Four-Factor Model | **FIXED 2026-09-24** (A6: insufficient-obs guard strengthened) | Carhart (1997) |
 | Custom Model | documented convention (user-supplied prediction; reduces to Market Model when `loss_market_cap = 0`) | MacKinlay (1997) |
 | BHAR Model + BHARTTest | verified, no change | Barber-Lyon (1997); Lyon-Barber-Tsai (1999) |
 | Volume Model | verified, no change | Campbell-Wasley (1996); Brown-Warner (1985) |
 | Volatility Model | verified, no change | Beaver (1968); Patell-Wolfson (1979) |
-| Rolling-Window Model | verified, no change | Fama-MacBeth (1973); MacKinlay (1997) |
+| Rolling-Window Model | **FIXED 2026-09-24** (A1: complete-pair restriction inside each rolling window) | Fama-MacBeth (1973); MacKinlay (1997) |
 | GARCH Model | verified, no change (identity-pinned, skip-guarded on rugarch) | Engle (1982); Bollerslev (1986) |
 | DCC-GARCH Model | verified, no change (identity-pinned, skip-guarded on rmgarch) | Bollerslev (1990); Engle (2002) |
-| AR / CAR t-tests (ARTTest, CARTTest) | verified, no change | MacKinlay (1997) |
+| AR / CAR t-tests (ARTTest, CARTTest) | verified, no change (documented: `forecast_error_corrected_sigma_car` intentionally unused, A11) | MacKinlay (1997) |
 | BHAR t-test (BHARTTest) | verified, no change | Barber-Lyon (1997); Lyon-Barber-Tsai (1999) |
-| Cross-Sectional t-test (CSectTTest) | verified, no change | Brown-Warner (1985) |
-| Patell Z-test (PatellZTest) | verified, no change (FEC sigma, `Q_i = (m-k)/(m-k-2)`, N >= 2 guard) | Patell (1976) |
-| BMP test (BMPTest) | verified, no change | Boehmer-Musumeci-Poulsen (1991) |
-| Sign test (SignTest) | verified, no change (strict `> 0` positive count, N >= 2 guard) | Brown-Warner (1985); Cowan (1992) |
-| Generalized Sign test (GeneralizedSignTest) | verified, no change (estimation-window `p_hat`) | Cowan (1992) |
-| Rank test (RankTest) | **FIXED**: `rank_z` scalar-`ifelse` broadcast collapsed the per-day vector to day 0; fixed + regression-tested before the pin | Corrado (1989) |
-| Calendar-Time Portfolio test (CalendarTimePortfolioTest) | **FIXED**: `caltime_t` / `ccaltime_t` scalar-`ifelse` broadcast collapsed the per-day vectors to day 0; fixed + regression-tested before the pin | Jaffe (1974); Fama (1998) |
-| Kolari-Pynnonen test (KolariPynnonenTest) | verified, no change (BMP scaled by `sqrt((1 - r_bar)/(1 + (N-1) r_bar))`) | Kolari-Pynnonen (2010) |
+| Multi-event all-NA exclusion (shared mechanism) | **FIXED 2026-09-24** (A2: all-NA events excluded from every CAR-based multi-event statistic, once per group) | -- |
+| Cross-Sectional t-test (CSectTTest) | **FIXED 2026-09-24** (A2 exclusion; A9: strict `n_pos > 0`) | Brown-Warner (1985) |
+| Patell Z-test (PatellZTest) | **FIXED 2026-09-24** (A2 exclusion; A6: `m`/`k` redefinition; A9: strict `n_pos > 0`) | Patell (1976) |
+| BMP test (BMPTest) | **FIXED 2026-09-24** (A2 exclusion; A11: roxygen corrected, docs-only) | Boehmer-Musumeci-Poulsen (1991) |
+| Sign test (SignTest) | **FIXED 2026-09-24** (A2 exclusion) | Brown-Warner (1985); Cowan (1992) |
+| Generalized Sign test (GeneralizedSignTest) | **FIXED 2026-09-24** (A2 exclusion; A4: `p_hat` grouped by `event_id`) | Cowan (1992) |
+| Rank test (RankTest) | **FIXED** (original audit: `rank_z` broadcast); **FIXED 2026-09-24** (A4: grouped by `event_id`) | Corrado (1989) |
+| Calendar-Time Portfolio test (CalendarTimePortfolioTest) | **FIXED** (original audit: `caltime_t`/`ccaltime_t` broadcast); **FIXED 2026-09-24** (A7: Brown-Warner estimation-window denominator, redefinition; A9: strict `n_pos > 0`) | Brown-Warner (1980, 1985); Jaffe (1974); Fama (1998) |
+| Kolari-Pynnonen test (KolariPynnonenTest) | **FIXED 2026-09-24** (A2 exclusion; A3: usable-events `r_bar`, per-day adjustment, never `kp_adj = 1` fallback) | Kolari-Pynnonen (2010) |
 | PermutationTest | unwired stub -- empty `compute()`, not on pipeline path; deferred | -- |
+| `bootstrap_test()` | **FIXED 2026-09-24** (A12a: observed/draw CAAR construction aligned; A12b: NA draws excluded from denominator; A12c: clustering unit confirmed, no change) | -- |
+| `cross_sectional_regression()` | **FIXED 2026-09-24** (A5: duplicate-id error, out-of-range `car_window` error, unmatched/NA-CAR warnings+exclusion) | -- |
+| `TestStatisticBase$confidence_type` | **FIXED 2026-09-24** (A10: validated, warns once when non-default; no formula change) | -- |
 
 ### Audit summary
 
-The audit covered all 13+ return models and all wired test statistics. Of these,
-two genuine implementation errors were found and fixed (each locked by a
-regression test whose fix commit precedes the golden pin, per the fix-before-pin
-policy); every other component was verified against its published formula with no
-behavior change, and the remaining differences were documented conventions.
+The original audit covered all 13+ return models and all wired test
+statistics and found two broadcast-bug implementation errors (RankTest,
+CalendarTimePortfolioTest). The 2026-09-24 re-evaluation covered the same
+surface plus `bootstrap_test()` and `cross_sectional_regression()`, and found
+twelve additional silent-wrong-statistic defects (items A1-A9, A11-A12; A10 is
+a validation/warning addition, no formula change; A11 is docs-only). Every
+defect is fixed, locked by a regression test that fails on the pre-fix code
+(`test_reeval_statistical_fixes.R`), and golden values affected by a genuine
+redefinition (A7, A8, and the Patell/KP/Rank/GSign pins touched by A2/A3/A4/A6/A9)
+are re-pinned in `test_golden_values.R` with an explanatory comment. No
+valid-input behavior changed for any component NOT listed above as fixed.
 
-**Fixes (2):**
+**2026-09-24 re-evaluation fixes (12 items, A1-A9 + A11-A12; A10 is a
+validation addition):**
 
-1. **RankTest `rank_z` broadcast.** Base `ifelse()` with a scalar `S_rank`
-   condition returned a length-1 result, collapsing the per-day rank z to the
-   day-0 value and recycling it. Fixed to divide the per-day vector directly.
-2. **CalendarTimePortfolioTest `caltime_t` / `ccaltime_t` broadcast.** The same
-   scalar-`ifelse` pattern on `ts_sd` collapsed the per-day t vectors to the
-   day-0 value. Fixed to divide the per-day vectors directly.
+1. **A1 -- RollingWindowModel complete pairs.** Rolling-window OLS computed
+   `x_bar`/`ss_xx` from ALL index values in a window, including rows where the
+   firm return was NA, biasing beta when NA-firm rows co-occur with index
+   outliers. Fixed to restrict each window to complete pairs.
+2. **A2 -- Multi-event all-NA exclusion.** A fully-degenerate event (all
+   event-window ARs NA) was coalesced to 0 in cumulative statistics instead of
+   excluded, silently understating cross-event dispersion. Fixed with a shared
+   exclusion helper applied once per group.
+3. **A3 -- KolariPynnonenTest usable events.** A degenerate estimation-window
+   SAR series was folded into `r_bar`, and an undefined adjustment silently
+   fell back to `kp_adj = 1` (the unadjusted BMP value). Fixed to exclude
+   non-usable events from `r_bar` and return NA (never a silent 1) when the
+   adjustment cannot be computed; also fixed the per-day window-size term
+   (previously the first day's count applied to every day).
+4. **A4 -- RankTest / GeneralizedSignTest grouping.** Ranking and `p_hat`
+   estimation grouped by `firm_symbol`, silently pooling a recurring firm's
+   data across its distinct events. Fixed to group by `event_id`.
+5. **A5 -- cross_sectional_regression sample integrity.** Duplicate
+   `event_id`s, out-of-range `car_window`s, and NA-CAR events were silently
+   tolerated. Fixed with explicit errors/warnings and exclusion.
+6. **A6 -- OLS insufficient-observations guard and Patell m/k.** The
+   insufficient-obs guard used a flat threshold instead of `n_params + 1`;
+   Patell's `k` was derived as `length(resid) - df` instead of read from the
+   model; Patell's `m` used the raw row count instead of the finite count;
+   MarketModel's FEC included incomplete-pair rows. All fixed.
+7. **A7 -- CalendarTimePortfolioTest denominator.** `ts_sd` was computed from
+   the event-window portfolio series itself (self-referential with the
+   numerator). Redefined to the Brown-Warner (1980, 1985) estimation-window
+   AAR standard deviation.
+8. **A8 -- MarketAdjustedModel FEC.** Wrongly reused the constant-MEAN
+   correction (`sigma * sqrt(1 + 1/m)`) for a model that estimates NOTHING.
+   Fixed to FEC == sigma exactly.
+9. **A9 -- Sign convention.** `n_pos` used `>= 0` in CSectT, Patell, and
+   CalendarTime (inconsistent with SignTest's `> 0`). Fixed to strict `> 0`
+   everywhere.
+10. **A11 -- BMP/KP roxygen (docs-only).** The BMP docstring incorrectly
+    claimed forecast-error-corrected-sigma standardization; both BMP and KP
+    standardize by MODEL sigma. Fixed the docstring; no formula change.
+11. **A12a/b -- bootstrap_test() observed/draw mismatch and NA-draw
+    denominator.** `observed_caar` used a different construction than the
+    draws; NA draws were counted as "did not exceed" while still inflating
+    the denominator. Both fixed.
+12. **A12c -- bootstrap clustering unit (confirmed, no change).** Firm-level
+    clustering is deliberate and unchanged; locked with a hand-replication
+    test.
 
-Both are the same latent idiom (`ifelse(scalar_condition, vector, scalar)` inside
-`dplyr::mutate`) and both are now guarded with a plain `if()` on the scalar
-denominator plus a regression test that asserts the per-day values are distinct.
-No valid-input behavior changed for any documented-convention component.
+A10 (TestStatisticBase `confidence_type` validation) adds a construction-time
+check and a one-time warning; it changes no computed statistic.

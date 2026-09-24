@@ -667,13 +667,19 @@ test_that("Calendar-time portfolio t matches the closed form and varies per day"
   #   (all three days reported the day-0 value 1.6474). The fix divides the
   #   vectors directly, guarding the scalar denominator with a plain if(). This
   #   test locks the corrected per-day values so the broadcast bug cannot return.
+  # Re-pinned 2026-09-24: A7 -- the denominator is now the Brown-Warner (1980,
+  #   1985) ESTIMATION-window AAR standard deviation (ts_sd = sd(AAR over the
+  #   8 estimation days)), not sd(AAR over the 3 event-window days) as before.
+  #   caltime_t = AAR_t / ts_sd; ccaltime_t = CAAR_t / (ts_sd * sqrt(L));
+  #   df = n_estimation_days - 1 = 7, exposed as attr(res, "caltime_df").
   # Assumed conventions (see vignettes/statistical-conventions.Rmd, Calendar-Time
-  #   Portfolio test): equal-weight portfolio AAR; time-series t = AAR / sd(AAR),
-  #   CAAR t = CAAR / (sd(AAR) sqrt(L)); sd over the event-window days; two-sided.
+  #   Portfolio test): equal-weight portfolio AAR; time-series t = AAR / ts_sd,
+  #   CAAR t = CAAR / (ts_sd * sqrt(L)); ts_sd over the ESTIMATION-window days;
+  #   two-sided.
   # Tolerance: absolute 1e-10 -- exact algebraic identity between the package
   #   pipeline and an independent closed-form portfolio computation.
   fx <- golden_multi_event_fixture()
-  res <- CalendarTimePortfolioTest$new()$compute(fx$data, NULL)
+  res <- suppressWarnings(CalendarTimePortfolioTest$new()$compute(fx$data, NULL))
 
   expect_equal(
     res$aar,
@@ -682,14 +688,15 @@ test_that("Calendar-time portfolio t matches the closed form and varies per day"
   )
   expect_equal(
     res$caltime_t,
-    c(1.647393006622242, -0.28182880354441781, 1.1394848553985282),
+    c(14.5159150457412, -2.48331937385221, 10.0405096357597),
     tolerance = 1e-10
   )
   expect_equal(
     res$ccaltime_t,
-    c(1.647393006622242, 0.96559970814193319, 1.4462907482445408),
+    c(14.5159150457412, 8.50832999486859, 12.7439132912219),
     tolerance = 1e-10
   )
+  expect_equal(attr(res, "caltime_df"), 7)
   # The three per-day t values are distinct -- proves the broadcast bug is fixed.
   expect_false(res$caltime_t[1] == res$caltime_t[2])
 })
