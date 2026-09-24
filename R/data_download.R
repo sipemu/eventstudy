@@ -42,6 +42,15 @@ download_stock_data <- function(symbols, from, to = Sys.Date(),
         )
     }
   } else if (requireNamespace("quantmod", quietly = TRUE)) {
+    # zoo::index() below reads the xts index from quantmod::getSymbols();
+    # zoo is a hard dependency of xts/quantmod at install time, but guard it
+    # explicitly (B6, 2026-09-24) so a broken/partial quantmod installation
+    # fails with an actionable message instead of a namespace-not-found error
+    # from inside the per-symbol tryCatch() below.
+    if (!requireNamespace("zoo", quietly = TRUE)) {
+      stop("Package 'zoo' is required to download stock data via quantmod. ",
+           "Install it with: install.packages('zoo')")
+    }
     data_list <- lapply(symbols, function(sym) {
       tryCatch({
         xts_data <- quantmod::getSymbols(sym, src = source,

@@ -63,13 +63,11 @@ Suggests:
     didimputation,
     tidyquant,
     quantmod,
-    DT,
     zoo,
     httr2 (>= 1.0.0),
     jsonlite,
     tinytex,
     tinytable,
-    patchwork,
     ragg
 Encoding: UTF-8
 Config/testthat/edition: 3
