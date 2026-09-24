@@ -2,13 +2,48 @@
 # not the specific data source (Yahoo Finance / Ken French library), which are
 # frequently unreachable or rate-limited from CI. .try_download() skips the
 # test when the source is down instead of failing on a transient outage.
+#
+# C6 (2026-09-24): only NETWORK/HTTP failures convert to skip() -- matched by
+# condition class (curl/httr2, when present) or by a narrow message pattern.
+# Every other error (a parse/logic bug in the package) is re-signalled so the
+# test fails instead of being silently skipped.
+.NETWORK_ERROR_PATTERN <- paste0(
+  "(could not resolve host|timed? ?out|timeout|http (error )?[45][0-9]{2}|",
+  "cannot open url|cannot open connection|ssl|unreachable|rate.?limit|",
+  "failed to download|connection (refused|reset)|could not connect|",
+  "network is unreachable|gateway timeout|service unavailable)"
+)
 .try_download <- function(expr) {
   tryCatch(
     expr,
-    error = function(e)
-      skip(paste("data source unreachable:", conditionMessage(e)))
+    error = function(e) {
+      is_network_class <- inherits(e, c("curl_error", "httr2_http", "httr2_failure",
+                                          "httr_error", "http_error"))
+      is_network_msg <- grepl(.NETWORK_ERROR_PATTERN, conditionMessage(e), ignore.case = TRUE)
+      if (is_network_class || is_network_msg) {
+        skip(paste("data source unreachable:", conditionMessage(e)))
+      }
+      stop(e)
+    }
   )
 }
+
+
+test_that(".try_download skips on a network-style condition (C6, 2026-09-24)", {
+  net_err <- simpleError("Failed to download: could not resolve host www.example.com")
+  expect_condition(
+    .try_download(stop(net_err)),
+    class = "skip"
+  )
+})
+
+
+test_that(".try_download re-signals a non-network (logic) error (C6, 2026-09-24)", {
+  expect_error(
+    .try_download(stop("subscript out of bounds")),
+    "subscript out of bounds"
+  )
+})
 
 test_that("download_stock_data errors without tidyquant or quantmod", {
   # This test verifies the error message when neither package is available
