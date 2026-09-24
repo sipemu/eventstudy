@@ -253,8 +253,13 @@ test_that("PatellZTest CSAR cumsum is per-firm with per-firm Q_i (GH #6)", {
 
 
 test_that("CalendarTimePortfolioTest computes correctly", {
+  # A7 (2026-09-24 re-evaluation): caltime_t's denominator is now the
+  # Brown-Warner ESTIMATION-window AAR standard deviation, so the fixture
+  # must supply an estimation window (the original fixture had none --
+  # estimation_window = 0 for every row -- which is now correctly a
+  # degenerate 0-estimation-day input yielding NA caltime_t).
   set.seed(42)
-  data = do.call(rbind, lapply(1:5, function(i) {
+  event_data = do.call(rbind, lapply(1:5, function(i) {
     tibble::tibble(
       event_id = paste0("E", i),
       firm_symbol = paste0("F", i),
@@ -264,6 +269,17 @@ test_that("CalendarTimePortfolioTest computes correctly", {
       estimation_window = 0
     )
   }))
+  est_data = do.call(rbind, lapply(1:5, function(i) {
+    tibble::tibble(
+      event_id = paste0("E", i),
+      firm_symbol = paste0("F", i),
+      relative_index = -25:-6,
+      abnormal_returns = rnorm(20, mean = 0, sd = 0.02),
+      event_window = 0,
+      estimation_window = 1
+    )
+  }))
+  data = dplyr::bind_rows(est_data, event_data)
 
   ct = CalendarTimePortfolioTest$new()
   result = ct$compute(data, NULL)
@@ -275,6 +291,7 @@ test_that("CalendarTimePortfolioTest computes correctly", {
   expect_true("car_window" %in% names(result))
   expect_equal(nrow(result), 11)
   expect_true(all(is.finite(result$caltime_t)))
+  expect_equal(attr(result, "caltime_df"), 19)
 })
 
 

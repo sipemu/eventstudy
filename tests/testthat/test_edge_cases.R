@@ -252,7 +252,13 @@ test_that("MarketAdjustedModel with constant estimation residuals", {
 # Forecast error correction with zero-variance market returns
 # ============================================================================
 
-test_that("Forecast error correction in MarketAdjustedModel uses constant-mean formula", {
+test_that("Forecast error correction in MarketAdjustedModel uses the arithmetic (sigma) formula", {
+  # A8 (2026-09-24 re-evaluation): MarketAdjustedModel estimates NOTHING from
+  # the estimation window (abnormal return is purely arithmetic, firm minus
+  # index), so its forecast error correction factor is exactly 1 --
+  # forecast_error_corrected_sigma == sigma. The previous sigma*sqrt(1+1/T)
+  # formula wrongly applied the constant-MEAN correction (which DOES estimate
+  # one parameter) to a model that estimates none.
   data = create_mock_model_data()
   # Constant index returns — should not affect forecast error correction
   data$index_returns = 0.001
@@ -261,16 +267,13 @@ test_that("Forecast error correction in MarketAdjustedModel uses constant-mean f
   mam$fit(data)
 
   expect_true(mam$is_fitted)
-  # Constant-mean correction: sigma * sqrt(1 + 1/T) — always finite
   fec = mam$statistics$forecast_error_corrected_sigma
   expect_true(!is.null(fec))
   expect_true(all(is.finite(fec)))
   # All values should be equal (constant correction, no regression term)
   expect_equal(length(unique(fec)), 1)
-  # Should equal sigma * sqrt(1 + 1/T)
-  T_est = sum(data$estimation_window == 1)
-  expected = mam$statistics$sigma * sqrt(1 + 1 / T_est)
-  expect_equal(fec[1], expected, tolerance = 1e-10)
+  # A8: FEC == sigma exactly (correction factor 1)
+  expect_equal(fec[1], mam$statistics$sigma, tolerance = 1e-10)
 })
 
 
@@ -405,7 +408,15 @@ test_that("validate_task warns when event date missing from data", {
 # extract_cars with all-NA abnormal returns
 # ============================================================================
 
-test_that("cross_sectional_regression with all-NA abnormal returns gives NA CARs", {
+test_that("cross_sectional_regression with all-NA abnormal returns excludes every event and errors (A5)", {
+  # A5 (2026-09-24 re-evaluation): .extract_cars() no longer na.rm's the
+  # window sum, so an event with ALL-NA abnormal returns gets an NA CAR (as
+  # before), but cross_sectional_regression() now EXCLUDES any NA-CAR event
+  # (one warning naming it) instead of passing it through to lm(). With
+  # every event's ARs NA, every matched event is excluded, leaving nothing
+  # to regress -- the call now errors ("No matching event_id values")
+  # BEFORE ever reaching lm(), superseding the prior tryCatch-around-lm()
+  # warning+NULL path (unreachable here since lm() is never called).
   task = create_fitted_mock_task(n_firms = 3)
 
   # Replace all abnormal returns with NA
@@ -414,19 +425,18 @@ test_that("cross_sectional_regression with all-NA abnormal returns gives NA CARs
   }
 
   firm_chars = tibble::tibble(
-    event_id = 1:2,
-    x = c(1.0, 2.0)
+    event_id = 1:3,
+    x = c(1.0, 2.0, 3.0)
   )
 
-  # All-NA ARs produce all-NA CARs.  lm() on all-NA response fails and the
-  # tryCatch wrapping in cross_sectional_regression() now emits a warning and
-  # returns NULL — so the call must warn, not stop().
   expect_warning(
-    result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE),
-    regexp = "lm|non-NA|missing|failed",
-    ignore.case = TRUE
+    err <- tryCatch(
+      cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE),
+      error = function(e) e
+    ),
+    regexp = "missing"
   )
-  expect_null(result)
+  expect_true(inherits(err, "error"))
 })
 
 
@@ -803,6 +813,9 @@ test_that("cross_sectional .extract_cars returns NA for all-NA abnormal returns"
   # Bug: sum(NA, na.rm=TRUE) returned 0, so events with entirely missing
   # ARs were treated as having zero CAR.
   # Fix: Now returns NA_real_ when all ARs are NA.
+  # A5 (2026-09-24): cross_sectional_regression() additionally EXCLUDES any
+  # event whose CAR is NA (one warning listing the excluded event_id(s)),
+  # rather than keeping it as an NA row in car_data.
   task <- create_fitted_mock_task(n_firms = 2)
 
   # Replace only the first firm's ARs with NA (leave second firm intact)
@@ -813,11 +826,14 @@ test_that("cross_sectional .extract_cars returns NA for all-NA abnormal returns"
     x = c(1.0, 2.0)
   )
 
-  # Should not error but the first firm should have NA CAR
-  result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE)
+  # Should warn (not error); the first event (all NA) is excluded
+  expect_warning(
+    result <- cross_sectional_regression(task, ~ x, firm_chars, robust = FALSE),
+    "missing"
+  )
   car_data <- result$car_data
-  # First event (all NA) should have NA CAR
-  expect_true(is.na(car_data$car[car_data$event_id == 1]))
+  # First event (all NA) is excluded entirely
+  expect_false(1 %in% car_data$event_id)
   # Second event should have a non-NA CAR
   expect_false(is.na(car_data$car[car_data$event_id == 2]))
 })

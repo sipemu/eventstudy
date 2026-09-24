@@ -820,19 +820,20 @@ test_that("BHARModel compounds returns within event window only, not across wind
 
 # --- Regression: Constant-mean FEC for non-regression models ---
 
-test_that("MarketAdjustedModel uses constant-mean FEC (sigma * sqrt(1 + 1/T))", {
-  # Bug: MarketAdjustedModel used OLS-style FEC formula despite having no regression.
-  # Fix: Use sigma * sqrt(1 + 1/T) for constant-mean models.
+test_that("MarketAdjustedModel FEC equals sigma exactly (A8, 2026-09-24 re-pin)", {
+  # A8 (2026-09-24 re-evaluation): MarketAdjustedModel estimates NOTHING from
+  # the estimation window (AR = firm - index is purely arithmetic), so its
+  # forecast error correction factor is exactly 1: FEC == sigma. The previous
+  # sigma * sqrt(1 + 1/T) formula wrongly reused the constant-MEAN correction
+  # (which DOES estimate one parameter, the mean) for a model estimating none.
   data <- create_mock_model_data(n_estimation = 100, n_event = 5)
   ma <- MarketAdjustedModel$new()
   ma$fit(data)
 
   stats <- ma$statistics
-  sigma <- stats$sigma
-  T_est <- 100
-  expected_fec <- sigma * sqrt(1 + 1 / T_est)
+  expected_fec <- stats$sigma
 
-  # FEC should be a vector of length n_event, all equal to the constant-mean correction
+  # FEC should be a vector of length n_event, all equal to sigma.
   expect_length(stats$forecast_error_corrected_sigma, 5)
   expect_equal(stats$forecast_error_corrected_sigma, rep(expected_fec, 5), tolerance = 1e-12)
 })
@@ -1347,7 +1348,11 @@ test_that("MarketAdjustedModel: valid-input baseline invariance (CONTRACT-05)", 
   expect_true(m$is_fitted)
   expect_equal(m$statistics$sigma, bl$sigma, tolerance = 1e-8)
   expect_equal(m$statistics$degree_of_freedom, bl$df, tolerance = 1e-8)
-  expect_equal(m$statistics$forecast_error_corrected_sigma[1:3], bl$fec, tolerance = 1e-8)
+  # A8 (2026-09-24 re-pin): FEC == sigma exactly (correction factor 1) -- the
+  # stored baseline's `fec` field predates the A8 fix and is stale; compare
+  # against the current sigma instead of the frozen fixture value.
+  expect_equal(m$statistics$forecast_error_corrected_sigma[1:3],
+               rep(m$statistics$sigma, 3), tolerance = 1e-8)
   ar <- m$abnormal_returns(d)$abnormal_returns[which(d$event_window == 1)][1:5]
   expect_equal(ar, bl$ar5, tolerance = 1e-8)
 })
@@ -1424,7 +1429,12 @@ test_that("VolatilityModel: valid-input baseline invariance (CONTRACT-05)", {
 # that are too large (false positives). These tests verify the fix.
 # ============================================================
 
-test_that("WR-03: MarketAdjustedModel FEC uses finite pair count not nrow (NA-heavy window)", {
+test_that("A8 (2026-09-24 re-pin): MarketAdjustedModel FEC no longer depends on pair count", {
+  # Formerly WR-03 ("MarketAdjustedModel FEC uses finite pair count not
+  # nrow"). A8 supersedes this: MarketAdjustedModel estimates NOTHING from
+  # the estimation window (AR = firm - index is purely arithmetic), so FEC
+  # == sigma exactly regardless of how many estimation rows are NA -- there
+  # is no pair-count-dependent correction factor left to get wrong.
   m <- MarketAdjustedModel$new()
   d <- create_mock_model_data(n_estimation = 50, n_event = 5)
   est <- which(d$estimation_window == 1)
@@ -1433,14 +1443,9 @@ test_that("WR-03: MarketAdjustedModel FEC uses finite pair count not nrow (NA-he
   d$index_returns[est[1:10]] <- NA_real_
   m$fit(d)
   expect_true(m$is_fitted)
-  sigma <- m$statistics$sigma
   fec_val <- m$statistics$forecast_error_corrected_sigma[1]
-  expected_finite <- sigma * sqrt(1 + 1 / 40)
-  expected_nrow   <- sigma * sqrt(1 + 1 / 50)
-  expect_equal(fec_val, expected_finite, tolerance = 1e-10,
-               info = "FEC must use finite pair count (n=40), not nrow (n=50)")
-  expect_false(isTRUE(all.equal(fec_val, expected_nrow, tolerance = 1e-10)),
-               info = "FEC must NOT equal nrow-based formula")
+  expect_equal(fec_val, m$statistics$sigma, tolerance = 1e-10,
+               info = "A8: FEC == sigma exactly (correction factor 1)")
 })
 
 test_that("WR-03: ComparisonPeriodMeanAdjustedModel FEC uses finite value count not nrow (NA-heavy window)", {

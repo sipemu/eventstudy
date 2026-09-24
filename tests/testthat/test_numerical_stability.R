@@ -51,7 +51,12 @@ test_that("well-conditioned design is UNAFFECTED by the ill-conditioned guard", 
   ref  <- stats::lm(firm_returns ~ index_returns, data = est)
 
   mm <- MarketModel$new()
-  expect_silent(mm$fit(data))
+  # A6 (2026-09-24): this fixture has only 6 estimation-window observations,
+  # below the recommended minimum of 30 -- the model still fits (n_valid >=
+  # n_params + 1 = 3), but now emits the advisory "short estimation window"
+  # warning in BOTH modes. This is not the ill-conditioned/rcond guard this
+  # test locks (that guard stays silent, per the assertions below).
+  expect_warning(mm$fit(data), "estimation window has only 6 valid observations")
   expect_true(mm$is_fitted)
 
   # Abnormal returns must match firm - (alpha + beta*index) from the reference
@@ -74,7 +79,11 @@ test_that("rcond guard does not fire on a moderately-conditioned design", {
   # above sqrt(.Machine$double.eps)); the guard must stay silent and fit.
   data <- invariant_ill_conditioned_fixture(scale = 1e-2)
   mm <- MarketModel$new()
-  expect_silent(mm$fit(data))
+  # A6 (2026-09-24): this fixture has only 8 estimation-window observations,
+  # below the recommended minimum of 30 -- the rcond guard still stays
+  # silent (that is what this test locks), but the advisory short-window
+  # warning now fires in both modes.
+  expect_warning(mm$fit(data), "estimation window has only 8 valid observations")
   expect_true(mm$is_fitted)
 })
 
