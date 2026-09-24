@@ -100,6 +100,54 @@ for the full audit log and citations.
   while still inflating `n_boot + 1`. The bootstrap weight clustering unit
   (`firm_symbol`) is confirmed correct and unchanged.
 
+## API and documentation consistency (2026-09-24 re-evaluation)
+
+* **B1 -- `ModelBase`, `TestStatisticBase`, and `ReturnCalculation` are now
+  exported** with roxygen documenting the subclass contract expected by
+  `run_event_study()` (`fit()`/`abnormal_returns()`, `compute()`,
+  `calculate_return()`, and the `statistics` fields consumed downstream,
+  including the optional `n_params` field added by A6). Previously these
+  base classes existed but were unexported, so vignettes and skills
+  advertising "subclass `ModelBase`" referenced a symbol users could not
+  actually reach with `EventStudy::ModelBase`.
+* **B5 -- `generics::tidy(task)` now dispatches to `tidy.EventStudyTask()`.**
+  `generics` added to Suggests; `tidy.EventStudyTask()` remains directly
+  callable and exported as before.
+* **B2 -- Vignette code examples fixed to the real function signatures.**
+  `modern-did-estimators.Rmd` and `automated-reports.Rmd` previously called
+  `PanelEventStudyTask$new()` with non-existent arguments
+  (`data`/`unit_col`/`time_col`/`treatment_col`/`outcome_col`); fixed to the
+  real `(panel_data, unit_id, time_id, outcome, treatment, treatment_time)`.
+  `cross_sectional_regression(characteristics = ...)` fixed to
+  `data = ...`. `automated-reports.Rmd`'s "Available sections" table and
+  every `sections = c(...)` example previously listed section keys
+  (`summary`, `data`, `single_event`, `multi_event`, `cross_sectional`,
+  `panel`) that do not exist in the report template; corrected to the real
+  keys (`exec_summary`, `data_methods`, `results`, `diagnostics`,
+  `robustness`, `references`, `appendix`).
+* **B4 -- pkgdown reference reorganized.** `statistical-conventions` added
+  as an article; `dieselgate`/`earnings_surprises` now listed explicitly in
+  "Data & Datasets"; `degenerate-input-contract`, `eventstudy-shape-contracts`,
+  and `eventstudy-deprecation` grouped under a new "Contracts & Lifecycle"
+  reference section; `report_table` added to "Export & Reporting" and its
+  `\keyword{internal}` tag removed (it is exported and advertised).
+* **B6 -- Unused `DT` and `patchwork` removed from Suggests.**
+  `download_stock_data()`'s quantmod fallback branch now guards
+  `zoo::index()` with its own `requireNamespace("zoo")` check before any
+  download.
+* **B7 -- `.claude/skills/es-capabilities/SKILL.md` signatures corrected**
+  for `run_event_study()` and `validate_task()` to match `formals()`; a
+  scripted scan of every vignette/README/skill code chunk confirms zero
+  remaining argument-name drift against the installed package.
+* **B3 -- `.claude/skills/es-advisor/reference/interpreting-diagnostics.md`
+  rewritten to the real `es_diagnostics()` structure** (`meta`,
+  `estimation_window`, `event_window`, `cross_sectional`, `contract_state`,
+  `aggregate_summary`), verified field-by-field against a live run, with the
+  8 offline knowledge-base rule thresholds restated in terms of the real
+  field paths they key off. The previous version documented a fabricated
+  structure (`n_events`, `per_event`, `mean_r_squared`, etc.) that did not
+  exist on the returned object.
+
 # EventStudy 0.66.0
 
 ## API Stabilization & Deprecation Lifecycle (Phase 28)
