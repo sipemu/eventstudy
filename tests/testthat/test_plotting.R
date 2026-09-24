@@ -101,8 +101,19 @@ test_that("plot_stocks respects max_symbols", {
   task = create_mock_task(n_firms = 4)
   ps = ParameterSet$new(single_event_statistics = NULL, multi_event_statistics = NULL)
   task = prepare_event_study(task, ps)
-  # Should not error even with fewer than max_symbols
-  expect_no_error(plot_stocks(task, max_symbols = 2, do_sample = FALSE))
+  # Should not error even with fewer than max_symbols. do_sample= is the
+  # deliberately-deprecated argument (B8/deprecation policy); it fires TWO
+  # warnings when {lifecycle} is installed -- base .Deprecated() plus
+  # lifecycle::deprecate_warn(). Muffle the lifecycle-specific one at its
+  # source (by class) and let expect_warning() capture the base one (C10,
+  # 2026-09-24).
+  expect_warning(
+    withCallingHandlers(
+      plot_stocks(task, max_symbols = 2, do_sample = FALSE),
+      lifecycle_warning_deprecated = function(w) invokeRestart("muffleWarning")
+    ),
+    regexp = "deprecated"
+  )
 })
 
 

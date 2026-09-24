@@ -199,7 +199,10 @@ invariant_model_registry <- list(
 invariant_fit_event_ar <- function(reg_row) {
   model <- reg_row$constructor()
   data  <- reg_row$fixture()
-  model$fit(data)
+  # C10 (2026-09-24): every invariant fixture is INTENTIONALLY small (kept
+  # tiny for closed-form/deterministic tractability); muffle only the
+  # advisory eventstudy_short_estimation_window warning this triggers.
+  muffle_short_window(model$fit(data))
   ar_tbl <- model$abnormal_returns(data)
   ev <- ar_tbl[ar_tbl$event_window == 1, , drop = FALSE]
   ev <- ev[order(ev$relative_index), , drop = FALSE]
@@ -349,7 +352,7 @@ invariant_rbar_zero_fixture <- function() {
     firm_symbol = sub("E", "F", names(patterns)),
     model = lapply(names(patterns), function(nm) {
       m <- MarketAdjustedModel$new()
-      m$fit(base[base$event_id == nm, ])
+      muffle_short_window(m$fit(base[base$event_id == nm, ]))
       m
     })
   )

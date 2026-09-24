@@ -471,7 +471,20 @@ for (.entry in contract_matrix_components) {
                " — NA statistic on degenerate input, no Inf/NaN"),
         {
           inputs <- entry$stat_data()
-          result <- entry$make_stat()$compute(inputs$data, inputs$model)
+          # C10 (2026-09-24): KolariPynnonenTest and CalendarTimePortfolioTest
+          # route their degenerate branch through .handle_degenerate(), which
+          # emits exactly one lenient-mode warning naming the component; the
+          # other statistics in this table return NA without a contract
+          # warning on their own degenerate fixtures. Assert the warning
+          # explicitly by class rather than leaving it unhandled.
+          if (entry$label %in% c("KolariPynnonenTest", "CalendarTimePortfolioTest")) {
+            expect_warning(
+              result <- entry$make_stat()$compute(inputs$data, inputs$model),
+              regexp = paste0("^", entry$label, ":")
+            )
+          } else {
+            result <- entry$make_stat()$compute(inputs$data, inputs$model)
+          }
 
           stat_vals <- result[[entry$stat_col]]
           expect_true(

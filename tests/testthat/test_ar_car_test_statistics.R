@@ -53,7 +53,12 @@ test_that("TestStatisticBase initializes with defaults", {
 
 
 test_that("TestStatisticBase initializes with custom parameters", {
-  ts = TestStatisticBase$new(confidence_level = 0.99, confidence_type = "less")
+  # A10 (2026-09-24): a non-default confidence_type emits exactly one warning
+  # that it is currently ignored (every p-value in the package is two-sided).
+  expect_warning(
+    ts <- TestStatisticBase$new(confidence_level = 0.99, confidence_type = "less"),
+    "currently ignored"
+  )
   expect_equal(ts$confidence_level, 0.99)
   expect_equal(ts$confidence_type, "less")
 })

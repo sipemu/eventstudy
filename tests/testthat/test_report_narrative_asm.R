@@ -241,10 +241,25 @@ test_that("provider error causes graceful fallback to offline for that section",
     }
   )
 
-  # Should not throw; result should be complete with offline fallback
-  result <- expect_no_error(
-    EventStudy:::assemble_report_narrative(diag, provider = error_mock)
+  # Should not throw; result should be complete with offline fallback. The
+  # provider is called once per section that attempts an online path, each
+  # emitting its own "Provider call failed" warning -- since expect_warning()
+  # only consumes ONE matching warning per call, muffle every matching
+  # occurrence explicitly (by message) and assert at least one fired, rather
+  # than leaving the 2nd/3rd occurrence to leak (C10, 2026-09-24).
+  provider_warn_count <- 0L
+  result <- withCallingHandlers(
+    expect_no_error(
+      EventStudy:::assemble_report_narrative(diag, provider = error_mock)
+    ),
+    warning = function(w) {
+      if (grepl("Simulated provider failure", conditionMessage(w), fixed = TRUE)) {
+        provider_warn_count <<- provider_warn_count + 1L
+        invokeRestart("muffleWarning")
+      }
+    }
   )
+  expect_gt(provider_warn_count, 0L)
 
   # All four section keys must be non-empty
   for (key in c("exec_summary", "data_methods", "results", "robustness")) {

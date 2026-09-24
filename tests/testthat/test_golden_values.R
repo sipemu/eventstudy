@@ -32,7 +32,7 @@ test_that("Market Model AR/CAR t-test matches MacKinlay (1997) closed form", {
 
   d <- golden_market_model_fixture()
   m <- MarketModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   # Model-level pins.
   expect_equal(m$statistics$sigma, 0.00166476081508083, tolerance = 1e-10)
@@ -70,7 +70,7 @@ test_that("Market Adjusted Model AR/sigma matches closed form (MacKinlay 1997)",
   #   pipeline and a direct subtraction, so the tight identity tolerance applies.
   d <- golden_market_adjusted_fixture()
   m <- MarketAdjustedModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$statistics$sigma, 0.0031885210782848315, tolerance = 1e-10)
   expect_equal(m$statistics$degree_of_freedom, 5L)
@@ -95,7 +95,7 @@ test_that("Comparison Period Mean model AR/sigma matches closed form (Brown-Warn
   #   fixed mean), so the tight identity tolerance applies.
   d <- golden_comparison_mean_fixture()
   m <- ComparisonPeriodMeanAdjustedModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$model, 0.01, tolerance = 1e-10)  # estimation-window mean
   expect_equal(m$statistics$sigma, 0.0028284271247461901, tolerance = 1e-10)
@@ -122,7 +122,7 @@ test_that("Fama-French 3-factor AR/sigma/df matches closed-form OLS (Fama-French
   #   pipeline and an independent lm()/predict() fit on the same fixture.
   d <- golden_factor_model_fixture()
   m <- FamaFrench3FactorModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$statistics$sigma, 0.0011487290143446527, tolerance = 1e-10)
   expect_equal(m$statistics$degree_of_freedom, 4L)
@@ -147,7 +147,7 @@ test_that("Fama-French 5-factor AR/sigma/df matches closed-form OLS (Fama-French
   #   pipeline and an independent lm()/predict() fit on the same fixture.
   d <- golden_factor_model_fixture()
   m <- FamaFrench5FactorModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$statistics$sigma, 0.00049531882326697056, tolerance = 1e-10)
   expect_equal(m$statistics$degree_of_freedom, 2L)
@@ -172,7 +172,7 @@ test_that("Carhart 4-factor AR/sigma/df matches closed-form OLS (Carhart 1997)",
   #   pipeline and an independent lm()/predict() fit on the same fixture.
   d <- golden_factor_model_fixture()
   m <- Carhart4FactorModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$statistics$sigma, 0.0013089355539710223, tolerance = 1e-10)
   expect_equal(m$statistics$degree_of_freedom, 3L)
@@ -201,9 +201,9 @@ test_that("Custom Model uses the user-supplied prediction (documented convention
   d$loss_market_cap <- 0  # neutralize the event-date adjustment
 
   cm <- CustomModel$new()
-  cm$fit(d)
+  muffle_short_window(cm$fit(d))
   mm <- MarketModel$new()
-  mm$fit(d)
+  muffle_short_window(mm$fit(d))
 
   ar_custom <- cm$abnormal_returns(d)
   ar_market <- mm$abnormal_returns(d)
@@ -237,7 +237,7 @@ test_that("BHAR model + BHARTTest match the compounded closed form (Barber-Lyon 
   #   pipeline and an independent closed-form compounding on the same fixture.
   d <- golden_bhar_fixture()
   m <- BHARModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$statistics$sigma, 0.0061318838867023568, tolerance = 1e-10)
   expect_equal(m$statistics$degree_of_freedom, 5L)
@@ -276,7 +276,7 @@ test_that("Volume model abnormal volume matches the log-mean closed form", {
   #   pipeline and a direct log-mean subtraction.
   d <- golden_volume_fixture()
   m <- VolumeModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$model, 6.9370259048580936, tolerance = 1e-10)  # log-volume mean
   expect_equal(m$statistics$sigma, 0.10347034309378118, tolerance = 1e-10)
@@ -303,7 +303,7 @@ test_that("Volatility model abnormal volatility matches the ratio closed form", 
   #   pipeline and a direct ratio computation.
   d <- golden_volatility_fixture()
   m <- VolatilityModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$model, 0.00038000000000000002, tolerance = 1e-10)  # est_var
   expect_equal(m$statistics$sigma, 0.82451474298735783, tolerance = 1e-10)
@@ -334,7 +334,7 @@ test_that("Rolling-Window model reduces to a single closed-form OLS on a 30-obs 
   #   pipeline and an independent single-window OLS on the same fixture.
   d <- golden_rolling_window_fixture()
   m <- RollingWindowModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
 
   expect_equal(m$statistics$alpha, 0.0039999999999999992, tolerance = 1e-10)
   expect_equal(m$statistics$beta, 1.1967741935483869, tolerance = 1e-10)
@@ -369,7 +369,7 @@ test_that("GARCH model abnormal return is the mean-equation residual identity (E
 
   d <- golden_market_model_fixture()  # any fixture with firm/index returns works
   m <- GARCHModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
   skip_if_not(isTRUE(m$is_fitted), "GARCH fit did not converge on the fixture")
 
   coefs  <- rugarch::coef(m$model)
@@ -403,7 +403,7 @@ test_that("DCC-GARCH model abnormal return is the time-varying-beta residual ide
 
   d <- golden_market_model_fixture()
   m <- DCCGARCHModel$new()
-  m$fit(d)
+  muffle_short_window(m$fit(d))
   skip_if_not(isTRUE(m$is_fitted), "DCC-GARCH fit did not converge on the fixture")
 
   alpha_last <- m$statistics$alpha

@@ -67,7 +67,9 @@ test_that("empty/all-NA event window yields all-NA CAR with no crash", {
     }
     model <- reg_row$constructor()
     data  <- reg_row$fixture()
-    model$fit(data)
+    # C10 (2026-09-24): fixtures are intentionally small; muffle only the
+    # advisory short-estimation-window warning.
+    muffle_short_window(model$fit(data))
 
     # NA out every event-window observation of the primary input columns so the
     # window is effectively empty. cumsum/cumprod over all-NA must degrade to NA,
@@ -253,13 +255,13 @@ test_that("t-statistic is invariant to a positive rescale of returns (MarketMode
   d  <- golden_market_model_fixture()
   cc <- 3.0
 
-  m1 <- MarketModel$new(); m1$fit(d)
+  m1 <- MarketModel$new(); muffle_short_window(m1$fit(d))
   t1 <- CARTTest$new()$compute(m1$abnormal_returns(d), m1)$car_t
 
   d2 <- d
   d2$firm_returns  <- d2$firm_returns  * cc
   d2$index_returns <- d2$index_returns * cc
-  m2 <- MarketModel$new(); m2$fit(d2)
+  m2 <- MarketModel$new(); muffle_short_window(m2$fit(d2))
   t2 <- CARTTest$new()$compute(m2$abnormal_returns(d2), m2)$car_t
 
   expect_equal(

@@ -342,7 +342,10 @@ golden_multi_event_fixture <- function() {
     firm_symbol = sub("E", "F", names(spec)),
     model = lapply(names(spec), function(nm) {
       mm <- MarketModel$new()
-      mm$fit(base[base$event_id == nm, ])
+      # C10 (2026-09-24): m = 8 estimation observations is INTENTIONALLY
+      # short (kept small for closed-form tractability); muffle only the
+      # advisory eventstudy_short_estimation_window warning it triggers.
+      muffle_short_window(mm$fit(base[base$event_id == nm, ]))
       mm
     })
   )
