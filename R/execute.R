@@ -178,6 +178,12 @@ calculate_statistics = function(task, parameter_set) {
 
   # Multiple events test statistic calculation
   if (!is.null(parameter_set$multi_event_statistics)) {
+    # Resolve the degenerate-input handling mode once for the whole pass
+    # (A2, 2026-09-24 re-evaluation): applied once per group inside
+    # .calculate_multiple_event_test_statistics(), before any of the
+    # configured statistics run, so N statistics produce at most one warning.
+    me_mode <- .resolve_degenerate_mode(parameter_set$degenerate_handling)
+
     # The data must be reshaped for these calculations as we need to consider the
     # grouping of the events.
     task$data_tbl %>%
@@ -195,7 +201,8 @@ calculate_statistics = function(task, parameter_set) {
       dplyr::mutate(statistics = purrr::map2(.x=data,
                                              .y=model,
                                              .f = .calculate_multiple_event_test_statistics,
-                                             statistic_set=parameter_set$multi_event_statistics))
+                                             statistic_set=parameter_set$multi_event_statistics,
+                                             degenerate_mode=me_mode))
 
     # Transpose results such that each test statistic result has its own column
     task$aar_caar_tbl$statistics %>%
@@ -241,7 +248,17 @@ calculate_statistics = function(task, parameter_set) {
 
 
 #' @noRd
-.calculate_multiple_event_test_statistics = function(data_tbl, model, statistic_set) {
+.calculate_multiple_event_test_statistics = function(data_tbl, model, statistic_set,
+                                                       degenerate_mode = "lenient") {
+  # A2 (2026-09-24 re-evaluation): exclude all-NA events once per group,
+  # before any configured statistic runs, so N statistics produce at most
+  # one warning (not N). Each compute() also re-applies the same exclusion
+  # defensively (a no-op here, but protects direct compute() calls).
+  excl <- .exclude_all_na_events(data_tbl, model, degenerate_mode,
+                                  "multi-event statistics")
+  data_tbl <- excl$data_tbl
+  model    <- excl$model
+
   # Calculate test statistics
   statistic_set$tests %>%
     purrr::map(.f = function(test_statistic, data_tbl) {

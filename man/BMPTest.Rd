@@ -5,9 +5,11 @@
 \title{BMP Test (Boehmer, Musumeci, Poulsen 1991)}
 \description{
 Standardized cross-sectional test that is robust to event-induced variance
-increases. The BMP test standardizes abnormal returns by their forecast
-error corrected standard deviation, then applies a cross-sectional
-t-test to these standardized residuals.
+increases. The BMP test standardizes abnormal returns by each event's
+MODEL sigma (the estimation-window residual standard deviation, i.e.
+\code{model$statistics$sigma}) -- NOT by the forecast-error-corrected
+sigma -- then applies a cross-sectional t-test to these standardized
+residuals.
 }
 \seealso{
 Other eventstudy-statistics:

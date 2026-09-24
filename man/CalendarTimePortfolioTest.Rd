@@ -6,12 +6,25 @@
 \description{
 Aggregates event-firm returns into calendar-time portfolios and tests
 whether the portfolio intercept (alpha) is significantly different from
-zero. This approach naturally handles cross-sectional dependence that
-arises when events cluster in calendar time.
+zero, using the Brown and Warner (1980, 1985) crude-dependence-adjustment:
+the standard deviation of the ESTIMATION-window cross-event average
+abnormal return (AAR) series is used as the (calendar-)time-series
+standard deviation, so the denominator is independent of the event window
+and of any event-window shock magnitude.
 
 For each relative event day, the test forms an equal-weighted portfolio
-of all event firms' abnormal returns and computes a t-statistic of the
-mean portfolio return.
+of all event firms' abnormal returns and computes
+\eqn{caltime_t = AAR_t / sd(AAR_{estimation})}, with degrees of freedom
+\code{n_estimation_days - 1} (the number of finite estimation-window AAR
+observations), exposed as \code{attr(result, "caltime_df")}.
+}
+\references{
+Brown, S. J. and Warner, J. B. (1980). Measuring security price
+performance. \emph{Journal of Financial Economics}, 8(3), 205--258.
+
+Brown, S. J. and Warner, J. B. (1985). Using daily stock returns: The
+case of event studies. \emph{Journal of Financial Economics}, 14(1),
+3--31.
 }
 \seealso{
 Other eventstudy-statistics:

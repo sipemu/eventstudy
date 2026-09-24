@@ -6,9 +6,17 @@
 \description{
 Adjusts the BMP (Boehmer, Musumeci, Poulsen 1991) test for cross-sectional
 correlation of abnormal returns using the Kolari and Pynnoenen (2010)
-correction. The adjustment scales the BMP statistic by a factor that
-accounts for the average pairwise correlation of standardized abnormal
-residuals in the estimation window.
+correction. Abnormal returns are standardized by each event's MODEL sigma
+(\code{model$statistics$sigma}, same as \code{\link{BMPTest}}) -- not the
+forecast-error-corrected sigma. The adjustment scales the BMP statistic by
+a factor that accounts for the average pairwise correlation of
+standardized abnormal residuals in the estimation window, computed only
+over "usable" events (at least 2 finite estimation-window SARs, finite
+model sigma, and non-constant/non-degenerate SAR variance). The adjustment
+is never silently substituted with 1: an event that cannot contribute a
+usable estimation-window series is excluded from the correlation estimate
+and reported once; if fewer than 2 usable events remain, \code{kp_t} and
+\code{ckp_t} are \code{NA}.
 }
 \references{
 Kolari, J. W. and Pynnoenen, S. (2010). Event Study Testing with

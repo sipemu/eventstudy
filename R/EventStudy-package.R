@@ -33,7 +33,9 @@ utils::globalVariables(c(
   "loss_market_cap", "caltime_t", "ccaltime_t",
   "k", "model_k",
   # Phase 4 (04-02): bootstrap n_car NSE column in bootstrap_test()
-  "n_car"
+  "n_car",
+  # 2026-09-24 re-evaluation fixes (A2/A3/A5/A6): new NSE columns
+  "m", "n_finite", "min_ri", "max_ri", "observed_caar"
 ))
 
 #' @title EventStudy: Event Study Analysis in R
