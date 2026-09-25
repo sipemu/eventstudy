@@ -5,10 +5,10 @@ milestone_name: Stabilization & CRAN Resubmission
 current_phase: 30
 status: completed
 stopped_at: context exhaustion at 76% (2026-09-18)
-last_updated: "2026-09-18T19:55:44.069Z"
-last_activity: 2026-09-13
+last_updated: "2026-09-25T06:11:28.993Z"
+last_activity: 2026-09-24
 last_activity_desc: Phase 30 complete
-state_head: 5a74fbd26484f98d383784aa66d0dc2903acf4d4
+state_head: c80159f679e7448e6e644a32e724622847bca48e
 progress:
   total_phases: 6
   completed_phases: 4
@@ -98,6 +98,7 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260924-sfl | Fix all findings from the 2026-09-24 package re-evaluation (A1-A12 statistical silent-wrong fixes, B1-B8 API/docs consistency, C1-C10 test-suite quality); dev version 0.66.0.9000 | 2026-09-24 | f0c8570 | [260924-sfl-fix-all-findings-from-the-2026-09-24-pac](./quick/260924-sfl-fix-all-findings-from-the-2026-09-24-pac/) |
+| 2 | Make CI non-ASCII baseline check locale-independent (c80159f) | 2026-09-25 | c80159f | — |
 
 ## Deferred Items
 
