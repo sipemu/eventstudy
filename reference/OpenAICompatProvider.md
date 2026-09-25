@@ -3,7 +3,7 @@
 A provider that issues `POST {base_url}/chat/completions` with an
 OpenAI-shaped request body. Because the endpoint is selected purely by
 `base_url` + `model`, this single class covers OpenAI itself AND every
-OpenAI-compatible backend — Ollama, LM Studio, or any gateway — via a
+OpenAI-compatible backend – Ollama, LM Studio, or any gateway – via a
 `base_url` override, with no code change.
 
 The API key is resolved at CALL time from `OPENAI_API_KEY` (never at
@@ -12,7 +12,7 @@ construction, never stored on the object) and attached with
 every print/error path. A missing key, transport/timeout failure,
 non-2xx status, malformed body, or missing completion text each degrades
 to exactly one [`warning()`](https://rdrr.io/r/base/warning.html) plus
-an \`es_provider_response\` with `text = NA_character_` — it never
+an \`es_provider_response\` with `text = NA_character_` – it never
 crashes the session and never returns a fabricated completion.
 
 `httr2` is required only for this provider and is guarded by
@@ -132,7 +132,7 @@ if (FALSE) { # \dontrun{
 p <- OpenAICompatProvider$new(model = "gpt-4o")
 p$complete("Summarise these event-study diagnostics")
 
-# Any OpenAI-compatible endpoint works via a base_url override — e.g. a local
+# Any OpenAI-compatible endpoint works via a base_url override -- e.g. a local
 # Ollama server (no cloud key needed by the server, but OPENAI_API_KEY is still
 # read as the bearer token; set it to any non-empty value for local servers):
 p_local <- OpenAICompatProvider$new(

@@ -9,7 +9,7 @@ around a specified event date."><meta property="og:image" content="https://sipem
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,8 @@ around a specified event date.</p>
 <span>  target_variable <span class="op">=</span> <span class="st">"firm_adjusted"</span>,</span>
 <span>  add_event_date <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  max_symbols <span class="op">=</span> <span class="fl">6</span>,</span>
-<span>  do_sample <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  sample_symbols <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  do_sample <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,9 +92,17 @@ to plot. Default is "firm_adjusted".</p></dd>
 to display. Default is 6.</p></dd>
 
 
+<dt id="arg-sample-symbols">sample_symbols<a class="anchor" aria-label="anchor" href="#arg-sample-symbols"></a></dt>
+<dd><p>Logical; if <code>TRUE</code> (default), randomly sample
+<code>max_symbols</code> symbols when the task contains more than
+<code>max_symbols</code>. If <code>FALSE</code>, take the first <code>max_symbols</code>
+in order.</p></dd>
+
+
 <dt id="arg-do-sample">do_sample<a class="anchor" aria-label="anchor" href="#arg-do-sample"></a></dt>
-<dd><p>A boolean specifying whether to randomly sample the
-symbols if the number exceeds max_symbols. Default is TRUE.</p></dd>
+<dd><p><em>Deprecated.</em> Renamed to <code>sample_symbols</code>
+in EventStudy 0.66.0. Accepts the old name for backward compatibility and
+emits one deprecation warning.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -25,7 +25,7 @@ correctness-critical layer that the offline advice functions
 [`flag_robustness`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md))
 and the Phase 7 LLM layer both evaluate against.
 
-**KB-04 scope note:** Phase 5 delivers the KB data structure only —
+**KB-04 scope note:** Phase 5 delivers the KB data structure only –
 exported and serializable, ready for Phase 7 system-prompt injection.
 The actual prompt-injection behavior is a Phase 7 deliverable and is
 deliberately out of scope here.
@@ -65,7 +65,7 @@ Each element of `EVENTSTUDY_KB` is a list with:
 ## Threshold notes
 
 The following thresholds are literature-informed defaults and are marked
-**\[ASSUMED\]** — they can be tuned without breaking the KB contract:
+**\[ASSUMED\]** – they can be tuned without breaking the KB contract:
 
 - Shapiro-Wilk p-value threshold: 0.05
 

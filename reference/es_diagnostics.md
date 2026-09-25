@@ -3,7 +3,7 @@
 Extracts already-computed statistical signals from a fitted
 `EventStudyTask` into a flat, JSON-ready S3 list. This is the
 always-available grounding foundation for the knowledge base and offline
-advice layer — it recomputes nothing; all signals already exist in the
+advice layer – it recomputes nothing; all signals already exist in the
 fitted task.
 
 ## Usage

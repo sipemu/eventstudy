@@ -11,7 +11,8 @@ plot_stocks(
   target_variable = "firm_adjusted",
   add_event_date = FALSE,
   max_symbols = 6,
-  do_sample = TRUE
+  sample_symbols = TRUE,
+  do_sample = NULL
 )
 ```
 
@@ -35,10 +36,17 @@ plot_stocks(
   An integer specifying the maximum number of symbols to display.
   Default is 6.
 
+- sample_symbols:
+
+  Logical; if `TRUE` (default), randomly sample `max_symbols` symbols
+  when the task contains more than `max_symbols`. If `FALSE`, take the
+  first `max_symbols` in order.
+
 - do_sample:
 
-  A boolean specifying whether to randomly sample the symbols if the
-  number exceeds max_symbols. Default is TRUE.
+  *Deprecated.* Renamed to `sample_symbols` in EventStudy 0.66.0.
+  Accepts the old name for backward compatibility and emits one
+  deprecation warning.
 
 ## Value
 

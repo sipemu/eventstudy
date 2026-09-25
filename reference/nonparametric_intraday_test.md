@@ -94,13 +94,27 @@ Other eventstudy-tasks:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
+# Build a small intraday grid: estimation window (multiple days) and a
+# single event-day window sharing the same intraday time stamps.
+set.seed(1)
+times <- sprintf("%02d:%02d", 10L + seq_len(30L) %/% 60L, seq_len(30L) %% 60L)
+est_data <- data.frame(
+  day            = rep(seq_len(10L), each = 30L),
+  time           = rep(times, 10L),
+  abnormalReturn = rnorm(300L, 0, 0.001)
+)
+event_data <- data.frame(
+  time           = times,
+  abnormalReturn = rnorm(30L, 0, 0.001)
+)
+
 results <- nonparametric_intraday_test(
   estimation_window = est_data,
-  event_window = event_data,
-  event_times = c("10:00", "14:30"),
-  p = 0.05,
-  init_window = 5
+  event_window      = event_data,
+  event_times       = times[c(5L, 20L)],
+  p                 = 0.05,
+  init_window       = 5
 )
-} # }
+# }
 ```

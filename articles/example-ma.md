@@ -102,7 +102,7 @@ es_tt(
 | 0.01                 | 0.96  |
 
 Detection power by true abnormal return (N = 15, cross-sectional test,
-alpha = 0.05) {#tinytable_j9nplrdwfu4l49t351tg .table .tinytable
+alpha = 0.05) {#tinytable_dcoij4dpvwfuh1dfwpbk .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -210,11 +210,11 @@ excludes.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.65.0
+    #> [1] EventStudy_0.66.0.9000
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         
-    #>  [4] compiler_4.6.1       tidyselect_1.2.1     tinytable_0.18.0    
+    #>  [4] compiler_4.6.1       tidyselect_1.2.1     tinytable_0.19.0    
     #>  [7] stringr_1.6.0        tidyr_1.3.2          jquerylib_0.1.4     
     #> [10] systemfonts_1.3.2    scales_1.4.0         textshaping_1.0.5   
     #> [13] yaml_2.3.12          fastmap_1.2.0        ggplot2_4.0.3       
@@ -222,7 +222,7 @@ excludes.
     #> [19] knitr_1.52           htmlwidgets_1.6.4    tibble_3.3.1        
     #> [22] desc_1.4.3           RColorBrewer_1.1-3   bslib_0.12.0        
     #> [25] pillar_1.11.1        rlang_1.3.0          stringi_1.8.9       
-    #> [28] cachem_1.1.0         xfun_0.60            S7_0.2.2            
+    #> [28] cachem_1.1.0         xfun_0.61            S7_0.2.2            
     #> [31] fs_2.1.0             sass_0.4.10          otel_0.2.0          
     #> [34] viridisLite_0.4.3    plotly_4.12.1        cli_3.6.6           
     #> [37] withr_3.0.3          pkgdown_2.2.1        magrittr_2.0.5      

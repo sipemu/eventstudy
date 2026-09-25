@@ -9,7 +9,7 @@ plans) inherit from this base and implement \`complete()\`.
 
 \`ProviderBase\` itself is abstract: calling \`complete()\` on it
 errors. It stores only non-secret configuration (\`model\`,
-\`base_url\`); API keys are NEVER read at construction — they are
+\`base_url\`); API keys are NEVER read at construction – they are
 resolved at call time inside each concrete provider's \`complete()\`.
 
 ## See also
@@ -74,7 +74,7 @@ stores API keys (keys are resolved at call time).
 
 ### `ProviderBase$complete()`
 
-Complete a prompt. Abstract on the base class — concrete providers
+Complete a prompt. Abstract on the base class – concrete providers
 override this.
 
 #### Usage

@@ -54,23 +54,26 @@ Choose which sections to include:
 generate_report(
   task,
   output_file = "report.html",
-  sections = c("summary", "data", "diagnostics",
-               "single_event", "multi_event", "appendix")
+  sections = c("exec_summary", "data_methods", "diagnostics",
+               "results", "robustness", "appendix")
 )
 ```
 
 Available sections:
 
-| Section           | Description                                             |
-|-------------------|---------------------------------------------------------|
-| `summary`         | Study overview: model, event window, number of events   |
-| `data`            | Data summary and event timeline                         |
-| `diagnostics`     | Model fit diagnostics (residual plots, normality tests) |
-| `single_event`    | Individual event AR and CAR results                     |
-| `multi_event`     | AAR and CAAR test statistics                            |
-| `cross_sectional` | Cross-sectional regression results                      |
-| `panel`           | Panel event study results (for PanelEventStudyTask)     |
-| `appendix`        | Technical details and methodology                       |
+| Section | Description |
+|----|----|
+| `exec_summary` | Study overview: model, event window, number of events |
+| `data_methods` | Data summary, model, and methodology description |
+| `results` | Single- and multi-event AR/CAR/AAR/CAAR results (or panel event-time estimates for a `PanelEventStudyTask`) |
+| `diagnostics` | Model fit diagnostics (residual plots, normality tests) |
+| `robustness` | Robustness notes and the joint-hypothesis caveat |
+| `references` | Knowledge-base references drawn from the diagnostics |
+| `appendix` | Technical details and methodology |
+
+Note: `exec_summary`, `data_methods`, `results`, `diagnostics`,
+`robustness`, and `references` are the six sections included by default;
+`appendix` is opt-in.
 
 ### Summary Only
 
@@ -81,7 +84,7 @@ For a quick overview:
 generate_report(
   task,
   output_file = "summary.html",
-  sections = c("summary", "multi_event")
+  sections = c("exec_summary", "results")
 )
 ```
 
@@ -95,14 +98,14 @@ regression:
 # Run cross-sectional regression first
 cs_result <- cross_sectional_regression(
   task,
-  formula = car ~ size + leverage,
-  characteristics = firm_chars
+  formula = ~ size + leverage,
+  data = firm_chars
 )
 
 generate_report(
   task,
   output_file = "report.html",
-  sections = c("summary", "multi_event", "cross_sectional"),
+  sections = c("exec_summary", "results", "diagnostics"),
   cross_sectional = cs_result
 )
 ```
@@ -129,20 +132,28 @@ renders panel-specific sections:
 ``` r
 
 panel_task <- PanelEventStudyTask$new(
-  data = panel_data,
-  unit_col = "unit_id",
-  time_col = "time_id",
-  treatment_col = "treatment",
-  outcome_col = "outcome"
+  panel_data = panel_data,
+  unit_id = "unit_id",
+  time_id = "time_id",
+  outcome = "outcome",
+  treatment = "treatment",
+  treatment_time = "treatment_time"
 )
-result <- estimate_panel_event_study(panel_task)
+panel_task <- estimate_panel_event_study(panel_task, method = "dynamic_twfe")
 
 generate_report(
   panel_task,
   output_file = "panel_report.html",
-  sections = c("summary", "panel")
+  sections = c("exec_summary", "results")
 )
 ```
+
+[`estimate_panel_event_study()`](https://sipemu.github.io/eventstudy/reference/estimate_panel_event_study.md)
+returns the (mutated) `PanelEventStudyTask` with results attached, not a
+separate results object – pass its return value on to
+[`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md).
+Panel-specific content is rendered automatically inside the `results`
+section whenever `task` is a `PanelEventStudyTask`.
 
 ## Programmatic Report Generation
 

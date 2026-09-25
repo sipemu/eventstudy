@@ -76,7 +76,7 @@ parametric and non-parametric test statistics, and visualization tools.
   – Boehmer, Musumeci & Poulsen (1991) test
 
 - [`KolariPynnonenTest`](https://sipemu.github.io/eventstudy/reference/KolariPynnonenTest.md)
-  – Kolari-Pynnönen adjusted BMP test
+  – Kolari-Pynnoenen adjusted BMP test
 
 - [`CalendarTimePortfolioTest`](https://sipemu.github.io/eventstudy/reference/CalendarTimePortfolioTest.md)
   – Calendar-time portfolio test

@@ -125,7 +125,7 @@ es_tt(
 | 3 | GOOGL | TRUE | 0.000000378554 | 1.792 | 0.7391 | 0.09284 | 0.01559 | 0.5945 |
 
 Per-event diagnostics: Shapiro-Wilk (shapiro_p), Durbin-Watson
-(dw_stat), Ljung-Box (ljung_box_p). {#tinytable_mgqrcycic4g7wovltqp7
+(dw_stat), Ljung-Box (ljung_box_p). {#tinytable_hj0i2azpzylcy9g8j63h
 .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}

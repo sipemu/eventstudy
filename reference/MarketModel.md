@@ -3,10 +3,10 @@
 The Market Model is a widely used method in event studies to estimate
 the expected returns of a stock and calculate its abnormal returns
 during an event window. The model is based on a simple linear regression
-framework and captures the relationship between a stock’s return and the
+framework and captures the relationship between a stock's return and the
 return of a market index, such as the S&P 500 or the Dow Jones
 Industrial Average. The underlying assumption of the Market Model is
-that a stock’s return is primarily influenced by market movements, along
+that a stock's return is primarily influenced by market movements, along
 with a stock-specific idiosyncratic component.
 
 ## See also
@@ -22,6 +22,8 @@ Other eventstudy-models:
 [`LinearFactorModel`](https://sipemu.github.io/eventstudy/reference/LinearFactorModel.md),
 [`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md),
 [`MarketAdjustedModel`](https://sipemu.github.io/eventstudy/reference/MarketAdjustedModel.md),
+[`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md),
+[`ReturnCalculation`](https://sipemu.github.io/eventstudy/reference/ReturnCalculation.md),
 [`RollingWindowModel`](https://sipemu.github.io/eventstudy/reference/RollingWindowModel.md),
 [`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md),
 [`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md),

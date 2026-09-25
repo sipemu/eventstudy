@@ -1,5 +1,338 @@
 # Changelog
 
+## EventStudy 0.66.0.9000
+
+### Statistical correctness fixes (2026-09-24 re-evaluation)
+
+The 2026-09-24 package re-evaluation found twelve silent-wrong-statistic
+defects across return models, multi-event test statistics, bootstrap
+inference, and cross-sectional regression. Every fix ships with a
+failing-first regression test in
+`tests/testthat/test_reeval_statistical_fixes.R` and, where the fix
+redefines a valid-input result, a re-pinned golden value in
+`tests/testthat/test_golden_values.R`. See
+`vignettes/statistical-conventions.Rmd` for the full audit log and
+citations.
+
+- **A1 – RollingWindowModel now restricts each rolling window to
+  COMPLETE PAIRS** (both firm and index finite) before computing
+  `x_bar`/`ss_xx`/ residuals/sigma. Previously, rows where the firm
+  return was NA but the index was not still contributed to
+  `x_bar`/`ss_xx`, biasing beta whenever NA-firm rows co-occur with
+  index outliers. `fit()` and
+  [`calculate_statistics()`](https://sipemu.github.io/eventstudy/reference/calculate_statistics.md)
+  now share the same complete-pair count for df/FEC.
+- **A2 – A fully-degenerate event (zero finite event-window abnormal
+  returns) is now EXCLUDED from every CAR-based multi-event statistic**
+  (`CSectTTest`, `PatellZTest`, `SignTest`, `GeneralizedSignTest`,
+  `BMPTest`, `KolariPynnonenTest`), applied once per group (at most one
+  warning per group, not one per configured statistic). Previously it
+  was coalesced to 0 and silently understated cross-event dispersion.
+  The pre-existing STATS-03 convention (a partial gap contributes 0 to
+  that event’s own CAR) is unchanged.
+- **A3 – KolariPynnonenTest never falls back to an adjustment factor of
+  1.** A degenerate (constant or too-short) estimation-window SAR series
+  is now excluded from the `r_bar` cross-sectional correlation estimate
+  (reported once); if fewer than 2 usable events remain, `kp_t`/`ckp_t`
+  are `NA` instead of silently reporting the unadjusted BMP value. The
+  per-day KP adjustment now uses THAT DAY’s `n_valid_events` instead of
+  the first day’s count applied uniformly to every day.
+- **A4 – RankTest and GeneralizedSignTest now group by `event_id`, not
+  `firm_symbol`,** for ranking/centering and `p_hat` estimation.
+  Previously a firm recurring across multiple events had its data
+  silently pooled across those events.
+- **A5 –
+  [`cross_sectional_regression()`](https://sipemu.github.io/eventstudy/reference/cross_sectional_regression.md)
+  sample-integrity hardening.** Duplicated `event_id`s in the `data`
+  argument now error; a `car_window` extending outside any event’s
+  available event window now errors; task events with no matching `data`
+  row are dropped with one warning; an event whose CAR is `NA` because
+  an abnormal return inside `car_window` is missing is excluded with one
+  warning (`.extract_cars()` no longer sums with `na.rm = TRUE`, so ANY
+  missing AR in the window makes the whole CAR `NA`;
+  [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md)/[`car_quantiles()`](https://sipemu.github.io/eventstudy/reference/car_quantiles.md)/[`plot_car_distribution()`](https://sipemu.github.io/eventstudy/reference/plot_car_distribution.md)
+  inherit this NA-CAR semantics without an additional warning).
+- **A6 – OLS insufficient-observations guard is now `n_params`-based,
+  not a flat threshold,** for `MarketModel` and every
+  `LinearFactorModel` subclass (FF3, FF5, Carhart4); a model that fits
+  with fewer than 30 valid estimation observations (the same recommended
+  minimum as
+  [`validate_task()`](https://sipemu.github.io/eventstudy/reference/validate_task.md)’s
+  default) now emits one advisory warning in both modes. `PatellZTest`’s
+  `k` is now read explicitly from each model’s `statistics$n_params`
+  (MarketModel 2, FF3 4, Carhart4 5, FF5 6, CPMA 1, MarketAdjusted 0)
+  instead of being derived as `length(resid) - df` (which was silently
+  wrong whenever `df` reflected an unrelated correction); `m` now counts
+  finite estimation-window abnormal returns instead of the raw row
+  count. `MarketModel`’s forecast-error correction now uses complete
+  pairs only for `mean(Rm_est)`/`SS_market`, matching exactly the rows
+  [`lm()`](https://rdrr.io/r/stats/lm.html) used.
+- **A7 – `CalendarTimePortfolioTest` denominator redefined to the
+  Brown-Warner (1980, 1985) estimation-window AAR standard deviation.**
+  Previously `ts_sd` was computed from the event-window portfolio series
+  itself (self-referential with the numerator, so a larger event-day
+  shock inflated both). `caltime_t`/`ccaltime_t` now use degrees of
+  freedom `n_estimation_days - 1`, exposed as
+  `attr(result, "caltime_df")` and read by both
+  [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md)
+  and `tidy()`. **This is a valid-input redefinition:**
+  `caltime_t`/`ccaltime_t` values differ from 0.66.0; golden values are
+  re-pinned.
+- **A8 – `MarketAdjustedModel`’s forecast-error correction is now
+  `forecast_error_corrected_sigma == sigma` exactly** (correction factor
+  1), because the model estimates nothing from the estimation window.
+  Previously it wrongly reused the constant-MEAN correction formula
+  (`sigma * sqrt(1 + 1/m)`), which is only valid for a model that DOES
+  estimate one parameter (a mean), like
+  `ComparisonPeriodMeanAdjustedModel` (unchanged). **This is a
+  valid-input redefinition;** golden values are re-pinned.
+- **A9 – Sign convention unified to strict `n_pos = sum(AR > 0)` /
+  `n_neg = sum(AR <= 0)`** in `CSectTTest`, `PatellZTest`, and
+  `CalendarTimePortfolioTest` (previously `>= 0`/`< 0`), matching the
+  pre-existing `SignTest` convention. An abnormal return of exactly 0
+  now counts as non-positive everywhere.
+- **A10 – `TestStatisticBase$confidence_type` is now validated** with
+  `match.arg(c("two-sided", "less", "greater"))` (an invalid value
+  errors) and emits one warning at construction when a non-default value
+  is supplied, stating that every p-value in EventStudy is currently
+  two-sided and the value has no effect. No p-value formula changed;
+  one-sided p-values are not implemented.
+- **A11 – `BMPTest` roxygen documentation corrected (docs-only, no
+  formula change).** The docstring incorrectly claimed standardization
+  by the forecast-error-corrected sigma; both `BMPTest` and
+  `KolariPynnonenTest` standardize by the MODEL sigma
+  (`model$statistics$sigma`), which is what the code always computed.
+- **A12 –
+  [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md)
+  observed/draw construction aligned; NA draws excluded from the p-value
+  denominator.** `observed_caar` now uses the SAME per-event
+  `coalesce`-to-0 CAR construction as the bootstrap draws (matches
+  `cumsum(observed_aar)` exactly on NA-free input, but differs from it
+  under a partial-window gap, where the per-event construction is
+  correct). A bootstrap draw whose statistic is `NA` (e.g. a sign-flip
+  combination that zeroes the cross-sectional SD) is now excluded from
+  BOTH the exceedance count and the denominator, instead of being
+  counted as “did not exceed” while still inflating `n_boot + 1`. The
+  bootstrap weight clustering unit (`firm_symbol`) is confirmed correct
+  and unchanged.
+
+### API and documentation consistency (2026-09-24 re-evaluation)
+
+- **B1 – `ModelBase`, `TestStatisticBase`, and `ReturnCalculation` are
+  now exported** with roxygen documenting the subclass contract expected
+  by
+  [`run_event_study()`](https://sipemu.github.io/eventstudy/reference/run_event_study.md)
+  (`fit()`/`abnormal_returns()`,
+  [`compute()`](https://dplyr.tidyverse.org/reference/compute.html),
+  `calculate_return()`, and the `statistics` fields consumed downstream,
+  including the optional `n_params` field added by A6). Previously these
+  base classes existed but were unexported, so vignettes and skills
+  advertising “subclass `ModelBase`” referenced a symbol users could not
+  actually reach with
+  [`EventStudy::ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md).
+- **B5 – `generics::tidy(task)` now dispatches to
+  [`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md).**
+  `generics` added to Suggests;
+  [`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)
+  remains directly callable and exported as before.
+- **B2 – Vignette code examples fixed to the real function signatures.**
+  `modern-did-estimators.Rmd` and `automated-reports.Rmd` previously
+  called `PanelEventStudyTask$new()` with non-existent arguments
+  (`data`/`unit_col`/`time_col`/`treatment_col`/`outcome_col`); fixed to
+  the real
+  `(panel_data, unit_id, time_id, outcome, treatment, treatment_time)`.
+  `cross_sectional_regression(characteristics = ...)` fixed to
+  `data = ...`. `automated-reports.Rmd`’s “Available sections” table and
+  every `sections = c(...)` example previously listed section keys
+  (`summary`, `data`, `single_event`, `multi_event`, `cross_sectional`,
+  `panel`) that do not exist in the report template; corrected to the
+  real keys (`exec_summary`, `data_methods`, `results`, `diagnostics`,
+  `robustness`, `references`, `appendix`).
+- **B4 – pkgdown reference reorganized.** `statistical-conventions`
+  added as an article; `dieselgate`/`earnings_surprises` now listed
+  explicitly in “Data & Datasets”; `degenerate-input-contract`,
+  `eventstudy-shape-contracts`, and `eventstudy-deprecation` grouped
+  under a new “Contracts & Lifecycle” reference section; `report_table`
+  added to “Export & Reporting” and its `\keyword{internal}` tag removed
+  (it is exported and advertised).
+- **B6 – Unused `DT` and `patchwork` removed from Suggests.**
+  [`download_stock_data()`](https://sipemu.github.io/eventstudy/reference/download_stock_data.md)’s
+  quantmod fallback branch now guards
+  [`zoo::index()`](https://rdrr.io/pkg/zoo/man/index.html) with its own
+  [`requireNamespace("zoo")`](https://zeileis.codeberg.page/zoo/) check
+  before any download.
+- **B7 – `.claude/skills/es-capabilities/SKILL.md` signatures
+  corrected** for
+  [`run_event_study()`](https://sipemu.github.io/eventstudy/reference/run_event_study.md)
+  and
+  [`validate_task()`](https://sipemu.github.io/eventstudy/reference/validate_task.md)
+  to match [`formals()`](https://rdrr.io/r/base/formals.html); a
+  scripted scan of every vignette/README/skill code chunk confirms zero
+  remaining argument-name drift against the installed package.
+- **B3 –
+  `.claude/skills/es-advisor/reference/interpreting-diagnostics.md`
+  rewritten to the real
+  [`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md)
+  structure** (`meta`, `estimation_window`, `event_window`,
+  `cross_sectional`, `contract_state`, `aggregate_summary`), verified
+  field-by-field against a live run, with the 8 offline knowledge-base
+  rule thresholds restated in terms of the real field paths they key
+  off. The previous version documented a fabricated structure
+  (`n_events`, `per_event`, `mean_r_squared`, etc.) that did not exist
+  on the returned object.
+
+### Testing (2026-09-24 re-evaluation)
+
+Test-suite quality hardening so vacuous or always-skip tests no longer
+mask regressions, and so the full `NOT_CRAN=true` suite runs with
+`WARN 0` (every warning a test triggers is now explicitly expected by
+class/regexp, or muffled at its source when the fixture is intentionally
+short).
+
+- **C1 –
+  [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md)**
+  gains explicit-formula tests for its KolariPynnonenTest,
+  GeneralizedSignTest, RankTest and CalendarTimePortfolioTest branches,
+  comparing against `2*pt(-abs(t), df)`/`2*pnorm(-abs(z))` directly.
+- **C2 – Vacuous regression tests made real:** the bootstrap
+  firm-clustering test now hand-replicates the wild-bootstrap algorithm
+  (one weight per unique `firm_symbol`) and shows it differs from an
+  event-level clustering alternative on the same seed; the two Patell
+  `Q_i` tests now assert the exact `aar_z` from an independent hand
+  computation (`k=2` and `k=4`); the `LinearFactorModel` FEC test now
+  asserts the exact hat-matrix value `sigma*sqrt(1+h_t)`; the HAC-SE
+  test now asserts equality with
+  [`sandwich::NeweyWest()`](https://zeileis.codeberg.page/sandwich/reference/NeweyWest.html)
+  on the same [`lm()`](https://rdrr.io/r/stats/lm.html) fit.
+- **C3 – Panel TWFE tests tightened to golden checks** against a direct
+  [`lm()`](https://rdrr.io/r/stats/lm.html) two-way-fixed-effects fit on
+  the same deterministic seeded fixture (`static_twfe` estimate +
+  cluster-robust SE; `dynamic_twfe` every non-base event-time
+  coefficient), replacing the previous loose numeric bounds.
+- **C4 – `.rank_events_for_cap()` real test:** an event genuinely
+  unfitted via a degenerate estimation window (with its one contract
+  warning asserted explicitly) is shown to always rank first (anomaly
+  score `Inf`) and always survive a `max_events` cap, replacing the
+  previous unconditional `skip()`.
+- **C5 – DCC-GARCH / MarketModel FEC tests de-guarded:** the DCC-GARCH
+  test no longer swallows errors in a
+  [`tryCatch()`](https://rdrr.io/r/base/conditions.html)-to-`TRUE`
+  handler; it now asserts `is_fitted` unconditionally and skips ONLY on
+  a narrowly-matched non-convergence warning. The `MarketModel` FEC
+  “effective obs count” test no longer hides its assertions behind
+  `if (is_fitted)`.
+- **C6 – `.try_download()` narrowed** to convert only network/HTTP-style
+  failures into `skip()` (by condition class when available, otherwise a
+  narrow message pattern); any other error (a parse/logic bug) now fails
+  the test. Covered by two new direct tests of the helper itself.
+- **C7 – Every `test_that()` block that draws random numbers without its
+  own seed now has one**, across `test_edge_cases.R`, `test_models.R`,
+  `test_multi_event_statistics.R`, `test_cross_sectional.R`,
+  `test_synthetic_control.R` and `test_intraday.R`; `test_intraday.R`’s
+  [`Sys.time()`](https://rdrr.io/r/base/Sys.time.html)-based fixtures
+  were replaced with fixed UTC `POSIXct` literals.
+- **C8 – High-value numeric assertions added** to `test_execute.R` (each
+  exercised model’s `AR`/`alpha`/`beta` checked against a direct
+  [`lm()`](https://rdrr.io/r/stats/lm.html) or arithmetic computation)
+  and `test_export.R` (exported CSV `AR`/`CAR`/`AAR` values checked to
+  equal the task’s own values, round-tripped through the file).
+- **C9 – Test-file organization:** the full-pipeline
+  `CalendarTimePortfolioTest` case moved from
+  `test_bhar_test_statistics.R` to `test_multi_event_statistics.R` (it
+  is not a BHAR test); the
+  [`browser()`](https://rdrr.io/r/base/browser.html)-source-grep check
+  in `test_aar_test_statistics.R` replaced with a behavioural
+  `PatellZTest$compute()` test against a hand computation; the single
+  weak test in `test_caar_test_statistics.R` folded into a real numeric
+  `CSectTTest` check.
+- **C10 – No leaked warnings.** Every warning a test triggers is now
+  either asserted explicitly (`expect_warning(..., regexp =` / nested
+  for multiple independent warnings) or muffled by class via the new
+  `muffle_short_window()` helper (`tests/testthat/helper-warnings.R`)
+  for fixtures whose short estimation window is intentional
+  (golden/invariant/ numerical-stability fixtures, never a blanket
+  [`suppressWarnings()`](https://rdrr.io/r/base/warning.html)). A new
+  `test_execute.R` test locks that
+  [`fit_model()`](https://sipemu.github.io/eventstudy/reference/fit_model.md)
+  collapses N short-window events into exactly ONE
+  `eventstudy_short_estimation_window` warning listing the event ids.
+
+## EventStudy 0.66.0
+
+### API Stabilization & Deprecation Lifecycle (Phase 28)
+
+This release completes a signature-consistency audit of the full public
+API and wires a formal deprecation lifecycle (base
+[`.Deprecated()`](https://rdrr.io/r/base/Deprecated.html) + optional
+`lifecycle` shim). All deprecated argument names continue to work and
+emit exactly one deprecation warning pointing to the replacement.
+
+#### Renamed Arguments (deprecated old names still work)
+
+- [`plot_stocks()`](https://sipemu.github.io/eventstudy/reference/plot_stocks.md):
+  `do_sample` is deprecated in favour of `sample_symbols` (#APIS-01).
+  The new name is noun-first, consistent with the sibling parameter
+  `max_symbols`. Pass the old name and you receive one deprecation
+  warning; the result is identical. (#APIS-04)
+
+#### Deprecation Infrastructure
+
+- New internal helper `.deprecate_arg()` in `R/deprecation.R`. Always
+  calls base [`.Deprecated()`](https://rdrr.io/r/base/Deprecated.html)
+  unconditionally; additionally calls
+  [`lifecycle::deprecate_warn()`](https://lifecycle.r-lib.org/reference/deprecate_soft.html)
+  when `lifecycle` is installed (Suggests-only, never a hard
+  dependency). (#APIS-04)
+
+#### Return-Shape Contracts (opt-in, default-off)
+
+- New `R/shape_contracts.R` provides an opt-in return-shape contract for
+  the pipeline’s result tibbles. Enable with
+  `options(EventStudy.shape_contracts = TRUE)`. When enabled, the
+  pipeline checks that the column names and types of the single-event
+  statistics tibbles (`ART`, `CART`) and the multi-event AAR/CAAR tibble
+  (`CSectT`) match the canonical expected shapes. On any mismatch
+  exactly one [`warning()`](https://rdrr.io/r/base/warning.html) is
+  emitted naming the context and the specific drift; the contract never
+  calls [`stop()`](https://rdrr.io/r/base/stop.html). Correctly-shaped
+  `is_fitted = FALSE` degenerate outputs (same column names,
+  `NA`-propagated values) are treated as valid shapes and produce no
+  warning. The option defaults to `FALSE` so valid-input behaviour and
+  the existing test suite are completely unaffected. (#APIS-02)
+
+### Install-Tested Multi-OS CI (Phase 29)
+
+- The GitHub Actions workflow now runs `rcmdcheck` against the
+  *installed* package (not `load_all`) across multiple operating
+  systems, catching install-vs-`load_all` divergence in
+  NAMESPACE/imports before it reaches CRAN.
+- A dedicated CI leg runs with `_R_CHECK_FORCE_SUGGESTS_` forced on,
+  exercising every optional-Suggests code path so the
+  [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html) guards are
+  verified end-to-end.
+- [`report_table()`](https://sipemu.github.io/eventstudy/reference/report_table.md)
+  is now an exported function; the public API snapshot accepts it.
+- Vignette and example audits confirm no default network access and no
+  writes outside [`tempdir()`](https://rdrr.io/r/base/tempfile.html).
+
+### CRAN Resubmission Preparation (Phase 30)
+
+- DESCRIPTION version bumped to 0.66.0 in preparation for CRAN
+  resubmission (the package was archived on 2024-04-20; v0.66.0 is a
+  complete ground-up rewrite).
+- CRAN example-policy compliance: the six data-dependent / slow-but-safe
+  examples (`es_report`, `generate_report`, `run_event_study`,
+  `recommend_stat`, `flag_robustness`, `nonparametric_intraday_test`)
+  were converted from `\dontrun{}` to `\donttest{}` and made
+  self-contained (bundled `dieselgate` data,
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html)-only output). Only
+  the genuine network + credentials provider examples remain
+  `\dontrun{}`.
+- `R CMD check --as-cran` on the built source tarball is clean (0
+  errors, 0 warnings; the only NOTE is the expected archived-package
+  incoming-feasibility acknowledgement), and win-builder R-devel /
+  R-release checks were dispatched.
+
 ## EventStudy 0.65.0
 
 The “Polish” milestone lifts the *felt* quality of the package — brand

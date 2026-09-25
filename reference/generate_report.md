@@ -127,12 +127,17 @@ Other eventstudy-export:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-task <- run_event_study(my_task, ParameterSet$new())
-# Single format (backward-compatible)
-path <- generate_report(task, format = "html")
-# Multi-format
-paths <- generate_report(task, format = c("html", "pdf"))
-paths[["html"]]
-} # }
+# \donttest{
+data(dieselgate)
+task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+task <- run_event_study(task, ParameterSet$new())
+
+# Single HTML format written to a temporary directory
+out  <- file.path(tempdir(), "event_study_report.html")
+path <- generate_report(task, output_file = out, format = "html")
+#> Report mode: Offline rule-based narrative
+#> Report generated: /tmp/Rtmpmbngq2/event_study_report.html
+path[["html"]]
+#> [1] "/tmp/Rtmpmbngq2/event_study_report.html"
+# }
 ```

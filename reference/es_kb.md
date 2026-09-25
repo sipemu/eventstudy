@@ -28,7 +28,7 @@ and
 and exported here so that Phase 7 can inject its contents into an LLM
 system prompt without accessing an internal package object.
 
-**KB-04 note:** This function delivers the *structure* only — exported
+**KB-04 note:** This function delivers the *structure* only – exported
 and serializable, ready for Phase 7 system-prompt injection. The actual
 prompt-injection behavior is a Phase 7 deliverable and is deliberately
 out of scope here.

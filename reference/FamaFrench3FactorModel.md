@@ -21,6 +21,8 @@ Other eventstudy-models:
 [`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md),
 [`MarketAdjustedModel`](https://sipemu.github.io/eventstudy/reference/MarketAdjustedModel.md),
 [`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md),
+[`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md),
+[`ReturnCalculation`](https://sipemu.github.io/eventstudy/reference/ReturnCalculation.md),
 [`RollingWindowModel`](https://sipemu.github.io/eventstudy/reference/RollingWindowModel.md),
 [`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md),
 [`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md),

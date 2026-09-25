@@ -37,7 +37,7 @@
 
     <a class="navbar-brand me-2" href="index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,9 +89,7 @@
 <img src="logo.png" class="logo" alt=""><h1 id="event-study-analysis-in-r">Event Study Analysis in R<a class="anchor" aria-label="anchor" href="#event-study-analysis-in-r"></a>
 </h1>
 </div>
-<p><a href="https://CRAN.R-project.org/package=EventStudy" class="external-link"><img src="https://www.r-pkg.org/badges/version/EventStudy" alt="CRAN status"></a> <a href="https://CRAN.R-project.org/package=EventStudy" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/EventStudy" alt="CRAN downloads"></a> <a href="https://CRAN.R-project.org/package=EventStudy" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/EventStudy" alt="CRAN monthly downloads"></a> <a href="https://www.gnu.org/licenses/agpl-3.0" class="external-link"><img src="https://img.shields.io/badge/License-AGPL--3-blue.svg" alt="License: AGPL-3"></a> <a href="https://cran.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R-%E2%89%A5%204.1.0-276DC3.svg?logo=r" alt="R ≥ 4.1.0"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a> <a href="https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://codecov.io/gh/sipemu/eventstudy" class="external-link"><img src="https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg" alt="Codecov"></a> <a href="https://sipemu.github.io/eventstudy/"><img src="https://img.shields.io/badge/docs-pkgdown-blue.svg" alt="Docs"></a></p>
-<p align="center">
-<img src="reference/figures/logo.png" height="160" alt="EventStudy logo"></p>
+<p><a href="https://CRAN.R-project.org/package=EventStudy" class="external-link"><img src="https://www.r-pkg.org/badges/version/EventStudy" alt="CRAN status"></a> <a href="https://CRAN.R-project.org/package=EventStudy" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/EventStudy" alt="CRAN downloads"></a> <a href="https://CRAN.R-project.org/package=EventStudy" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/EventStudy" alt="CRAN monthly downloads"></a> <a href="https://www.gnu.org/licenses/agpl-3.0" class="external-link"><img src="https://img.shields.io/badge/License-AGPL--3-blue.svg" alt="License: AGPL-3"></a> <a href="https://cran.r-project.org/" class="external-link"><img src="https://img.shields.io/badge/R-%E2%89%A5%204.1.0-276DC3.svg?logo=r" alt="R ≥ 4.1.0"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a> <a href="https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://codecov.io/gh/sipemu/eventstudy" class="external-link"><img src="https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg" alt="Codecov"></a> <a href="https://sipemu.github.io/eventstudy/"><img src="https://img.shields.io/badge/docs-pkgdown-blue.svg" alt="Docs"></a> <a href="#id_-claude-code-skills-ai-pair-programming"><img src="https://img.shields.io/badge/Claude_Code-AI_skills_plugin-8A2BE2" alt="Claude Code Plugin"></a></p>
 <p>A comprehensive, modular R package for financial event study analysis. Implements the classical methodology (MacKinlay 1997) and extends it with modern multi-factor models, long-horizon methods, panel (DiD) event studies, and more.</p>
 <!-- pkgdown-home-start -->
 <div class="section level2">
@@ -120,11 +118,26 @@
 </div>
 </div>
 <div class="section level2">
+<h2 id="robot-claude-code-skills-ai-pair-programming">🤖 Claude Code Skills (AI pair-programming)<a class="anchor" aria-label="anchor" href="#robot-claude-code-skills-ai-pair-programming"></a>
+</h2>
+<p>Two <a href="https://claude.com/claude-code" class="external-link">Claude Code</a> Agent Skills ship with this repo as an installable plugin, giving your AI assistant grounded knowledge of the package API:</p>
+<ul>
+<li>
+<strong><code>es-capabilities</code></strong> – discover the full API surface: return models, test statistics, task types, function signatures, and method-for-task routing.</li>
+<li>
+<strong><code>es-advisor</code></strong> – run the grounded <em>load -&gt; run -&gt; diagnose -&gt; advise -&gt; re-run -&gt; compare</em> loop (offline degrade path, never fabricates a number).</li>
+</ul>
+<p>Install via the built-in plugin marketplace:</p>
+<pre><code>/plugin marketplace add sipemu/eventstudy
+/plugin install eventstudy@eventstudy</code></pre>
+<p>The skills are then auto-invoked from their descriptions, or callable as <code>/eventstudy:es-capabilities</code> and <code>/eventstudy:es-advisor</code>.</p>
+</div>
+<div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
-<li><p><strong>AI Advisor</strong> (new in 0.60.0): Grounded, LLM-agnostic advice via <code><a href="reference/es_advise.html">es_advise()</a></code> plus offline <code><a href="reference/es_diagnostics.html">es_diagnostics()</a></code>. Interprets only package-computed numbers and never fabricates results. Works fully offline with no API key required; optional LLM providers (Anthropic, OpenAI-compatible, custom) can be supplied via <code><a href="reference/provider.html">provider()</a></code>.</p></li>
-<li><p><strong>One-Call Reporting</strong> (new in 0.64.0): Generate a complete, multi-format event study report in a single call: <code>es_report(task)</code> – deep-clones the task, harvests diagnostics, and renders HTML/PDF/Word/Markdown with a grounded narrative (offline by default). Also available as <code>run_event_study(..., report = TRUE)</code>.</p></li>
+<li><p><strong>AI Advisor</strong>: Grounded, LLM-agnostic advice via <code><a href="reference/es_advise.html">es_advise()</a></code> plus offline <code><a href="reference/es_diagnostics.html">es_diagnostics()</a></code>. Interprets only package-computed numbers and never fabricates results. Works fully offline with no API key required; optional LLM providers (Anthropic, OpenAI-compatible, custom) can be supplied via <code><a href="reference/provider.html">provider()</a></code>.</p></li>
+<li><p><strong>One-Call Reporting</strong>: Generate a complete, multi-format event study report in a single call: <code>es_report(task)</code> – deep-clones the task, harvests diagnostics, and renders HTML/PDF/Word/Markdown with a grounded narrative (offline by default). Also available as <code>run_event_study(..., report = TRUE)</code>.</p></li>
 <li><p><strong>15+ Return Models</strong>: Market Model, Market Adjusted, Mean Adjusted, Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), DCC-GARCH, Rolling-Window, Buy-and-Hold Abnormal Returns (BHAR), Volume, and Volatility models.</p></li>
 <li><p><strong>12 Test Statistics</strong>: Parametric (AR T, CAR T, BHAR T, Cross-Sectional T, Patell Z, BMP, Kolari-Pynnonen) and non-parametric (Sign, Generalized Sign, Rank, Calendar-Time Portfolio).</p></li>
 <li><p><strong>Diagnostics</strong>: Shapiro-Wilk normality, Durbin-Watson, Ljung-Box autocorrelation, pre-trend testing.</p></li>
@@ -139,7 +152,7 @@
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create task from your data</span></span>
@@ -155,7 +168,7 @@
 <h3 id="ai-advisor">AI Advisor<a class="anchor" aria-label="anchor" href="#ai-advisor"></a>
 </h3>
 <p>New in 0.60.0. Get grounded advice about your fitted study — fully offline, no API key, and it never invents numbers (it interprets only what the package computed):</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">diag</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/es_diagnostics.html">es_diagnostics</a></span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span>
 <span><span class="va">advice</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/es_advise.html">es_advise</a></span><span class="op">(</span><span class="va">diag</span>, task_type <span class="op">=</span> <span class="st">"recommend_stat"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">advice</span><span class="op">)</span></span></code></pre></div>
@@ -170,7 +183,7 @@
 <div class="section level3">
 <h3 id="id_1-load-data">1. Load Data<a class="anchor" aria-label="anchor" href="#id_1-load-data"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://business-science.github.io/tidyquant/" class="external-link">tidyquant</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sipemu/eventstudy" class="external-link">EventStudy</a></span><span class="op">)</span></span>
@@ -204,11 +217,11 @@
 <h3 id="id_2-run-the-event-study">2. Run the Event Study<a class="anchor" aria-label="anchor" href="#id_2-run-the-event-study"></a>
 </h3>
 <p><strong>One-liner with defaults:</strong></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/EventStudyTask.html">EventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">firm_tbl</span>, <span class="va">index_tbl</span>, <span class="va">request_tbl</span><span class="op">)</span></span>
 <span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_event_study.html">run_event_study</a></span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Step-by-step with custom parameters:</strong></p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/EventStudyTask.html">EventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">firm_tbl</span>, <span class="va">index_tbl</span>, <span class="va">request_tbl</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">est_params</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
@@ -222,7 +235,7 @@
 <span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span><span class="va">task</span>, <span class="va">est_params</span><span class="op">)</span></span>
 <span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/calculate_statistics.html">calculate_statistics</a></span><span class="op">(</span><span class="va">task</span>, <span class="va">est_params</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Pipe-friendly:</strong></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/EventStudyTask.html">EventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">firm_tbl</span>, <span class="va">index_tbl</span>, <span class="va">request_tbl</span><span class="op">)</span></span>
 <span><span class="va">est_params</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>return_calculation <span class="op">=</span> <span class="va"><a href="reference/LogReturn.html">LogReturn</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -234,7 +247,7 @@
 <div class="section level3">
 <h3 id="id_3-extract-results">3. Extract Results<a class="anchor" aria-label="anchor" href="#id_3-extract-results"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Overview</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span>
@@ -256,7 +269,7 @@
 <div class="section level3">
 <h3 id="id_4-export-results">4. Export Results<a class="anchor" aria-label="anchor" href="#id_4-export-results"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># CSV (one file per result type)</span></span>
 <span><span class="fu"><a href="reference/export_results.html">export_results</a></span><span class="op">(</span><span class="va">task</span>, <span class="st">"results.csv"</span><span class="op">)</span></span>
 <span></span>
@@ -269,7 +282,7 @@
 <div class="section level3">
 <h3 id="id_5-visualize">5. Visualize<a class="anchor" aria-label="anchor" href="#id_5-visualize"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Event study plots with confidence bands</span></span>
 <span><span class="fu"><a href="reference/plot_event_study.html">plot_event_study</a></span><span class="op">(</span><span class="va">task</span>, type <span class="op">=</span> <span class="st">"car"</span>, event_id <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/plot_event_study.html">plot_event_study</a></span><span class="op">(</span><span class="va">task</span>, type <span class="op">=</span> <span class="st">"caar"</span>, group <span class="op">=</span> <span class="st">"VW Group"</span><span class="op">)</span></span>
@@ -286,7 +299,7 @@
 <div class="section level3">
 <h3 id="id_6-diagnostics-and-validation">6. Diagnostics and Validation<a class="anchor" aria-label="anchor" href="#id_6-diagnostics-and-validation"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/validate_task.html">validate_task</a></span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/model_diagnostics.html">model_diagnostics</a></span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/pretrend_test.html">pretrend_test</a></span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span></code></pre></div>
@@ -375,7 +388,7 @@
 <h3 id="using-factor-models">Using Factor Models<a class="anchor" aria-label="anchor" href="#using-factor-models"></a>
 </h3>
 <p>Factor models require a <code>factor_tbl</code> with Fama-French data:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">factor_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  date <span class="op">=</span> <span class="va">dates</span>,             <span class="co"># matching format as firm/index data</span></span>
 <span>  smb <span class="op">=</span> <span class="va">smb_returns</span>,</span>
@@ -478,7 +491,7 @@
 <h2 id="cross-sectional-regression">Cross-Sectional Regression<a class="anchor" aria-label="anchor" href="#cross-sectional-regression"></a>
 </h2>
 <p>Explain why some firms are affected more than others:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">firm_chars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  event_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>,</span>
 <span>  log_market_cap <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">11</span>, <span class="fl">12</span>, <span class="fl">10.5</span><span class="op">)</span>,</span>
@@ -499,7 +512,7 @@
 <h2 id="intraday-event-studies">Intraday Event Studies<a class="anchor" aria-label="anchor" href="#intraday-event-studies"></a>
 </h2>
 <p>For high-frequency studies around earnings announcements, Fed decisions, etc.:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/IntradayEventStudyTask.html">IntradayEventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  <span class="va">firm_intraday_tbl</span>,    <span class="co"># symbol, timestamp (POSIXct), price</span></span>
 <span>  <span class="va">index_intraday_tbl</span>,</span>
@@ -508,7 +521,7 @@
 <span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_intraday_event_study.html">prepare_intraday_event_study</a></span><span class="op">(</span><span class="va">task</span>, <span class="va"><a href="reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fit_model.html">fit_model</a></span><span class="op">(</span><span class="va">task</span>, <span class="va"><a href="reference/ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Non-parametric significance test</strong> (Rinaudo &amp; Saha 2014): compares event-day CARs to the empirical distribution of estimation-day CARs to build confidence bands without distributional assumptions.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/nonparametric_intraday_test.html">nonparametric_intraday_test</a></span><span class="op">(</span></span>
 <span>  estimation_window <span class="op">=</span> <span class="va">est_data</span>,   <span class="co"># day, time, abnormalReturn</span></span>
 <span>  event_window      <span class="op">=</span> <span class="va">event_data</span>, <span class="co"># time, abnormalReturn</span></span>
@@ -521,7 +534,7 @@
 <h2 id="panel-event-studies-did">Panel Event Studies (DiD)<a class="anchor" aria-label="anchor" href="#panel-event-studies-did"></a>
 </h2>
 <p>For difference-in-differences style analysis with staggered treatment:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/PanelEventStudyTask.html">PanelEventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  <span class="va">panel_data</span>,</span>
 <span>  unit_id <span class="op">=</span> <span class="st">"firm_id"</span>,</span>
@@ -546,7 +559,7 @@
 <div class="section level3">
 <h3 id="custom-models">Custom Models<a class="anchor" aria-label="anchor" href="#custom-models"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MyModel</span> <span class="op">&lt;-</span> <span class="fu">R6</span><span class="fu">::</span><span class="kw"><a href="https://r6.r-lib.org/reference/R6Class.html" class="external-link">R6Class</a></span><span class="op">(</span><span class="st">"MyModel"</span>,</span>
 <span>  inherit <span class="op">=</span> <span class="va">ModelBase</span>,</span>
 <span>  public <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -564,7 +577,7 @@
 <div class="section level3">
 <h3 id="custom-test-statistics">Custom Test Statistics<a class="anchor" aria-label="anchor" href="#custom-test-statistics"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">MyTest</span> <span class="op">&lt;-</span> <span class="fu">R6</span><span class="fu">::</span><span class="kw"><a href="https://r6.r-lib.org/reference/R6Class.html" class="external-link">R6Class</a></span><span class="op">(</span><span class="st">"MyTest"</span>,</span>
 <span>  inherit <span class="op">=</span> <span class="va">TestStatisticBase</span>,</span>
 <span>  public <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -648,7 +661,7 @@
 <p><strong>Current free tier</strong> already includes offline KB-based advice via <code><a href="reference/recommend_stat.html">recommend_stat()</a></code> and <code><a href="reference/flag_robustness.html">flag_robustness()</a></code> — no API key required.</p>
 <p><strong>Join the waitlist:</strong> <a href="https://github.com/sipemu/eventstudy#advisor-pro-waitlist" class="external-link uri">https://github.com/sipemu/eventstudy#advisor-pro-waitlist</a></p>
 <p><strong>Opt-in footer reminder</strong> (silent by default):</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>eventstudy.advisor_pro_footer <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co"># Appends a static waitlist URL to advice print output — no network call.</span></span></code></pre></div>
 <p>See <code><a href="reference/advisor_pro.html">?advisor_pro</a></code> for details.</p>

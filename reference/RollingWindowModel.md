@@ -19,6 +19,8 @@ Other eventstudy-models:
 [`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md),
 [`MarketAdjustedModel`](https://sipemu.github.io/eventstudy/reference/MarketAdjustedModel.md),
 [`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md),
+[`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md),
+[`ReturnCalculation`](https://sipemu.github.io/eventstudy/reference/ReturnCalculation.md),
 [`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md),
 [`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md),
 [`VolumeModel`](https://sipemu.github.io/eventstudy/reference/VolumeModel.md)
@@ -72,7 +74,12 @@ Create a new RollingWindowModel.
 
 - `min_obs`:
 
-  Minimum observations for a valid window.
+  Minimum valid (complete-pair) observations required inside each
+  individual rolling sub-window for that sub-window to be fit. Distinct
+  from
+  [`validate_task()`](https://sipemu.github.io/eventstudy/reference/validate_task.md)'s
+  `min_estimation_obs`, which is a whole-estimation-window advisory
+  threshold checked once per event, not per sub-window.
 
 ------------------------------------------------------------------------
 

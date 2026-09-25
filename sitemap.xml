@@ -29,6 +29,7 @@
 <url><loc>https://sipemu.github.io/eventstudy/articles/result-extraction.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/articles/simulation-power-analysis.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/articles/smoke-test.html</loc></url>
+<url><loc>https://sipemu.github.io/eventstudy/articles/statistical-conventions.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/articles/synthetic-control.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/articles/time-varying-models.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/articles/volume-volatility-event-study.html</loc></url>
@@ -98,6 +99,8 @@
 <url><loc>https://sipemu.github.io/eventstudy/reference/es_report.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/estimate_panel_event_study.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/estimate_synthetic_control.html</loc></url>
+<url><loc>https://sipemu.github.io/eventstudy/reference/eventstudy-deprecation.html</loc></url>
+<url><loc>https://sipemu.github.io/eventstudy/reference/eventstudy-shape-contracts.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/export_results.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/fit_model.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/flag_robustness.html</loc></url>
@@ -127,6 +130,7 @@
 <url><loc>https://sipemu.github.io/eventstudy/reference/print.es_diagnostics.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/provider.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/recommend_stat.html</loc></url>
+<url><loc>https://sipemu.github.io/eventstudy/reference/report_table.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/run_event_study.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/sc_placebo_test.html</loc></url>
 <url><loc>https://sipemu.github.io/eventstudy/reference/simulate_event_study.html</loc></url>

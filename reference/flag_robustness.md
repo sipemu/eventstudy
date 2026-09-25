@@ -71,9 +71,20 @@ Other eventstudy-advisor:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-task <- run_event_study(my_task, ParameterSet$new())
+# \donttest{
+data(dieselgate)
+task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+task <- run_event_study(task, ParameterSet$new())
 advice <- flag_robustness(task)
 print(advice)
-} # }
+#> Offline Event Study Advice
+#> ==========================
+#> Source:           offline_kb 
+#> Deterministic:    TRUE 
+#> Rules matched:    1 
+#> 
+#> [WARNING] KB-SMALL-N  (citation: BrownWarner1985)
+#>   Recommendation: Very few valid events (n < 10). The cross-sectional t-test relies on a large-sample normal approximation that is unreliable with fewer than ~10 events. Non-parametric tests (Sign Test, Rank Test) are preferred in small samples, as documented by Brown & Warner (1985). Interpret parametric p-values cautiously. [Threshold: n < 10 — ASSUMED, adjustable] 
+#> 
+# }
 ```

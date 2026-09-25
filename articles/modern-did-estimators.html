@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,7 @@
                         <h4 data-toc-skip class="author">Simon
 Mueller</h4>
             
-            <h4 data-toc-skip class="date">2026-09-10</h4>
+            <h4 data-toc-skip class="date">2026-09-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sipemu/eventstudy/blob/main/vignettes/modern-did-estimators.Rmd" class="external-link"><code>vignettes/modern-did-estimators.Rmd</code></a></small>
       <div class="d-none name"><code>modern-did-estimators.Rmd</code></div>
@@ -153,24 +153,32 @@ event study estimators:</p>
 <span><span class="va">panel_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  unit_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span>
 <span>  time_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, times <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>,</span>
+<span>  <span class="co"># Units 1-50 are first treated in period 11; units 51-100 are never treated.</span></span>
+<span>  treatment_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">unit_id</span> <span class="op">&lt;=</span> <span class="fl">50</span>, <span class="fl">11</span>, <span class="cn">NA_integer_</span><span class="op">)</span>,</span>
 <span>  treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">unit_id</span> <span class="op">&lt;=</span> <span class="fl">50</span> <span class="op">&amp;</span> <span class="va">time_id</span> <span class="op">&gt;=</span> <span class="fl">11</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2000</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">treatment</span>  <span class="co"># true effect = 2</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/PanelEventStudyTask.html">PanelEventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">panel_data</span>,</span>
-<span>  unit_col <span class="op">=</span> <span class="st">"unit_id"</span>,</span>
-<span>  time_col <span class="op">=</span> <span class="st">"time_id"</span>,</span>
-<span>  treatment_col <span class="op">=</span> <span class="st">"treatment"</span>,</span>
-<span>  outcome_col <span class="op">=</span> <span class="st">"outcome"</span></span>
+<span>  panel_data <span class="op">=</span> <span class="va">panel_data</span>,</span>
+<span>  unit_id <span class="op">=</span> <span class="st">"unit_id"</span>,</span>
+<span>  time_id <span class="op">=</span> <span class="st">"time_id"</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"outcome"</span>,</span>
+<span>  treatment <span class="op">=</span> <span class="st">"treatment"</span>,</span>
+<span>  treatment_time <span class="op">=</span> <span class="st">"treatment_time"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="twfe-default">TWFE (Default)<a class="anchor" aria-label="anchor" href="#twfe-default"></a>
 </h2>
+<p>The default <code>"static_twfe"</code> method estimates a single
+average treatment effect on the treated (ATT) and has no per-period
+dynamic coefficients, so it is printed as a table rather than plotted
+(use <code>"dynamic_twfe"</code> or <code>"sun_abraham"</code> below for
+an event-time plot).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span><span class="va">task</span>, method <span class="op">=</span> <span class="st">"twfe"</span>, leads <span class="op">=</span> <span class="fl">5</span>, lags <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/plot_panel_event_study.html">plot_panel_event_study</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span><span class="va">task</span>, method <span class="op">=</span> <span class="st">"static_twfe"</span>, leads <span class="op">=</span> <span class="fl">5</span>, lags <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">coefficients</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="sun-abraham">Sun-Abraham<a class="anchor" aria-label="anchor" href="#sun-abraham"></a>
@@ -244,7 +252,7 @@ staggered treatment timing - Provides horizon-specific estimates</p>
 (<code>relative_time, estimate, std.error, statistic, p.value</code>),
 making it easy to compare:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"twfe"</span>, <span class="st">"sun_abraham"</span>, <span class="st">"callaway_santanna"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"static_twfe"</span>, <span class="st">"sun_abraham"</span>, <span class="st">"callaway_santanna"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">methods</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>

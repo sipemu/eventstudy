@@ -1,14 +1,23 @@
-# Kolari-Pynnönen Adjusted BMP Test
+# Kolari-Pynnoenen Adjusted BMP Test
 
 Adjusts the BMP (Boehmer, Musumeci, Poulsen 1991) test for
 cross-sectional correlation of abnormal returns using the Kolari and
-Pynnönen (2010) correction. The adjustment scales the BMP statistic by a
-factor that accounts for the average pairwise correlation of
-standardized abnormal residuals in the estimation window.
+Pynnoenen (2010) correction. Abnormal returns are standardized by each
+event's MODEL sigma (`model$statistics$sigma`, same as
+[`BMPTest`](https://sipemu.github.io/eventstudy/reference/BMPTest.md)) –
+not the forecast-error-corrected sigma. The adjustment scales the BMP
+statistic by a factor that accounts for the average pairwise correlation
+of standardized abnormal residuals in the estimation window, computed
+only over "usable" events (at least 2 finite estimation-window SARs,
+finite model sigma, and non-constant/non-degenerate SAR variance). The
+adjustment is never silently substituted with 1: an event that cannot
+contribute a usable estimation-window series is excluded from the
+correlation estimate and reported once; if fewer than 2 usable events
+remain, `kp_t` and `ckp_t` are `NA`.
 
 ## References
 
-Kolari, J. W. and Pynnönen, S. (2010). Event Study Testing with
+Kolari, J. W. and Pynnoenen, S. (2010). Event Study Testing with
 Cross-sectional Correlation of Abnormal Returns. *The Review of
 Financial Studies*, 23(11), 3996–4025.
 
@@ -28,6 +37,7 @@ Other eventstudy-statistics:
 [`SignTest`](https://sipemu.github.io/eventstudy/reference/SignTest.md),
 [`SingleEventStatisticsSet`](https://sipemu.github.io/eventstudy/reference/SingleEventStatisticsSet.md),
 [`StatisticsSetBase`](https://sipemu.github.io/eventstudy/reference/StatisticsSetBase.md),
+[`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md),
 [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md),
 [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md),
 [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md),
@@ -65,7 +75,7 @@ Inherited methods
 
 ### `KolariPynnonenTest$compute()`
 
-Computes the Kolari-Pynnönen adjusted BMP test.
+Computes the Kolari-Pynnoenen adjusted BMP test.
 
 #### Usage
 

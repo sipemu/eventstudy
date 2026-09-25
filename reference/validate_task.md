@@ -28,8 +28,11 @@ validate_task(
 
 - min_estimation_obs:
 
-  Minimum number of observations required in the estimation window.
-  Default is 30.
+  Minimum number of observations required in the *whole* per-event
+  estimation window (a task-level validation threshold checked once per
+  event). Default is 30. Distinct from `RollingWindowModel$min_obs`,
+  which bounds each individual sub-window inside a single event's
+  rolling-window fit.
 
 - verbose:
 
@@ -57,6 +60,7 @@ Other eventstudy-statistics:
 [`SignTest`](https://sipemu.github.io/eventstudy/reference/SignTest.md),
 [`SingleEventStatisticsSet`](https://sipemu.github.io/eventstudy/reference/SingleEventStatisticsSet.md),
 [`StatisticsSetBase`](https://sipemu.github.io/eventstudy/reference/StatisticsSetBase.md),
+[`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md),
 [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md),
 [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md),
 [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md),

@@ -3,7 +3,7 @@
 The Market Adjusted Model is another simple approach used in event
 studies to estimate the expected returns of a stock and calculate its
 abnormal returns during an event window. This model is less complex than
-the Market Model, as it assumes that a stock’s expected return is equal
+the Market Model, as it assumes that a stock's expected return is equal
 to the market return, without considering any stock-specific factors.
 The Market Adjusted Model is particularly useful in situations where the
 estimation of individual stock parameters (such as alpha and beta) is
@@ -22,6 +22,8 @@ Other eventstudy-models:
 [`LinearFactorModel`](https://sipemu.github.io/eventstudy/reference/LinearFactorModel.md),
 [`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md),
 [`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md),
+[`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md),
+[`ReturnCalculation`](https://sipemu.github.io/eventstudy/reference/ReturnCalculation.md),
 [`RollingWindowModel`](https://sipemu.github.io/eventstudy/reference/RollingWindowModel.md),
 [`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md),
 [`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md),

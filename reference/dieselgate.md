@@ -64,8 +64,8 @@ use only; see `data-raw/dieselgate.R` for the reproducible fetch script.
 The event is the U.S. Environmental Protection Agency's Notice of
 Violation issued to Volkswagen on **2015-09-18** (a Friday); the
 share-price crash lands on the following trading days. The dataset
-covers two groups: the "VW Group" (VOW.DE, PAH3.DE — directly implicated
-firms) and "Other" (BMW.DE, MBG.DE — peer automakers). The bundled
+covers two groups: the "VW Group" (VOW.DE, PAH3.DE – directly implicated
+firms) and "Other" (BMW.DE, MBG.DE – peer automakers). The bundled
 window layout uses a 250-trading-day estimation window ending 11 days
 before the event and an event window of `[-10, +10]` trading days.
 
@@ -78,13 +78,13 @@ nature of the shock.
 
 **Firms:**
 
-- `VOW.DE` — Volkswagen AG ordinary shares (Xetra), event_id = 1
+- `VOW.DE` – Volkswagen AG ordinary shares (Xetra), event_id = 1
 
-- `PAH3.DE` — Porsche Automobil Holding SE (Xetra), event_id = 2
+- `PAH3.DE` – Porsche Automobil Holding SE (Xetra), event_id = 2
 
-- `BMW.DE` — BMW AG (Xetra), event_id = 3
+- `BMW.DE` – BMW AG (Xetra), event_id = 3
 
-- `MBG.DE` — Mercedes-Benz Group AG (Xetra), event_id = 4
+- `MBG.DE` – Mercedes-Benz Group AG (Xetra), event_id = 4
 
 **Groups:** "VW Group" (VOW.DE, PAH3.DE) vs "Other" (BMW.DE, MBG.DE).
 **Benchmark:** DAX performance index (ticker `^GDAXI`). **Date range:**

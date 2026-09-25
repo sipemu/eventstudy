@@ -3,7 +3,7 @@
 The CAR t-test is a statistical method used to determine whether the
 cumulative abnormal return of a security over an event window is
 significantly different from zero. This test helps researchers identify
-whether the event of interest has a significant impact on the security’s
+whether the event of interest has a significant impact on the security's
 return over the entire event window, considering the cumulative effects
 of the event.
 
@@ -25,6 +25,7 @@ Other eventstudy-statistics:
 [`SignTest`](https://sipemu.github.io/eventstudy/reference/SignTest.md),
 [`SingleEventStatisticsSet`](https://sipemu.github.io/eventstudy/reference/SingleEventStatisticsSet.md),
 [`StatisticsSetBase`](https://sipemu.github.io/eventstudy/reference/StatisticsSetBase.md),
+[`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md),
 [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md),
 [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md),
 [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md),

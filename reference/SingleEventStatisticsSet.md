@@ -19,6 +19,7 @@ Other eventstudy-statistics:
 [`RankTest`](https://sipemu.github.io/eventstudy/reference/RankTest.md),
 [`SignTest`](https://sipemu.github.io/eventstudy/reference/SignTest.md),
 [`StatisticsSetBase`](https://sipemu.github.io/eventstudy/reference/StatisticsSetBase.md),
+[`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md),
 [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md),
 [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md),
 [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md),

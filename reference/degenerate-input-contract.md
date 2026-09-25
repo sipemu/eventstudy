@@ -42,7 +42,28 @@ neither is set, the default `"lenient"` mode is used.
 `abnormal_returns = NA_real_` for all rows. All downstream test
 statistics that depend on fitted models then receive `NA` inputs and
 propagate `NA` to their outputs. The event is retained in the output
-tibble — it is never silently dropped.
+tibble – it is never silently dropped.
+
+**Multi-event exclusion (2026-09-24 re-evaluation, item A2):** A
+single-event's `NA` propagation above is not enough for cumulative
+(CAR-based) multi-event statistics (CSectT, PatellZ, Sign,
+GeneralizedSign, BMP, KolariPynnonen): an event with ZERO finite
+event-window abnormal returns must be EXCLUDED from every such
+statistic's group, not merely NA-propagated, because a cumulative sum
+that
+[`coalesce()`](https://dplyr.tidyverse.org/reference/coalesce.html)s a
+fully-degenerate event's abnormal returns to 0 would silently understate
+the true cross-sectional dispersion. The exclusion is applied once per
+group (see `.exclude_all_na_events`) before any statistic is computed,
+and reported exactly once: silently if the excluded event's model
+already emitted the one contract warning guaranteed by CONTRACT-04 (an
+unfitted `ModelBase` instance), or via a single additional warning
+naming the excluded `event_id`(s) otherwise. Strict mode errors instead.
+This exclusion rule leaves the pre-existing STATS-03 convention for a
+PARTIAL gap unchanged: an event with at least one finite event-window
+abnormal return, but a missing value on some individual day, still
+contributes 0 to that event's CAR on the missing day(s) via
+`coalesce(abnormal_returns, 0)`.
 
 ## Details
 

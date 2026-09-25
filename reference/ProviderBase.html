@@ -6,7 +6,7 @@
   delivered in later plans) inherit from this base and implement `complete()`.
 `ProviderBase` itself is abstract: calling `complete()` on it errors. It
   stores only non-secret configuration (`model`, `base_url`); API keys are
-  NEVER read at construction — they are resolved at call time inside each
+  NEVER read at construction – they are resolved at call time inside each
   concrete provider's `complete()`."><meta property="og:description" content="Abstract base class for Grounded AI Advisor providers. Defines the
   uniform `complete(prompt, schema, ...)` contract, mirroring the package's
   `ModelBase` / `TestStatisticBase` strategy-pattern idiom. Concrete providers
@@ -14,7 +14,7 @@
   delivered in later plans) inherit from this base and implement `complete()`.
 `ProviderBase` itself is abstract: calling `complete()` on it errors. It
   stores only non-secret configuration (`model`, `base_url`); API keys are
-  NEVER read at construction — they are resolved at call time inside each
+  NEVER read at construction – they are resolved at call time inside each
   concrete provider's `complete()`."><meta property="og:image" content="https://sipemu.github.io/eventstudy/reference/figures/og-card.png"><meta property="og:image:alt" content="EventStudy R Package - Financial Event Study Analysis"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:creator" content="@sipemu"><meta name="twitter:site" content="@sipemu"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
   delivered in later plans) inherit from this base and implement `complete()`.</p>
 <p>`ProviderBase` itself is abstract: calling `complete()` on it errors. It
   stores only non-secret configuration (`model`, `base_url`); API keys are
-  NEVER read at construction — they are resolved at call time inside each
+  NEVER read at construction – they are resolved at call time inside each
   concrete provider's `complete()`.</p>
     </div>
 
@@ -138,7 +138,7 @@
 
 <p></p><hr><a id="method-ProviderBase-complete"></a><div class="section">
 <h3 id="providerbase-complete-"><code>ProviderBase$complete()</code><a class="anchor" aria-label="anchor" href="#providerbase-complete-"></a></h3>
-<p>Complete a prompt. Abstract on the base class — concrete
+<p>Complete a prompt. Abstract on the base class – concrete
   providers override this.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ProviderBase</span><span class="op">$</span><span class="fu">complete</span><span class="op">(</span><span class="va">prompt</span>, schema <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>

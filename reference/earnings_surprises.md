@@ -76,11 +76,11 @@ signal across all three firms.
 
 **Firms:**
 
-- `AAPL` — Apple Inc. (NASDAQ), event_id = 1
+- `AAPL` – Apple Inc. (NASDAQ), event_id = 1
 
-- `MSFT` — Microsoft Corporation (NASDAQ), event_id = 2
+- `MSFT` – Microsoft Corporation (NASDAQ), event_id = 2
 
-- `GOOGL` — Alphabet Inc. Class A (NASDAQ), event_id = 3
+- `GOOGL` – Alphabet Inc. Class A (NASDAQ), event_id = 3
 
 **Group:** "Earnings Beat" (all firms). **Benchmark:** S&P 500 index
 (ticker `^GSPC`). **Date range:** 2022-06-01 to 2023-06-30.

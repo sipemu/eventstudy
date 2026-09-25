@@ -5,7 +5,7 @@ Anthropic Messages API. The request carries the mandatory `max_tokens`
 field and the `anthropic-version` header; when a `schema` is supplied it
 adds a tool-use `input_schema` block (`tools` + `tool_choice`) to obtain
 structured output, and the response extractor prefers that tool call's
-structured `input` while falling back to the first text block — so the
+structured `input` while falling back to the first text block – so the
 provider never crashes when the model replies with plain text instead of
 a tool call.
 
@@ -13,11 +13,11 @@ The API key is resolved at CALL time from `ANTHROPIC_API_KEY` (never at
 construction, never stored on the object) and attached with
 `req_headers_redacted("x-api-key" = key)`, which redacts the key in
 every print/error path. Note `req_auth_bearer_token` does NOT redact an
-`x-api-key` header — the redacted-headers helper is mandatory here. A
+`x-api-key` header – the redacted-headers helper is mandatory here. A
 missing key, transport/timeout failure, non-2xx status, malformed body,
 or missing completion text each degrades to exactly one
 [`warning()`](https://rdrr.io/r/base/warning.html) plus an
-\`es_provider_response\` with `text = NA_character_` — it never crashes
+\`es_provider_response\` with `text = NA_character_` – it never crashes
 the session and never returns a fabricated completion.
 
 `httr2` is required only for this provider and is guarded by

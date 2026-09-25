@@ -7,6 +7,8 @@ designs — with formulas, assumptions, and references.
 
 - [Methods Gate: Smoke
   Test](https://sipemu.github.io/eventstudy/articles/smoke-test.md):
+- [Statistical Conventions and Formula
+  Audit](https://sipemu.github.io/eventstudy/articles/statistical-conventions.md):
 - [Methods: Return
   Models](https://sipemu.github.io/eventstudy/articles/methods-return-models.md):
 - [Methods: Test

@@ -89,9 +89,23 @@ Other eventstudy-advisor:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-task <- run_event_study(my_task, ParameterSet$new())
+# \donttest{
+data(dieselgate)
+task <- EventStudyTask$new(dieselgate$firm, dieselgate$index, dieselgate$request)
+task <- run_event_study(task, ParameterSet$new())
 advice <- recommend_stat(task)
 print(advice)
-} # }
+#> Offline Event Study Advice
+#> ==========================
+#> Source:           offline_kb 
+#> Deterministic:    TRUE 
+#> Rules matched:    2 
+#> 
+#> [WARNING] KB-NONNORM-NONPAR  (citation: BrownWarner1985)
+#>   Recommendation: Non-normality detected in estimation-window residuals for >= 50% of events (Shapiro-Wilk p < 0.05). Consider non-parametric alternatives: Sign Test or Rank Test (Corrado 1989) are robust to departures from normality. Brown & Warner (1985) document that parametric tests lose size control under non-normal return distributions. [Threshold: 50% of events — ASSUMED, adjustable] 
+#> 
+#> [WARNING] KB-VAR-INCREASE-BMP  (citation: BMP1991)
+#>   Recommendation: High CAR dispersion (IQR > 0.10 or SD > 0.15) suggests event-induced variance increase, which inflates Patell Z rejection rates. Use the BMP (Boehmer-Musumeci-Poulsen) test, which standardizes by the event-window variance and is specifically designed for this case. [Thresholds: IQR > 0.10, SD > 0.15 — ASSUMED, adjustable] 
+#> 
+# }
 ```

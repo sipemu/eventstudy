@@ -15,7 +15,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,7 +91,10 @@
 
 <dt id="arg-min-estimation-obs">min_estimation_obs<a class="anchor" aria-label="anchor" href="#arg-min-estimation-obs"></a></dt>
 <dd><p>Minimum number of observations required in the
-estimation window. Default is 30.</p></dd>
+<em>whole</em> per-event estimation window (a task-level validation
+threshold checked once per event). Default is 30. Distinct from
+<code>RollingWindowModel$min_obs</code>, which bounds each individual
+sub-window inside a single event's rolling-window fit.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -120,6 +123,7 @@ estimation window. Default is 30.</p></dd>
 <code><a href="SignTest.html">SignTest</a></code>,
 <code><a href="SingleEventStatisticsSet.html">SingleEventStatisticsSet</a></code>,
 <code><a href="StatisticsSetBase.html">StatisticsSetBase</a></code>,
+<code><a href="TestStatisticBase.html">TestStatisticBase</a></code>,
 <code><a href="adjust_p_values.html">adjust_p_values()</a></code>,
 <code><a href="bootstrap_test.html">bootstrap_test()</a></code>,
 <code><a href="car_by_group.html">car_by_group()</a></code>,

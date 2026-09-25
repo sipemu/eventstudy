@@ -13,7 +13,7 @@ es_advice S3 object.'><meta property="og:image" content="https://sipemu.github.i
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,11 +125,22 @@ flagged <code>is_deterministic = TRUE</code> and <code>source = "offline_kb"</co
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="run_event_study.html">run_event_study</a></span><span class="op">(</span><span class="va">my_task</span>, <span class="va"><a href="ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">dieselgate</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="va"><a href="EventStudyTask.html">EventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">dieselgate</span><span class="op">$</span><span class="va">firm</span>, <span class="va">dieselgate</span><span class="op">$</span><span class="va">index</span>, <span class="va">dieselgate</span><span class="op">$</span><span class="va">request</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">task</span> <span class="op">&lt;-</span> <span class="fu"><a href="run_event_study.html">run_event_study</a></span><span class="op">(</span><span class="va">task</span>, <span class="va"><a href="ParameterSet.html">ParameterSet</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">advice</span> <span class="op">&lt;-</span> <span class="fu">flag_robustness</span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">advice</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Offline Event Study Advice</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ==========================</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Source:           offline_kb </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Deterministic:    TRUE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Rules matched:    1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [WARNING] KB-SMALL-N  (citation: BrownWarner1985)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Recommendation: Very few valid events (n &lt; 10). The cross-sectional t-test relies on a large-sample normal approximation that is unreliable with fewer than ~10 events. Non-parametric tests (Sign Test, Rank Test) are preferred in small samples, as documented by Brown &amp; Warner (1985). Interpret parametric p-values cautiously. [Threshold: n &lt; 10 — ASSUMED, adjustable] </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

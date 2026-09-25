@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,7 @@
                         <h4 data-toc-skip class="author">Simon
 Mueller</h4>
             
-            <h4 data-toc-skip class="date">2026-09-10</h4>
+            <h4 data-toc-skip class="date">2026-09-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sipemu/eventstudy/blob/main/vignettes/automated-reports.Rmd" class="external-link"><code>vignettes/automated-reports.Rmd</code></a></small>
       <div class="d-none name"><code>automated-reports.Rmd</code></div>
@@ -146,8 +146,8 @@ cross-sectional regression results.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/generate_report.html">generate_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">task</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="st">"report.html"</span>,</span>
-<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"summary"</span>, <span class="st">"data"</span>, <span class="st">"diagnostics"</span>,</span>
-<span>               <span class="st">"single_event"</span>, <span class="st">"multi_event"</span>, <span class="st">"appendix"</span><span class="op">)</span></span>
+<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exec_summary"</span>, <span class="st">"data_methods"</span>, <span class="st">"diagnostics"</span>,</span>
+<span>               <span class="st">"results"</span>, <span class="st">"robustness"</span>, <span class="st">"appendix"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Available sections:</p>
 <table class="table">
@@ -161,39 +161,40 @@ cross-sectional regression results.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>summary</code></td>
+<td><code>exec_summary</code></td>
 <td>Study overview: model, event window, number of events</td>
 </tr>
 <tr class="even">
-<td><code>data</code></td>
-<td>Data summary and event timeline</td>
+<td><code>data_methods</code></td>
+<td>Data summary, model, and methodology description</td>
 </tr>
 <tr class="odd">
+<td><code>results</code></td>
+<td>Single- and multi-event AR/CAR/AAR/CAAR results (or panel event-time
+estimates for a <code>PanelEventStudyTask</code>)</td>
+</tr>
+<tr class="even">
 <td><code>diagnostics</code></td>
 <td>Model fit diagnostics (residual plots, normality tests)</td>
 </tr>
+<tr class="odd">
+<td><code>robustness</code></td>
+<td>Robustness notes and the joint-hypothesis caveat</td>
+</tr>
 <tr class="even">
-<td><code>single_event</code></td>
-<td>Individual event AR and CAR results</td>
+<td><code>references</code></td>
+<td>Knowledge-base references drawn from the diagnostics</td>
 </tr>
 <tr class="odd">
-<td><code>multi_event</code></td>
-<td>AAR and CAAR test statistics</td>
-</tr>
-<tr class="even">
-<td><code>cross_sectional</code></td>
-<td>Cross-sectional regression results</td>
-</tr>
-<tr class="odd">
-<td><code>panel</code></td>
-<td>Panel event study results (for PanelEventStudyTask)</td>
-</tr>
-<tr class="even">
 <td><code>appendix</code></td>
 <td>Technical details and methodology</td>
 </tr>
 </tbody>
 </table>
+<p>Note: <code>exec_summary</code>, <code>data_methods</code>,
+<code>results</code>, <code>diagnostics</code>, <code>robustness</code>,
+and <code>references</code> are the six sections included by default;
+<code>appendix</code> is opt-in.</p>
 </div>
 <div class="section level3">
 <h3 id="summary-only">Summary Only<a class="anchor" aria-label="anchor" href="#summary-only"></a>
@@ -203,7 +204,7 @@ cross-sectional regression results.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/generate_report.html">generate_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">task</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="st">"summary.html"</span>,</span>
-<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"summary"</span>, <span class="st">"multi_event"</span><span class="op">)</span></span>
+<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exec_summary"</span>, <span class="st">"results"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -215,14 +216,14 @@ regression:</p>
 <code class="sourceCode R"><span><span class="co"># Run cross-sectional regression first</span></span>
 <span><span class="va">cs_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cross_sectional_regression.html">cross_sectional_regression</a></span><span class="op">(</span></span>
 <span>  <span class="va">task</span>,</span>
-<span>  formula <span class="op">=</span> <span class="va">car</span> <span class="op">~</span> <span class="va">size</span> <span class="op">+</span> <span class="va">leverage</span>,</span>
-<span>  characteristics <span class="op">=</span> <span class="va">firm_chars</span></span>
+<span>  formula <span class="op">=</span> <span class="op">~</span> <span class="va">size</span> <span class="op">+</span> <span class="va">leverage</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">firm_chars</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/generate_report.html">generate_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">task</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="st">"report.html"</span>,</span>
-<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"summary"</span>, <span class="st">"multi_event"</span>, <span class="st">"cross_sectional"</span><span class="op">)</span>,</span>
+<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exec_summary"</span>, <span class="st">"results"</span>, <span class="st">"diagnostics"</span><span class="op">)</span>,</span>
 <span>  cross_sectional <span class="op">=</span> <span class="va">cs_result</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -247,19 +248,26 @@ installation:</p>
 sections:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">panel_task</span> <span class="op">&lt;-</span> <span class="va"><a href="../reference/PanelEventStudyTask.html">PanelEventStudyTask</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">panel_data</span>,</span>
-<span>  unit_col <span class="op">=</span> <span class="st">"unit_id"</span>,</span>
-<span>  time_col <span class="op">=</span> <span class="st">"time_id"</span>,</span>
-<span>  treatment_col <span class="op">=</span> <span class="st">"treatment"</span>,</span>
-<span>  outcome_col <span class="op">=</span> <span class="st">"outcome"</span></span>
+<span>  panel_data <span class="op">=</span> <span class="va">panel_data</span>,</span>
+<span>  unit_id <span class="op">=</span> <span class="st">"unit_id"</span>,</span>
+<span>  time_id <span class="op">=</span> <span class="st">"time_id"</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"outcome"</span>,</span>
+<span>  treatment <span class="op">=</span> <span class="st">"treatment"</span>,</span>
+<span>  treatment_time <span class="op">=</span> <span class="st">"treatment_time"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span><span class="va">panel_task</span><span class="op">)</span></span>
+<span><span class="va">panel_task</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study</a></span><span class="op">(</span><span class="va">panel_task</span>, method <span class="op">=</span> <span class="st">"dynamic_twfe"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/generate_report.html">generate_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">panel_task</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="st">"panel_report.html"</span>,</span>
-<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"summary"</span>, <span class="st">"panel"</span><span class="op">)</span></span>
+<span>  sections <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exec_summary"</span>, <span class="st">"results"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/estimate_panel_event_study.html">estimate_panel_event_study()</a></code> returns the (mutated)
+<code>PanelEventStudyTask</code> with results attached, not a separate
+results object – pass its return value on to
+<code><a href="../reference/generate_report.html">generate_report()</a></code>. Panel-specific content is rendered
+automatically inside the <code>results</code> section whenever
+<code>task</code> is a <code>PanelEventStudyTask</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="programmatic-report-generation">Programmatic Report Generation<a class="anchor" aria-label="anchor" href="#programmatic-report-generation"></a>

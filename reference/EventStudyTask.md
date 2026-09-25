@@ -42,6 +42,11 @@ Other eventstudy-pipeline:
 - `.request_file_columns`:
 
   The necessary column names of the request dataframe.
+  `estimation_window_length` here is an input count (number of trading
+  days before the event window); it is distinct from the derived 0/1
+  `estimation_window` flag column that
+  [`prepare_event_study()`](https://sipemu.github.io/eventstudy/reference/prepare_event_study.md)
+  later adds to each event's nested data.
 
 - `factor_tbl`:
 

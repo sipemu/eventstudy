@@ -21,7 +21,7 @@ plot_diagnostics(task, event_id = NULL)
 
 ## Value
 
-A ggplot2 plot arranged with patchwork-style layout.
+A ggplot2 plot arranged in a gridExtra 2x2 grid layout.
 
 ## See also
 

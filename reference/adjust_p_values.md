@@ -55,6 +55,7 @@ Other eventstudy-statistics:
 [`SignTest`](https://sipemu.github.io/eventstudy/reference/SignTest.md),
 [`SingleEventStatisticsSet`](https://sipemu.github.io/eventstudy/reference/SingleEventStatisticsSet.md),
 [`StatisticsSetBase`](https://sipemu.github.io/eventstudy/reference/StatisticsSetBase.md),
+[`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md),
 [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md),
 [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md),
 [`car_quantiles()`](https://sipemu.github.io/eventstudy/reference/car_quantiles.md),

@@ -13,7 +13,7 @@ named data_tbl."><meta property="og:image" content="https://sipemu.github.io/eve
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,7 +103,13 @@ CAAR test statistics.</p></dd>
 
     <dt><code>.request_file_columns</code></dt>
 <dd><p>The necessary
-column names of the request dataframe.</p></dd>
+column names of the request dataframe.
+<code>estimation_window_length</code> here is an
+input count (number of trading days before
+the event window); it is distinct from the
+derived 0/1 <code>estimation_window</code> flag
+column that <code><a href="prepare_event_study.html">prepare_event_study()</a></code>
+later adds to each event's nested data.</p></dd>
 
 
     <dt><code>factor_tbl</code></dt>

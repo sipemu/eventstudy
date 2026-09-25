@@ -9,7 +9,7 @@ providers do not cover. It uses NO network and needs neither `httr2` nor
 The user function is run inside `tryCatch`: if it errors, the provider
 degrades to exactly one
 [`warning()`](https://rdrr.io/r/base/warning.html) plus an
-\`es_provider_response\` with `text = NA_character_` — it never crashes
+\`es_provider_response\` with `text = NA_character_` – it never crashes
 the session.
 
 ## See also

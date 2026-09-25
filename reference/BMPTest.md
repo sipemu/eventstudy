@@ -1,9 +1,11 @@
 # BMP Test (Boehmer, Musumeci, Poulsen 1991)
 
 Standardized cross-sectional test that is robust to event-induced
-variance increases. The BMP test standardizes abnormal returns by their
-forecast error corrected standard deviation, then applies a
-cross-sectional t-test to these standardized residuals.
+variance increases. The BMP test standardizes abnormal returns by each
+event's MODEL sigma (the estimation-window residual standard deviation,
+i.e. `model$statistics$sigma`) – NOT by the forecast-error-corrected
+sigma – then applies a cross-sectional t-test to these standardized
+residuals.
 
 ## See also
 
@@ -21,6 +23,7 @@ Other eventstudy-statistics:
 [`SignTest`](https://sipemu.github.io/eventstudy/reference/SignTest.md),
 [`SingleEventStatisticsSet`](https://sipemu.github.io/eventstudy/reference/SingleEventStatisticsSet.md),
 [`StatisticsSetBase`](https://sipemu.github.io/eventstudy/reference/StatisticsSetBase.md),
+[`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md),
 [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md),
 [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md),
 [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md),

@@ -1,4 +1,4 @@
-# Advisor Pro — Future Retrieval-Grounded Paid Tier
+# Advisor Pro – Future Retrieval-Grounded Paid Tier
 
 **Advisor Pro** is a planned premium add-on for the EventStudy package
 that will provide retrieval-augmented, evidence-grounded AI advice
@@ -24,13 +24,13 @@ The current package already ships an offline advice layer based on a
 deterministic knowledge base:
 
 - [`recommend_stat()`](https://sipemu.github.io/eventstudy/reference/recommend_stat.md)
-  — KB-based test-statistic recommendation
+  – KB-based test-statistic recommendation
 
 - [`flag_robustness()`](https://sipemu.github.io/eventstudy/reference/flag_robustness.md)
-  — KB-based robustness flags
+  – KB-based robustness flags
 
 - [`es_advise()`](https://sipemu.github.io/eventstudy/reference/es_advise.md)
-  — LLM-backed advice (requires provider)
+  – LLM-backed advice (requires provider)
 
 ## Waitlist
 
@@ -41,5 +41,5 @@ To enable an optional footer reminder after printing advice objects:
 
     options(eventstudy.advisor_pro_footer = TRUE)
 
-The footer is silent by default; enabling it appends a static URL — no
+The footer is silent by default; enabling it appends a static URL – no
 network connection is made.

@@ -13,7 +13,7 @@ fit_model() -&amp;gt; calculate_statistics()).'><meta property="og:image" conten
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -115,8 +115,8 @@ to drive a complete multi-group event study (<code><a href="prepare_event_study.
     <p>The event is the U.S. Environmental Protection Agency's Notice of Violation
 issued to Volkswagen on <strong>2015-09-18</strong> (a Friday); the share-price crash
 lands on the following trading days. The dataset covers two groups: the
-"VW Group" (VOW.DE, PAH3.DE — directly implicated firms) and "Other"
-(BMW.DE, MBG.DE — peer automakers). The bundled window layout uses a
+"VW Group" (VOW.DE, PAH3.DE – directly implicated firms) and "Other"
+(BMW.DE, MBG.DE – peer automakers). The bundled window layout uses a
 250-trading-day estimation window ending 11 days before the event and an
 event window of <code>[-10, +10]</code> trading days.</p>
 <p>Fitting a market model on the "VW Group" events produces a strongly negative
@@ -125,10 +125,10 @@ roughly -17% and -13% average abnormal returns on the first two trading days
 after the disclosure, while the "Other" peer automakers show near-zero CAAR
 (approximately +1%), illustrating the idiosyncratic nature of the shock.</p>
 
-<p><strong>Firms:</strong></p><ul><li><p><code>VOW.DE</code> — Volkswagen AG ordinary shares (Xetra), event_id = 1</p></li>
-<li><p><code>PAH3.DE</code> — Porsche Automobil Holding SE (Xetra), event_id = 2</p></li>
-<li><p><code>BMW.DE</code> — BMW AG (Xetra), event_id = 3</p></li>
-<li><p><code>MBG.DE</code> — Mercedes-Benz Group AG (Xetra), event_id = 4</p></li>
+<p><strong>Firms:</strong></p><ul><li><p><code>VOW.DE</code> – Volkswagen AG ordinary shares (Xetra), event_id = 1</p></li>
+<li><p><code>PAH3.DE</code> – Porsche Automobil Holding SE (Xetra), event_id = 2</p></li>
+<li><p><code>BMW.DE</code> – BMW AG (Xetra), event_id = 3</p></li>
+<li><p><code>MBG.DE</code> – Mercedes-Benz Group AG (Xetra), event_id = 4</p></li>
 </ul><p><strong>Groups:</strong> "VW Group" (VOW.DE, PAH3.DE) vs "Other" (BMW.DE, MBG.DE).
 <strong>Benchmark:</strong> DAX performance index (ticker <code>^GDAXI</code>).
 <strong>Date range:</strong> 2014-06-01 to 2015-11-01.</p>

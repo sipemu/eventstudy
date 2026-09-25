@@ -3,7 +3,7 @@
 The AR t-test is a statistical method used to determine whether the
 abnormal return of a security on a specific day is significantly
 different from zero. This test helps researchers identify whether the
-event of interest has a significant impact on the security’s return at a
+event of interest has a significant impact on the security's return at a
 particular point in time.
 
 See also <https://eventstudy.de/statistics/ar_car_statistics.html>
@@ -24,6 +24,7 @@ Other eventstudy-statistics:
 [`SignTest`](https://sipemu.github.io/eventstudy/reference/SignTest.md),
 [`SingleEventStatisticsSet`](https://sipemu.github.io/eventstudy/reference/SingleEventStatisticsSet.md),
 [`StatisticsSetBase`](https://sipemu.github.io/eventstudy/reference/StatisticsSetBase.md),
+[`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md),
 [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md),
 [`bootstrap_test()`](https://sipemu.github.io/eventstudy/reference/bootstrap_test.md),
 [`car_by_group()`](https://sipemu.github.io/eventstudy/reference/car_by_group.md),

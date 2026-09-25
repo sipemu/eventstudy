@@ -184,7 +184,7 @@ Data & Reporting
 
 ## Worked Examples
 
-[](https://sipemu.github.io/eventstudy/articles/example-earnings.md)
+[](https://sipemu.github.io/eventstudy/articles/example-earnings.html)
 
 ![Earnings Surprise
 Analysis](../reference/figures/card-example-earnings.svg)
@@ -193,7 +193,7 @@ Earnings Surprise Analysis
 
 Worked Examples
 
-[](https://sipemu.github.io/eventstudy/articles/example-regulatory.md)
+[](https://sipemu.github.io/eventstudy/articles/example-regulatory.html)
 
 ![Regulatory Shock
 Analysis](../reference/figures/card-example-regulatory.svg)
@@ -202,7 +202,7 @@ Regulatory Shock Analysis
 
 Worked Examples
 
-[](https://sipemu.github.io/eventstudy/articles/example-ma.md)
+[](https://sipemu.github.io/eventstudy/articles/example-ma.html)
 
 ![M&A Deal Announcements](../reference/figures/card-example-ma.svg)
 

@@ -5,16 +5,16 @@
   schema is supplied it adds a tool-use input_schema block
   (tools + tool_choice) to obtain structured output, and the
   response extractor prefers that tool call's structured input while
-  falling back to the first text block — so the provider never crashes when the
+  falling back to the first text block – so the provider never crashes when the
   model replies with plain text instead of a tool call.
 The API key is resolved at CALL time from ANTHROPIC_API_KEY (never at
   construction, never stored on the object) and attached with
   req_headers_redacted(&quot;x-api-key&quot; = key), which redacts the key in
   every print/error path. Note req_auth_bearer_token does NOT redact an
-  x-api-key header — the redacted-headers helper is mandatory here. A
+  x-api-key header – the redacted-headers helper is mandatory here. A
   missing key, transport/timeout failure, non-2xx status, malformed body, or
   missing completion text each degrades to exactly one warning() plus an
-  `es_provider_response` with text = NA_character_ — it never crashes the
+  `es_provider_response` with text = NA_character_ – it never crashes the
   session and never returns a fabricated completion.
 httr2 is required only for this provider and is guarded by
   requireNamespace() at the top of complete(), so the package
@@ -24,16 +24,16 @@ httr2 is required only for this provider and is guarded by
   schema is supplied it adds a tool-use input_schema block
   (tools + tool_choice) to obtain structured output, and the
   response extractor prefers that tool call's structured input while
-  falling back to the first text block — so the provider never crashes when the
+  falling back to the first text block – so the provider never crashes when the
   model replies with plain text instead of a tool call.
 The API key is resolved at CALL time from ANTHROPIC_API_KEY (never at
   construction, never stored on the object) and attached with
   req_headers_redacted(&quot;x-api-key&quot; = key), which redacts the key in
   every print/error path. Note req_auth_bearer_token does NOT redact an
-  x-api-key header — the redacted-headers helper is mandatory here. A
+  x-api-key header – the redacted-headers helper is mandatory here. A
   missing key, transport/timeout failure, non-2xx status, malformed body, or
   missing completion text each degrades to exactly one warning() plus an
-  `es_provider_response` with text = NA_character_ — it never crashes the
+  `es_provider_response` with text = NA_character_ – it never crashes the
   session and never returns a fabricated completion.
 httr2 is required only for this provider and is guarded by
   requireNamespace() at the top of complete(), so the package
@@ -45,7 +45,7 @@ httr2 is required only for this provider and is guarded by
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,16 +96,16 @@ httr2 is required only for this provider and is guarded by
   <code>schema</code> is supplied it adds a tool-use <code>input_schema</code> block
   (<code>tools</code> + <code>tool_choice</code>) to obtain structured output, and the
   response extractor prefers that tool call's structured <code>input</code> while
-  falling back to the first text block — so the provider never crashes when the
+  falling back to the first text block – so the provider never crashes when the
   model replies with plain text instead of a tool call.</p>
 <p>The API key is resolved at CALL time from <code>ANTHROPIC_API_KEY</code> (never at
   construction, never stored on the object) and attached with
   <code>req_headers_redacted("x-api-key" = key)</code>, which redacts the key in
   every print/error path. Note <code>req_auth_bearer_token</code> does NOT redact an
-  <code>x-api-key</code> header — the redacted-headers helper is mandatory here. A
+  <code>x-api-key</code> header – the redacted-headers helper is mandatory here. A
   missing key, transport/timeout failure, non-2xx status, malformed body, or
   missing completion text each degrades to exactly one <code><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning()</a></code> plus an
-  `es_provider_response` with <code>text = NA_character_</code> — it never crashes the
+  `es_provider_response` with <code>text = NA_character_</code> – it never crashes the
   session and never returns a fabricated completion.</p>
 <p><code>httr2</code> is required only for this provider and is guarded by
   <code><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace()</a></code> at the top of <code>complete()</code>, so the package

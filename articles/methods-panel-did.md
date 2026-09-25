@@ -135,7 +135,7 @@ es_tt(
 | relative_time | estimate | std.error | statistic | p.value          |
 |---------------|----------|-----------|-----------|------------------|
 | -3            | -0.7182  | 0.3181    | -2.258    | 0.02395869066429 |
-| -2            | -0.561   | 0.2615    | -2.146    | 0.03190555093361 |
+| -2            | -0.561   | 0.2615    | -2.146    | 0.03190555093362 |
 | -1            | 0        | 0         | NA        | NA               |
 | 0             | 2.0085   | 0.3333    | 6.026     | 0.0000000016834  |
 | 1             | 2.2249   | 0.4618    | 4.818     | 0.00000145136014 |
@@ -143,7 +143,7 @@ es_tt(
 | 3             | NA       | NA        | NA        | NA               |
 
 Dynamic TWFE event-time coefficients (base period k = -1) on the
-synthetic staggered panel. {#tinytable_e653ruwa9o3hrhgtzmaq .table
+synthetic staggered panel. {#tinytable_xtq7c9grki1xocrh86r4 .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

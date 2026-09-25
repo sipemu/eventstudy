@@ -15,8 +15,8 @@ stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://
 [![R-CMD-check](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sipemu/eventstudy/actions/workflows/R-CMD-check.yaml)
 [![Codecov](https://codecov.io/gh/sipemu/eventstudy/graph/badge.svg)](https://codecov.io/gh/sipemu/eventstudy)
 [![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://sipemu.github.io/eventstudy/)
-
-![EventStudy logo](reference/figures/logo.png)
+[![Claude Code
+Plugin](https://img.shields.io/badge/Claude_Code-AI_skills_plugin-8A2BE2)](#id_-claude-code-skills-ai-pair-programming)
 
 A comprehensive, modular R package for financial event study analysis.
 Implements the classical methodology (MacKinlay 1997) and extends it
@@ -45,9 +45,30 @@ install.packages("devtools")
 devtools::install_github("sipemu/eventstudy")
 ```
 
+## 🤖 Claude Code Skills (AI pair-programming)
+
+Two [Claude Code](https://claude.com/claude-code) Agent Skills ship with
+this repo as an installable plugin, giving your AI assistant grounded
+knowledge of the package API:
+
+- **`es-capabilities`** – discover the full API surface: return models,
+  test statistics, task types, function signatures, and method-for-task
+  routing.
+- **`es-advisor`** – run the grounded *load -\> run -\> diagnose -\>
+  advise -\> re-run -\> compare* loop (offline degrade path, never
+  fabricates a number).
+
+Install via the built-in plugin marketplace:
+
+    /plugin marketplace add sipemu/eventstudy
+    /plugin install eventstudy@eventstudy
+
+The skills are then auto-invoked from their descriptions, or callable as
+`/eventstudy:es-capabilities` and `/eventstudy:es-advisor`.
+
 ## Features
 
-- **AI Advisor** (new in 0.60.0): Grounded, LLM-agnostic advice via
+- **AI Advisor**: Grounded, LLM-agnostic advice via
   [`es_advise()`](https://sipemu.github.io/eventstudy/reference/es_advise.md)
   plus offline
   [`es_diagnostics()`](https://sipemu.github.io/eventstudy/reference/es_diagnostics.md).
@@ -56,11 +77,11 @@ devtools::install_github("sipemu/eventstudy")
   (Anthropic, OpenAI-compatible, custom) can be supplied via
   [`provider()`](https://sipemu.github.io/eventstudy/reference/provider.md).
 
-- **One-Call Reporting** (new in 0.64.0): Generate a complete,
-  multi-format event study report in a single call: `es_report(task)` –
-  deep-clones the task, harvests diagnostics, and renders
-  HTML/PDF/Word/Markdown with a grounded narrative (offline by default).
-  Also available as `run_event_study(..., report = TRUE)`.
+- **One-Call Reporting**: Generate a complete, multi-format event study
+  report in a single call: `es_report(task)` – deep-clones the task,
+  harvests diagnostics, and renders HTML/PDF/Word/Markdown with a
+  grounded narrative (offline by default). Also available as
+  `run_event_study(..., report = TRUE)`.
 
 - **15+ Return Models**: Market Model, Market Adjusted, Mean Adjusted,
   Fama-French 3- and 5-factor, Carhart 4-factor, GARCH(1,1), DCC-GARCH,

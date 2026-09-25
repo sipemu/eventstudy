@@ -13,7 +13,7 @@ instability that is common in financial return data."><meta property="og:image" 
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.65.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,6 +79,8 @@ instability that is common in financial return data.</p>
 <code><a href="LogReturn.html">LogReturn</a></code>,
 <code><a href="MarketAdjustedModel.html">MarketAdjustedModel</a></code>,
 <code><a href="MarketModel.html">MarketModel</a></code>,
+<code><a href="ModelBase.html">ModelBase</a></code>,
+<code><a href="ReturnCalculation.html">ReturnCalculation</a></code>,
 <code><a href="SimpleReturn.html">SimpleReturn</a></code>,
 <code><a href="VolatilityModel.html">VolatilityModel</a></code>,
 <code><a href="VolumeModel.html">VolumeModel</a></code></p></div>
@@ -123,7 +125,11 @@ instability that is common in financial return data.</p>
 <dd><p>Size of the rolling window.</p></dd>
 
       <dt><code>min_obs</code></dt>
-<dd><p>Minimum observations for a valid window.</p></dd>
+<dd><p>Minimum valid (complete-pair) observations
+required inside each individual rolling sub-window for that
+sub-window to be fit. Distinct from <code><a href="validate_task.html">validate_task()</a></code>'s
+<code>min_estimation_obs</code>, which is a whole-estimation-window
+advisory threshold checked once per event, not per sub-window.</p></dd>
 
 
 </dl><p></p></div>

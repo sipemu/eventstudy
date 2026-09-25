@@ -24,6 +24,8 @@ touches first to set up and run an event study.
 R6 model classes for estimating normal returns and computing abnormal
 returns, plus return-calculation strategy classes.
 
+- [`ModelBase`](https://sipemu.github.io/eventstudy/reference/ModelBase.md)
+  : ModelBase
 - [`MarketModel`](https://sipemu.github.io/eventstudy/reference/MarketModel.md)
   : Market Model
 - [`MarketAdjustedModel`](https://sipemu.github.io/eventstudy/reference/MarketAdjustedModel.md)
@@ -50,6 +52,8 @@ returns, plus return-calculation strategy classes.
   : Volume Event Study Model
 - [`VolatilityModel`](https://sipemu.github.io/eventstudy/reference/VolatilityModel.md)
   : Volatility Event Study Model
+- [`ReturnCalculation`](https://sipemu.github.io/eventstudy/reference/ReturnCalculation.md)
+  : ReturnCalculation
 - [`SimpleReturn`](https://sipemu.github.io/eventstudy/reference/SimpleReturn.md)
   : R6 class for simple return calculation
 - [`LogReturn`](https://sipemu.github.io/eventstudy/reference/LogReturn.md)
@@ -60,6 +64,8 @@ returns, plus return-calculation strategy classes.
 Single-event (AR/CAR) and multi-event (AAR/CAAR) test statistic classes
 and their container sets.
 
+- [`TestStatisticBase`](https://sipemu.github.io/eventstudy/reference/TestStatisticBase.md)
+  : TestStatisticBase
 - [`ARTTest`](https://sipemu.github.io/eventstudy/reference/ARTTest.md)
   : Abnormal Return T Statistic (ART)
 - [`CARTTest`](https://sipemu.github.io/eventstudy/reference/CARTTest.md)
@@ -79,7 +85,7 @@ and their container sets.
 - [`RankTest`](https://sipemu.github.io/eventstudy/reference/RankTest.md)
   : Rank Test (Corrado 1989)
 - [`KolariPynnonenTest`](https://sipemu.github.io/eventstudy/reference/KolariPynnonenTest.md)
-  : Kolari-Pynnönen Adjusted BMP Test
+  : Kolari-Pynnoenen Adjusted BMP Test
 - [`CalendarTimePortfolioTest`](https://sipemu.github.io/eventstudy/reference/CalendarTimePortfolioTest.md)
   : Calendar-Time Portfolio Test
 - [`SingleEventStatisticsSet`](https://sipemu.github.io/eventstudy/reference/SingleEventStatisticsSet.md)
@@ -177,6 +183,8 @@ automated RMarkdown report generation.
   : One-Call Event Study Report Orchestrator
 - [`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md)
   : Generate Event Study Report (Multi-Format)
+- [`report_table()`](https://sipemu.github.io/eventstudy/reference/report_table.md)
+  : Render a data frame as a styled table (HTML / PDF / Word / Markdown)
 - [`tidy.EventStudyTask()`](https://sipemu.github.io/eventstudy/reference/tidy.EventStudyTask.md)
   : Tidy Event Study Results
 
@@ -217,3 +225,15 @@ rates, plus bundled example datasets.
   : Volkswagen "Dieselgate" Multi-Automaker Event Study Dataset
 - [`earnings_surprises`](https://sipemu.github.io/eventstudy/reference/earnings_surprises.md)
   : Earnings Surprise Multi-Firm Event Study Dataset
+
+## Contracts & Lifecycle
+
+Shared degenerate-input handling contract, structural shape contracts,
+and the package’s deprecation policy.
+
+- [`degenerate-input-contract`](https://sipemu.github.io/eventstudy/reference/degenerate-input-contract.md)
+  : Degenerate-Input Contract for EventStudy Models
+- [`eventstudy-shape-contracts`](https://sipemu.github.io/eventstudy/reference/eventstudy-shape-contracts.md)
+  : Return-Shape Contracts for EventStudy Pipeline Results
+- [`eventstudy-deprecation`](https://sipemu.github.io/eventstudy/reference/eventstudy-deprecation.md)
+  : EventStudy Deprecation Policy
