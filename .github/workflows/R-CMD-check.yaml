@@ -69,8 +69,11 @@ jobs:
           # roxygen docs (author names, math symbols) and SVG glyphs is legitimate
           # and recorded in .github/non-ascii-baseline.txt. This step fails only
           # when a NEW non-ASCII line appears outside that baseline.
-          grep -rnP '[^\x00-\x7F]' R/ man/figures/ inst/ 2>/dev/null | sort > non-ascii-current.txt || true
-          if ! diff -u .github/non-ascii-baseline.txt non-ascii-current.txt; then
+          # Sort both sides under LC_ALL=C: the baseline is committed from a
+          # developer machine whose locale collates differently from the runner.
+          grep -rnP '[^\x00-\x7F]' R/ man/figures/ inst/ 2>/dev/null | LC_ALL=C sort > non-ascii-current.txt || true
+          LC_ALL=C sort .github/non-ascii-baseline.txt > non-ascii-baseline-sorted.txt
+          if ! diff -u non-ascii-baseline-sorted.txt non-ascii-current.txt; then
             echo "New non-ASCII characters found in R/, man/figures/, or inst/."
             echo "If intentional (and covered by Encoding: UTF-8), update .github/non-ascii-baseline.txt."
             exit 1

@@ -1,8 +1,3 @@
-man/figures/card-cross-sectional-analysis.svg:23:  <text x="255" y="55" font-family="sans-serif" font-size="9" fill="#dc3545">R²</text>
-man/figures/card-factor-models-bhar.svg:23:  <text x="295" y="58" font-family="sans-serif" font-size="10" fill="#198754">β</text>
-man/figures/card-time-varying-models.svg:15:  <text x="30" y="50" font-family="sans-serif" font-size="9" fill="#198754">β(t)</text>
-man/figures/card-time-varying-models.svg:9:  <text x="335" y="108" font-family="sans-serif" font-size="8" fill="#adb5bd">β̄</text>
-man/figures/card-volume-volatility-event-study.svg:24:  <text x="310" y="108" font-family="sans-serif" font-size="8" fill="#198754">σ</text>
 R/deprecation.R:40:#' @param old   Character scalar — the old argument name (as the user typed it).
 R/deprecation.R:41:#' @param new   Character scalar — the replacement argument name.
 R/deprecation.R:44:#' @param fn    Character scalar — name of the function where the rename lives,
@@ -15,3 +10,8 @@ R/shape_contracts.R:197:    NULL  # unknown stat — skip silently
 R/shape_contracts.R:220:    NULL   # unknown stat — skip silently
 R/shape_contracts.R:52:  # Returns TRUE (on) or FALSE (off — strict no-op).
 R/shape_contracts.R:64:# (NA-propagated values, same column names — per contract.R semantics).
+man/figures/card-cross-sectional-analysis.svg:23:  <text x="255" y="55" font-family="sans-serif" font-size="9" fill="#dc3545">R²</text>
+man/figures/card-factor-models-bhar.svg:23:  <text x="295" y="58" font-family="sans-serif" font-size="10" fill="#198754">β</text>
+man/figures/card-time-varying-models.svg:15:  <text x="30" y="50" font-family="sans-serif" font-size="9" fill="#198754">β(t)</text>
+man/figures/card-time-varying-models.svg:9:  <text x="335" y="108" font-family="sans-serif" font-size="8" fill="#adb5bd">β̄</text>
+man/figures/card-volume-volatility-event-study.svg:24:  <text x="310" y="108" font-family="sans-serif" font-size="8" fill="#198754">σ</text>
