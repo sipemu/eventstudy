@@ -1,4 +1,10 @@
-# EventStudy 0.66.0.9000
+# EventStudy 0.66.1
+
+## CRAN resubmission
+
+* DESCRIPTION text revised per CRAN review: single quotes only around
+  software names, all acronyms spelled out, and method references given as
+  author (year) with DOI/URL links.
 
 ## Statistical correctness fixes (2026-09-24 re-evaluation)
 
