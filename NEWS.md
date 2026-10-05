@@ -1,4 +1,4 @@
-# EventStudy 0.66.1
+# EventStudy 0.66.0
 
 ## CRAN resubmission
 
@@ -69,7 +69,7 @@ for the full audit log and citations.
   inflated both). `caltime_t`/`ccaltime_t` now use degrees of freedom
   `n_estimation_days - 1`, exposed as `attr(result, "caltime_df")` and read by
   both `adjust_p_values()` and `tidy()`. **This is a valid-input redefinition:**
-  `caltime_t`/`ccaltime_t` values differ from 0.66.0; golden values are
+  `caltime_t`/`ccaltime_t` values differ from the initial 0.66.0 submission; golden values are
   re-pinned.
 * **A8 -- `MarketAdjustedModel`'s forecast-error correction is now
   `forecast_error_corrected_sigma == sigma` exactly** (correction factor 1),
@@ -219,8 +219,6 @@ or muffled at its source when the fixture is intentionally short).
   `test_execute.R` test locks that `fit_model()` collapses N short-window
   events into exactly ONE `eventstudy_short_estimation_window` warning
   listing the event ids.
-
-# EventStudy 0.66.0
 
 ## API Stabilization & Deprecation Lifecycle (Phase 28)
 
