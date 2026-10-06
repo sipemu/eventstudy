@@ -102,7 +102,7 @@ es_tt(
 | 0.01                 | 0.96  |
 
 Detection power by true abnormal return (N = 15, cross-sectional test,
-alpha = 0.05) {#tinytable_dcoij4dpvwfuh1dfwpbk .table .tinytable
+alpha = 0.05) {#tinytable_6ijd35j2gzu041ssuhml .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -210,7 +210,7 @@ excludes.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.66.0.9000
+    #> [1] EventStudy_0.66.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] gtable_0.3.6         jsonlite_2.0.0       dplyr_1.2.1         

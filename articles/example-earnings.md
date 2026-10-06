@@ -129,7 +129,7 @@ car_tbl |>
 | MSFT        | \[-5,5\] | 0.06781  | 0.03889   | 1.7436    | 0.08278 |
 
 Cumulative Abnormal Returns by firm (widest event window)
-{#tinytable_rmag3119vmec7qcwb0sw .table .tinytable
+{#tinytable_d4blxderxlnrnf1hu75a .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -226,7 +226,7 @@ for the full battery.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.66.0.9000
+    #> [1] EventStudy_0.66.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] plotly_4.12.1        sass_0.4.10          utf8_1.2.6          

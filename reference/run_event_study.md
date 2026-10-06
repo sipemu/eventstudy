@@ -86,10 +86,10 @@ out  <- file.path(tempdir(), "event_study_report.html")
 task <- run_event_study(task, ParameterSet$new(), report = TRUE,
                         report_args = list(output_file = out))
 #> Report mode: Offline rule-based narrative
-#> Report generated: /tmp/Rtmpmbngq2/event_study_report.html
-#> Report written to: /tmp/Rtmpmbngq2/event_study_report.html
+#> Report generated: /tmp/Rtmp345H0b/event_study_report.html
+#> Report written to: /tmp/Rtmp345H0b/event_study_report.html
 attr(task, "report_path")  # path to the rendered HTML
 #>                                      html 
-#> "/tmp/Rtmpmbngq2/event_study_report.html" 
+#> "/tmp/Rtmp345H0b/event_study_report.html" 
 # }
 ```

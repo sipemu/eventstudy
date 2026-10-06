@@ -115,7 +115,7 @@ caar_tbl |>
 [TABLE]
 
 CAAR by group at the end of the event window: VW-Group vs Peers
-{#tinytable_n6xk7546s8fjlu476y3u .table .tinytable
+{#tinytable_hz8uqt9bkeiocbx2wpuh .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -133,7 +133,7 @@ es_tt(grp$summary, digits = 4,
 | Other    | 2   | 0.01324  | 0.05546 | 0.01324    | -0.02597 | 0.05246  |
 | VW Group | 2   | -0.38576 | 0.04329 | -0.38576   | -0.41637 | -0.35515 |
 
-Per-firm CAR summary by group {#tinytable_juzhl4bby1kathw07suo .table
+Per-firm CAR summary by group {#tinytable_6fv9ytwwomyh0jzs1r7u .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -224,7 +224,7 @@ before trusting the parametric *p*-values.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.66.0.9000
+    #> [1] EventStudy_0.66.0
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] plotly_4.12.1        sass_0.4.10          utf8_1.2.6          

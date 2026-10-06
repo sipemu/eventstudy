@@ -1,6 +1,12 @@
 # Changelog
 
-## EventStudy 0.66.0.9000
+## EventStudy 0.66.0
+
+### CRAN resubmission
+
+- DESCRIPTION text revised per CRAN review: single quotes only around
+  software names, all acronyms spelled out, and method references given
+  as author (year) with DOI/URL links.
 
 ### Statistical correctness fixes (2026-09-24 re-evaluation)
 
@@ -76,8 +82,8 @@ citations.
   `attr(result, "caltime_df")` and read by both
   [`adjust_p_values()`](https://sipemu.github.io/eventstudy/reference/adjust_p_values.md)
   and `tidy()`. **This is a valid-input redefinition:**
-  `caltime_t`/`ccaltime_t` values differ from 0.66.0; golden values are
-  re-pinned.
+  `caltime_t`/`ccaltime_t` values differ from the initial 0.66.0
+  submission; golden values are re-pinned.
 - **A8 – `MarketAdjustedModel`’s forecast-error correction is now
   `forecast_error_corrected_sigma == sigma` exactly** (correction factor
   1), because the model estimates nothing from the estimation window.
@@ -256,8 +262,6 @@ short).
   [`fit_model()`](https://sipemu.github.io/eventstudy/reference/fit_model.md)
   collapses N short-window events into exactly ONE
   `eventstudy_short_estimation_window` warning listing the event ids.
-
-## EventStudy 0.66.0
 
 ### API Stabilization & Deprecation Lifecycle (Phase 28)
 
