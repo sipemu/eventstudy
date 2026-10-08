@@ -122,7 +122,7 @@ es_tt(
 | 0.8483 | 0.00688  | 248               | 0.14675  | 0.000006053 | 1.691   | 0.1447      |
 
 Per-event estimation-window diagnostics feeding the advisor (offline).
-{#tinytable_85q10ikuhl91b6w4dmkn .table .tinytable
+{#tinytable_bnx06m8iaf9yrwtryt7x .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

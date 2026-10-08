@@ -126,7 +126,7 @@ es_tt(
 [TABLE]
 
 AAR / CAAR with cross-sectional t, plus companion Patell/BMP/Sign/KP
-statistics. {#tinytable_2j62nrxg11l24u9nzuq8 .table .tinytable
+statistics. {#tinytable_2unjsgu1v2vjs9wpkuv4 .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 

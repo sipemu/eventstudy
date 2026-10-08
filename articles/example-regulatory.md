@@ -115,7 +115,7 @@ caar_tbl |>
 [TABLE]
 
 CAAR by group at the end of the event window: VW-Group vs Peers
-{#tinytable_hz8uqt9bkeiocbx2wpuh .table .tinytable
+{#tinytable_ybf2v10hgklkqixjomi9 .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -133,7 +133,7 @@ es_tt(grp$summary, digits = 4,
 | Other    | 2   | 0.01324  | 0.05546 | 0.01324    | -0.02597 | 0.05246  |
 | VW Group | 2   | -0.38576 | 0.04329 | -0.38576   | -0.41637 | -0.35515 |
 
-Per-firm CAR summary by group {#tinytable_6fv9ytwwomyh0jzs1r7u .table
+Per-firm CAR summary by group {#tinytable_uou5jw1aorrve76zl8am .table
 .tinytable style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
