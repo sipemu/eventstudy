@@ -102,7 +102,7 @@ es_tt(
 | 0.01                 | 0.96  |
 
 Detection power by true abnormal return (N = 15, cross-sectional test,
-alpha = 0.05) {#tinytable_lp5dao94z3ssnz4zxgev .table .tinytable
+alpha = 0.05) {#tinytable_guy0rew983m792u3fiwe .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
