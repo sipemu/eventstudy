@@ -106,14 +106,37 @@ environment (`rugarch`, `rmgarch`, `did`, `DIDmultiplegt`,
 `requireNamespace()` guard, so the package installs, loads, and passes its
 tests without them.
 
-### Windows (win-builder R-devel and R-release)
+### Windows (win-builder R-devel)
 
-Re-run on the revised tarball before submission: RESULTS PENDING.
+Checked on win-builder with R Under development (unstable) (2026-10-05 r90641
+ucrt); installation 29s, check 255s.
 
-The previous submission's win-builder runs reported `0 errors | 0 warnings | 1 note`
-on both R-devel and R-release, the NOTE being the expected incoming-feasibility
-NOTE plus "possibly misspelled words" BMP and DCC. Those acronyms no longer
-appear unexplained in the revised Description.
+```
+0 errors | 0 warnings | 1 note
+```
+
+The single NOTE is the expected **CRAN incoming feasibility** NOTE ("New
+submission", "Package was archived on CRAN"). Its "Possibly misspelled words in
+DESCRIPTION" sub-item lists only author surnames of the cited references
+(Abadie, Boehmer, Bollerslev, Borusyak, Callaway, Carhart, Chaisemartin,
+D'Haultfoeuille, Engle, Fama, Hainmueller, Jaravel, Kolari, MacKinlay, Musumeci,
+Poulsen, Pynnonen, Sant'Anna, Spiess, and the particle "de" in "de
+Chaisemartin"), the acronym DCC (dynamic conditional correlation, spelled out
+in the text), and the correctly spelled technical terms "heteroskedasticity"
+and "intraday". None are misspellings.
+
+### Windows (win-builder R-release)
+
+Checked on win-builder with R version 4.6.1 (2026-06-24 ucrt); installation
+27s, check 260s.
+
+```
+0 errors | 0 warnings | 1 note
+```
+
+The same single expected incoming-feasibility NOTE as on R-devel, with the
+same benign "Possibly misspelled words" sub-item (author surnames and
+technical terms, explained above).
 
 ## Test suite
 
