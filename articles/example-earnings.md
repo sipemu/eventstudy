@@ -129,7 +129,7 @@ car_tbl |>
 | MSFT        | \[-5,5\] | 0.06781  | 0.03889   | 1.7436    | 0.08278 |
 
 Cumulative Abnormal Returns by firm (widest event window)
-{#tinytable_ztzquo2qexjg3y5wwylz .table .tinytable
+{#tinytable_5ifr7jhbfud0kx2urq5i .table .tinytable
 style="width: auto; margin-left: auto; margin-right: auto;"
 quarto-disable-processing="true"}
 
@@ -205,7 +205,7 @@ for the full battery.
 
 ## Session info
 
-    #> R version 4.6.1 (2026-06-24)
+    #> R version 4.6.2 (2026-10-29)
     #> Platform: x86_64-pc-linux-gnu
     #> Running under: Ubuntu 24.04.5 LTS
     #> 
@@ -226,28 +226,28 @@ for the full battery.
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] EventStudy_0.66.0
+    #> [1] EventStudy_0.70
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] plotly_4.12.1        sass_0.4.10          utf8_1.2.6          
     #>  [4] generics_0.1.4       tidyr_1.3.2          stringi_1.8.9       
     #>  [7] digest_0.6.39        magrittr_2.0.5       evaluate_1.0.5      
-    #> [10] grid_4.6.1           RColorBrewer_1.1-3   fastmap_1.2.0       
+    #> [10] grid_4.6.2           RColorBrewer_1.1-3   fastmap_1.2.0       
     #> [13] jsonlite_2.0.0       httr_1.4.9           purrr_1.2.2         
     #> [16] crosstalk_1.2.2      viridisLite_0.4.3    scales_1.4.0        
     #> [19] textshaping_1.0.5    jquerylib_0.1.4      cli_3.6.6           
     #> [22] rlang_1.3.0          withr_3.0.3          cachem_1.1.0        
     #> [25] yaml_2.3.12          tinytable_0.19.0     otel_0.2.0          
-    #> [28] tools_4.6.1          dplyr_1.2.1          ggplot2_4.0.3       
+    #> [28] tools_4.6.2          dplyr_1.2.1          ggplot2_4.0.3       
     #> [31] vctrs_0.7.3          R6_2.6.1             lifecycle_1.0.5     
     #> [34] stringr_1.6.0        fs_2.1.0             htmlwidgets_1.6.4   
     #> [37] ragg_1.5.2           pkgconfig_2.0.3      desc_1.4.3          
     #> [40] pkgdown_2.2.1        pillar_1.11.1        bslib_0.12.0        
     #> [43] gtable_0.3.6         glue_1.8.1           data.table_1.18.6.1 
-    #> [46] systemfonts_1.3.2    xfun_0.61            tibble_3.3.1        
+    #> [46] systemfonts_1.3.2    xfun_0.62            tibble_3.3.1        
     #> [49] tidyselect_1.2.1     knitr_1.52           farver_2.1.2        
     #> [52] htmltools_0.5.9      rmarkdown_2.32       labeling_0.4.3      
-    #> [55] compiler_4.6.1       S7_0.2.2             distributional_0.9.0
+    #> [55] compiler_4.6.2       S7_0.2.2             distributional_0.9.0
 
 Boehmer, Ekkehart, Jim Musumeci, and Annette B. Poulsen. 1991.
 “Event-Study Methodology Under Conditions of Event-Induced Variance.”

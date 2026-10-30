@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">EventStudy</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.66.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.70</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,12 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.66.0" id="eventstudy-0660">EventStudy 0.66.0<a class="anchor" aria-label="anchor" href="#eventstudy-0660"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.70" id="eventstudy-070">EventStudy 0.70<a class="anchor" aria-label="anchor" href="#eventstudy-070"></a></h2>
+<ul><li>
+<code><a href="../reference/generate_report.html">generate_report()</a></code> / <code><a href="../reference/es_report.html">es_report()</a></code> no longer write into the installed package library. The bundled R Markdown template is now copied to a per-call temporary directory and rendered from there, so knitr/rmarkdown intermediates land in <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> (CRAN policy; the Debian check machines mount the library read-only). A regression test asserts the installed template directory is unchanged after rendering.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.66.0" id="eventstudy-0660">EventStudy 0.66.0<a class="anchor" aria-label="anchor" href="#eventstudy-0660"></a></h2><p class="text-muted">CRAN release: 2026-10-21</p>
 <div class="section level3">
 <h3 id="cran-resubmission-0-66-0">CRAN resubmission<a class="anchor" aria-label="anchor" href="#cran-resubmission-0-66-0"></a></h3>
 <ul><li>DESCRIPTION text revised per CRAN review: single quotes only around software names, all acronyms spelled out, and method references given as author (year) with DOI/URL links.</li>

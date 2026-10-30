@@ -1,6 +1,20 @@
 # Changelog
 
+## EventStudy 0.70
+
+- [`generate_report()`](https://sipemu.github.io/eventstudy/reference/generate_report.md)
+  /
+  [`es_report()`](https://sipemu.github.io/eventstudy/reference/es_report.md)
+  no longer write into the installed package library. The bundled R
+  Markdown template is now copied to a per-call temporary directory and
+  rendered from there, so knitr/rmarkdown intermediates land in
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html) (CRAN policy; the
+  Debian check machines mount the library read-only). A regression test
+  asserts the installed template directory is unchanged after rendering.
+
 ## EventStudy 0.66.0
+
+CRAN release: 2026-10-21
 
 ### CRAN resubmission
 
