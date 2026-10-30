@@ -1,3 +1,12 @@
+# EventStudy 0.66.1
+
+* `generate_report()` / `es_report()` no longer write into the installed
+  package library. The bundled R Markdown template is now copied to a
+  per-call temporary directory and rendered from there, so knitr/rmarkdown
+  intermediates land in `tempdir()` (CRAN policy; the Debian check machines
+  mount the library read-only). A regression test asserts the installed
+  template directory is unchanged after rendering.
+
 # EventStudy 0.66.0
 
 ## CRAN resubmission

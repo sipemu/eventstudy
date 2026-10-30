@@ -20,3 +20,4 @@
 ^inst/rmarkdown/templates/event_study_report/skeleton/.*\.log$
 ^CRAN-SUBMISSION$
 ^tests/testthat/Rplots\.pdf$
+^tests/testthat/_problems$

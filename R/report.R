@@ -233,6 +233,14 @@ generate_report <- function(task,
   if (template_path == "") {
     stop("Report template not found. Ensure the package is properly installed.")
   }
+  # Render from a private copy: knitr/rmarkdown write intermediates (.knit.md,
+  # LaTeX logs, ...) next to the input file, and the installed package library
+  # may be read-only (CRAN policy: write only to the session temp directory).
+  template_dir <- tempfile("es_report_template_")
+  dir.create(template_dir)
+  on.exit(unlink(template_dir, recursive = TRUE), add = TRUE)
+  file.copy(template_path, template_dir)
+  template_path <- file.path(template_dir, basename(template_path))
 
   # ---- 5. Output base name and directory ----
   basename_no_ext <- tools::file_path_sans_ext(basename(output_file))
