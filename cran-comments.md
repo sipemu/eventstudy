@@ -1,4 +1,4 @@
-## Update 0.70.0 (addressing CRAN check ERRORs, request of 2026-10-28)
+## Update 0.70 (addressing CRAN check ERRORs, request of 2026-10-28)
 
 This patch fixes the test ERRORs on the Debian check flavors
 (r-devel-linux-x86_64-debian-clang/gcc, r-patched-linux, r-release-linux).
@@ -10,7 +10,7 @@ code writes outside the R session's temporary directory.
 
 Verified by installing the package into a read-only library and running the
 test suite without `NOT_CRAN`: 0.66.0 reproduces the three failures reported
-on CRAN; 0.70.0 passes with 0 failures. A new test
+on CRAN; 0.70 passes with 0 failures. A new test
 (`test_report_readonly_template.R`, not skipped on CRAN) asserts that the
 installed template directory is unchanged after rendering.
 

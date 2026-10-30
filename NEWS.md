@@ -1,4 +1,4 @@
-# EventStudy 0.70.0
+# EventStudy 0.70
 
 * `generate_report()` / `es_report()` no longer write into the installed
   package library. The bundled R Markdown template is now copied to a
