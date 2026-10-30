@@ -100,6 +100,7 @@ Carried into this milestone from v0.65.0 (now formally in scope):
 | 260924-sfl | Fix all findings from the 2026-09-24 package re-evaluation (A1-A12 statistical silent-wrong fixes, B1-B8 API/docs consistency, C1-C10 test-suite quality); dev version 0.66.0.9000 | 2026-09-24 | f0c8570 | [260924-sfl-fix-all-findings-from-the-2026-09-24-pac](./quick/260924-sfl-fix-all-findings-from-the-2026-09-24-pac/) |
 | 2 | Make CI non-ASCII baseline check locale-independent (c80159f) | 2026-09-25 | c80159f | — |
 | 3 | Revise DESCRIPTION per CRAN review; prepare 0.66.1 resubmission | 2026-10-04 | a485d98 | — |
+| 261030-taz | Fix CRAN policy violation: report template rendered from tempdir instead of read-only library; 0.66.1 | 2026-10-30 | becbf74 | [261030-taz-fix-cran-readonly-library-report-render](./quick/261030-taz-fix-cran-readonly-library-report-render/) |
 
 ## Deferred Items
 
